@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Rubik', ui-rounded, system-ui, sans-serif;
+  --font-body: 'Nunito', ui-rounded, system-ui, sans-serif;
+
+  --color-cream: #fff8ec;
+  --color-surface: #ffffff;
+  --color-muted: #f5efe4;
+  --color-line: #f1e3c8;
+  --color-line-strong: #eadfc9;
+
+  --color-ink: #3a2e4d;
+  --color-ink-soft: #5e5470;
+
+  --color-primary: #13917e;
+  --color-primary-shadow: #0c6b5d;
+  --color-primary-soft: #ddf4ec;
+  --color-primary-ink: #0f6e5f;
+
+  --color-girl: #f27ba6;
+  --color-girl-ink: #c24c7b;
+
+  --color-coin: #ffc93c;
+  --color-coin-shadow: #e0a419;
+  --color-coin-soft: #fff0c2;
+
+  --color-oops: #ff8a4c;
+  --color-oops-soft: #ffe4d3;
+  --color-oops-ink: #8f3b14;
+
+  --color-highlight: #d93d78;
+  --color-sky: #7cc4f5;
+  --color-sky-soft: #ddeefc;
+  --color-lilac-soft: #eee6fb;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-weight: 700;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input,
+  textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  button {
+    cursor: pointer;
+    font: inherit;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 4px solid var(--color-sky);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
