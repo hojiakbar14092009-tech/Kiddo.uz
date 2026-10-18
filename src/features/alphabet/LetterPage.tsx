@@ -6,7 +6,9 @@ import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/Button'
 import { getAlphabet } from '@/content/alphabet'
+import { Robot } from '@/features/mascot/Robot'
 import { useSpeaker } from '@/services/useSpeaker'
+import { useMascotModel } from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
 import { HighlightedWord } from './HighlightedWord'
 import { paletteFor } from './letterPalette'
@@ -18,7 +20,8 @@ export function LetterPage() {
   const { t } = useTranslation()
   const { letterId = '' } = useParams()
   const language = useLanguage()
-  const { sayLetter } = useSpeaker()
+  const { sayLetter, speaking } = useSpeaker()
+  const mascot = useMascotModel()
 
   const { letters } = getAlphabet(language)
   const index = letters.findIndex((entry) => entry.id === letterId)
@@ -79,9 +82,16 @@ export function LetterPage() {
             className="text-[clamp(3rem,9vw,4.75rem)] leading-tight"
           />
           <p className="text-lg text-ink-soft">{t('letter.hint')}</p>
-          <Button icon={<SpeakerIcon size={30} />} onClick={() => void sayLetter(letter)}>
-            {t('common.listenAgain')}
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button icon={<SpeakerIcon size={30} />} onClick={() => void sayLetter(letter)}>
+              {t('common.listenAgain')}
+            </Button>
+            <Robot
+              model={mascot}
+              mood={speaking ? 'talk' : 'idle'}
+              className="h-auto w-16 sm:w-20"
+            />
+          </div>
         </div>
       </section>
 

@@ -35,4 +35,11 @@ export const ru: Translation = {
     next: 'Следующая буква',
     backToAlphabet: 'Назад к алфавиту',
   },
+  mascot: {
+    tryAgain: 'Попробуем ещё!',
+    girl: 'Робот-девочка',
+    boy: 'Робот-мальчик',
+    homeHello: 'Привет, {{name}}! Что будем учить сегодня?',
+    homeHelloNoName: 'Привет! Что будем учить сегодня?',
+  },
 }

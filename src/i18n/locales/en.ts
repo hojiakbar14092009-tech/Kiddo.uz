@@ -35,4 +35,11 @@ export const en: Translation = {
     next: 'Next letter',
     backToAlphabet: 'Back to the alphabet',
   },
+  mascot: {
+    tryAgain: 'Let’s try again!',
+    girl: 'Girl robot',
+    boy: 'Boy robot',
+    homeHello: 'Hi, {{name}}! What shall we learn today?',
+    homeHelloNoName: 'Hi! What shall we learn today?',
+  },
 }

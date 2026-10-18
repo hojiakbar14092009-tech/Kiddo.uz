@@ -33,6 +33,13 @@ export const uz = {
     next: 'Keyingi harf',
     backToAlphabet: 'Alifboga qaytish',
   },
+  mascot: {
+    tryAgain: 'Yana urinib ko‘ramiz!',
+    girl: 'Qiz robot',
+    boy: 'O‘g‘il robot',
+    homeHello: 'Salom, {{name}}! Bugun nima o‘rganamiz?',
+    homeHelloNoName: 'Salom! Bugun nima o‘rganamiz?',
+  },
 }
 
 type DeepStringRecord<T> = { [K in keyof T]: T[K] extends string ? string : DeepStringRecord<T[K]> }
