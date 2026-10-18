@@ -5,6 +5,7 @@ import { CheckIcon } from '@/components/icons'
 import type { LetterEntry } from '@/content/alphabet'
 import { HighlightedWord } from '@/features/alphabet/HighlightedWord'
 import type { ChoiceGameType } from './games'
+import { Picture } from '@/components/ui/Picture'
 
 export type OptionStatus = 'idle' | 'wrong' | 'correct' | 'hint'
 
@@ -18,8 +19,8 @@ interface OptionCardProps {
 }
 
 const STATUS_CLASSES: Record<OptionStatus, string> = {
-  idle: 'bg-surface shadow-[0_7px_0_var(--color-line)]',
-  hint: 'bg-surface shadow-[0_7px_0_var(--color-line)] ring-4 ring-coin',
+  idle: 'bg-white shadow-[0_7px_0_var(--color-line)]',
+  hint: 'bg-white shadow-[0_7px_0_var(--color-line)] ring-4 ring-coin',
   correct: 'bg-primary-soft shadow-[0_7px_0_#B5E3D2] ring-4 ring-primary',
   wrong: 'bg-oops-soft text-oops-ink shadow-[0_7px_0_#F6C2A3] opacity-70',
 }
@@ -51,9 +52,7 @@ export function OptionCard({ option, target, taskType, status, onChoose }: Optio
     >
       {isPicture ? (
         <>
-          <span aria-hidden="true" className="text-[clamp(4rem,13vw,7.5rem)] leading-none">
-            {option.emoji}
-          </span>
+          <Picture emoji={option.emoji} className="size-[62%]" />
           {status === 'correct' && (
             <HighlightedWord letter={target} className="text-2xl sm:text-3xl" />
           )}

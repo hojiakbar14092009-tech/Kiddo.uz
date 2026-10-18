@@ -17,6 +17,7 @@ import { TaskShell } from './TaskShell'
 import { useFinishTask } from './useFinishTask'
 import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
+import { Picture } from '@/components/ui/Picture'
 
 const PAIRS = 4
 const HIDE_DELAY_MS = 1100
@@ -107,12 +108,7 @@ export function MemoryGame() {
                     <span className="font-display text-[clamp(2rem,6vw,3.75rem)] leading-none font-extrabold">
                       {card.letter.upper}
                     </span>
-                    <span
-                      aria-hidden="true"
-                      className="text-[clamp(2rem,6vw,3.75rem)] leading-none"
-                    >
-                      {card.letter.emoji}
-                    </span>
+                    <Picture emoji={card.letter.emoji} className="size-[clamp(3rem,9vw,5.5rem)]" />
                   </span>
                 ) : (
                   <span

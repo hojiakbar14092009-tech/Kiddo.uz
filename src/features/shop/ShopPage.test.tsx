@@ -56,7 +56,7 @@ describe('Shop', () => {
     const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('tab', { name: /Stikerlar/ }))
     expect(screen.getByText(`1 / ${STICKERS.length}`)).toBeInTheDocument()
-    expect(screen.getByText(STICKERS[0]!.emoji)).toBeInTheDocument()
+    expect(document.querySelectorAll('li img')).toHaveLength(1)
     expect(screen.getAllByLabelText('Bo‘sh joy')).toHaveLength(STICKERS.length - 1)
   })
 })

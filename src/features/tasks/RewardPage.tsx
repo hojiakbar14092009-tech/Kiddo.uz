@@ -11,6 +11,7 @@ import { useMascot } from '@/features/mascot/useMascot'
 import { findSticker } from '@/features/stickers/stickers'
 import { isGameType } from './games'
 import { isRewardState, type RewardState } from './rewardState'
+import { Picture } from '@/components/ui/Picture'
 
 const MAX_STARS = 3
 
@@ -93,9 +94,9 @@ function RewardContent({ taskType, outcome }: RewardState) {
           >
             <span
               aria-hidden="true"
-              className="flex size-14 items-center justify-center rounded-2xl bg-sky-soft text-4xl"
+              className="flex size-14 items-center justify-center rounded-2xl bg-white p-1.5"
             >
-              {sticker.emoji}
+              <Picture emoji={sticker.emoji} className="size-full" />
             </span>
             <span className="font-display text-xl font-bold">{t('reward.newSticker')}</span>
           </motion.div>

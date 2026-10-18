@@ -14,6 +14,7 @@ import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useLanguage } from '@/store/settingsStore'
 import { paletteFor } from './letterPalette'
+import { Picture } from '@/components/ui/Picture'
 
 const NAV_LINK_CLASSES =
   'inline-flex size-16 items-center justify-center rounded-full bg-surface shadow-[0_5px_0_var(--color-line)] active:translate-y-1'
@@ -119,11 +120,11 @@ function NumberScreen({ index }: { index: number }) {
                     }
                     transition={{ duration: 0.35 }}
                     className={clsx(
-                      'relative flex aspect-square w-full items-center justify-center rounded-2xl bg-surface text-[clamp(1.75rem,6vw,3rem)]',
+                      'relative flex aspect-square w-full items-center justify-center rounded-2xl bg-white text-[clamp(1.75rem,6vw,3rem)]',
                       count !== undefined && 'ring-4 ring-primary',
                     )}
                   >
-                    <span aria-hidden="true">{entry.emoji}</span>
+                    <Picture emoji={entry.emoji} className="size-[70%]" />
                     {count !== undefined && (
                       <span className="absolute -top-2 -right-2 flex size-8 items-center justify-center rounded-full bg-primary font-display text-base font-bold text-white">
                         {count}

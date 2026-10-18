@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, CoinIcon } from '@/components/icons'
 import type { Outfit } from './outfits'
+import { Picture } from '@/components/ui/Picture'
 
 interface OutfitCardProps {
   outfit: Outfit
@@ -40,12 +41,12 @@ export function OutfitCard({ outfit, owned, worn, coins, onSelect }: OutfitCardP
       <span
         aria-hidden="true"
         className={clsx(
-          'flex size-20 items-center justify-center rounded-full text-5xl sm:size-24 sm:text-6xl',
-          owned ? 'bg-primary-soft' : 'bg-cream',
+          'flex size-20 items-center justify-center rounded-full border-4 bg-white p-3 sm:size-24',
+          owned ? 'border-primary-soft' : 'border-cream',
           !owned && !affordable && 'opacity-60',
         )}
       >
-        {outfit.emoji}
+        <Picture emoji={outfit.emoji} className="size-full" />
       </span>
       <span className="font-display text-xl font-bold first-letter:uppercase">{name}</span>
 

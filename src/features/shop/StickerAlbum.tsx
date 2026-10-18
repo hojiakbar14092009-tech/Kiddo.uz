@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { STICKERS } from '@/features/stickers/stickers'
+import { Picture } from '@/components/ui/Picture'
 
 /** Every sticker in the collection: earned ones in colour, the rest as empty slots. */
 export function StickerAlbum({ owned }: { owned: readonly string[] }) {
@@ -28,11 +29,11 @@ export function StickerAlbum({ owned }: { owned: readonly string[] }) {
               className={clsx(
                 'flex aspect-square items-center justify-center rounded-3xl text-4xl sm:text-5xl',
                 has
-                  ? 'bg-surface shadow-[0_5px_0_var(--color-line)]'
+                  ? 'bg-white shadow-[0_5px_0_var(--color-line)]'
                   : 'border-[3px] border-dashed border-line-strong text-2xl font-bold text-line-strong',
               )}
             >
-              {has ? sticker.emoji : '?'}
+              {has ? <Picture emoji={sticker.emoji} className="size-[72%]" /> : '?'}
             </li>
           )
         })}
