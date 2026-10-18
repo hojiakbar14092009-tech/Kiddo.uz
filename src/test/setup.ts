@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, vi } from 'vitest'
 
 afterEach(() => {
   cleanup()
@@ -24,3 +24,24 @@ if (!window.matchMedia) {
       }) as MediaQueryList,
   })
 }
+
+// Howler needs real audio hardware; tests only care that sounds are requested.
+vi.mock('howler', () => {
+  class Howl {
+    static instances: Howl[] = []
+    options: Record<string, unknown>
+    constructor(options: Record<string, unknown>) {
+      this.options = options
+      Howl.instances.push(this)
+    }
+    play() {
+      const onend = this.options.onend
+      if (typeof onend === 'function') queueMicrotask(() => onend())
+      return 1
+    }
+    volume() {
+      return this
+    }
+  }
+  return { Howl, Howler: { volume: () => undefined } }
+})

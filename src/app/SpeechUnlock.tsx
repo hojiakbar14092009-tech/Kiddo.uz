@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { speech } from '@/services/speech'
+import { speech } from '@/services/audio/speech'
 
 /** Unlocks speech on the first touch so later, automatic speech works on iPad and iPhone. */
 export function SpeechUnlock() {

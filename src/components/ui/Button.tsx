@@ -39,7 +39,7 @@ export function Button({
     <button
       type={type}
       className={clsx(
-        'inline-flex items-center justify-center rounded-full font-display font-bold',
+        'inline-flex items-center justify-center rounded-full font-display font-bold whitespace-nowrap',
         'transition-[transform,box-shadow] duration-100 active:translate-y-1',
         'disabled:opacity-50 disabled:active:translate-y-0',
         VARIANT_CLASSES[variant],

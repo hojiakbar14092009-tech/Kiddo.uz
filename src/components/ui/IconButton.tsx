@@ -22,7 +22,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={clsx(
-        'inline-flex size-14 shrink-0 items-center justify-center rounded-2xl transition-transform active:scale-95',
+        'inline-flex size-11 shrink-0 items-center justify-center rounded-2xl transition-transform active:scale-95 sm:size-14',
         tone === 'primary' && 'bg-primary-soft text-primary-ink',
         tone === 'plain' && 'border-2 border-line-strong bg-surface text-ink',
         className,

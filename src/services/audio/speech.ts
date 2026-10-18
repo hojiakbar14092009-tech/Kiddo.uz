@@ -8,6 +8,8 @@ export interface SpeakOptions {
   rate?: number
   /** Overrides the locale, e.g. to say “Yahoooo!” with an English voice. */
   locale?: string
+  /** 0–1; defaults to full volume. */
+  volume?: number
 }
 
 const VOICE_WAIT_MS = 1200
@@ -100,6 +102,7 @@ export const speech = {
             utterance.lang = voice.lang
             utterance.pitch = options.pitch ?? 1.1
             utterance.rate = options.rate ?? 0.85
+            utterance.volume = options.volume ?? 1
             utterance.onend = () => resolve()
             utterance.onerror = () => resolve()
             synth.speak(utterance)

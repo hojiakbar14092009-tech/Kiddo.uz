@@ -5,14 +5,21 @@ import type { Language } from '@/content/languages'
 interface SettingsState {
   /** `null` until the first language is chosen on the welcome screen. */
   language: Language | null
+  /** Master volume for clicks, effects and voice, 0–1. */
+  volume: number
   setLanguage: (language: Language) => void
+  setVolume: (volume: number) => void
 }
+
+export const DEFAULT_VOLUME = 0.8
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       language: null,
+      volume: DEFAULT_VOLUME,
       setLanguage: (language) => set({ language }),
+      setVolume: (volume) => set({ volume: Math.min(1, Math.max(0, volume)) }),
     }),
     { name: 'kiddo.settings', version: 1 },
   ),

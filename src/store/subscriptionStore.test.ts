@@ -1,0 +1,39 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import { isProActive, useSubscriptionStore } from './subscriptionStore'
+
+const NOW = new Date('2026-10-18T10:00:00Z')
+const DAY = 24 * 60 * 60 * 1000
+
+describe('subscriptionStore', () => {
+  beforeEach(() => useSubscriptionStore.getState().cancel())
+
+  it('starts on Free', () => {
+    expect(isProActive(useSubscriptionStore.getState())).toBe(false)
+  })
+
+  it('activates a monthly plan for 30 days', () => {
+    useSubscriptionStore.getState().activatePlan('monthly', 'payment', NOW)
+    const state = useSubscriptionStore.getState()
+    expect(isProActive(state, NOW.getTime() + 29 * DAY)).toBe(true)
+    expect(isProActive(state, NOW.getTime() + 31 * DAY)).toBe(false)
+  })
+
+  it('never expires a lifetime plan', () => {
+    useSubscriptionStore.getState().activatePlan('lifetime', 'payment', NOW)
+    expect(isProActive(useSubscriptionStore.getState(), NOW.getTime() + 9999 * DAY)).toBe(true)
+  })
+
+  it('extends an active plan when days are granted', () => {
+    const store = useSubscriptionStore.getState()
+    store.activatePlan('monthly', 'payment', NOW)
+    store.grantDays(10, 'promo', NOW)
+    expect(Date.parse(useSubscriptionStore.getState().expiresAt!)).toBe(NOW.getTime() + 40 * DAY)
+  })
+
+  it('toggles demo PRO on and off', () => {
+    useSubscriptionStore.getState().setDemoPro(true)
+    expect(useSubscriptionStore.getState()).toMatchObject({ plan: 'lifetime', source: 'demo' })
+    useSubscriptionStore.getState().setDemoPro(false)
+    expect(isProActive(useSubscriptionStore.getState())).toBe(false)
+  })
+})

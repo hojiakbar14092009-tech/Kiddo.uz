@@ -110,3 +110,55 @@ export function CoinIcon({ size = 28, ...rest }: IconProps) {
     </svg>
   )
 }
+
+export function PictureIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="3" y="5" width="18" height="14" rx="3" />
+      <circle cx="9" cy="10" r="1.8" />
+      <path d="M21 16l-5-5-7 7" />
+    </StrokeIcon>
+  )
+}
+
+export function TrophyIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M7 4h10v5a5 5 0 0 1-10 0z" />
+      <path d="M7 6H4a3 3 0 0 0 3 4" />
+      <path d="M17 6h3a3 3 0 0 1-3 4" />
+      <path d="M12 14v4" />
+      <path d="M8 21h8" />
+    </StrokeIcon>
+  )
+}
+
+export function StickerIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M15 3H6a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h9l6-6V6a3 3 0 0 0-3-3h-3" />
+      <path d="M15 21v-4a2 2 0 0 1 2-2h4" />
+    </StrokeIcon>
+  )
+}
+
+export function CrownIcon({ size = 20, ...rest }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      {...rest}
+    >
+      <path
+        d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}

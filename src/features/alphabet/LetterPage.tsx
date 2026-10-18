@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { ChevronLeftIcon, ChevronRightIcon, SpeakerIcon } from '@/components/icons'
+import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
-import { Button } from '@/components/ui/Button'
+import { ListenButton } from '@/components/ui/ListenButton'
 import { getAlphabet } from '@/content/alphabet'
 import { Robot } from '@/features/mascot/Robot'
-import { useSpeaker } from '@/services/useSpeaker'
+import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useMascotModel } from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
 import { HighlightedWord } from './HighlightedWord'
@@ -45,7 +45,7 @@ export function LetterPage() {
           start={
             <Link
               to="/alphabet"
-              className="inline-flex h-14 items-center gap-1 rounded-full border-2 border-line-strong bg-surface pr-5 pl-3 text-lg"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-line-strong bg-surface text-lg sm:h-14 sm:w-auto sm:gap-1 sm:pr-5 sm:pl-3"
             >
               <ChevronLeftIcon />
               <span className="hidden sm:inline">{t('alphabet.title')}</span>
@@ -56,7 +56,7 @@ export function LetterPage() {
       }
       className="gap-5 px-4 py-5 sm:px-8"
     >
-      <section className="flex flex-1 flex-col items-center gap-6 rounded-[36px] bg-surface p-5 shadow-[0_8px_0_var(--color-line)] sm:p-8 md:flex-row md:gap-10">
+      <section className="flex flex-1 flex-col items-center gap-6 rounded-[36px] bg-surface p-5 shadow-[0_8px_0_var(--color-line)] sm:p-8 lg:flex-row lg:gap-10">
         <div
           className="flex aspect-square w-full max-w-[min(380px,70vw)] shrink-0 items-center justify-center rounded-[30px]"
           style={{ backgroundColor: palette.background }}
@@ -70,7 +70,7 @@ export function LetterPage() {
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col items-center gap-4 text-center md:items-start md:text-left">
+        <div className="flex flex-1 flex-col items-center gap-4 text-center lg:items-start lg:text-left">
           <p className="flex items-baseline gap-4 font-display font-extrabold leading-none">
             <span className="text-[clamp(5rem,14vw,8rem)] text-primary">{letter.upper}</span>
             {showLower && (
@@ -83,9 +83,7 @@ export function LetterPage() {
           />
           <p className="text-lg text-ink-soft">{t('letter.hint')}</p>
           <div className="flex items-center gap-4">
-            <Button icon={<SpeakerIcon size={30} />} onClick={() => void sayLetter(letter)}>
-              {t('common.listenAgain')}
-            </Button>
+            <ListenButton onListen={() => void sayLetter(letter)} />
             <Robot
               model={mascot}
               mood={speaking ? 'talk' : 'idle'}

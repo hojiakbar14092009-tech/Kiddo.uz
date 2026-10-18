@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { useSpeaker } from '@/services/useSpeaker'
+import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useMascotModel } from '@/store/familyStore'
 import { Robot } from './Robot'
 import { SpeechBubble } from './SpeechBubble'
