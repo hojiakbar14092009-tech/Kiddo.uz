@@ -30,6 +30,18 @@ export const ru: Translation = {
     greeting: 'Привет, {{name}}!',
     greetingNoName: 'Привет!',
     alphabet: 'Алфавит',
+    numbers: 'Числа',
+    more: 'Что ещё поделаем?',
+    restTitle: 'План на сегодня выполнен!',
+    restText: 'Отличная работа! Теперь можно немного отдохнуть.',
+  },
+  childSelect: {
+    title: 'Кто играет?',
+    guest: 'Гость',
+    guestHint: 'Играть без профиля',
+    age: 'Возраст: {{count}}',
+    noProfiles: 'Родители могут добавить профиль в разделе для родителей.',
+    switch: 'Сменить ребёнка',
   },
   alphabet: {
     title: 'Алфавит',
@@ -93,6 +105,7 @@ export const ru: Translation = {
     locked: 'Пока закрыто',
     done: 'Готово',
     next: 'Следующее',
+    later: 'Потом',
   },
   stickers: {
     title: 'Мои наклейки',
@@ -114,5 +127,6 @@ export const ru: Translation = {
     boy: 'Робот-мальчик',
     homeHello: 'Привет, {{name}}! Что будем учить сегодня?',
     homeHelloNoName: 'Привет! Что будем учить сегодня?',
+    homePlanDone: 'План на сегодня готов! Молодец!',
   },
 }

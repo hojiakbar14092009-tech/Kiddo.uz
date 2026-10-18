@@ -4,6 +4,7 @@ import { Flag } from '@/components/flags/Flag'
 import { Screen } from '@/components/layout/Screen'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
 import { MascotFigure } from '@/features/mascot/MascotFigure'
+import { useFamilyStore } from '@/store/familyStore'
 import { useSettingsStore } from '@/store/settingsStore'
 
 export function LanguagePage() {
@@ -11,10 +12,12 @@ export function LanguagePage() {
   const navigate = useNavigate()
   const language = useSettingsStore((state) => state.language)
   const setLanguage = useSettingsStore((state) => state.setLanguage)
+  const hasProfiles = useFamilyStore((state) => state.children.length > 0)
 
   const choose = (code: Language) => {
     setLanguage(code)
-    navigate('/home')
+    // With several children the next question is “who is playing?”.
+    navigate(hasProfiles ? '/child-select' : '/home')
   }
 
   return (

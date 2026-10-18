@@ -28,6 +28,18 @@ export const uz = {
     greeting: 'Salom, {{name}}!',
     greetingNoName: 'Salom!',
     alphabet: 'Alifbo',
+    numbers: 'Sonlar',
+    more: 'Yana nima qilamiz?',
+    restTitle: 'Bugungi reja bajarildi!',
+    restText: 'Zo‘r ishlading! Endi biroz dam olsang ham bo‘ladi.',
+  },
+  childSelect: {
+    title: 'Kim o‘ynaydi?',
+    guest: 'Mehmon',
+    guestHint: 'Profilsiz o‘ynash',
+    age: 'Yoshi: {{count}}',
+    noProfiles: 'Ota-onang ota-ona bo‘limida profil qo‘shishi mumkin.',
+    switch: 'Bolani almashtirish',
   },
   alphabet: {
     title: 'Alifbo',
@@ -91,6 +103,7 @@ export const uz = {
     locked: 'Hali yopiq',
     done: 'Bajarildi',
     next: 'Navbatdagi',
+    later: 'Keyin',
   },
   stickers: {
     title: 'Mening stikerlarim',
@@ -112,6 +125,7 @@ export const uz = {
     boy: 'O‘g‘il robot',
     homeHello: 'Salom, {{name}}! Bugun nima o‘rganamiz?',
     homeHelloNoName: 'Salom! Bugun nima o‘rganamiz?',
+    homePlanDone: 'Bugungi rejani bajarding! Barakalla!',
   },
 }
 

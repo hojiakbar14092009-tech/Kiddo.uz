@@ -30,6 +30,18 @@ export const en: Translation = {
     greeting: 'Hi, {{name}}!',
     greetingNoName: 'Hi!',
     alphabet: 'Alphabet',
+    numbers: 'Numbers',
+    more: 'What else shall we do?',
+    restTitle: 'Today’s plan is done!',
+    restText: 'Great work! Now it’s fine to take a little rest.',
+  },
+  childSelect: {
+    title: 'Who is playing?',
+    guest: 'Guest',
+    guestHint: 'Play without a profile',
+    age: 'Age {{count}}',
+    noProfiles: 'Parents can add a profile in the parent area.',
+    switch: 'Switch child',
   },
   alphabet: {
     title: 'Alphabet',
@@ -93,6 +105,7 @@ export const en: Translation = {
     locked: 'Locked for now',
     done: 'Done',
     next: 'Up next',
+    later: 'Later',
   },
   stickers: {
     title: 'My stickers',
@@ -114,5 +127,6 @@ export const en: Translation = {
     boy: 'Boy robot',
     homeHello: 'Hi, {{name}}! What shall we learn today?',
     homeHelloNoName: 'Hi! What shall we learn today?',
+    homePlanDone: 'You finished today’s plan! Well done!',
   },
 }
