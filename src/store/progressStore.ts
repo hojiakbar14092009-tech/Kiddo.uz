@@ -76,6 +76,8 @@ interface ProgressState {
   byChild: Record<string, ChildProgress>
   completeTask: (childKey: string, task: CompletedTask, now?: Date) => TaskOutcome
   addMinutes: (childKey: string, minutes: number, now?: Date) => void
+  /** Clear the guest’s coins, stickers and results for a fresh start. */
+  startGuest: () => void
   resetChild: (childKey: string) => void
   /** Spends coins on a robot item and puts it on. Returns false if it cannot be bought. */
   buyOutfit: (childKey: string, outfitId: OutfitId) => boolean
@@ -201,6 +203,11 @@ export const useProgressStore = create<ProgressState>()(
           return { byChild: { ...state.byChild, [childKey]: { ...current, wearing } } }
         }),
 
+      startGuest: () =>
+        set((state) => ({
+          byChild: { ...state.byChild, [GUEST_KEY]: freshGuest(state.byChild[GUEST_KEY]) },
+        })),
+
       resetChild: (childKey) =>
         set((state) => {
           const byChild = { ...state.byChild }
@@ -212,9 +219,19 @@ export const useProgressStore = create<ProgressState>()(
       name: 'kiddo.progress',
       version: 2,
       migrate: (persisted, version) => migrateProgress(persisted, version),
+      // A guest starts fresh every time the app opens; only today’s screen time is kept,
+      // so reopening the app does not hand out a new daily allowance.
+      partialize: (state) => ({
+        byChild: { ...state.byChild, [GUEST_KEY]: freshGuest(state.byChild[GUEST_KEY]) },
+      }),
     },
   ),
 )
+
+/** Guest progress with everything but screen time cleared. */
+function freshGuest(guest: ChildProgress | undefined): ChildProgress {
+  return { ...EMPTY_PROGRESS, minutesByDay: guest?.minutesByDay ?? {} }
+}
 
 /** v1 had no robot clothes; older saves get an empty wardrobe. */
 export function migrateProgress(persisted: unknown, version: number) {

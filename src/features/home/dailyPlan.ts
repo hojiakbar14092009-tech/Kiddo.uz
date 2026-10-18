@@ -1,8 +1,9 @@
+import { DAILY_PLANS, GUEST_LEVEL, type AgeLevel } from '@/features/age/ageLevel'
 import type { GameType } from '@/features/tasks/games'
 import type { TaskResult } from '@/store/progressStore'
 
-/** Today’s plan: three short games, varied so practice stays fresh. */
-export const DAILY_PLAN: readonly GameType[] = ['find-letter', 'find-picture', 'trace']
+/** Today’s plan for a six-year-old: three short games, varied so practice stays fresh. */
+export const DAILY_PLAN: readonly GameType[] = DAILY_PLANS[GUEST_LEVEL]
 
 export type PlanStepStatus = 'done' | 'next' | 'later'
 
@@ -22,12 +23,16 @@ export interface DailyPlanState {
  * Each planned game counts once per day, whatever order the child plays in.
  * The first unfinished game is “next”; nothing is ever locked.
  */
-export function dailyPlanState(results: readonly TaskResult[], day: string): DailyPlanState {
+export function dailyPlanState(
+  results: readonly TaskResult[],
+  day: string,
+  level: AgeLevel = GUEST_LEVEL,
+): DailyPlanState {
   const playedToday = new Set(
     results.filter((result) => result.day === day).map((result) => result.type),
   )
   let nextAssigned = false
-  const steps = DAILY_PLAN.map((game): PlanStep => {
+  const steps = DAILY_PLANS[level].map((game): PlanStep => {
     if (playedToday.has(game)) return { game, status: 'done' }
     if (nextAssigned) return { game, status: 'later' }
     nextAssigned = true

@@ -10,7 +10,12 @@ import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey, isFinalTestUnlocked } from '@/features/tasks/rules'
 import { usePendingHomework } from '@/features/tasks/useHomework'
-import { useActiveChild, useFamilyStore } from '@/store/familyStore'
+import { useActiveChild, useAgeLevel, useFamilyStore } from '@/store/familyStore'
+import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
+import { UnlockCelebration } from '@/features/age/UnlockCelebration'
+import { GAME_TYPES } from '@/features/tasks/games'
+import { useSpeaker } from '@/services/audio/useSpeaker'
+import { motion, useAnimationControls } from 'framer-motion'
 import { useProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
@@ -22,7 +27,9 @@ export function HomePage() {
   const child = useActiveChild()
   const hasProfiles = useFamilyStore((state) => state.children.length > 0)
   const { results, learned } = useProgress()
-  const plan = dailyPlanState(results, dayKey())
+  const level = useAgeLevel()
+  const plan = dailyPlanState(results, dayKey(), level)
+  const lockedGames = GAME_TYPES.filter((game) => !isGameOpen(game, level))
   const homework = usePendingHomework()
   const language = useLanguage()
   const exam = examProgress(getAlphabet(language).letters, learned[language] ?? [])
@@ -60,6 +67,11 @@ export function HomePage() {
       <h1 className="text-center font-display text-4xl font-extrabold sm:text-5xl">
         {child ? t('home.greeting', { name: child.name }) : t('home.greetingNoName')}
       </h1>
+      {child && (
+        <span className="-mt-5 rounded-full bg-surface px-4 py-1 font-display text-lg font-bold text-primary-ink shadow-[0_4px_0_var(--color-line)] sm:-mt-7">
+          {t('age.badge', { age: level })}
+        </span>
+      )}
 
       {homework && <HomeworkCard homework={homework} />}
 
@@ -99,23 +111,36 @@ export function HomePage() {
             tone="lilac"
           />
           <ActivityCard to="/shop" label={t('shop.open')} symbol="🛍️" tone="girl" />
-          <ActivityCard
-            to="/exam"
-            label={t('journey.finalTest')}
-            symbol="🏆"
-            tone="sky"
-            detail={
-              examUnlocked
-                ? t('home.examReady')
-                : `🔒 ${t('exam.progress', { learned: exam.learned, total: exam.total })}`
-            }
-          />
+          {lockedGames.map((game) => (
+            <LockedCard
+              key={game}
+              label={t(GAME_META[game].titleKey)}
+              symbol={GAME_META[game].emoji}
+              age={GAME_MIN_LEVEL[game]}
+            />
+          ))}
+          {level >= EXAM_MIN_LEVEL ? (
+            <ActivityCard
+              to="/exam"
+              label={t('journey.finalTest')}
+              symbol="🏆"
+              tone="sky"
+              detail={
+                examUnlocked
+                  ? t('home.examReady')
+                  : `🔒 ${t('exam.progress', { learned: exam.learned, total: exam.total })}`
+              }
+            />
+          ) : (
+            <LockedCard label={t('journey.finalTest')} symbol="🏆" age={EXAM_MIN_LEVEL} />
+          )}
         </ul>
       </section>
 
       <ParentAreaLink />
 
       <PeekingMascot message={hello} />
+      <UnlockCelebration />
     </Screen>
   )
 }
@@ -154,6 +179,47 @@ function ActivityCard({ to, label, symbol, tone, detail }: ActivityCardProps) {
         </span>
         {detail && <span className="text-center text-sm text-ink-soft sm:text-base">{detail}</span>}
       </Link>
+    </li>
+  )
+}
+
+/** A game for an older child: greyed, with a padlock and the age it opens at. */
+function LockedCard({ label, symbol, age }: { label: string; symbol: string; age: AgeLevel }) {
+  const { t } = useTranslation()
+  const { sayText } = useSpeaker()
+  const shake = useAnimationControls()
+  const lockedAt = t('age.lockedAt', { age })
+
+  const tap = () => {
+    void shake.start({ x: [0, -10, 9, -6, 4, 0], transition: { duration: 0.45 } })
+    void sayText(t('age.lockedSay', { age }))
+  }
+
+  return (
+    <li>
+      <motion.button
+        type="button"
+        animate={shake}
+        onClick={tap}
+        aria-label={`${label} — ${lockedAt}`}
+        className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-[28px] border-[3px] border-dashed border-line-strong bg-surface/60 p-3 sm:gap-3 sm:p-5"
+      >
+        <span
+          aria-hidden="true"
+          className="relative flex size-20 items-center justify-center rounded-3xl bg-cream text-4xl sm:size-28 sm:text-5xl"
+        >
+          <span className="opacity-40 grayscale">{symbol}</span>
+          <span className="absolute -right-2 -bottom-2 flex size-10 items-center justify-center rounded-full bg-coin text-xl shadow-[0_3px_0_var(--color-coin-shadow)] sm:size-12 sm:text-2xl">
+            🔒
+          </span>
+        </span>
+        <span className="text-center font-display text-lg leading-tight font-bold text-ink-soft sm:text-2xl">
+          {label}
+        </span>
+        <span className="text-center text-sm font-semibold text-ink-soft sm:text-base">
+          {lockedAt}
+        </span>
+      </motion.button>
     </li>
   )
 }

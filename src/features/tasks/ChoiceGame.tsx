@@ -6,6 +6,9 @@ import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import type { MistakeDetail } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
+import { useAgeLevel } from '@/store/familyStore'
+import { OPTION_COUNT } from '@/features/age/ageLevel'
+import { ROUNDS_PER_TASK } from './rules'
 import type { ChoiceGameType } from './games'
 import { generateRounds, type TaskRound } from './generateRounds'
 import { OptionCard, type OptionStatus } from './OptionCard'
@@ -32,8 +35,18 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
   const language = useLanguage()
   const learner = useLearner(type)
   const finish = useFinishTask(type)
+  const optionCount = OPTION_COUNT[useAgeLevel()][type]
   // Rounds are drawn once when the game starts; progress updates must not reshuffle them.
-  const [rounds] = useState(() => generateRounds(type, playableLetters(language, type), learner))
+  const [rounds] = useState(() =>
+    generateRounds(
+      type,
+      playableLetters(language, type),
+      learner,
+      Math.random,
+      ROUNDS_PER_TASK,
+      optionCount,
+    ),
+  )
 
   return (
     <ChoiceRounds
@@ -127,9 +140,11 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
       <div
         className={clsx(
           'mx-auto grid w-full flex-1 content-center gap-4 sm:gap-6',
-          type === 'find-letter'
-            ? 'max-w-md grid-cols-2 landscape:max-w-4xl landscape:grid-cols-4'
-            : 'max-w-3xl grid-cols-3',
+          round.options.length === 2
+            ? 'max-w-2xl grid-cols-2'
+            : round.options.length === 3
+              ? 'max-w-3xl grid-cols-3'
+              : 'max-w-md grid-cols-2 landscape:max-w-4xl landscape:grid-cols-4',
         )}
       >
         {round.options.map((option) => (

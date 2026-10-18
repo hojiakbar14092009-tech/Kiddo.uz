@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
-import { useFamilyStore, type ChildProfile } from '@/store/familyStore'
+import { childAge, useFamilyStore, type ChildProfile } from '@/store/familyStore'
+import { useProgressStore } from '@/store/progressStore'
 import { ParentGateOverlay } from '@/features/parent/gate/ParentGate'
 import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { useScreenTime } from '@/features/rest/useScreenTime'
@@ -21,7 +22,11 @@ export function ChildSelectPage() {
   /** A switch waiting for the parent gate; `undefined` when none is pending. */
   const [pending, setPending] = useState<ChildProfile | null | undefined>(undefined)
 
+  const startGuest = useProgressStore((state) => state.startGuest)
+
   const switchTo = (child: ChildProfile | null) => {
+    // Every visit as a guest starts from a clean slate.
+    if (!child) startGuest()
     setActiveChild(child?.id ?? null)
     navigate('/home')
   }
@@ -52,7 +57,7 @@ export function ChildSelectPage() {
               onClick={() => choose(child)}
               avatar={<ChildAvatar child={child} size={112} />}
               name={child.name}
-              detail={t('childSelect.age', { count: child.age })}
+              detail={t('childSelect.age', { count: childAge(child) })}
             />
           </li>
         ))}

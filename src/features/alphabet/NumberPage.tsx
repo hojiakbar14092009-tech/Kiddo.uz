@@ -15,14 +15,19 @@ import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useLanguage } from '@/store/settingsStore'
 import { paletteFor } from './letterPalette'
 import { Picture } from '@/components/ui/Picture'
+import { NUMBER_LIMIT } from '@/features/age/ageLevel'
+import { useAgeLevel } from '@/store/familyStore'
 
 const NAV_LINK_CLASSES =
   'inline-flex size-16 items-center justify-center rounded-full bg-surface shadow-[0_5px_0_var(--color-line)] active:translate-y-1'
 
 export function NumberPage() {
   const { itemId = '' } = useParams()
+  const limit = NUMBER_LIMIT[useAgeLevel()]
   const index = NUMBERS.findIndex((entry) => entry.id === itemId)
-  if (index === -1) return <Navigate to="/alphabet?tab=numbers" replace />
+  // Numbers past the child’s age limit stay locked.
+  if (index === -1 || NUMBERS[index]!.value > limit)
+    return <Navigate to="/alphabet?tab=numbers" replace />
   // A fresh counting game for every number.
   return <NumberScreen key={itemId} index={index} />
 }
@@ -37,7 +42,9 @@ function NumberScreen({ index }: { index: number }) {
   const word = entry.words[language]
   const palette = paletteFor(index)
   const previous = NUMBERS[index - 1]
-  const next = NUMBERS[index + 1]
+  const limit = NUMBER_LIMIT[useAgeLevel()]
+  const following = NUMBERS[index + 1]
+  const next = following && following.value <= limit ? following : undefined
 
   /** Order in which the pictures were tapped: `counted[i]` is the count shown on picture `i`. */
   const [counted, setCounted] = useState<Record<number, number>>({})

@@ -11,6 +11,8 @@ import { RestPage } from '@/features/rest/RestPage'
 import { ScreenTimeGuard } from '@/features/rest/ScreenTimeGuard'
 import { GamePage } from '@/features/tasks/GamePage'
 import { RewardPage } from '@/features/tasks/RewardPage'
+import { EXAM_MIN_LEVEL } from '@/features/age/ageLevel'
+import { RequireAge } from '@/features/age/RequireAge'
 import { AppShell } from './AppShell'
 import { LoadingScreen } from './LoadingScreen'
 import { RequireLanguage } from './RequireLanguage'
@@ -44,10 +46,15 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
-                path: '/exam',
-                lazy: async () => ({
-                  Component: (await import('@/features/exam/ExamPage')).ExamPage,
-                }),
+                element: <RequireAge min={EXAM_MIN_LEVEL} />,
+                children: [
+                  {
+                    path: '/exam',
+                    lazy: async () => ({
+                      Component: (await import('@/features/exam/ExamPage')).ExamPage,
+                    }),
+                  },
+                ],
               },
               { path: '/rest', element: <RestPage /> },
             ],

@@ -1,8 +1,10 @@
-import { screen } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
+import { birthDateForAge } from '@/features/age/ageLevel'
+import { dayKey } from '@/features/tasks/rules'
 import { renderRoute } from '@/test/renderRoute'
 
 function finish(type: 'find-letter' | 'find-picture' | 'trace', childKey = GUEST_KEY) {
@@ -51,13 +53,47 @@ describe('Home', () => {
   })
 
   it('shows the active child and their own progress', async () => {
-    const ali = useFamilyStore.getState().addChild({ name: 'Ali', age: 5, gender: 'boy' })
+    const ali = useFamilyStore
+      .getState()
+      .addChild({ name: 'Ali', birthDate: birthDateForAge(5, dayKey()), gender: 'boy' })
     useFamilyStore.getState().setActiveChild(ali.id)
-    finish('trace', ali.id)
+    finish('find-picture', ali.id)
     await renderRoute('/home')
     expect(screen.getByRole('heading', { name: 'Salom, Ali!' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Bolani almashtirish' })).toHaveTextContent('Ali')
     expect(screen.getByText('1 / 3 vazifa bajarildi')).toBeInTheDocument()
+  })
+
+  it('locks games for older children and opens them on the birthday', async () => {
+    const lola = useFamilyStore
+      .getState()
+      .addChild({ name: 'Lola', birthDate: birthDateForAge(4, dayKey()), gender: 'girl' })
+    useFamilyStore.getState().setActiveChild(lola.id)
+    const { router, user } = await renderRoute('/home')
+    expect(screen.getByText('0 / 2 vazifa bajarildi')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Harfni top — 5 yoshda ochiladi/ }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /6 yoshda ochiladi/ })).toHaveLength(2)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    // A locked game cannot be opened by its address either.
+    await act(() => router.navigate('/tasks/trace'))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/home'))
+
+    // A year later the child is five: the celebration shows and the game opens.
+    useFamilyStore.getState().updateChild(lola.id, { celebratedLevel: 4 })
+    useFamilyStore.setState((state) => ({
+      children: state.children.map((child) => ({
+        ...child,
+        birthDate: birthDateForAge(5, dayKey()),
+      })),
+    }))
+    const dialog = await screen.findByRole('dialog', { name: /Endi 5 yoshdasan/ })
+    expect(dialog).toHaveTextContent('Harfni top')
+    await user.click(screen.getByRole('button', { name: 'Zo‘r, o‘ynaymiz!' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(useFamilyStore.getState().children[0]?.celebratedLevel).toBe(5)
   })
 })
 
@@ -69,8 +105,12 @@ describe('Child select', () => {
 
   it('lets a child pick their profile and go home', async () => {
     const family = useFamilyStore.getState()
-    family.addChild({ name: 'Lola', age: 4, gender: 'girl' })
-    const ali = family.addChild({ name: 'Ali', age: 6, gender: 'boy' })
+    family.addChild({ name: 'Lola', birthDate: birthDateForAge(4, dayKey()), gender: 'girl' })
+    const ali = family.addChild({
+      name: 'Ali',
+      birthDate: birthDateForAge(6, dayKey()),
+      gender: 'boy',
+    })
 
     const { router, user } = await renderRoute('/child-select')
     expect(screen.getByRole('heading', { name: 'Kim o‘ynaydi?' })).toBeInTheDocument()
@@ -82,8 +122,12 @@ describe('Child select', () => {
 
   it('asks a parent before switching away from a child who has already played today', async () => {
     const family = useFamilyStore.getState()
-    const ali = family.addChild({ name: 'Ali', age: 6, gender: 'boy' })
-    family.addChild({ name: 'Lola', age: 4, gender: 'girl' })
+    const ali = family.addChild({
+      name: 'Ali',
+      birthDate: birthDateForAge(6, dayKey()),
+      gender: 'boy',
+    })
+    family.addChild({ name: 'Lola', birthDate: birthDateForAge(4, dayKey()), gender: 'girl' })
     family.setActiveChild(ali.id)
     useProgressStore.getState().addMinutes(ali.id, 5)
 
@@ -105,7 +149,9 @@ describe('Child select', () => {
   })
 
   it('goes to child select after choosing a language when profiles exist', async () => {
-    useFamilyStore.getState().addChild({ name: 'Lola', age: 4, gender: 'girl' })
+    useFamilyStore
+      .getState()
+      .addChild({ name: 'Lola', birthDate: birthDateForAge(4, dayKey()), gender: 'girl' })
     const { router, user } = await renderRoute('/')
     await user.click(screen.getByRole('button', { name: /Русский/ }))
     expect(router.state.location.pathname).toBe('/child-select')

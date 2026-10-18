@@ -1,4 +1,4 @@
-import type { ChildProfile } from '@/store/familyStore'
+import { childAge, type ChildProfile } from '@/store/familyStore'
 import type { ChildProgress, TaskResult } from '@/store/progressStore'
 
 /* Local objects → rows of the Supabase tables in supabase/migrations. */
@@ -7,7 +7,9 @@ export function childRow(child: ChildProfile) {
   return {
     id: child.id,
     name: child.name,
-    age: child.age,
+    age: childAge(child),
+    birth_date: child.birthDate,
+    celebrated_level: child.celebratedLevel,
     gender: child.gender,
     mascot: child.mascot,
     daily_limit_minutes: child.dailyLimitMinutes,

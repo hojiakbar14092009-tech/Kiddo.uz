@@ -18,7 +18,7 @@ const STATUS_KEY = {
   later: 'journey.later',
 } as const
 
-/** Today’s three games as stops on a road. Every stop can be played; the next one glows. */
+/** Today’s games as stops on a road. Every stop can be played; the next one glows. */
 export function JourneyPath({ plan }: { plan: DailyPlanState }) {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion() ?? false
@@ -38,9 +38,13 @@ export function JourneyPath({ plan }: { plan: DailyPlanState }) {
         {/* the road behind the stops */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-12 right-[16%] left-[16%] h-3 -translate-y-1/2 rounded-full bg-[repeating-linear-gradient(90deg,var(--color-line-strong)_0_22px,transparent_22px_36px)] sm:top-16"
+          style={{ left: `${50 / plan.steps.length}%`, right: `${50 / plan.steps.length}%` }}
+          className="pointer-events-none absolute top-12 h-3 -translate-y-1/2 rounded-full bg-[repeating-linear-gradient(90deg,var(--color-line-strong)_0_22px,transparent_22px_36px)] sm:top-16"
         />
-        <ol className="relative grid grid-cols-3 gap-2 sm:gap-6">
+        <ol
+          className="relative grid gap-2 sm:gap-6"
+          style={{ gridTemplateColumns: `repeat(${plan.steps.length}, minmax(0, 1fr))` }}
+        >
           {plan.steps.map((step, index) => {
             const meta = GAME_META[step.game]
             const title = t(meta.titleKey)

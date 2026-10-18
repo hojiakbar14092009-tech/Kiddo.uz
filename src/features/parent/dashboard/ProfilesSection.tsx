@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
-import { MAX_CHILDREN, useFamilyStore, type ChildProfile } from '@/store/familyStore'
+import { childAge, useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
 import { ChildForm, type ChildFormValues } from './ChildForm'
 import { Panel } from './Panel'
@@ -53,7 +53,7 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
   }
 
   return (
-    <Panel title={t('parent.profiles.title', { count: children.length, max: MAX_CHILDREN })}>
+    <Panel title={t('parent.profiles.title', { count: children.length })}>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {children.map((child) => (
           <li key={child.id} className="flex flex-col gap-3 rounded-3xl bg-cream p-4">
@@ -62,7 +62,7 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
               <div className="flex min-w-0 flex-col">
                 <span className="truncate font-display text-xl font-extrabold">{child.name}</span>
                 <span className="text-ink-soft">
-                  {t('childSelect.age', { count: child.age })} ·{' '}
+                  {t('childSelect.age', { count: childAge(child) })} ·{' '}
                   {t('parent.profiles.minutes', { count: child.dailyLimitMinutes })}
                 </span>
               </div>
@@ -104,13 +104,9 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
           </li>
         ))}
       </ul>
-      {children.length < MAX_CHILDREN ? (
-        <Button size="md" className="self-start" onClick={() => setEditing({ kind: 'new' })}>
-          + {t('parent.profiles.add')}
-        </Button>
-      ) : (
-        <p className="text-ink-soft">{t('parent.profiles.full', { max: MAX_CHILDREN })}</p>
-      )}
+      <Button size="md" className="self-start" onClick={() => setEditing({ kind: 'new' })}>
+        + {t('parent.profiles.add')}
+      </Button>
     </Panel>
   )
 }

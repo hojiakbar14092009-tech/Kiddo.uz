@@ -1,9 +1,11 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentGateStore, useParentStore } from '@/store/parentStore'
 import { useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
+import { birthDateForAge } from '@/features/age/ageLevel'
+import { dayKey } from '@/features/tasks/rules'
 import { renderRoute } from '@/test/renderRoute'
 
 type User = Awaited<ReturnType<typeof renderRoute>>['user']
@@ -72,13 +74,24 @@ describe('Parent dashboard', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/parent/dashboard'))
 
     await user.type(await screen.findByRole('textbox', { name: 'Ismi' }), 'Ali')
-    await user.click(screen.getByRole('radio', { name: '4' }))
+    const birthday = screen.getByLabelText(/^Tug‘ilgan kuni/)
+    // Too young for Kiddo: the form refuses it.
+    fireEvent.change(birthday, { target: { value: birthDateForAge(2, dayKey()) } })
+    await user.click(screen.getByRole('button', { name: 'Saqlash' }))
+    expect(screen.getByText(/bola 4 yoshdan 6 yoshgacha/)).toBeInTheDocument()
+    expect(useFamilyStore.getState().children).toHaveLength(0)
+    fireEvent.change(birthday, { target: { value: birthDateForAge(4, dayKey()) } })
     await user.click(screen.getByRole('radio', { name: 'O‘g‘il' }))
     await user.click(screen.getByRole('radio', { name: '45 daqiqa' }))
     await user.click(screen.getByRole('button', { name: 'Saqlash' }))
 
     const [child] = useFamilyStore.getState().children
-    expect(child).toMatchObject({ name: 'Ali', age: 4, gender: 'boy', mascot: 'boy' })
+    expect(child).toMatchObject({
+      name: 'Ali',
+      birthDate: birthDateForAge(4, dayKey()),
+      gender: 'boy',
+      mascot: 'boy',
+    })
     expect(child?.dailyLimitMinutes).toBe(45)
   })
 
@@ -92,7 +105,9 @@ describe('Parent dashboard', () => {
 
   it('reports today’s work and which letters get mixed up', async () => {
     useParentStore.setState({ session: { mode: 'demo' } })
-    const ali = useFamilyStore.getState().addChild({ name: 'Ali', age: 5, gender: 'boy' })
+    const ali = useFamilyStore
+      .getState()
+      .addChild({ name: 'Ali', birthDate: birthDateForAge(5, dayKey()), gender: 'boy' })
     useProgressStore.getState().completeTask(ali.id, {
       type: 'find-letter',
       language: 'uz',
@@ -109,7 +124,9 @@ describe('Parent dashboard', () => {
 
   it('asks before deleting a profile', async () => {
     useParentStore.setState({ session: { mode: 'demo' } })
-    useFamilyStore.getState().addChild({ name: 'Ali', age: 5, gender: 'boy' })
+    useFamilyStore
+      .getState()
+      .addChild({ name: 'Ali', birthDate: birthDateForAge(5, dayKey()), gender: 'boy' })
     const { user } = await renderRoute('/parent/dashboard?tab=profiles')
     await user.click(screen.getByRole('button', { name: 'Ali profilini o‘chirish' }))
     expect(useFamilyStore.getState().children).toHaveLength(1)
@@ -119,7 +136,9 @@ describe('Parent dashboard', () => {
 
   it('sends homework that the child sees first and that its game practises', async () => {
     useParentStore.setState({ session: { mode: 'demo' } })
-    const ali = useFamilyStore.getState().addChild({ name: 'Ali', age: 5, gender: 'boy' })
+    const ali = useFamilyStore
+      .getState()
+      .addChild({ name: 'Ali', birthDate: birthDateForAge(5, dayKey()), gender: 'boy' })
     useFamilyStore.getState().setActiveChild(ali.id)
 
     const parent = await renderRoute('/parent/dashboard?tab=homework')

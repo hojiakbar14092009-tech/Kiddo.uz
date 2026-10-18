@@ -2,6 +2,7 @@ import type { LetterEntry } from '@/content/alphabet'
 import { shuffle, type RandomSource } from '@/lib/random'
 import type { ChoiceGameType } from './games'
 import { ROUNDS_PER_TASK } from './rules'
+import { GUEST_LEVEL, OPTION_COUNT } from '@/features/age/ageLevel'
 
 export interface TaskRound {
   target: LetterEntry
@@ -15,7 +16,7 @@ export interface LearnerState {
   focus?: readonly string[]
 }
 
-const OPTION_COUNT: Record<ChoiceGameType, number> = { 'find-letter': 4, 'find-picture': 3 }
+const DEFAULT_OPTION_COUNT: Record<ChoiceGameType, number> = OPTION_COUNT[GUEST_LEVEL]
 /** Struggled letters come back first, but never take over a whole task. */
 const MAX_STRUGGLE_ROUNDS = 2
 /** New letters are introduced from a small window, in alphabet order. */
@@ -81,11 +82,12 @@ export function buildRound(
   target: LetterEntry,
   letters: readonly LetterEntry[],
   random: RandomSource,
+  optionCount: number = DEFAULT_OPTION_COUNT[type],
 ): TaskRound {
   const distractors = shuffle(
     letters.filter((letter) => canBeDistractor(type, target, letter)),
     random,
-  ).slice(0, OPTION_COUNT[type] - 1)
+  ).slice(0, optionCount - 1)
   return { target, options: shuffle([target, ...distractors], random) }
 }
 
@@ -95,8 +97,9 @@ export function generateRounds(
   learner: LearnerState,
   random: RandomSource = Math.random,
   count: number = ROUNDS_PER_TASK,
+  optionCount: number = DEFAULT_OPTION_COUNT[type],
 ): TaskRound[] {
   return pickTargets(letters, learner, count, random).map((target) =>
-    buildRound(type, target, letters, random),
+    buildRound(type, target, letters, random, optionCount),
   )
 }

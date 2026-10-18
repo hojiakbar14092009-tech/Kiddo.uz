@@ -4,10 +4,16 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { findLetter } from '@/content/alphabet'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
+import { isGameOpen } from '@/features/age/ageLevel'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { GAME_TYPES, type GameType } from '@/features/tasks/games'
 import { playableLetters } from '@/features/tasks/playableLetters'
-import { MAX_HOMEWORK_LETTERS, useFamilyStore, type ChildProfile } from '@/store/familyStore'
+import {
+  levelOfChild,
+  MAX_HOMEWORK_LETTERS,
+  useFamilyStore,
+  type ChildProfile,
+} from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
 import { formatDayMonth } from '@/lib/dates'
 import { ChoiceChips } from './ChoiceChips'
@@ -20,7 +26,10 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
   const clearHomework = useFamilyStore((state) => state.clearHomework)
   const childLanguage = useLanguage()
   const [language, setLanguage] = useState<Language>(childLanguage)
-  const [game, setGame] = useState<GameType>('find-letter')
+  // Only games open for the child’s age can be set as homework.
+  const openGames = GAME_TYPES.filter((type) => isGameOpen(type, levelOfChild(child)))
+  const [chosenGame, setGame] = useState<GameType>(openGames[0] ?? 'find-picture')
+  const game = openGames.includes(chosenGame) ? chosenGame : (openGames[0] ?? 'find-picture')
   const [letters, setLetters] = useState<string[]>([])
   const homework = child.homework
 
@@ -93,7 +102,7 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
         />
         <ChoiceChips
           label={t('parent.homework.game')}
-          options={GAME_TYPES.map((value) => ({
+          options={openGames.map((value) => ({
             value,
             label: `${GAME_META[value].emoji} ${t(GAME_META[value].titleKey)}`,
           }))}

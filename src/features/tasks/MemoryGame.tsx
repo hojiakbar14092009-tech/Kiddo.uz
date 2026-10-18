@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
@@ -18,8 +18,9 @@ import { useFinishTask } from './useFinishTask'
 import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 import { Picture } from '@/components/ui/Picture'
+import { MEMORY_PAIRS } from '@/features/age/ageLevel'
+import { useAgeLevel } from '@/store/familyStore'
 
-const PAIRS = 4
 const HIDE_DELAY_MS = 1100
 const FINISH_DELAY_MS = 1600
 
@@ -28,14 +29,16 @@ export function MemoryGame() {
   const { t } = useTranslation()
   const language = useLanguage()
   const learner = useLearner('memory')
+  const level = useAgeLevel()
   const reduceMotion = useReducedMotion() ?? false
   const { react, reset } = useMascot()
   const { sayText, sayLetter, speaking } = useSpeaker()
   const finish = useFinishTask('memory')
+  const [pairs] = useState(() => MEMORY_PAIRS[level])
 
   const [state, dispatch] = useReducer(memoryReducer, undefined, () =>
     createMemoryGame(
-      pickTargets(playableLetters(language, 'memory'), learner, PAIRS, Math.random),
+      pickTargets(playableLetters(language, 'memory'), learner, pairs, Math.random),
       Math.random,
     ),
   )
@@ -72,12 +75,19 @@ export function MemoryGame() {
   return (
     <TaskShell
       title={t('task.memoryTitle')}
-      round={Math.min(state.matched.length, PAIRS - 1)}
-      rounds={PAIRS}
+      round={Math.min(state.matched.length, pairs - 1)}
+      rounds={pairs}
       speaking={speaking}
       onRepeat={() => void sayText(t('task.memoryPrompt'))}
     >
-      <ul className="mx-auto grid w-full max-w-3xl flex-1 grid-cols-4 content-center gap-2.5 sm:gap-5 portrait:max-w-xl">
+      <ul
+        className={clsx(
+          'mx-auto grid w-full flex-1 content-center gap-2.5 sm:gap-5',
+          pairs === 3
+            ? 'max-w-2xl grid-cols-3 portrait:max-w-lg'
+            : 'max-w-3xl grid-cols-4 portrait:max-w-xl',
+        )}
+      >
         {state.cards.map((card, index) => {
           const matched = state.matched.includes(card.letter.id)
           const faceUp = matched || state.open.includes(index)

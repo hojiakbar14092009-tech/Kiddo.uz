@@ -17,7 +17,8 @@ import { childChanges, progressChanges, snapshot } from './trackChanges'
 const ALI: ChildProfile = {
   id: 'ali',
   name: 'Ali',
-  age: 5,
+  birthDate: '2021-03-10',
+  celebratedLevel: 5,
   gender: 'boy',
   mascot: 'boy',
   dailyLimitMinutes: 30,
@@ -128,7 +129,7 @@ describe('flushQueue', () => {
 describe('change tracking', () => {
   it('notices new, edited and removed profiles', () => {
     const lola: ChildProfile = { ...ALI, id: 'lola', name: 'Lola' }
-    const edited = { ...ALI, age: 6 }
+    const edited = { ...ALI, birthDate: '2020-03-10' }
     const operations = childChanges([ALI, lola], [edited])
     expect(operations.map((operation) => operation.kind)).toEqual(['upsertChild', 'deleteChild'])
   })

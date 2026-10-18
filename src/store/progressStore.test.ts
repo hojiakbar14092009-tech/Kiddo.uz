@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { STICKERS } from '@/features/stickers/stickers'
-import { EMPTY_PROGRESS, migrateProgress, useProgressStore } from './progressStore'
+import { EMPTY_PROGRESS, GUEST_KEY, migrateProgress, useProgressStore } from './progressStore'
 
 const KEY = 'child-1'
 const MORNING = new Date(2026, 9, 18, 9, 0)
@@ -148,5 +148,33 @@ describe('robot clothes', () => {
     }
     const migrated = migrateProgress(old, 1)
     expect(migrated.byChild[KEY]).toMatchObject({ coins: 9, outfits: [], wearing: {} })
+  })
+
+  it('gives a guest a fresh start but keeps today’s screen time', () => {
+    const store = useProgressStore.getState()
+    store.completeTask(
+      GUEST_KEY,
+      { type: 'memory', language: 'uz', letterIds: ['a'], mistakeDetails: [] },
+      MORNING,
+    )
+    store.completeTask(
+      KEY,
+      { type: 'memory', language: 'uz', letterIds: ['a'], mistakeDetails: [] },
+      MORNING,
+    )
+    store.addMinutes(GUEST_KEY, 7, MORNING)
+
+    // What is saved for the next visit: the child keeps everything, the guest only minutes.
+    const saved = JSON.parse(localStorage.getItem('kiddo.progress') ?? '{}') as {
+      state: { byChild: Record<string, typeof EMPTY_PROGRESS> }
+    }
+    expect(saved.state.byChild[GUEST_KEY]).toMatchObject({ coins: 0, results: [] })
+    expect(saved.state.byChild[GUEST_KEY]?.minutesByDay).toEqual({ '2026-10-18': 7 })
+    expect(saved.state.byChild[KEY]?.coins).toBeGreaterThan(0)
+
+    useProgressStore.getState().startGuest()
+    const guest = useProgressStore.getState().byChild[GUEST_KEY]
+    expect(guest).toMatchObject({ coins: 0, results: [], stickers: [] })
+    expect(guest?.minutesByDay).toEqual({ '2026-10-18': 7 })
   })
 })

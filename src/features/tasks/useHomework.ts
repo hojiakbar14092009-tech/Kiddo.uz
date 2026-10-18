@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
-import { useActiveChild, type Homework } from '@/store/familyStore'
+import { isGameOpen } from '@/features/age/ageLevel'
+import { levelOfChild, useActiveChild, type Homework } from '@/store/familyStore'
 import { useProgress, type ChildProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import type { GameType } from './games'
@@ -11,6 +12,8 @@ export function usePendingHomework(): Homework | null {
   const language = useLanguage()
   const homework = child?.homework
   if (!homework || homework.completedAt || homework.language !== language) return null
+  // A game for an older child (e.g. after the birthday was corrected) waits until it opens.
+  if (!isGameOpen(homework.game, levelOfChild(child ?? null))) return null
   return homework
 }
 

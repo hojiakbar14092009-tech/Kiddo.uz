@@ -2,6 +2,15 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import type { GameType } from '@/features/tasks/games'
+import {
+  ageOn,
+  birthDateForAge,
+  GUEST_LEVEL,
+  levelForAge,
+  MAX_AGE,
+  MIN_AGE,
+  type AgeLevel,
+} from '@/features/age/ageLevel'
 
 export type Gender = 'girl' | 'boy'
 export type MascotModel = Gender
@@ -23,7 +32,10 @@ export type NewHomework = Pick<Homework, 'language' | 'game' | 'letterIds'>
 export interface ChildProfile {
   id: string
   name: string
-  age: number
+  /** YYYY-MM-DD; the age, and so which games are open, follows from it. */
+  birthDate: string
+  /** The highest age level whose unlock celebration the child has seen. */
+  celebratedLevel: AgeLevel
   gender: Gender
   /** Defaults to the child’s gender; a parent may switch it in the profile. */
   mascot: MascotModel
@@ -34,15 +46,14 @@ export interface ChildProfile {
   homework?: Homework | null
 }
 
-export type NewChild = Pick<ChildProfile, 'name' | 'age' | 'gender'> &
+export type NewChild = Pick<ChildProfile, 'name' | 'birthDate' | 'gender'> &
   Partial<Pick<ChildProfile, 'mascot' | 'dailyLimitMinutes'>>
 
 export const DEFAULT_DAILY_LIMIT_MINUTES = 30
 /** Daily time limits a parent can choose, in minutes. */
 export const DAILY_LIMIT_OPTIONS = [15, 20, 30, 45, 60] as const
-export const MIN_CHILD_AGE = 3
-export const MAX_CHILD_AGE = 6
-export const MAX_CHILDREN = 3
+export const MIN_CHILD_AGE = MIN_AGE
+export const MAX_CHILD_AGE = MAX_AGE
 export const MAX_NAME_LENGTH = 20
 export const MAX_HOMEWORK_LETTERS = 5
 
@@ -58,6 +69,13 @@ interface FamilyState {
   completeHomework: (childId: string, homeworkId: string, mistakes: number) => void
 }
 
+function today(): string {
+  const date = new Date()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
 function createId(): string {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -66,18 +84,16 @@ function createId(): string {
 
 export const useFamilyStore = create<FamilyState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       children: [],
       activeChildId: null,
 
       addChild: (input) => {
-        if (get().children.length >= MAX_CHILDREN) {
-          throw new Error(`A family has at most ${MAX_CHILDREN} child profiles`)
-        }
         const child: ChildProfile = {
           id: createId(),
           name: input.name.trim(),
-          age: input.age,
+          birthDate: input.birthDate,
+          celebratedLevel: levelForAge(ageOn(input.birthDate, today())),
           gender: input.gender,
           mascot: input.mascot ?? input.gender,
           dailyLimitMinutes: input.dailyLimitMinutes ?? DEFAULT_DAILY_LIMIT_MINUTES,
@@ -91,7 +107,15 @@ export const useFamilyStore = create<FamilyState>()(
         set((state) => ({
           children: state.children.map((child) =>
             child.id === id
-              ? { ...child, ...changes, name: (changes.name ?? child.name).trim() }
+              ? {
+                  ...child,
+                  ...changes,
+                  name: (changes.name ?? child.name).trim(),
+                  // A parent fixing the birthday should not trigger a celebration.
+                  ...(changes.birthDate && changes.birthDate !== child.birthDate
+                    ? { celebratedLevel: levelForAge(ageOn(changes.birthDate, today())) }
+                    : {}),
+                }
               : child,
           ),
         })),
@@ -143,7 +167,26 @@ export const useFamilyStore = create<FamilyState>()(
           ),
         })),
     }),
-    { name: 'kiddo.family', version: 1 },
+    {
+      name: 'kiddo.family',
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = persisted as { children?: Array<Record<string, unknown>> }
+        if (version < 2 && Array.isArray(state.children)) {
+          state.children = state.children.map((child) => {
+            const age = typeof child.age === 'number' ? child.age : MAX_AGE
+            const { age: _old, ...rest } = child
+            void _old
+            return {
+              ...rest,
+              birthDate: birthDateForAge(Math.max(MIN_AGE, age), today()),
+              celebratedLevel: levelForAge(age),
+            }
+          })
+        }
+        return state as unknown as FamilyState
+      },
+    },
   ),
 )
 
@@ -156,4 +199,17 @@ export function useActiveChild(): ChildProfile | null {
 /** Which robot to show: the active child’s choice, or the girl robot before anyone signs in. */
 export function useMascotModel(): MascotModel {
   return useActiveChild()?.mascot ?? 'girl'
+}
+
+/** The age level that decides which games are open; guests get everything. */
+export function levelOfChild(child: ChildProfile | null, day: string = today()): AgeLevel {
+  return child ? levelForAge(ageOn(child.birthDate, day)) : GUEST_LEVEL
+}
+
+export function useAgeLevel(): AgeLevel {
+  return levelOfChild(useActiveChild())
+}
+
+export function childAge(child: ChildProfile, day: string = today()): number {
+  return ageOn(child.birthDate, day)
 }
