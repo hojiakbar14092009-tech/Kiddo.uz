@@ -28,7 +28,16 @@ Playwright birinchi marta: `npx playwright install chromium`.
 
 **Bola uchun**
 
+- Ochilish animatsiyasi: Kiddo logotipi, atrofida harflar va sonlar paydo bo‘ladi.
 - Til tanlash (o‘zbek, rus, ingliz), “Kim o‘ynaydi?” – har bir bola o‘z robotini bosib kiradi.
+- Yoshga qarab (4, 5, 6): tug‘ilgan kun kiritiladi, yoshga mos o‘yinlar ochiq, kattaroq yoshniki qulflangan
+  va tug‘ilgan kuni animatsiya bilan o‘zi ochiladi. Har yoshning o‘z dizayni: 4 – o‘yinchoq quti,
+  5 – yashil bog‘, 6 – maktab daftari.
+- Har bir o‘yinda o‘ng tepada “💡 Yordam”: bola qiynalsa yonadi, harf qanday yozilishini uzun animatsiyada ko‘rsatadi.
+- Harf sahifasida rasm 3D: bola barmog‘i bilan aylantirib ko‘radi.
+- Robotlar sahifa bo‘ylab yuradi: kartalar ustiga sakraydi, ba’zan yiqilib turadi, do‘konda buyumlarga osiladi;
+  to‘g‘ri javobda yashil va xursand, xatoda qizil va xafa bo‘ladi, turli maqtov so‘zlarini aytadi.
+- Mehmon har safar noldan boshlaydi (natijalari saqlanmaydi).
 - Alifbo va 1–10 sonlari: harf so‘z ichida rangli ajratiladi, sonlarni bosib sanash.
 - 4 ta o‘yin: harfni top, rasmni top, juftini top, harfni barmoq bilan yoz.
 - Coinlar: xatosiz +5, xato bilan +3, kunlik sovg‘a +2. Coin hech qachon jarima sifatida ayirilmaydi.
@@ -42,19 +51,29 @@ Playwright birinchi marta: `npx playwright install chromium`.
 
 - Free: tugmalarda yumshoq “klik”, robot o‘y pufakchalari bilan “gapiradi”, ovoz yo‘q.
 - PRO: harf, so‘z, son va topshiriqlar ovoz bilan aytiladi, robot “Yahoooo!”/“Oops!” deydi.
+  PRO faqat oila farzandlari uchun – mehmon har doim Free. Sotib olinganda tabrik animatsiyasi.
 
 **Ota-ona bo‘limi** (ko‘paytirish misoli bilan himoyalangan)
 
 - Bugungi hisobot, haftalik coinlar, xatolar tahlili (“Ch o‘rniga Sh”), mashq kerak harflar.
-- 1–3 bola profili (jins → robot, kunlik vaqt), uy vazifasi, ovoz va til sozlamalari.
-- PRO: tariflar, Click / Payme / Uzum Pay, promokod, Demo PRO.
+- Bola profillari (cheklovsiz; tug‘ilgan kun, jins → robot, kunlik vaqt), uy vazifasi, ovoz va til sozlamalari.
+- Bola ilovadan chiqsa – vaqti bilan yoziladi va ota-ona bo‘limida ko‘rinadi (bulut hisobida boshqa qurilmada ham).
+- PRO: oylik va yillik tariflar, Click / Payme / Uzum Pay, promokod, Demo PRO.
 
 ## Ochiq aytilishi kerak bo‘lgan cheklovlar
 
 - **To‘lovlar sinov rejimida.** `src/services/payments/mockPayment.ts` to‘lovni faqat taqlid qiladi va pul yechmaydi. Haqiqiy to‘lov uchun Click/Payme/Uzum merchant hisobi va to‘lov xabarini (callback) tekshirib, `subscriptions` jadvaliga service role bilan yozadigan server kerak.
 - **Promokodlar** (`KIDDO7` – 7 kun, `BOLAJON30` – 30 kun) hozircha qurilmada tekshiriladi. Ishlab chiqarishda ularni ham serverga o‘tkazish kerak.
-- **Ovoz.** Yozib olingan ovozlar hali yo‘q, shuning uchun qurilmaning o‘z ovozi (Web Speech API) ishlatiladi. Qurilmada o‘zbek ovozi bo‘lmasa, ilova jim turadi (noto‘g‘ri talaffuz qilmaydi). Yozuvlar tayyor bo‘lganda faylni `public/audio/{til}/{tur}/{id}.mp3` ga qo‘ying va id’ni `src/services/audio/voiceLibrary.ts` ga yozing – shu zahoti o‘sha yozuv ishlatiladi.
-- **Rasmlar** emoji: barcha qurilmada bor, offline ishlaydi, mualliflik huquqi muammosi yo‘q.
+- **Ovoz.** Ilova aytadigan har bir gap oldindan neyron ovoz bilan yozib olingan (`public/audio/voice/`):
+  rus tili – rus ovozi, ingliz tili – britan ovozi. Ochiq o‘zbek neyron ovozi hali yo‘q, shuning uchun
+  o‘zbekcha matn o‘zimizning qoidalar bilan tovushlarga aylantiriladi (oʻ, gʻ, sh, ch, ng, urg‘u oxirgi bo‘g‘inda,
+  savol/undov ohangi) va eng yaqin turkiy (turk) ovoz bilan o‘qiladi. Bolaning ismi kabi yozilmagan so‘zlar
+  qurilma ovozida aytiladi. Yangi matn qo‘shilsa: `npx tsx scripts/voices/collect.ts > scripts/voices/phrases.json`,
+  so‘ng `python3 scripts/voices/generate.py` (Piper modellari kerak, fayl ichida yozilgan).
+  Haqiqiy diktor yozuvlari bilan almashtirish eng yaxshi natija beradi.
+- **Rasmlar** Fluent Emoji (MIT) SVG, oq fonda; 3D ko‘rinish shu rasmlardan quriladi.
+- **Chiqish xabari** ota-onaning telefoniga push-bildirishnoma sifatida emas, ota-ona bo‘limidagi ro‘yxat sifatida
+  keladi (push uchun server kerak).
 - **Bulut sinxronlash** bir tomonlama: qurilmadagi profil va natijalar ota-onaning Supabase hisobiga zaxiralanadi. Boshqa qurilmadan yuklab olish hali yo‘q.
 
 ## Supabase (ixtiyoriy)

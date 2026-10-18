@@ -7,6 +7,7 @@ import { TopBar } from '@/components/layout/TopBar'
 import { IconButton } from '@/components/ui/IconButton'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useIsPro } from '@/store/subscriptionStore'
+import { TaskHint, type HintContent } from './TaskHint'
 
 interface TaskShellProps {
   title: string
@@ -16,11 +17,24 @@ interface TaskShellProps {
   speaking: boolean
   /** Repeats the spoken instruction (PRO only; Free has nothing to repeat). */
   onRepeat: () => void
+  /** What the help bulb (top right) shows for the current question. */
+  hint?: HintContent
+  /** The child keeps getting it wrong: the help bulb lights up. */
+  struggling?: boolean
   children: ReactNode
 }
 
 /** Shared frame of every game: title and progress dots, the mascot with its bubble, then the game. */
-export function TaskShell({ title, round, rounds, speaking, onRepeat, children }: TaskShellProps) {
+export function TaskShell({
+  title,
+  round,
+  rounds,
+  speaking,
+  onRepeat,
+  hint,
+  struggling = false,
+  children,
+}: TaskShellProps) {
   const { t } = useTranslation()
   const isPro = useIsPro()
 
@@ -49,6 +63,7 @@ export function TaskShell({ title, round, rounds, speaking, onRepeat, children }
             <SpeakerIcon size={28} />
           </IconButton>
         )}
+        {hint && <TaskHint hint={hint} struggling={struggling} />}
       </div>
       {children}
     </Screen>

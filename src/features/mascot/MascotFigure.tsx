@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useReducedMotion } from 'framer-motion'
 import { lazy, Suspense, useState } from 'react'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -10,7 +11,17 @@ const Robot3D = lazy(() => import('./three/Robot3D'))
  * The mascot’s body: the articulated 3D robot when the device can render it,
  * otherwise (or while the 3D code is still loading) the animated SVG robot.
  */
-export function MascotFigure(props: RobotProps) {
+export function MascotFigure({ tint: useTint = true, ...input }: RobotProps & { tint?: boolean }) {
+  // Red and sad after a mistake, green and happy after a right answer,
+  // its own colours the rest of the time.
+  const tint = !useTint
+    ? undefined
+    : input.mood === 'oops'
+      ? 'mascot-tint-oops'
+      : input.mood === 'happy' || input.mood === 'celebrate'
+        ? 'mascot-tint-happy'
+        : 'mascot-tint-none'
+  const props = { ...input, className: clsx(input.className, tint) }
   const [failed, setFailed] = useState(false)
   const reducedMotion = useReducedMotion() ?? false
   const flat = <Robot {...props} />

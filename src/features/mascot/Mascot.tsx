@@ -15,6 +15,8 @@ interface MascotProps {
   speaking?: boolean
   /** Overrides the child’s clothes, e.g. to try an item on in the shop. */
   wearing?: Wearing
+  /** Marks the robot’s spot (`data-roam`), so a roaming robot can start from it. */
+  robotRoam?: string
   className?: string
 }
 
@@ -28,6 +30,7 @@ export function Mascot({
   bubbleSide = 'right',
   speaking = false,
   wearing,
+  robotRoam,
   className,
 }: MascotProps) {
   const model = useMascotModel()
@@ -44,13 +47,15 @@ export function Mascot({
         className,
       )}
     >
-      <MascotFigure
-        model={model}
-        wearing={wearing ?? ownWearing}
-        mood={mood === 'idle' && speaking ? 'talk' : mood}
-        reactionKey={reactionKey}
-        className={clsx('h-auto shrink-0', robotClassName)}
-      />
+      <div data-roam={robotRoam} className={clsx('shrink-0', robotClassName)}>
+        <MascotFigure
+          model={model}
+          wearing={wearing ?? ownWearing}
+          mood={mood === 'idle' && speaking ? 'talk' : mood}
+          reactionKey={reactionKey}
+          className="h-auto w-full"
+        />
+      </div>
       <MascotThoughtBubble
         message={message}
         messageKey={reactionKey}

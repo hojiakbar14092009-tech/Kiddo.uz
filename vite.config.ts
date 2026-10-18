@@ -38,7 +38,19 @@ export default defineConfig({
       },
       workbox: {
         // Everything the child area needs is precached, so it works fully offline.
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,mp3}'],
+        // Voice clips (several MB) are cached as they are first played instead.
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}', 'audio/ui/*.mp3'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/audio/voice/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'kiddo-voice',
+              expiration: { maxEntries: 4000 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
         // The 3D robot chunk (three.js) is about 1 MB.
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallback: '/index.html',

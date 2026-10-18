@@ -12,7 +12,7 @@ import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useLanguage } from '@/store/settingsStore'
 import { HighlightedWord } from './HighlightedWord'
 import { paletteFor } from './letterPalette'
-import { Picture } from '@/components/ui/Picture'
+import { PictureViewer } from './PictureViewer'
 
 const NAV_LINK_CLASSES =
   'inline-flex size-16 items-center justify-center rounded-full bg-surface font-display text-xl font-bold shadow-[0_5px_0_var(--color-line)] active:translate-y-1'
@@ -68,10 +68,10 @@ export function LetterPage() {
     >
       <section className="flex flex-1 flex-col items-center gap-6 rounded-[36px] bg-surface p-5 shadow-[0_8px_0_var(--color-line)] sm:p-8 lg:flex-row lg:gap-10">
         <div
-          className="flex aspect-square w-full max-w-[min(380px,70vw)] shrink-0 items-center justify-center rounded-[30px] border-4 bg-white p-[12%]"
+          className="flex aspect-square w-full max-w-[min(380px,70vw)] shrink-0 items-center justify-center rounded-[30px] border-4 bg-white p-[6%]"
           style={{ borderColor: palette.background }}
         >
-          <Picture emoji={letter.emoji} alt={letter.word} className="size-full" />
+          <PictureViewer emoji={letter.emoji} word={letter.word} />
         </div>
 
         <div className="flex flex-1 flex-col items-center gap-4 text-center lg:items-start lg:text-left">

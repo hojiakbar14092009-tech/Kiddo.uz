@@ -136,6 +136,8 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
       rounds={session.rounds.length}
       speaking={speaking}
       onRepeat={() => void sayText(prompt(round.target, true))}
+      hint={{ kind: type, letter: round.target }}
+      struggling={session.wrongIds.length > 0}
     >
       <div
         className={clsx(

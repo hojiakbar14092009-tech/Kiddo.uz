@@ -2,3 +2,6 @@ dist
 node_modules
 coverage
 package-lock.json
+scripts/voices/phrases.json
+src/services/audio/voiceManifest.json
+public/audio

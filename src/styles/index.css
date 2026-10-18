@@ -42,7 +42,14 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  html,
   body {
+    /* Roaming robots may step past the screen edge; that must not scroll sideways. */
+    overflow-x: clip;
+  }
+
+  body {
+    position: relative;
     margin: 0;
     min-height: 100dvh;
     background-color: var(--color-cream);
@@ -133,4 +140,21 @@ html[data-age='6'] body {
     linear-gradient(#dfe8f7 1px, transparent 1px),
     linear-gradient(90deg, #dfe8f7 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+/* The robot's feelings in colour: red after a mistake, green after a right answer. */
+.mascot-tint-none,
+.mascot-tint-oops,
+.mascot-tint-happy {
+  transition: filter 0.45s ease;
+}
+
+.mascot-tint-oops {
+  filter: sepia(0.75) saturate(4.5) hue-rotate(-40deg) brightness(0.95)
+    drop-shadow(0 0 16px rgb(239 68 68 / 0.65));
+}
+
+.mascot-tint-happy {
+  filter: sepia(0.6) saturate(3.2) hue-rotate(70deg) brightness(1.03)
+    drop-shadow(0 0 16px rgb(34 197 94 / 0.6));
 }

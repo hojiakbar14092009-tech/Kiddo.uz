@@ -37,7 +37,7 @@ test('a right answer earns praise, a finished game earns coins', async ({ page }
     previous = await prompt.innerText()
     const letter = previous.replace(' harfini top!', '').trim()
     await page.getByRole('button', { name: `${letter} harfi`, exact: true }).click()
-    await expect(page.getByText('Yahoooo! Barakalla!')).toBeVisible()
+    await expect(page.getByText(/^(Yahoooo|Wow|Hooray|Yay|Woohoo)! /)).toBeVisible()
   }
 
   await expect(page).toHaveURL(/\/reward$/, { timeout: 10_000 })
@@ -59,7 +59,10 @@ test('the parent area is behind the grown-ups gate', async ({ page }) => {
   await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
 
   await page.getByRole('textbox', { name: 'Ismi' }).fill('Lola')
-  await page.getByRole('radio', { name: '4', exact: true }).click()
+  // A five-year-old: born five years ago today.
+  const born = new Date()
+  born.setFullYear(born.getFullYear() - 5)
+  await page.getByLabel(/^Tug‘ilgan kuni/).fill(born.toISOString().slice(0, 10))
   await page.getByRole('button', { name: 'Saqlash' }).click()
   await expect(page.getByRole('button', { name: 'Lola profilini tahrirlash' })).toBeVisible()
 

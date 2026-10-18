@@ -4,7 +4,7 @@ import { KiddoMark, KiddoWordmark } from '@/components/brand/KiddoLogo'
 import { Flag } from '@/components/flags/Flag'
 import { Screen } from '@/components/layout/Screen'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
-import { MascotFigure } from '@/features/mascot/MascotFigure'
+import { RoamingMascot } from '@/features/mascot/RoamingMascot'
 import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { useFamilyStore } from '@/store/familyStore'
 import { useSettingsStore } from '@/store/settingsStore'
@@ -28,10 +28,27 @@ export function LanguagePage() {
         <KiddoMark size={72} />
         <KiddoWordmark className="text-5xl sm:text-6xl" />
       </div>
+      {/* The robots start here, then hop down and play on the language cards. */}
       <div className="flex items-end gap-2" aria-hidden="true">
-        <MascotFigure model="girl" mood="wave" className="h-auto w-20 sm:w-28" />
-        <MascotFigure model="boy" mood="wave" className="h-auto w-20 sm:w-28" />
+        <div data-roam="lang-girl" className="aspect-[4/5] w-20 sm:w-28" />
+        <div data-roam="lang-boy" className="aspect-[4/5] w-20 sm:w-28" />
       </div>
+      <RoamingMascot
+        model="girl"
+        mode="play"
+        group="lang"
+        startAt="lang-girl"
+        size={104}
+        delayMs={1200}
+      />
+      <RoamingMascot
+        model="boy"
+        mode="play"
+        group="lang"
+        startAt="lang-boy"
+        size={104}
+        delayMs={2600}
+      />
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="font-display text-2xl font-bold sm:text-3xl">{t('language.greeting')}</p>
         <p className="text-lg text-ink-soft sm:text-xl">{t('language.question')}</p>
@@ -41,7 +58,7 @@ export function LanguagePage() {
 
       <ul className="grid w-full max-w-4xl grid-cols-1 gap-5 sm:grid-cols-3">
         {LANGUAGES.map((code) => (
-          <li key={code}>
+          <li key={code} data-roam="lang">
             <button
               type="button"
               lang={code}

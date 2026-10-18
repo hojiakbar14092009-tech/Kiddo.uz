@@ -153,6 +153,6 @@ describe('Parent dashboard', () => {
     expect(child.router.state.location.search).toBe(`?homework=${homework!.id}`)
     // The homework letter is practised in the game.
     await child.user.click(screen.getByRole('button', { name: 'Ch harfi' }))
-    expect(screen.getByText('Yahoooo! Barakalla!')).toBeInTheDocument()
+    expect(screen.getByText(/^(Yahoooo|Wow|Hooray|Yay|Woohoo)! /)).toBeInTheDocument()
   })
 })

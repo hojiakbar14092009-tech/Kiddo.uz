@@ -29,14 +29,19 @@ describe('audioManager', () => {
     expect(speech.say).not.toHaveBeenCalled()
   })
 
-  it('speaks in PRO with the chosen volume', async () => {
+  it('speaks in PRO: recorded clips first, the device voice for anything else', async () => {
     useSubscriptionStore.getState().setDemoPro(true)
     useFamilyStore.setState({ activeChildId: 'ali' })
-    const spoke = await audioManager.speak([{ text: 'Б' }, { text: 'банан' }], { language: 'ru' })
+    const spoke = await audioManager.speak([{ text: 'банан' }, { text: 'Тест без записи.' }], {
+      language: 'ru',
+    })
 
     expect(spoke).toBe(true)
-    expect(speech.say).toHaveBeenNthCalledWith(1, 'Б', { language: 'ru', volume: 0.8 })
-    expect(speech.say).toHaveBeenNthCalledWith(2, 'банан', { language: 'ru', volume: 0.8 })
+    expect(instances().some((howl) => howl.options.src[0]?.startsWith('/audio/voice/ru/'))).toBe(
+      true,
+    )
+    expect(speech.say).toHaveBeenCalledTimes(1)
+    expect(speech.say).toHaveBeenCalledWith('Тест без записи.', { language: 'ru', volume: 0.8 })
   })
 
   it('stays silent at zero volume', async () => {

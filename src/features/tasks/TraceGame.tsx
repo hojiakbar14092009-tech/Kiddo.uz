@@ -98,6 +98,8 @@ export function TraceGame() {
       rounds={letters.length}
       speaking={speaking}
       onRepeat={() => void sayText(prompt(true))}
+      hint={{ kind: 'write', letter }}
+      struggling={mistakes.some((mistake) => mistake.targetId === letter.id)}
     >
       <div className="flex flex-1 flex-col items-center justify-center gap-5">
         <TraceCanvas

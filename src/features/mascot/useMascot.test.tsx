@@ -7,10 +7,11 @@ import { useFamilyStore } from '@/store/familyStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { Mascot } from './Mascot'
 import { useMascotStore } from './mascotStore'
-import { useMascot } from './useMascot'
+import { resetMascotPhrases, useMascot } from './useMascot'
 
 describe('useMascot', () => {
   beforeEach(() => {
+    resetMascotPhrases()
     useSettingsStore.setState({ language: 'uz' })
     useMascotStore.getState().reset()
     useSubscriptionStore.getState().cancel()

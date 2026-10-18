@@ -5,7 +5,9 @@ import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { SegmentedTabs } from '@/components/ui/SegmentedTabs'
 import { tabPanelProps } from '@/components/ui/tabPanel'
+import clsx from 'clsx'
 import { Mascot } from '@/features/mascot/Mascot'
+import { RoamingMascot } from '@/features/mascot/RoamingMascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useMascotModel } from '@/store/familyStore'
 import { useChildKey, useProgress, useProgressStore } from '@/store/progressStore'
@@ -31,10 +33,22 @@ export function ShopPage() {
 
   useEffect(() => reset, [reset])
 
+  // The robot does not sit still: a few seconds after the last tap it climbs
+  // out of its frame and plays on the items; any tap calls it back to show them on.
+  const [roaming, setRoaming] = useState(false)
+  const [lastTap, setLastTap] = useState(0)
+  useEffect(() => {
+    if (roaming || pending || tab !== 'outfits') return undefined
+    const timer = setTimeout(() => setRoaming(true), 4000)
+    return () => clearTimeout(timer)
+  }, [roaming, pending, tab, lastTap])
+
   /** While the child is deciding, the robot already tries the item on. */
   const shownWearing: Wearing = pending ? { ...wearing, [pending.slot]: pending.id } : wearing
 
   const select = (outfit: Outfit) => {
+    setRoaming(false)
+    setLastTap((count) => count + 1)
     if (outfits.includes(outfit.id)) {
       toggleOutfit(childKey, outfit.id)
       return
@@ -79,16 +93,40 @@ export function ShopPage() {
           <div className="flex w-full flex-col items-center gap-3 rounded-[32px] bg-surface p-4 shadow-[0_6px_0_var(--color-line)] lg:sticky lg:top-0 lg:w-80">
             <Mascot
               wearing={shownWearing}
-              robotClassName="w-32 sm:w-44"
+              robotClassName={clsx('w-32 sm:w-44', roaming && 'invisible')}
+              robotRoam="shop-frame"
               bubbleSide="right"
               className="w-full max-w-md lg:flex-col"
             />
+            {roaming && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRoaming(false)
+                  setLastTap((count) => count + 1)
+                }}
+                className="-mt-24 rounded-full bg-primary-soft px-4 py-2 font-display font-bold text-primary-ink sm:-mt-32"
+              >
+                <span aria-hidden="true">👋 </span>
+                {t('shop.callRobot')}
+              </button>
+            )}
             <p className="text-center text-lg text-ink-soft">{t('shop.outfitsHint')}</p>
           </div>
 
+          {roaming && (
+            <RoamingMascot
+              model={model}
+              wearing={wearing}
+              mode="climb"
+              group="shop"
+              startAt="shop-frame"
+              size={128}
+            />
+          )}
           <ul className="grid w-full flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
             {OUTFITS.map((outfit) => (
-              <li key={outfit.id}>
+              <li key={outfit.id} data-roam="shop">
                 <OutfitCard
                   outfit={outfit}
                   owned={outfits.includes(outfit.id)}

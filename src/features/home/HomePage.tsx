@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
-import { PeekingMascot } from '@/features/mascot/PeekingMascot'
+import { RoamingMascot } from '@/features/mascot/RoamingMascot'
 import { getAlphabet } from '@/content/alphabet'
 import { examProgress } from '@/features/exam/exam'
 import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
@@ -10,14 +10,14 @@ import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey, isFinalTestUnlocked } from '@/features/tasks/rules'
 import { usePendingHomework } from '@/features/tasks/useHomework'
-import { useActiveChild, useAgeLevel, useFamilyStore } from '@/store/familyStore'
+import { useActiveChild, useAgeLevel, useFamilyStore, useMascotModel } from '@/store/familyStore'
 import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
 import { AppIcon, type AppIconName } from '@/features/age/AppIcon'
 import { UnlockCelebration } from '@/features/age/UnlockCelebration'
 import { GAME_TYPES } from '@/features/tasks/games'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { motion, useAnimationControls } from 'framer-motion'
-import { useProgress } from '@/store/progressStore'
+import { useProgress, useWearing } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
 import { HomeworkCard } from './HomeworkCard'
@@ -29,6 +29,9 @@ export function HomePage() {
   const hasProfiles = useFamilyStore((state) => state.children.length > 0)
   const { results, learned } = useProgress()
   const level = useAgeLevel()
+  const mascotModel = useMascotModel()
+  const wearing = useWearing()
+  const { sayText: sayHello } = useSpeaker()
   const plan = dailyPlanState(results, dayKey(), level)
   const lockedGames = GAME_TYPES.filter((game) => !isGameOpen(game, level))
   const homework = usePendingHomework()
@@ -140,7 +143,15 @@ export function HomePage() {
 
       <ParentAreaLink />
 
-      <PeekingMascot message={hello} />
+      <RoamingMascot
+        model={mascotModel}
+        wearing={wearing}
+        mode="tour"
+        group="home"
+        greeting={hello}
+        onGreet={() => void sayHello(hello)}
+        delayMs={900}
+      />
       <UnlockCelebration />
     </Screen>
   )
@@ -164,7 +175,7 @@ interface ActivityCardProps {
 
 function ActivityCard({ to, label, icon, tone, detail }: ActivityCardProps) {
   return (
-    <li>
+    <li data-roam="home">
       <Link
         to={to}
         className="flex h-full flex-col items-center justify-center gap-2 rounded-[28px] bg-surface p-3 shadow-[0_7px_0_var(--color-line)] transition-transform active:translate-y-1 sm:gap-3 sm:p-5"
@@ -197,7 +208,7 @@ function LockedCard({ label, icon, age }: { label: string; icon: AppIconName; ag
   }
 
   return (
-    <li>
+    <li data-roam="home">
       <motion.button
         type="button"
         animate={shake}

@@ -3,7 +3,8 @@ import type { Language } from '@/content/languages'
 import { useSettingsStore } from '@/store/settingsStore'
 import { getIsPro } from '@/store/subscriptionStore'
 import { speech, type SpeakOptions } from './speech'
-import { recordedClipUrl, type VoiceClip } from './voiceLibrary'
+import { useFamilyStore } from '@/store/familyStore'
+import { planSpeech, type VoiceClip } from './voiceLibrary'
 
 export type UiSound = 'click' | 'success' | 'soft'
 
@@ -23,19 +24,6 @@ export type VoiceOptions = Omit<SpeakOptions, 'volume'> & { language: Language }
 
 function currentVolume(): number {
   return useSettingsStore.getState().volume
-}
-
-function playHowl(src: string, volume: number): Promise<void> {
-  return new Promise((resolve) => {
-    const howl = new Howl({
-      src: [src],
-      volume,
-      onend: () => resolve(),
-      onloaderror: () => resolve(),
-      onplayerror: () => resolve(),
-    })
-    howl.play()
-  })
 }
 
 /**
@@ -74,16 +62,48 @@ class AudioManager {
     const volume = currentVolume()
     if (volume <= 0) return true
 
+    const family = useFamilyStore.getState()
+    const name = family.children.find((child) => child.id === family.activeChildId)?.name
+    const generation = ++this.generation
+    this.current?.stop?.()
     for (const item of items) {
-      const url = item.clip ? recordedClipUrl(options.language, item.clip) : null
-      if (url) await playHowl(url, volume)
-      else await speech.say(item.text, { ...options, volume })
+      // An English cheer (“Yahoooo!”) in any language uses the English recordings.
+      const clipLanguage = options.locale?.startsWith('en') ? 'en' : options.language
+      const parts = await planSpeech(clipLanguage, item.text, name)
+      for (const part of parts) {
+        // A newer phrase or stop() wins: the rest of this one is dropped.
+        if (generation !== this.generation) return true
+        if (part.kind === 'clip') await this.playClip(part.url, volume)
+        else await speech.say(part.text, { ...options, volume })
+      }
     }
     return true
   }
 
   stopSpeech(): void {
+    this.generation += 1
+    this.current?.stop?.()
+    this.current = null
     speech.cancel()
+  }
+
+  private generation = 0
+  private current: Howl | null = null
+
+  private playClip(src: string, volume: number): Promise<void> {
+    return new Promise((resolve) => {
+      const howl = new Howl({
+        src: [src],
+        volume,
+        onend: () => resolve(),
+        onstop: () => resolve(),
+        onloaderror: () => resolve(),
+        onplayerror: () => resolve(),
+      })
+      this.current?.stop?.()
+      this.current = howl
+      howl.play()
+    })
   }
 }
 

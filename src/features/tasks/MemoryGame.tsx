@@ -79,6 +79,8 @@ export function MemoryGame() {
       rounds={pairs}
       speaking={speaking}
       onRepeat={() => void sayText(t('task.memoryPrompt'))}
+      hint={{ kind: 'memory', letter: state.cards[0]?.letter ?? null }}
+      struggling={state.mistakes.length >= 3}
     >
       <ul
         className={clsx(

@@ -6,6 +6,21 @@ import { useLanguage } from '@/store/settingsStore'
 import { useMascotStore } from './mascotStore'
 import type { MascotEvent, MascotMessage } from './types'
 
+const CHEERS = ['Yahoooo!', 'Wow!', 'Hooray!', 'Yay!', 'Woohoo!'] as const
+const OOPSES = ['Oops!', 'Uh-oh!', 'Hmm!'] as const
+const PRAISES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7'] as const
+const RETRIES = ['r1', 'r2', 'r3', 'r4'] as const
+
+/** Takes turns through a list, so the robot never says the same thing twice in a row. */
+let praiseTurn = 0
+let retryTurn = 0
+
+/** Test helper: start the cheers from the first one again. */
+export function resetMascotPhrases(): void {
+  praiseTurn = 0
+  retryTurn = 0
+}
+
 /** Exclamations sound the same in every language, said in a bright English voice. */
 const EXCLAIM = { locale: 'en-US', pitch: 1.7, rate: 1 } as const
 
@@ -46,10 +61,18 @@ export function useMascot() {
             text: child ? t('mascot.greet', { name: child.name }) : t('mascot.greetNoName'),
             emoji,
           }
-        case 'correct':
-          return { text: t('mascot.correct'), emoji }
-        case 'wrong':
-          return { text: t('mascot.wrong'), emoji }
+        case 'correct': {
+          const turn = praiseTurn++
+          const exclaim = CHEERS[turn % CHEERS.length]!
+          const praise = t(`mascot.praises.${PRAISES[turn % PRAISES.length]!}`)
+          return { text: `${exclaim} ${praise}`, emoji, exclaim, spoken: praise }
+        }
+        case 'wrong': {
+          const turn = retryTurn++
+          const exclaim = OOPSES[turn % OOPSES.length]!
+          const retry = t(`mascot.retries.${RETRIES[turn % RETRIES.length]!}`)
+          return { text: `${exclaim} ${retry}`, emoji, exclaim, spoken: retry }
+        }
         case 'rest':
           return { text: t('mascot.rest'), emoji }
         case 'locked':
@@ -68,15 +91,9 @@ export function useMascot() {
       const say = (items: Utterance[], exclaim = false) =>
         audioManager.speak(items, exclaim ? { language, ...EXCLAIM } : { language })
 
-      if (event === 'correct') {
-        if (await say([{ text: 'Yahoooo!' }], true)) {
-          await say([{ text: t('mascot.praise'), clip: { kind: 'phrases', id: 'praise' } }])
-        }
-        return
-      }
-      if (event === 'wrong') {
-        if (await say([{ text: 'Oops!' }], true)) {
-          await say([{ text: t('mascot.tryAgain'), clip: { kind: 'phrases', id: 'try-again' } }])
+      if ((event === 'correct' || event === 'wrong') && message?.exclaim) {
+        if (await say([{ text: message.exclaim }], true)) {
+          await say([{ text: message.spoken ?? message.text }])
         }
         return
       }
@@ -84,7 +101,7 @@ export function useMascot() {
       if (event === 'locked' || !message) return
       await say([{ text: message.spoken ?? message.text }])
     },
-    [language, t],
+    [language],
   )
 
   const react = useCallback(

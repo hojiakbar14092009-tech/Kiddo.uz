@@ -11,6 +11,8 @@ export interface MascotMessage {
   emoji?: string
   /** What PRO says aloud, when it differs from `text` (e.g. a letter’s spoken name). */
   spoken?: string
+  /** A short cheer said first, in a bright English voice (“Yahoooo!”, “Oops!”). */
+  exclaim?: string
 }
 
 export interface RobotPalette {
