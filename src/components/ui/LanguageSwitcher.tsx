@@ -25,7 +25,7 @@ export function LanguageSwitcher() {
             aria-label={LANGUAGE_INFO[code].nativeName}
             onClick={() => setLanguage(code)}
             className={clsx(
-              'h-10 min-w-10 rounded-full px-1.5 font-display text-sm font-bold transition-colors sm:h-12 sm:min-w-14 sm:px-3 sm:text-lg',
+              'h-11 min-w-11 rounded-full px-1.5 font-display text-sm font-bold transition-colors sm:h-12 sm:min-w-14 sm:px-3 sm:text-lg',
               isActive ? 'bg-primary text-white' : 'text-ink',
             )}
           >

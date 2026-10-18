@@ -1,4 +1,4 @@
-import { act, screen } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { dayKey } from '@/features/tasks/rules'
 import { useFamilyStore } from '@/store/familyStore'
@@ -7,7 +7,7 @@ import { EMPTY_PROGRESS, GUEST_KEY, useProgressStore } from '@/store/progressSto
 import { useScreenTimeStore } from '@/store/screenTimeStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
-import { mayFinishHere, screenTimeStatus } from './screenTime'
+import { extraToGrant, mayFinishHere, screenTimeStatus } from './screenTime'
 
 function usedToday(minutes: number) {
   useProgressStore.setState({
@@ -23,11 +23,16 @@ describe('screenTimeStatus', () => {
     expect(screenTimeStatus(30, 30, 10)).toMatchObject({ over: false, limit: 40 })
   })
 
-  it('lets a started game and its reward finish', async () => {
+  it('knows where a game can be in progress', async () => {
     expect(mayFinishHere('/tasks/trace')).toBe(true)
-    expect(mayFinishHere('/reward')).toBe(true)
+    expect(mayFinishHere('/exam')).toBe(true)
     expect(mayFinishHere('/home')).toBe(false)
     expect(mayFinishHere('/shop')).toBe(false)
+  })
+
+  it('gives the full extra time even if the clock ran on during the rest screen', async () => {
+    expect(extraToGrant(30, 30)).toBe(10)
+    expect(extraToGrant(42, 30)).toBe(22)
   })
 })
 
@@ -49,10 +54,26 @@ describe('Rest screen', () => {
     expect(screen.queryByRole('button', { name: 'Bosh sahifa' })).not.toBeInTheDocument()
   })
 
-  it('lets a game in progress finish', async () => {
+  it('lets the game in progress finish and show its reward, but nothing new', async () => {
+    usedToday(29)
+    const { router } = await renderRoute('/tasks/trace')
+    act(() => usedToday(30))
+    expect(router.state.location.pathname).toBe('/tasks/trace')
+
+    const outcome = { coins: 5, bonus: 0, stars: 3, stickerId: null, mistakes: 0 }
+    await act(() =>
+      router.navigate('/reward', { replace: true, state: { taskType: 'trace', outcome } }),
+    )
+    expect(router.state.location.pathname).toBe('/reward')
+
+    await act(() => router.navigate('/tasks/trace'))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/rest'))
+  })
+
+  it('sends a reloaded game straight to rest once time is up', async () => {
     usedToday(30)
     const { router } = await renderRoute('/tasks/trace')
-    expect(router.state.location.pathname).toBe('/tasks/trace')
+    expect(router.state.location.pathname).toBe('/rest')
   })
 
   it('warns gently two minutes before', async () => {
@@ -69,6 +90,8 @@ describe('Rest screen', () => {
     await user.click(screen.getByRole('button', { name: 'Tekshirish' }))
     await user.click(screen.getByRole('button', { name: '+10 daqiqa' }))
     expect(router.state.location.pathname).toBe('/home')
+    // The answer unlocked only the rest screen, never the parent area.
+    expect(useParentGateStore.getState().openedAt).toBeNull()
   })
 
   it('counts time only while the screen is visible', async () => {

@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { InterfaceSounds } from './InterfaceSounds'
 import { LanguageSync } from './LanguageSync'
+import { ParentGateAutoLock } from './ParentGateAutoLock'
 import { SyncManager } from '@/services/sync/SyncManager'
 import { SpeechUnlock } from './SpeechUnlock'
 
@@ -12,6 +13,7 @@ export function AppShell() {
       <SpeechUnlock />
       <InterfaceSounds />
       <SyncManager />
+      <ParentGateAutoLock />
       <Outlet />
     </>
   )

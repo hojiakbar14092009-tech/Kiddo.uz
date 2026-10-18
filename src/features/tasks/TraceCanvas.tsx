@@ -8,6 +8,8 @@ const SAMPLE_STEP = 6
 export interface TraceCanvasHandle {
   clear: () => void
   score: () => TraceScore
+  /** Nothing has been drawn yet. */
+  isEmpty: () => boolean
 }
 
 interface TraceCanvasProps {
@@ -95,6 +97,7 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
     () => ({
       clear: paintGuide,
       score: () => scoreTrace(glyphPoints.current, drawn.current, lineWidth),
+      isEmpty: () => drawn.current.length === 0,
     }),
     [lineWidth, paintGuide],
   )

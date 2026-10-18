@@ -80,6 +80,22 @@ describe('Child select', () => {
     expect(router.state.location.pathname).toBe('/home')
   })
 
+  it('asks a parent before switching away from a child who has already played today', async () => {
+    const family = useFamilyStore.getState()
+    const ali = family.addChild({ name: 'Ali', age: 6, gender: 'boy' })
+    family.addChild({ name: 'Lola', age: 4, gender: 'girl' })
+    family.setActiveChild(ali.id)
+    useProgressStore.getState().addMinutes(ali.id, 5)
+
+    const { router, user } = await renderRoute('/child-select')
+    await user.click(screen.getByRole('button', { name: /Lola/ }))
+    expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
+    expect(useFamilyStore.getState().activeChildId).toBe(ali.id)
+
+    await user.click(screen.getByRole('button', { name: 'Orqaga' }))
+    expect(router.state.location.pathname).toBe('/child-select')
+  })
+
   it('offers guest play when there are no profiles', async () => {
     const { router, user } = await renderRoute('/child-select')
     expect(screen.getByText(/ota-ona bo‘limida profil/)).toBeInTheDocument()

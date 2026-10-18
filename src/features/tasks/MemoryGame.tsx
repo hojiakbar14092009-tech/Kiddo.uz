@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getAlphabet } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useLanguage } from '@/store/settingsStore'
@@ -16,6 +15,7 @@ import {
 } from './memory'
 import { TaskShell } from './TaskShell'
 import { useFinishTask } from './useFinishTask'
+import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 
 const PAIRS = 4
@@ -34,7 +34,7 @@ export function MemoryGame() {
 
   const [state, dispatch] = useReducer(memoryReducer, undefined, () =>
     createMemoryGame(
-      pickTargets(getAlphabet(language).letters, learner, PAIRS, Math.random),
+      pickTargets(playableLetters(language, 'memory'), learner, PAIRS, Math.random),
       Math.random,
     ),
   )

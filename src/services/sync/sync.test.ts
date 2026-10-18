@@ -4,6 +4,7 @@ import type { ChildProfile } from '@/store/familyStore'
 import { childRow, resultRow } from './rows'
 import {
   coalesce,
+  MAX_ATTEMPTS,
   flushQueue,
   retryDelay,
   useSyncStore,
@@ -146,5 +147,33 @@ describe('change tracking', () => {
       'upsertResult',
     ])
     expect(operations[1]).toMatchObject({ row: { id: 'r2' } })
+  })
+})
+
+describe('queue robustness', () => {
+  beforeEach(() => useSyncStore.setState({ queue: [], snapshotFor: null }))
+
+  it('drops an operation the server keeps refusing, so later ones still go out', async () => {
+    const client = new FakeClient()
+    useSyncStore.getState().enqueue({ kind: 'upsertChild', row: childRow(ALI) })
+    useSyncStore.getState().enqueue({ kind: 'deleteChild', childId: 'other' })
+    client.failNext = MAX_ATTEMPTS
+    let time = 0
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+      time += retryDelay(MAX_ATTEMPTS)
+      await flushQueue(client, () => time)
+    }
+    expect(client.calls).toEqual(['delete children other'])
+    expect(useSyncStore.getState().queue).toHaveLength(0)
+  })
+
+  it('keeps pending deletions when a parent signs out', () => {
+    const store = useSyncStore.getState()
+    store.enqueue({ kind: 'upsertChild', row: childRow(ALI) })
+    store.enqueue({ kind: 'deleteChild', childId: 'lola' })
+    store.clear()
+    expect(useSyncStore.getState().queue.map((item) => item.operation.kind)).toEqual([
+      'deleteChild',
+    ])
   })
 })

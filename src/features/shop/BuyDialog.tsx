@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CoinIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { useFocusTrap } from '@/components/ui/useFocusTrap'
 import { Robot } from '@/features/mascot/Robot'
 import type { MascotModel } from '@/store/familyStore'
 import type { Outfit, Wearing } from './outfits'
@@ -24,8 +25,10 @@ export function BuyDialog({ outfit, model, wearing, onConfirm, onCancel }: BuyDi
   const yes = useRef<HTMLButtonElement>(null)
   const name = t(`shop.items.${outfit.id}`)
 
+  const dialog = useRef<HTMLDivElement>(null)
+  useFocusTrap(dialog, yes)
+
   useEffect(() => {
-    yes.current?.focus()
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCancel()
     }
@@ -36,6 +39,7 @@ export function BuyDialog({ outfit, model, wearing, onConfirm, onCancel }: BuyDi
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/30 p-4 sm:items-center">
       <div
+        ref={dialog}
         role="dialog"
         aria-modal="true"
         aria-labelledby="buy-title"

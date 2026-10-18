@@ -24,6 +24,11 @@ export interface SyncClient {
 
 const BASE_RETRY_MS = 5_000
 const MAX_RETRY_MS = 5 * 60_000
+/**
+ * After this many failures an operation is dropped, so one row the server will
+ * never accept cannot block every later change. The data stays on the device.
+ */
+export const MAX_ATTEMPTS = 8
 
 export function retryDelay(attempts: number): number {
   return Math.min(MAX_RETRY_MS, BASE_RETRY_MS * 2 ** Math.max(0, attempts - 1))
@@ -89,6 +94,7 @@ interface SyncState {
   snapshotFor: string | null
   enqueue: (operation: SyncOperation) => void
   setSnapshotFor: (userId: string | null) => void
+  /** On sign-out: forget everything meant for that account. */
   clear: () => void
 }
 
@@ -108,7 +114,12 @@ export const useSyncStore = create<SyncState>()(
           queue: coalesce(state.queue, { id: operationId(), operation, attempts: 0, notBefore: 0 }),
         })),
       setSnapshotFor: (snapshotFor) => set({ snapshotFor }),
-      clear: () => set({ queue: [], snapshotFor: null }),
+      // Deletions are kept: they are safe for any account and must not be forgotten.
+      clear: () =>
+        set((state) => ({
+          queue: state.queue.filter((item) => item.operation.kind === 'deleteChild'),
+          snapshotFor: null,
+        })),
     }),
     { name: 'kiddo.sync', version: 1 },
   ),
@@ -138,18 +149,18 @@ export async function flushQueue(client: SyncClient, now: () => number = Date.no
         sent += 1
       } catch {
         failed = true
+        const attempts = head.attempts + 1
         useSyncStore.setState((state) => ({
-          queue: state.queue.map((item) =>
-            item.id === head.id
-              ? {
-                  ...item,
-                  attempts: item.attempts + 1,
-                  notBefore: now() + retryDelay(item.attempts + 1),
-                }
-              : item,
-          ),
+          queue:
+            attempts >= MAX_ATTEMPTS
+              ? state.queue.filter((item) => item.id !== head.id)
+              : state.queue.map((item) =>
+                  item.id === head.id
+                    ? { ...item, attempts, notBefore: now() + retryDelay(attempts) }
+                    : item,
+                ),
         }))
-        break
+        if (attempts < MAX_ATTEMPTS) break
       }
     }
   } finally {

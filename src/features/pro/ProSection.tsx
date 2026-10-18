@@ -41,6 +41,7 @@ export function ProSection() {
   const demoOn = active && subscription.source === 'demo'
   // The demo switch must never wipe out PRO that was paid for or redeemed.
   const paidOrPromo = active && subscription.source !== 'demo'
+  const hasLifetime = paidOrPromo && subscription.expiresAt === null
 
   const pay = async () => {
     setPayState('paying')
@@ -121,7 +122,11 @@ export function ProSection() {
       </Panel>
 
       <Panel title={t('pro.buy')}>
-        {payState === 'paid' ? (
+        {hasLifetime && payState !== 'paid' ? (
+          <p className="rounded-2xl bg-primary-soft px-4 py-3 text-primary-ink">
+            {t('pro.lifetimeOwned')}
+          </p>
+        ) : payState === 'paid' ? (
           <div role="status" className="flex flex-col items-start gap-3">
             <p className="font-display text-2xl font-extrabold">{t('pro.paid')}</p>
             <p className="text-ink-soft">{t('pro.paidText')}</p>

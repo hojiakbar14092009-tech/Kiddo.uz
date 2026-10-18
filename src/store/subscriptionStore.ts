@@ -59,12 +59,18 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       source: null,
       usedPromoCodes: [],
 
+      // A new plan adds to the PRO time already paid for; lifetime stays lifetime.
+      // Demo PRO is not real, so a purchase simply replaces it.
       activatePlan: (plan, source, now = new Date()) => {
+        const state = get()
+        const real = state.source !== 'demo' && isProActive(state, now.getTime())
+        if (real && state.expiresAt === null) return
         const days = PLAN_DURATION_DAYS[plan]
+        const start = real && state.expiresAt ? Date.parse(state.expiresAt) : now.getTime()
         set({
           plan,
           source,
-          expiresAt: days === null ? null : new Date(now.getTime() + days * DAY_MS).toISOString(),
+          expiresAt: days === null ? null : new Date(start + days * DAY_MS).toISOString(),
         })
       },
 

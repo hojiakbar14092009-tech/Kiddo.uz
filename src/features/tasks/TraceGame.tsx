@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
-import { getAlphabet, type LetterEntry } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import type { MistakeDetail } from '@/store/progressStore'
@@ -12,12 +11,11 @@ import { TaskShell } from './TaskShell'
 import { TraceCanvas, type TraceCanvasHandle } from './TraceCanvas'
 import { AUTO_PASS, passes, type TraceScore } from './traceScoring'
 import { useFinishTask } from './useFinishTask'
+import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 
 const LETTERS_PER_TASK = 3
 const ADVANCE_DELAY_MS = 1700
-/** The apostrophe-like tutuq belgisi is too small to trace with a finger. */
-const TRACEABLE = (letter: LetterEntry) => letter.id !== 'tutuq'
 
 /** “Write the letter”: trace three letters with a finger. */
 export function TraceGame() {
@@ -30,12 +28,7 @@ export function TraceGame() {
   const canvas = useRef<TraceCanvasHandle>(null)
 
   const [letters] = useState(() =>
-    pickTargets(
-      getAlphabet(language).letters.filter(TRACEABLE),
-      learner,
-      LETTERS_PER_TASK,
-      Math.random,
-    ),
+    pickTargets(playableLetters(language, 'trace'), learner, LETTERS_PER_TASK, Math.random),
   )
   const [index, setIndex] = useState(0)
   const [solved, setSolved] = useState(false)
@@ -84,6 +77,11 @@ export function TraceGame() {
 
   const check = () => {
     if (solved || !canvas.current) return
+    // “Done” before drawing anything is not a mistake – just a reminder.
+    if (canvas.current.isEmpty()) {
+      react('instruct', { text: prompt(false), emoji: '✏️' }, { speak: false })
+      return
+    }
     if (passes(canvas.current.score())) {
       succeed()
       return

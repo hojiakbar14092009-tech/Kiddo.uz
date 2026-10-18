@@ -1,10 +1,12 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { useFamilyStore, type ChildProfile } from '@/store/familyStore'
+import { ParentGateOverlay } from '@/features/parent/gate/ParentGate'
 import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
+import { useScreenTime } from '@/features/rest/useScreenTime'
 import { ChildAvatar } from './ChildAvatar'
 
 /** `/child-select`: the child taps their own robot. No passwords – they cannot read yet. */
@@ -15,9 +17,22 @@ export function ChildSelectPage() {
   const activeChildId = useFamilyStore((state) => state.activeChildId)
   const setActiveChild = useFamilyStore((state) => state.setActiveChild)
 
-  const choose = (child: ChildProfile | null) => {
+  const { used } = useScreenTime()
+  /** A switch waiting for the parent gate; `undefined` when none is pending. */
+  const [pending, setPending] = useState<ChildProfile | null | undefined>(undefined)
+
+  const switchTo = (child: ChildProfile | null) => {
     setActiveChild(child?.id ?? null)
     navigate('/home')
+  }
+
+  // Once the current player has used time today, changing to another profile
+  // (or to the guest) needs a parent – otherwise every switch would start a
+  // fresh daily allowance.
+  const choose = (child: ChildProfile | null) => {
+    const isSame = (child?.id ?? null) === activeChildId
+    if (!isSame && children.length > 0 && used > 0) setPending(child)
+    else switchTo(child)
   }
 
   return (
@@ -56,6 +71,13 @@ export function ChildSelectPage() {
         <p className="max-w-md text-center text-lg text-ink-soft">{t('childSelect.noProfiles')}</p>
       )}
       <ParentAreaLink />
+
+      {pending !== undefined && (
+        <ParentGateOverlay
+          onPass={() => switchTo(pending)}
+          onCancel={() => setPending(undefined)}
+        />
+      )}
     </Screen>
   )
 }

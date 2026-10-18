@@ -3,12 +3,17 @@ import { motion, useAnimationControls } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
+import { useFocusTrap } from '@/components/ui/useFocusTrap'
 import { createMathQuestion, MAX_ANSWER_DIGITS } from './mathQuestion'
 
 interface ParentGateProps {
   onPass: () => void
   onCancel: () => void
 }
+
+/** After this many wrong answers in a row the keypad rests for a while. */
+export const MAX_WRONG_ANSWERS = 3
+export const LOCKOUT_SECONDS = 30
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'clear', '0', 'ok'] as const
 type Key = (typeof KEYS)[number]
@@ -24,16 +29,34 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
   const [wrong, setWrong] = useState(false)
   const shake = useAnimationControls()
   const dialog = useRef<HTMLDivElement>(null)
+  const [wrongInRow, setWrongInRow] = useState(0)
+  const [secondsLeft, setSecondsLeft] = useState(0)
+  const locked = secondsLeft > 0
 
-  // Focus the dialog so a keyboard (or a tablet’s hardware keyboard) works at once.
-  useEffect(() => dialog.current?.focus(), [])
+  // Focus the dialog so a keyboard (or a tablet’s hardware keyboard) works at
+  // once, and keep Tab inside it.
+  useFocusTrap(dialog)
+
+  // A random tapper would eventually hit the answer; a short rest makes that
+  // impractical while costing a parent who mistyped almost nothing.
+  useEffect(() => {
+    if (!locked) return undefined
+    const tick = setTimeout(() => {
+      setSecondsLeft(secondsLeft - 1)
+      if (secondsLeft === 1) setWrongInRow(0)
+    }, 1000)
+    return () => clearTimeout(tick)
+  }, [locked, secondsLeft])
 
   const submit = () => {
-    if (answer === '') return
+    if (answer === '' || locked) return
     if (Number(answer) === question.answer) {
       onPass()
       return
     }
+    const wrongCount = wrongInRow + 1
+    setWrongInRow(wrongCount)
+    if (wrongCount >= MAX_WRONG_ANSWERS) setSecondsLeft(LOCKOUT_SECONDS)
     setWrong(true)
     setAnswer('')
     setQuestion(createMathQuestion())
@@ -41,6 +64,7 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
   }
 
   const press = (key: Key) => {
+    if (locked) return
     if (key === 'ok') submit()
     else if (key === 'clear') setAnswer(answer.slice(0, -1))
     else if (answer.length < MAX_ANSWER_DIGITS) {
@@ -90,7 +114,11 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
         </span>
       </p>
       <p role="status" className="min-h-6 font-semibold text-oops-ink">
-        {wrong ? t('parent.gate.wrong') : ''}
+        {locked
+          ? t('parent.gate.wait', { count: secondsLeft })
+          : wrong
+            ? t('parent.gate.wrong')
+            : ''}
       </p>
 
       <div className="grid w-full grid-cols-3 gap-2">
@@ -99,6 +127,7 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
             key={key}
             type="button"
             onClick={() => press(key)}
+            disabled={locked}
             aria-label={
               key === 'ok'
                 ? t('parent.gate.check')

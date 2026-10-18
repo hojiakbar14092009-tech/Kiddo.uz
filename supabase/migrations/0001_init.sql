@@ -78,10 +78,14 @@ drop trigger if exists child_state_touch on public.child_state;
 create trigger child_state_touch before update on public.child_state
   for each row execute function public.touch_updated_at();
 
--- At most three children per parent.
+-- At most three children per parent. An upsert of an existing child is an
+-- update, not a new child, so it must never be blocked by the limit.
 create or replace function public.limit_children()
 returns trigger language plpgsql as $$
 begin
+  if exists (select 1 from public.children where id = new.id) then
+    return new;
+  end if;
   if (select count(*) from public.children where parent_id = new.parent_id) >= 3 then
     raise exception 'A family has at most 3 child profiles';
   end if;

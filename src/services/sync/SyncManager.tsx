@@ -28,6 +28,19 @@ export function SyncManager() {
     state.session?.mode === 'cloud' ? state.session.userId : null,
   )
 
+  // Signed out, profile deletions are still remembered, so a child removed
+  // in demo mode is also removed from the cloud at the next sign-in. A delete
+  // can never touch another family's rows (RLS), so this is always safe.
+  useEffect(() => {
+    if (userId) return undefined
+    return useFamilyStore.subscribe((next, previous) => {
+      const { enqueue } = useSyncStore.getState()
+      childChanges(previous.children, next.children)
+        .filter((operation) => operation.kind === 'deleteChild')
+        .forEach(enqueue)
+    })
+  }, [userId])
+
   useEffect(() => {
     if (!userId) return undefined
     let client: SyncClient | null = null

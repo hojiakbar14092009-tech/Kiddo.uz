@@ -67,3 +67,26 @@ describe('promo codes', () => {
     expect(useSubscriptionStore.getState().usedPromoCodes).toEqual([])
   })
 })
+
+describe('buying on top of PRO', () => {
+  beforeEach(() => useSubscriptionStore.getState().cancel())
+
+  it('adds a new plan to the days still left', () => {
+    const store = useSubscriptionStore.getState()
+    store.activatePlan('monthly', 'payment', NOW)
+    store.activatePlan('yearly', 'payment', new Date(NOW.getTime() + 10 * DAY))
+    expect(isProActive(useSubscriptionStore.getState(), NOW.getTime() + 394 * DAY)).toBe(true)
+  })
+
+  it('never turns lifetime into a shorter plan, but replaces demo PRO', () => {
+    const store = useSubscriptionStore.getState()
+    store.activatePlan('lifetime', 'payment', NOW)
+    store.activatePlan('monthly', 'payment', NOW)
+    expect(useSubscriptionStore.getState()).toMatchObject({ plan: 'lifetime', expiresAt: null })
+
+    store.cancel()
+    store.setDemoPro(true)
+    store.activatePlan('monthly', 'payment', NOW)
+    expect(useSubscriptionStore.getState()).toMatchObject({ plan: 'monthly', source: 'payment' })
+  })
+})

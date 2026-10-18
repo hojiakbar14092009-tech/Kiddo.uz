@@ -153,6 +153,7 @@ export const uz = {
       text: 'Davom etish uchun misolni yeching.',
       question: '{{a}} ko‘paytirish {{b}} nechaga teng?',
       wrong: 'Noto‘g‘ri. Mana yangi misol.',
+      wait: 'Ko‘p xato. {{count}} soniyadan keyin yana urinib ko‘ring.',
       check: 'Tekshirish',
       clear: 'Oxirgi raqamni o‘chirish',
       cancel: 'Orqaga',
@@ -295,6 +296,7 @@ export const uz = {
     demo: 'Demo PRO',
     demoLabel: 'PRO’ni sinab ko‘rish',
     demoHint: 'To‘lovsiz yoqib, ovozli rejimni tekshiring.',
+    lifetimeOwned: 'Sizda umrbod PRO bor – boshqa tarif kerak emas.',
     demoBlocked: 'Sizda haqiqiy PRO yoqilgan.',
   },
   rest: {

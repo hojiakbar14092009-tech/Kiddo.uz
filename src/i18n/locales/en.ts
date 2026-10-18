@@ -155,6 +155,7 @@ export const en: Translation = {
       text: 'Solve the sum to continue.',
       question: 'What is {{a}} times {{b}}?',
       wrong: 'Not quite. Here is a new one.',
+      wait: 'Too many tries. Try again in {{count}} s.',
       check: 'Check',
       clear: 'Delete last digit',
       cancel: 'Back',
@@ -297,6 +298,7 @@ export const en: Translation = {
     demo: 'Demo PRO',
     demoLabel: 'Try PRO',
     demoHint: 'Turn it on without paying to check the voice mode.',
+    lifetimeOwned: 'You have lifetime PRO – no other plan is needed.',
     demoBlocked: 'Real PRO is already on.',
   },
   rest: {

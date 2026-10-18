@@ -10,7 +10,7 @@ import { useMascot } from '@/features/mascot/useMascot'
 import { ParentGateOverlay } from '@/features/parent/gate/ParentGate'
 import { useParentGateStore } from '@/store/parentStore'
 import { useScreenTimeStore } from '@/store/screenTimeStore'
-import { EXTRA_MINUTES } from './screenTime'
+import { EXTRA_MINUTES, extraToGrant } from './screenTime'
 import { useScreenTime } from './useScreenTime'
 
 const STARS = [
@@ -31,7 +31,7 @@ export function RestPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion() ?? false
-  const { over, childKey, day } = useScreenTime()
+  const { over, used, limit, childKey, day } = useScreenTime()
   const grantExtra = useScreenTimeStore((state) => state.grantExtra)
   const openGate = useParentGateStore((state) => state.open)
   const { react, reset } = useMascot()
@@ -71,13 +71,19 @@ export function RestPage() {
           <Button
             variant="coin"
             onClick={() => {
-              grantExtra(childKey, day, EXTRA_MINUTES)
+              grantExtra(childKey, day, extraToGrant(used, limit))
               navigate('/home', { replace: true })
             }}
           >
             {t('rest.extra', { count: EXTRA_MINUTES })}
           </Button>
-          <Button variant="soft" onClick={() => navigate('/parent/dashboard')}>
+          <Button
+            variant="soft"
+            onClick={() => {
+              openGate()
+              navigate('/parent/dashboard')
+            }}
+          >
             {t('common.parentArea')}
           </Button>
         </div>
@@ -94,10 +100,9 @@ export function RestPage() {
 
       {gate === 'asking' && (
         <ParentGateOverlay
-          onPass={() => {
-            openGate()
-            setGate('open')
-          }}
+          // Solving the question here only unlocks this screen’s two choices,
+          // not the whole parent area.
+          onPass={() => setGate('open')}
           onCancel={() => setGate('closed')}
         />
       )}

@@ -2,18 +2,16 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
-import { findLetter, getAlphabet } from '@/content/alphabet'
+import { findLetter } from '@/content/alphabet'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { GAME_TYPES, type GameType } from '@/features/tasks/games'
+import { playableLetters } from '@/features/tasks/playableLetters'
 import { MAX_HOMEWORK_LETTERS, useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
 import { formatDayMonth } from '@/lib/dates'
 import { ChoiceChips } from './ChoiceChips'
 import { Panel } from './Panel'
-
-/** Tutuq belgisi has no shape to trace or find on its own. */
-const NOT_FOR_HOMEWORK = new Set(['tutuq'])
 
 /** The parent picks up to five letters and a game; the child sees it first on the home screen. */
 export function HomeworkSection({ child }: { child: ChildProfile }) {
@@ -100,36 +98,40 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
             label: `${GAME_META[value].emoji} ${t(GAME_META[value].titleKey)}`,
           }))}
           value={game}
-          onChange={setGame}
+          onChange={(next) => {
+            setGame(next)
+            // Keep only letters the new game can actually ask about.
+            setLetters((current) =>
+              current.filter((id) => playableLetters(language, next).some((l) => l.id === id)),
+            )
+          }}
         />
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 font-semibold">
             {t('parent.homework.letters', { count: letters.length, max: MAX_HOMEWORK_LETTERS })}
           </legend>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2">
-            {getAlphabet(language)
-              .letters.filter((letter) => !NOT_FOR_HOMEWORK.has(letter.id))
-              .map((letter) => {
-                const selected = letters.includes(letter.id)
-                return (
-                  <button
-                    key={letter.id}
-                    type="button"
-                    aria-pressed={selected}
-                    disabled={!selected && letters.length >= MAX_HOMEWORK_LETTERS}
-                    onClick={() => toggle(letter.id)}
-                    lang={language}
-                    className={clsx(
-                      'h-12 rounded-2xl border-2 font-display text-xl font-bold disabled:opacity-40',
-                      selected
-                        ? 'border-primary bg-primary text-white'
-                        : 'border-line-strong bg-surface',
-                    )}
-                  >
-                    {letter.upper}
-                  </button>
-                )
-              })}
+            {playableLetters(language, game).map((letter) => {
+              const selected = letters.includes(letter.id)
+              return (
+                <button
+                  key={letter.id}
+                  type="button"
+                  aria-pressed={selected}
+                  disabled={!selected && letters.length >= MAX_HOMEWORK_LETTERS}
+                  onClick={() => toggle(letter.id)}
+                  lang={language}
+                  className={clsx(
+                    'h-12 rounded-2xl border-2 font-display text-xl font-bold disabled:opacity-40',
+                    selected
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-line-strong bg-surface',
+                  )}
+                >
+                  {letter.upper}
+                </button>
+              )
+            })}
           </div>
         </fieldset>
         <Button size="md" className="self-start" disabled={letters.length === 0} onClick={assign}>

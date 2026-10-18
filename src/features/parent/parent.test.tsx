@@ -36,6 +36,13 @@ describe('Parent gate', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/parent/login'))
   })
 
+  it('rests the keypad after three wrong answers in a row', async () => {
+    const { user } = await renderRoute('/parent')
+    for (let attempt = 0; attempt < 3; attempt += 1) await solveGate(user, '1')
+    expect(screen.getByText(/30 soniyadan keyin/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '9' })).toBeDisabled()
+  })
+
   it('goes back to the child area on cancel', async () => {
     const { router, user } = await renderRoute('/parent')
     await user.click(screen.getByRole('button', { name: 'Orqaga' }))

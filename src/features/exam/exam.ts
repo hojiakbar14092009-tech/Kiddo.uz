@@ -2,17 +2,15 @@ import type { LetterEntry } from '@/content/alphabet'
 import type { Language } from '@/content/languages'
 import { shuffle, type RandomSource } from '@/lib/random'
 import { buildRound, type TaskRound } from '@/features/tasks/generateRounds'
+import { isPlayable } from '@/features/tasks/playableLetters'
 import type { MistakeDetail, TaskResult } from '@/store/progressStore'
 
 export const EXAM_ROUNDS = 10
 /** Passed with at most this many wrong taps over all rounds. */
 export const PASS_MAX_MISTAKES = 2
 
-/** Signs without a sound of their own cannot be found in a picture. */
-const NOT_IN_EXAM = new Set(['tutuq', 'hard', 'soft'])
-
 export function examLetters(letters: readonly LetterEntry[]): LetterEntry[] {
-  return letters.filter((letter) => !NOT_IN_EXAM.has(letter.id))
+  return letters.filter((letter) => isPlayable('exam', letter))
 }
 
 /** How many of the exam letters the child has learned, and how many there are. */

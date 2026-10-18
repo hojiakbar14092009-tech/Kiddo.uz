@@ -25,7 +25,15 @@ export function screenTimeStatus(used: number, limit: number, extra: number): Sc
   }
 }
 
-/** A game that has started may finish, and its reward may be shown, before the rest screen. */
+/** Screens where a game can be in progress when time runs out. */
 export function mayFinishHere(pathname: string): boolean {
-  return pathname.startsWith('/tasks/') || pathname === '/reward' || pathname === '/exam'
+  return pathname.startsWith('/tasks/') || pathname === '/exam'
+}
+
+/**
+ * Extra minutes so the child really gets `extra` more minutes from now, even
+ * if the clock passed the limit while the tablet showed the rest screen.
+ */
+export function extraToGrant(used: number, limit: number, extra: number = EXTRA_MINUTES): number {
+  return Math.max(0, used - limit) + extra
 }

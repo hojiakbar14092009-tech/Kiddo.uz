@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { HomeIcon, TrophyIcon } from '@/components/icons'
@@ -19,6 +19,7 @@ import {
   type TaskOutcome,
 } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
+import { useScreenTime } from '@/features/rest/useScreenTime'
 import { CertificateCard } from './CertificateCard'
 import {
   EXAM_ROUNDS,
@@ -51,6 +52,7 @@ export function ExamPage() {
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
   const [rounds, setRounds] = useState(() => generateExamRounds(letters))
   const name = child?.name ?? t('exam.certificate.guestName')
+  const { over: timeIsUp } = useScreenTime()
 
   useEffect(() => {
     if (phase.kind !== 'intro') return
@@ -63,22 +65,26 @@ export function ExamPage() {
   }, [learned, phase.kind, react, t, total, unlocked])
   useEffect(() => reset, [reset])
 
-  const finish = (letterIds: string[], mistakes: MistakeDetail[]) => {
-    const outcome = completeTask(childKey, {
-      type: 'exam',
-      language,
-      letterIds,
-      mistakeDetails: mistakes,
-    })
-    if (examPassed(outcome.mistakes)) react('celebrate')
-    else react('greet', { text: t('exam.notYet'), emoji: '💪' })
-    setPhase({
-      kind: 'result',
-      outcome,
-      correct: firstTryCorrect(mistakes),
-      passedAt: new Date().toISOString(),
-    })
-  }
+  // Stable, so re-renders (e.g. the screen-time clock) never restart the round timer.
+  const finish = useCallback(
+    (letterIds: string[], mistakes: MistakeDetail[]) => {
+      const outcome = completeTask(childKey, {
+        type: 'exam',
+        language,
+        letterIds,
+        mistakeDetails: mistakes,
+      })
+      if (examPassed(outcome.mistakes)) react('celebrate')
+      else react('greet', { text: t('exam.notYet'), emoji: '💪' })
+      setPhase({
+        kind: 'result',
+        outcome,
+        correct: firstTryCorrect(mistakes),
+        passedAt: new Date().toISOString(),
+      })
+    },
+    [childKey, completeTask, language, react, t],
+  )
 
   if (phase.kind === 'playing') {
     return (
@@ -103,7 +109,7 @@ export function ExamPage() {
           name={name}
           language={language}
           passedAt={phase.passedAt}
-          onAgain={startAgain}
+          onAgain={timeIsUp ? undefined : startAgain}
           onHome={() => navigate('/home')}
         />
       ) : (
@@ -112,7 +118,7 @@ export function ExamPage() {
             <TrophyIcon size={44} aria-hidden="true" />
             {t('exam.title')}
           </h1>
-          {unlocked ? (
+          {unlocked && !timeIsUp ? (
             <>
               <p className="max-w-md text-xl text-ink-soft">
                 {t('exam.intro', { count: EXAM_ROUNDS })}
@@ -121,12 +127,18 @@ export function ExamPage() {
             </>
           ) : (
             <>
-              <p className="max-w-md text-xl text-ink-soft">{t('exam.locked')}</p>
-              <ProgressBar
-                value={learned}
-                max={total}
-                label={t('exam.progress', { learned, total })}
-              />
+              {unlocked ? (
+                <p className="max-w-md text-xl text-ink-soft">{t('rest.text')}</p>
+              ) : (
+                <>
+                  <p className="max-w-md text-xl text-ink-soft">{t('exam.locked')}</p>
+                  <ProgressBar
+                    value={learned}
+                    max={total}
+                    label={t('exam.progress', { learned, total })}
+                  />
+                </>
+              )}
               <Button
                 variant="soft"
                 icon={<HomeIcon size={26} />}
@@ -157,7 +169,8 @@ interface ExamResultProps {
   name: string
   language: ReturnType<typeof useLanguage>
   passedAt: string
-  onAgain: () => void
+  /** Missing when today’s time is up: the test can be retried tomorrow. */
+  onAgain?: () => void
   onHome: () => void
 }
 
@@ -190,7 +203,7 @@ function ExamResult({
         <Button variant="soft" icon={<HomeIcon size={26} />} onClick={onHome}>
           {t('reward.home')}
         </Button>
-        {!passed && <Button onClick={onAgain}>{t('exam.again')}</Button>}
+        {!passed && onAgain && <Button onClick={onAgain}>{t('exam.again')}</Button>}
       </div>
     </>
   )

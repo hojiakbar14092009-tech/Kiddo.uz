@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getAlphabet, type LetterEntry } from '@/content/alphabet'
+import type { LetterEntry } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import type { MistakeDetail } from '@/store/progressStore'
@@ -18,6 +18,7 @@ import {
 } from './taskSession'
 import { TaskShell } from './TaskShell'
 import { useFinishTask } from './useFinishTask'
+import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 
 /** Pause after a right answer, so the celebration can play before moving on. */
@@ -32,7 +33,7 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
   const learner = useLearner(type)
   const finish = useFinishTask(type)
   // Rounds are drawn once when the game starts; progress updates must not reshuffle them.
-  const [rounds] = useState(() => generateRounds(type, getAlphabet(language).letters, learner))
+  const [rounds] = useState(() => generateRounds(type, playableLetters(language, type), learner))
 
   return (
     <ChoiceRounds
