@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { LetterEntry } from '@/content/alphabet'
+import type { NumberEntry } from '@/content/numbers'
 import { useLanguage } from '@/store/settingsStore'
 import { useIsPro } from '@/store/subscriptionStore'
 import { audioManager, type Utterance } from './audioManager'
@@ -42,8 +43,22 @@ export function useSpeaker() {
     [speak],
   )
 
+  /** The number’s word in the child’s language, e.g. “uch”. */
+  const sayNumber = useCallback(
+    (entry: NumberEntry) =>
+      speak([{ text: entry.words[language], clip: { kind: 'numbers', id: entry.id } }]),
+    [language, speak],
+  )
+
+  /** Counting aloud while the child taps pictures: “bir”, “ikki”, … */
+  const sayCount = useCallback(
+    (count: number, words: string) =>
+      speak([{ text: words, clip: { kind: 'numbers', id: `num-${count}` } }]),
+    [speak],
+  )
+
   const sayText = useCallback((text: string) => speak([{ text }]), [speak])
   const stop = useCallback(() => audioManager.stopSpeech(), [])
 
-  return { canSpeak, speaking, speak, sayLetter, sayText, stop }
+  return { canSpeak, speaking, speak, sayLetter, sayNumber, sayCount, sayText, stop }
 }

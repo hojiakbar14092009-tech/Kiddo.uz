@@ -34,6 +34,19 @@ export const ru: Translation = {
   alphabet: {
     title: 'Алфавит',
     hint: 'Нажми на букву, я её назову!',
+    tabs: 'Буквы или цифры',
+    tabLetters: 'Буквы',
+    tabNumbers: 'Цифры',
+    numbersHint: 'Нажми на число и посчитай!',
+  },
+  number: {
+    countAgain: 'Посчитать ещё',
+    countHint: 'Нажимай на картинки и считай!',
+    counted: 'Посчитано: {{count}}',
+    item: 'Картинка {{count}}',
+    previous: 'Предыдущее число',
+    next: 'Следующее число',
+    backToNumbers: 'Назад к числам',
   },
   letter: {
     hint: 'Буква в слове выделена цветом',

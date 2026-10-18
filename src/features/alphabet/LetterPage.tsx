@@ -18,7 +18,7 @@ const NAV_LINK_CLASSES =
 
 export function LetterPage() {
   const { t } = useTranslation()
-  const { letterId = '' } = useParams()
+  const { itemId: letterId = '' } = useParams()
   const language = useLanguage()
   const { sayLetter, speaking } = useSpeaker()
   const { react, reset } = useMascot()

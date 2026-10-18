@@ -40,3 +40,34 @@ describe('Alphabet', () => {
     expect(router.state.location.pathname).toBe('/alphabet')
   })
 })
+
+describe('Numbers', () => {
+  beforeEach(() => {
+    useSettingsStore.setState({ language: 'uz' })
+  })
+
+  it('switches to the numbers tab and opens a number', async () => {
+    const { router, user } = renderRoute('/alphabet')
+    await user.click(screen.getByRole('tab', { name: /123/ }))
+    expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(10)
+
+    await user.click(screen.getByRole('button', { name: '3 — uch' }))
+    expect(router.state.location.pathname).toBe('/alphabet/num-3')
+  })
+
+  it('counts the pictures one by one and celebrates at the end', async () => {
+    const { user } = renderRoute('/alphabet/num-3')
+    const pictures = screen.getAllByRole('button', { name: /-rasm$/ })
+    expect(pictures).toHaveLength(3)
+
+    await user.click(pictures[2]!)
+    await user.click(pictures[2]!)
+    await user.click(pictures[0]!)
+    expect(pictures[2]).toHaveTextContent('1')
+    expect(pictures[0]).toHaveTextContent('2')
+
+    await user.click(pictures[1]!)
+    expect(screen.getByText('Sanaldi: 3')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Yana sanash' })).toBeInTheDocument()
+  })
+})

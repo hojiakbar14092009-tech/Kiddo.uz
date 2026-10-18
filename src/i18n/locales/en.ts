@@ -34,6 +34,19 @@ export const en: Translation = {
   alphabet: {
     title: 'Alphabet',
     hint: 'Tap a letter and I will say it!',
+    tabs: 'Letters or numbers',
+    tabLetters: 'Letters',
+    tabNumbers: 'Numbers',
+    numbersHint: 'Tap a number and count!',
+  },
+  number: {
+    countAgain: 'Count again',
+    countHint: 'Tap the pictures to count!',
+    counted: 'Counted: {{count}}',
+    item: 'Picture {{count}}',
+    previous: 'Previous number',
+    next: 'Next number',
+    backToNumbers: 'Back to numbers',
   },
   letter: {
     hint: 'The letter is coloured inside the word',

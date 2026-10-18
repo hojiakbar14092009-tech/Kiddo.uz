@@ -32,6 +32,19 @@ export const uz = {
   alphabet: {
     title: 'Alifbo',
     hint: 'Harfni bos, men aytib beraman!',
+    tabs: 'Harflar yoki sonlar',
+    tabLetters: 'Harflar',
+    tabNumbers: 'Sonlar',
+    numbersHint: 'Sonni bos va sanab ko‘r!',
+  },
+  number: {
+    countAgain: 'Yana sanash',
+    countHint: 'Rasmlarni bosib sana!',
+    counted: 'Sanaldi: {{count}}',
+    item: '{{count}}-rasm',
+    previous: 'Oldingi son',
+    next: 'Keyingi son',
+    backToNumbers: 'Sonlarga qaytish',
   },
   letter: {
     hint: 'Harf so‘z ichida rangli bo‘lib turibdi',
