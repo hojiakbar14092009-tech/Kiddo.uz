@@ -28,6 +28,8 @@ export function childStateRow(childId: string, progress: ChildProgress) {
     stickers: progress.stickers,
     outfits: progress.outfits,
     wearing: progress.wearing,
+    pets: progress.pets ?? [],
+    pet: progress.pet ?? null,
     minutes_by_day: progress.minutesByDay,
   }
 }

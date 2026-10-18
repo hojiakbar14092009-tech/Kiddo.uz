@@ -1,5 +1,5 @@
-/** Where on the robot an item sits; one item per slot. */
-export type OutfitSlot = 'head' | 'face' | 'neck'
+/** Where on the robot an item sits; one item per slot, so up to four at once. */
+export type OutfitSlot = 'head' | 'ear' | 'face' | 'neck'
 
 export const OUTFIT_IDS = ['flower', 'bowtie', 'cap', 'scarf', 'glasses', 'crown'] as const
 export type OutfitId = (typeof OUTFIT_IDS)[number]
@@ -19,7 +19,7 @@ export type Wearing = Partial<Record<OutfitSlot, OutfitId>>
  * and the crown after roughly a week of daily plans – a goal, not a grind.
  */
 export const OUTFITS: readonly Outfit[] = [
-  { id: 'flower', slot: 'head', price: 10, emoji: '🌼' },
+  { id: 'flower', slot: 'ear', price: 10, emoji: '🌼' },
   { id: 'bowtie', slot: 'neck', price: 12, emoji: '🎀' },
   { id: 'cap', slot: 'head', price: 15, emoji: '🧢' },
   { id: 'scarf', slot: 'neck', price: 15, emoji: '🧣' },

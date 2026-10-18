@@ -1,7 +1,8 @@
 import clsx from 'clsx'
 import type { Wearing } from '@/features/shop/outfits'
 import { useMascotModel } from '@/store/familyStore'
-import { useWearing } from '@/store/progressStore'
+import { useActivePet, useWearing } from '@/store/progressStore'
+import { PetCompanion } from '@/features/pets/PetCompanion'
 import { useMascotStore } from './mascotStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
 import { MascotFigure } from './MascotFigure'
@@ -35,6 +36,7 @@ export function Mascot({
 }: MascotProps) {
   const model = useMascotModel()
   const ownWearing = useWearing()
+  const pet = useActivePet()
   const mood = useMascotStore((state) => state.mood)
   const message = useMascotStore((state) => state.message)
   const reactionKey = useMascotStore((state) => state.reactionKey)
@@ -47,7 +49,7 @@ export function Mascot({
         className,
       )}
     >
-      <div data-roam={robotRoam} className={clsx('shrink-0', robotClassName)}>
+      <div data-roam={robotRoam} className={clsx('relative shrink-0', robotClassName)}>
         <MascotFigure
           model={model}
           wearing={wearing ?? ownWearing}
@@ -55,6 +57,7 @@ export function Mascot({
           reactionKey={reactionKey}
           className="h-auto w-full"
         />
+        {pet && <PetCompanion pet={pet} mood={mood} />}
       </div>
       <MascotThoughtBubble
         message={message}

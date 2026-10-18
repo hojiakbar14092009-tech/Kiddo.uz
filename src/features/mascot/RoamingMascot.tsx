@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom'
 import type { Wearing } from '@/features/shop/outfits'
 import type { MascotModel } from '@/store/familyStore'
 import { MascotFigure } from './MascotFigure'
+import { PetSprite } from '@/features/pets/PetSprite'
+import { useActivePet } from '@/store/progressStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
 import type { MascotMood } from './types'
 
@@ -94,6 +96,7 @@ export function RoamingMascot({
   startAt,
 }: RoamingMascotProps) {
   const reduceMotion = useReducedMotion() ?? false
+  const pet = useActivePet()
   // Smaller on phones, so the robot never hides a whole card.
   const [size] = useState(() =>
     typeof window !== 'undefined' && window.innerWidth < 640
@@ -285,7 +288,7 @@ export function RoamingMascot({
       aria-hidden="true"
     >
       {bubble && (
-        <div className="absolute right-full bottom-1/2 w-64 pr-2">
+        <div className="absolute right-full bottom-1/2 w-80 pr-2">
           <MascotThoughtBubble
             message={{ text: bubble, emoji: '👋' }}
             messageKey={1}
@@ -303,6 +306,8 @@ export function RoamingMascot({
           className="h-auto w-full drop-shadow-[0_10px_8px_rgba(58,46,77,0.18)]"
         />
       </div>
+      {/* The pet keeps close to the robot's feet wherever it goes. */}
+      {pet && <PetSprite pet={pet} className="absolute -bottom-1 left-[62%] w-[46%]" />}
     </motion.div>,
     document.body,
   )

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import { findOutfit, type OutfitId, type Wearing } from '@/features/shop/outfits'
+import { PET_PRICE, type PetId } from '@/features/pets/pets'
 import { nextSticker } from '@/features/stickers/stickers'
 import type { GameType } from '@/features/tasks/games'
 import { coinsFor, DAILY_BONUS, dayKey, starsFor } from '@/features/tasks/rules'
@@ -41,6 +42,9 @@ export interface ChildProgress {
   /** Robot clothes the child bought with coins, and what the robot wears now. */
   outfits: OutfitId[]
   wearing: Wearing
+  /** Pets adopted with coins, and the one walking with the robot (or none). */
+  pets: PetId[]
+  pet: PetId | null
 }
 
 export interface CompletedTask {
@@ -70,6 +74,8 @@ export const EMPTY_PROGRESS: ChildProgress = Object.freeze({
   minutesByDay: {},
   outfits: [],
   wearing: {},
+  pets: [],
+  pet: null,
 }) as ChildProgress
 
 interface ProgressState {
@@ -83,6 +89,10 @@ interface ProgressState {
   buyOutfit: (childKey: string, outfitId: OutfitId) => boolean
   /** Puts an owned item on, or takes it off if the robot already wears it. */
   toggleOutfit: (childKey: string, outfitId: OutfitId) => void
+  /** Adopts a pet for coins; it walks with the robot at once. */
+  buyPet: (childKey: string, pet: PetId) => boolean
+  /** Picks which owned pet walks with the robot (null: none). */
+  choosePet: (childKey: string, pet: PetId | null) => void
 }
 
 function unique(values: readonly string[]): string[] {
@@ -208,6 +218,27 @@ export const useProgressStore = create<ProgressState>()(
           byChild: { ...state.byChild, [GUEST_KEY]: freshGuest(state.byChild[GUEST_KEY]) },
         })),
 
+      buyPet: (childKey, pet) => {
+        const current = get().byChild[childKey] ?? EMPTY_PROGRESS
+        const owned = current.pets ?? []
+        if (owned.includes(pet) || current.coins < PET_PRICE) return false
+        const next: ChildProgress = {
+          ...current,
+          coins: current.coins - PET_PRICE,
+          pets: [...owned, pet],
+          pet,
+        }
+        set((state) => ({ byChild: { ...state.byChild, [childKey]: next } }))
+        return true
+      },
+
+      choosePet: (childKey, pet) =>
+        set((state) => {
+          const current = state.byChild[childKey] ?? EMPTY_PROGRESS
+          if (pet !== null && !(current.pets ?? []).includes(pet)) return state
+          return { byChild: { ...state.byChild, [childKey]: { ...current, pet } } }
+        }),
+
       resetChild: (childKey) =>
         set((state) => {
           const byChild = { ...state.byChild }
@@ -217,7 +248,7 @@ export const useProgressStore = create<ProgressState>()(
     }),
     {
       name: 'kiddo.progress',
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => migrateProgress(persisted, version),
       // A guest starts fresh every time the app opens; only today’s screen time is kept,
       // so reopening the app does not hand out a new daily allowance.
@@ -233,13 +264,28 @@ function freshGuest(guest: ChildProgress | undefined): ChildProgress {
   return { ...EMPTY_PROGRESS, minutesByDay: guest?.minutesByDay ?? {} }
 }
 
-/** v1 had no robot clothes; older saves get an empty wardrobe. */
+/**
+ * v1 had no robot clothes; v2 had no pets and wore the flower on the head
+ * (it now has its own place by the ear, so it goes with a cap or a crown).
+ */
 export function migrateProgress(persisted: unknown, version: number) {
   const state = (persisted ?? {}) as { byChild?: Record<string, Partial<ChildProgress>> }
-  if (version >= 2) return state as Pick<ProgressState, 'byChild'>
+  if (version >= 3) return state as Pick<ProgressState, 'byChild'>
   const byChild: Record<string, ChildProgress> = {}
   for (const [key, progress] of Object.entries(state.byChild ?? {})) {
-    byChild[key] = { ...EMPTY_PROGRESS, ...progress, outfits: [], wearing: {} }
+    const wearing: Wearing = version < 2 ? {} : { ...(progress.wearing ?? {}) }
+    if ((wearing.head as string | undefined) === 'flower') {
+      delete wearing.head
+      wearing.ear = 'flower'
+    }
+    byChild[key] = {
+      ...EMPTY_PROGRESS,
+      ...progress,
+      outfits: version < 2 ? [] : (progress.outfits ?? []),
+      wearing,
+      pets: [],
+      pet: null,
+    }
   }
   return { byChild }
 }
@@ -258,4 +304,9 @@ export function useProgress(childKey?: string): ChildProgress {
   const activeKey = useChildKey()
   const key = childKey ?? activeKey
   return useProgressStore((state) => state.byChild[key] ?? EMPTY_PROGRESS)
+}
+
+/** The pet walking with the active child's robot, if any. */
+export function useActivePet(childKey?: string): PetId | null {
+  return useProgress(childKey).pet ?? null
 }

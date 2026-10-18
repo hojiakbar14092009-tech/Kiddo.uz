@@ -23,3 +23,7 @@ alter table public.child_events enable row level security;
 drop policy if exists "own child events" on public.child_events;
 create policy "own child events" on public.child_events
   for all using (parent_id = auth.uid()) with check (parent_id = auth.uid());
+
+-- Pets adopted in the shop, and the one walking with the robot.
+alter table public.child_state add column if not exists pets jsonb not null default '[]'::jsonb;
+alter table public.child_state add column if not exists pet text;

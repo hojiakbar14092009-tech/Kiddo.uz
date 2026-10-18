@@ -43,7 +43,7 @@ export function SegmentedTabs<T extends string>({
           aria-controls={`${idBase}-panel-${tab.value}`}
           onClick={() => onChange(tab.value)}
           className={clsx(
-            'h-14 min-w-14 flex-1 rounded-full px-3 font-display text-xl font-bold whitespace-nowrap transition-colors sm:min-w-28 sm:flex-none sm:px-5',
+            'inline-flex h-14 min-w-14 flex-1 items-center justify-center rounded-full px-3 font-display text-xl font-bold whitespace-nowrap transition-colors sm:min-w-28 sm:flex-none sm:px-5',
             value === tab.value ? 'bg-primary text-white' : 'text-ink',
           )}
         >

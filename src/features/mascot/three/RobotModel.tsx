@@ -338,6 +338,7 @@ function Head({ model, expression, materials, eyesRef, mouthRef, wobbleRef, wear
       )}
 
       <HeadOutfit3D id={wearing?.head} />
+      <HeadOutfit3D id={wearing?.ear} />
 
       {/* face, on the front of the visor */}
       <group position={[0, -0.02, 0.655]}>

@@ -118,10 +118,11 @@ describe('robot clothes', () => {
   })
 
   it('swaps items in the same slot and takes an item off on a second tap', () => {
+    useProgressStore.setState({ byChild: { [KEY]: { ...EMPTY_PROGRESS, coins: 200 } } })
     const store = useProgressStore.getState()
     store.buyOutfit(KEY, 'cap')
-    store.buyOutfit(KEY, 'flower')
-    expect(progress().wearing).toEqual({ head: 'flower' })
+    store.buyOutfit(KEY, 'crown')
+    expect(progress().wearing).toEqual({ head: 'crown' })
     store.toggleOutfit(KEY, 'cap')
     expect(progress().wearing).toEqual({ head: 'cap' })
     store.toggleOutfit(KEY, 'cap')
@@ -176,5 +177,42 @@ describe('robot clothes', () => {
     const guest = useProgressStore.getState().byChild[GUEST_KEY]
     expect(guest).toMatchObject({ coins: 0, results: [], stickers: [] })
     expect(guest?.minutesByDay).toEqual({ '2026-10-18': 7 })
+  })
+
+  it('wears several things at once: a flower by the ear goes with a cap', () => {
+    useProgressStore.setState({ byChild: { [KEY]: { ...EMPTY_PROGRESS, coins: 200 } } })
+    const store = useProgressStore.getState()
+    store.buyOutfit(KEY, 'cap')
+    store.buyOutfit(KEY, 'flower')
+    store.buyOutfit(KEY, 'glasses')
+    store.buyOutfit(KEY, 'scarf')
+    expect(progress().wearing).toEqual({
+      head: 'cap',
+      ear: 'flower',
+      face: 'glasses',
+      neck: 'scarf',
+    })
+  })
+
+  it('adopts a pet for 75 coins, and it walks with the robot', () => {
+    useProgressStore.setState({ byChild: { [KEY]: { ...EMPTY_PROGRESS, coins: 80 } } })
+    const store = useProgressStore.getState()
+    expect(store.buyPet(KEY, 'cat')).toBe(true)
+    expect(progress()).toMatchObject({ coins: 5, pets: ['cat'], pet: 'cat' })
+    expect(store.buyPet(KEY, 'bunny')).toBe(false)
+    store.choosePet(KEY, null)
+    expect(progress().pet).toBeNull()
+    store.choosePet(KEY, 'bunny')
+    expect(progress().pet).toBeNull()
+  })
+
+  it('moves an old flower from the head to the ear', () => {
+    const migrated = migrateProgress(
+      {
+        byChild: { [KEY]: { ...EMPTY_PROGRESS, outfits: ['flower'], wearing: { head: 'flower' } } },
+      },
+      2,
+    )
+    expect(migrated.byChild[KEY]).toMatchObject({ wearing: { ear: 'flower' }, pets: [], pet: null })
   })
 })

@@ -415,6 +415,7 @@ export function Robot({
               />
               <ellipse cx="72" cy="38" rx="20" ry="6" fill="#FFFFFF" opacity="0.85" />
               <HeadOutfit id={wearing?.head} />
+              <HeadOutfit id={wearing?.ear} />
 
               {model === 'girl' && (
                 <g>

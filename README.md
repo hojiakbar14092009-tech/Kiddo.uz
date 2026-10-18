@@ -41,7 +41,9 @@ Playwright birinchi marta: `npx playwright install chromium`.
 - Alifbo va 1–10 sonlari: harf so‘z ichida rangli ajratiladi, sonlarni bosib sanash.
 - 4 ta o‘yin: harfni top, rasmni top, juftini top, harfni barmoq bilan yoz.
 - Coinlar: xatosiz +5, xato bilan +3, kunlik sovg‘a +2. Coin hech qachon jarima sifatida ayirilmaydi.
-- Bugungi reja (3 o‘yin), stikerlar albomi, robotga kiyim do‘koni.
+- Bugungi reja, stikerlar albomi, robotga kiyim do‘koni (bir vaqtda 4 tagacha narsa: bosh, quloq yoni, ko‘z, bo‘yin).
+- Uy hayvonlari (75 coin): mushuk, to‘tiqush, xomyak, dengiz cho‘chqachasi, quyoncha – jonli harakatda,
+  har biri o‘z ovozi bilan; tanlangani robotning oyog‘i yonida yuradi va robot bilan birga xursand/xafa bo‘ladi.
 - Uy vazifasi (ota-ona bergan harflar) bosh sahifada birinchi turadi.
 - Katta sinov (hamma harflar o‘rganilgach) va yuklab olinadigan PNG sertifikat.
 - Kunlik vaqt chegarasi: tugashidan 2 daqiqa oldin eslatma, keyin dam olish ekrani – undan faqat ota-ona chiqara oladi.

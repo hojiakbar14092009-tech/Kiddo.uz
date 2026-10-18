@@ -15,8 +15,9 @@ import { BuyDialog } from './BuyDialog'
 import { OutfitCard } from './OutfitCard'
 import { OUTFITS, type Outfit, type Wearing } from './outfits'
 import { StickerAlbum } from './StickerAlbum'
+import { PetsPanel } from '@/features/pets/PetsPanel'
 
-type ShopTab = 'outfits' | 'stickers'
+type ShopTab = 'outfits' | 'pets' | 'stickers'
 
 /** `/shop`: spend coins on robot clothes, and look through the sticker album. */
 export function ShopPage() {
@@ -27,7 +28,8 @@ export function ShopPage() {
   const toggleOutfit = useProgressStore((state) => state.toggleOutfit)
   const { react, reset } = useMascot()
   const [params, setParams] = useSearchParams()
-  const tab: ShopTab = params.get('tab') === 'stickers' ? 'stickers' : 'outfits'
+  const requested = params.get('tab')
+  const tab: ShopTab = requested === 'stickers' || requested === 'pets' ? requested : 'outfits'
   const [pending, setPending] = useState<Outfit | null>(null)
   const model = useMascotModel()
 
@@ -38,7 +40,7 @@ export function ShopPage() {
   const [roaming, setRoaming] = useState(false)
   const [lastTap, setLastTap] = useState(0)
   useEffect(() => {
-    if (roaming || pending || tab !== 'outfits') return undefined
+    if (roaming || pending || tab === 'stickers') return undefined
     const timer = setTimeout(() => setRoaming(true), 4000)
     return () => clearTimeout(timer)
   }, [roaming, pending, tab, lastTap])
@@ -74,20 +76,23 @@ export function ShopPage() {
         <SegmentedTabs
           tabs={[
             { value: 'outfits', symbol: '🧢', label: t('shop.tabOutfits') },
+            {
+              value: 'pets',
+              symbol: <img src="/pets/paw-button.webp" alt="" className="inline size-8" />,
+              label: t('shop.tabPets'),
+            },
             { value: 'stickers', symbol: '📒', label: t('shop.tabStickers') },
           ]}
           value={tab}
-          onChange={(next) =>
-            setParams(next === 'stickers' ? { tab: next } : {}, { replace: true })
-          }
+          onChange={(next) => setParams(next === 'outfits' ? {} : { tab: next }, { replace: true })}
           label={t('shop.tabs')}
           idBase="shop"
         />
       </div>
 
-      {tab === 'outfits' ? (
+      {tab !== 'stickers' ? (
         <div
-          {...tabPanelProps('shop', 'outfits')}
+          {...tabPanelProps('shop', tab)}
           className="flex flex-1 flex-col items-center gap-6 lg:flex-row lg:items-start"
         >
           <div className="flex w-full flex-col items-center gap-3 rounded-[32px] bg-surface p-4 shadow-[0_6px_0_var(--color-line)] lg:sticky lg:top-0 lg:w-80">
@@ -111,7 +116,9 @@ export function ShopPage() {
                 {t('shop.callRobot')}
               </button>
             )}
-            <p className="text-center text-lg text-ink-soft">{t('shop.outfitsHint')}</p>
+            <p className="text-center text-lg text-ink-soft">
+              {tab === 'pets' ? t('shop.petsHint') : t('shop.outfitsHint')}
+            </p>
           </div>
 
           {roaming && (
@@ -124,19 +131,23 @@ export function ShopPage() {
               size={128}
             />
           )}
-          <ul className="grid w-full flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
-            {OUTFITS.map((outfit) => (
-              <li key={outfit.id} data-roam="shop">
-                <OutfitCard
-                  outfit={outfit}
-                  owned={outfits.includes(outfit.id)}
-                  worn={wearing[outfit.slot] === outfit.id}
-                  coins={coins}
-                  onSelect={() => select(outfit)}
-                />
-              </li>
-            ))}
-          </ul>
+          {tab === 'pets' ? (
+            <PetsPanel />
+          ) : (
+            <ul className="grid w-full flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
+              {OUTFITS.map((outfit) => (
+                <li key={outfit.id} data-roam="shop">
+                  <OutfitCard
+                    outfit={outfit}
+                    owned={outfits.includes(outfit.id)}
+                    worn={wearing[outfit.slot] === outfit.id}
+                    coins={coins}
+                    onSelect={() => select(outfit)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       ) : (
         <div {...tabPanelProps('shop', 'stickers')} className="flex flex-1 flex-col gap-4">
