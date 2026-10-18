@@ -8,6 +8,7 @@ import type { ChildProfile } from '@/store/familyStore'
 import { useProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { confusionPairs, daySummary, strugglingLetters, weeklyCoins } from '../report'
+import { ActivityPanel } from './ActivityPanel'
 import { Panel } from './Panel'
 
 /** Today, the week and the letters that need practice – for one child. */
@@ -148,6 +149,7 @@ export function ReportSection({ child }: { child: ChildProfile }) {
           </>
         )}
       </Panel>
+      <ActivityPanel child={child} />
     </div>
   )
 }

@@ -142,7 +142,7 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
             >
               <Robot model={model} size={72} followPointer={false} />
               <span className="font-display font-bold">
-                {t(model === 'girl' ? 'parent.profiles.lola' : 'parent.profiles.bobo')}
+                {t(model === 'girl' ? 'parent.profiles.robotGirl' : 'parent.profiles.robotBoy')}
               </span>
             </button>
           ))}

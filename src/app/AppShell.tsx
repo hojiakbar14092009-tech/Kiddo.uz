@@ -6,6 +6,7 @@ import { ParentGateAutoLock } from './ParentGateAutoLock'
 import { SyncManager } from '@/services/sync/SyncManager'
 import { SpeechUnlock } from './SpeechUnlock'
 import { SplashScreen } from './SplashScreen'
+import { ExitWatcher } from './ExitWatcher'
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
@@ -17,6 +18,7 @@ export function AppShell() {
       <InterfaceSounds />
       <SyncManager />
       <ParentGateAutoLock />
+      <ExitWatcher />
       <Outlet />
       <SplashScreen />
     </>

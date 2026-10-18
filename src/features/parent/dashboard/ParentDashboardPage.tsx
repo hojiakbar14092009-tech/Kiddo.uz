@@ -13,6 +13,7 @@ import { ProSection } from '@/features/pro/ProSection'
 import { ParentShell } from '../ParentShell'
 import { HomeworkSection } from './HomeworkSection'
 import { ProfilesSection } from './ProfilesSection'
+import { ExitAlert } from './ExitAlert'
 import { ReportSection } from './ReportSection'
 import { SettingsSection } from './SettingsSection'
 
@@ -110,6 +111,8 @@ export function ParentDashboardPage() {
             idBase="parent"
           />
         </div>
+
+        <ExitAlert onOpen={() => setParams({ tab: 'report' }, { replace: true })} />
 
         <div {...tabPanelProps('parent', tab)}>
           {tab === 'profiles' && (

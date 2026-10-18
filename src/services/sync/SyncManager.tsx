@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
 import { useProgressStore } from '@/store/progressStore'
+import { useActivityStore } from '@/store/activityStore'
+import { eventRow } from './rows'
 import { flushQueue, useSyncStore, type SyncClient } from './syncQueue'
 import { childChanges, progressChanges, snapshot } from './trackChanges'
 
@@ -77,6 +79,15 @@ export function SyncManager() {
         ),
       ),
     )
+    // A child leaving the app is sent at once, while the page can still send.
+    const stopActivity = useActivityStore.subscribe((next, previous) => {
+      const known = new Set(previous.events.map((event) => event.id))
+      const fresh = next.events.filter((event) => !known.has(event.id))
+      if (fresh.length === 0) return
+      const { enqueue } = useSyncStore.getState()
+      fresh.forEach((event) => enqueue({ kind: 'upsertEvent', row: eventRow(event) }))
+      flush()
+    })
     const timer = setInterval(flush, FLUSH_EVERY_MS)
     window.addEventListener('online', flush)
     void loadClient().then((loaded) => {
@@ -87,6 +98,7 @@ export function SyncManager() {
     return () => {
       stopFamily()
       stopProgress()
+      stopActivity()
       clearInterval(timer)
       clearTimeout(soon)
       window.removeEventListener('online', flush)

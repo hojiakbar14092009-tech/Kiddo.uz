@@ -11,8 +11,8 @@ describe('MascotFigure', () => {
 
   it('falls back to the SVG robot when WebGL is not available', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
-    render(<MascotFigure model="boy" label="Bobo" />)
-    expect(screen.getByRole('img', { name: 'Bobo' }).tagName.toLowerCase()).toBe('svg')
+    render(<MascotFigure model="boy" label="Bipbot" />)
+    expect(screen.getByRole('img', { name: 'Bipbot' }).tagName.toLowerCase()).toBe('svg')
   })
 
   it('uses the 2D robot on very weak devices', () => {

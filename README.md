@@ -1,6 +1,6 @@
 # Kiddo
 
-3–6 yoshli bolalar uchun o‘zbek, rus va ingliz alifbosini hamda 1–10 sonlarini o‘yin orqali o‘rgatuvchi veb-ilova (PWA). Asosan planshet (iPad) va telefon uchun mo‘ljallangan, internetsiz ham ishlaydi.
+4–6 yoshli bolalar uchun o‘zbek, rus va ingliz alifbosini hamda 1–10 sonlarini o‘yin orqali o‘rgatuvchi veb-ilova (PWA). Asosan planshet (iPad) va telefon uchun mo‘ljallangan, internetsiz ham ishlaydi.
 
 ## Ishga tushirish
 
@@ -36,7 +36,7 @@ Playwright birinchi marta: `npx playwright install chromium`.
 - Uy vazifasi (ota-ona bergan harflar) bosh sahifada birinchi turadi.
 - Katta sinov (hamma harflar o‘rganilgach) va yuklab olinadigan PNG sertifikat.
 - Kunlik vaqt chegarasi: tugashidan 2 daqiqa oldin eslatma, keyin dam olish ekrani – undan faqat ota-ona chiqara oladi.
-- 3D robotlar Lola va Bobo (tirik harakatlar, ko‘z qirpish, nigoh), WebGL bo‘lmasa SVG robot.
+- 3D robotlar Pixi va Bipbot (tirik harakatlar, ko‘z qirpish, nigoh), WebGL bo‘lmasa SVG robot.
 
 **Free va PRO**
 

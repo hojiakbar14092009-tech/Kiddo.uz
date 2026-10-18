@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ChildRow, ChildStateRow, ResultRow } from './rows'
+import type { ChildRow, ChildStateRow, EventRow, ResultRow } from './rows'
 
 export type SyncOperation =
   | { kind: 'upsertChild'; row: ChildRow }
   | { kind: 'deleteChild'; childId: string }
   | { kind: 'upsertChildState'; row: ChildStateRow }
   | { kind: 'upsertResult'; row: ResultRow }
+  | { kind: 'upsertEvent'; row: EventRow }
 
 export interface QueuedOperation {
   id: string
@@ -43,6 +44,7 @@ function childOf(operation: SyncOperation): string {
     case 'upsertChildState':
       return operation.row.child_id
     case 'upsertResult':
+    case 'upsertEvent':
       return operation.row.child_id
   }
 }
@@ -72,6 +74,7 @@ export function coalesce(
 function sameTarget(a: SyncOperation, b: SyncOperation): boolean {
   if (a.kind !== b.kind) return false
   if (a.kind === 'upsertResult' && b.kind === 'upsertResult') return a.row.id === b.row.id
+  if (a.kind === 'upsertEvent' && b.kind === 'upsertEvent') return a.row.id === b.row.id
   return true
 }
 
@@ -85,6 +88,8 @@ async function send(client: SyncClient, operation: SyncOperation) {
       return client.upsert('child_state', operation.row, 'child_id')
     case 'upsertResult':
       return client.upsert('task_results', operation.row, 'id')
+    case 'upsertEvent':
+      return client.upsert('child_events', operation.row, 'id')
   }
 }
 
