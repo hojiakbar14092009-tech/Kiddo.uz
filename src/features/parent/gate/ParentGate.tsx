@@ -82,7 +82,7 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
       aria-modal="true"
       aria-labelledby="gate-title"
       aria-describedby="gate-text"
-      className="flex w-full max-w-sm flex-col items-center gap-4 rounded-[32px] bg-surface p-6 text-center shadow-[0_8px_0_var(--color-line)] outline-none"
+      className="flex w-full max-w-sm flex-col items-center gap-4 rounded-[32px] bg-surface p-6 text-center text-ink shadow-[0_8px_0_var(--color-line)] outline-none"
       onKeyDown={(event) => {
         if (/^\d$/.test(event.key)) press(event.key as Key)
         else if (event.key === 'Enter') submit()

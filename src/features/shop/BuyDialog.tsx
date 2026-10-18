@@ -44,7 +44,7 @@ export function BuyDialog({ outfit, model, wearing, onConfirm, onCancel }: BuyDi
         aria-modal="true"
         aria-labelledby="buy-title"
         aria-describedby="buy-text"
-        className="flex w-full max-w-md flex-col items-center gap-4 rounded-[36px] bg-surface p-6 text-center shadow-[0_8px_0_var(--color-line)]"
+        className="flex w-full max-w-md flex-col items-center gap-4 rounded-[36px] bg-surface p-6 text-center text-ink shadow-[0_8px_0_var(--color-line)]"
       >
         <Robot model={model} wearing={wearing} size={120} followPointer={false} />
         <h2 id="buy-title" className="font-display text-3xl font-extrabold">
