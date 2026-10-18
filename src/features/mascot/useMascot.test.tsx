@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@/i18n'
 import { audioManager } from '@/services/audio/audioManager'
 import { useSettingsStore } from '@/store/settingsStore'
+import { useFamilyStore } from '@/store/familyStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { Mascot } from './Mascot'
 import { useMascotStore } from './mascotStore'
@@ -32,6 +33,7 @@ describe('useMascot', () => {
 
   it('on PRO: says “Yahoooo!” and then praises in the child’s language', async () => {
     useSubscriptionStore.getState().setDemoPro(true)
+    useFamilyStore.setState({ activeChildId: 'ali' })
     const { result } = renderHook(() => useMascot())
 
     await act(async () => result.current.react('correct'))

@@ -265,6 +265,11 @@ export const uz = {
     },
   },
   pro: {
+    celebrateTitle: 'PRO ochildi!',
+    celebrateText:
+      'Endi robot gapiradi: harflarni, so‘zlarni va vazifalarni ovoz bilan o‘rganamiz.',
+    celebrateOk: 'Zo‘r, boshladik!',
+    celebrateSay: 'Voy, rahmat! Endi men gapira olaman! Keling, birga o‘rganamiz!',
     status: 'Obuna holati',
     until: '{{date}} gacha',
     forever: 'Umrbod',

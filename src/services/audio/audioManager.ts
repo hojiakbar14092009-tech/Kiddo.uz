@@ -65,8 +65,12 @@ class AudioManager {
   }
 
   /** Speaks the items in order. Resolves `false` without a sound on Free. */
-  async speak(items: readonly Utterance[], options: VoiceOptions): Promise<boolean> {
-    if (!this.canSpeak()) return false
+  async speak(
+    items: readonly Utterance[],
+    options: VoiceOptions,
+    { requirePro = true }: { requirePro?: boolean } = {},
+  ): Promise<boolean> {
+    if (requirePro && !this.canSpeak()) return false
     const volume = currentVolume()
     if (volume <= 0) return true
 

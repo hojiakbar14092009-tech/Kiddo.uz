@@ -14,6 +14,7 @@ import {
   type PromoResult,
 } from '@/store/subscriptionStore'
 import { findPlan, formatSum, PLANS } from './plans'
+import { ProCelebration } from './ProCelebration'
 
 /** What each tier really offers – PRO adds the voice, nothing is taken from Free. */
 const FEATURES = [
@@ -37,6 +38,7 @@ export function ProSection() {
   const [payState, setPayState] = useState<PayState>('idle')
   const [promo, setPromo] = useState('')
   const [promoResult, setPromoResult] = useState<PromoResult | null>(null)
+  const [celebrating, setCelebrating] = useState(false)
   const plan = findPlan(planId)
   const demoOn = active && subscription.source === 'demo'
   // The demo switch must never wipe out PRO that was paid for or redeemed.
@@ -48,6 +50,7 @@ export function ProSection() {
     const receipt = await payMock({ plan: planId, provider, amount: plan.price })
     subscription.activatePlan(receipt.plan, 'payment')
     setPayState('paid')
+    setCelebrating(true)
   }
 
   const redeem = (event: FormEvent) => {
@@ -55,11 +58,15 @@ export function ProSection() {
     if (!promo.trim()) return
     const result = subscription.redeemPromo(promo)
     setPromoResult(result)
-    if (result === 'ok') setPromo('')
+    if (result === 'ok') {
+      setPromo('')
+      setCelebrating(true)
+    }
   }
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
+      {celebrating && <ProCelebration onClose={() => setCelebrating(false)} />}
       <Panel title={t('pro.status')} className="lg:col-span-2">
         <div className="flex flex-wrap items-center gap-4">
           <span

@@ -1,6 +1,7 @@
 import { Howl } from 'howler'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSettingsStore } from '@/store/settingsStore'
+import { useFamilyStore } from '@/store/familyStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { audioManager } from './audioManager'
 import { speech } from './speech'
@@ -30,6 +31,7 @@ describe('audioManager', () => {
 
   it('speaks in PRO with the chosen volume', async () => {
     useSubscriptionStore.getState().setDemoPro(true)
+    useFamilyStore.setState({ activeChildId: 'ali' })
     const spoke = await audioManager.speak([{ text: 'Б' }, { text: 'банан' }], { language: 'ru' })
 
     expect(spoke).toBe(true)
@@ -39,8 +41,17 @@ describe('audioManager', () => {
 
   it('stays silent at zero volume', async () => {
     useSubscriptionStore.getState().setDemoPro(true)
+    useFamilyStore.setState({ activeChildId: 'ali' })
     useSettingsStore.setState({ volume: 0 })
     await audioManager.speak([{ text: 'apple' }], { language: 'en' })
     expect(speech.say).not.toHaveBeenCalled()
+  })
+
+  it('stays silent for a guest even when the family has PRO', async () => {
+    useSubscriptionStore.getState().setDemoPro(true)
+    useFamilyStore.setState({ activeChildId: null })
+    const say = vi.spyOn(speech, 'say').mockResolvedValue()
+    expect(await audioManager.speak([{ text: 'Salom' }], { language: 'uz' })).toBe(false)
+    expect(say).not.toHaveBeenCalled()
   })
 })

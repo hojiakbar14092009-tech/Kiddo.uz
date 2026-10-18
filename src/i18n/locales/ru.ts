@@ -267,6 +267,10 @@ export const ru: Translation = {
     },
   },
   pro: {
+    celebrateTitle: 'PRO открыт!',
+    celebrateText: 'Теперь робот говорит: буквы, слова и задания — с голосом.',
+    celebrateOk: 'Ура, начинаем!',
+    celebrateSay: 'Ура, спасибо! Теперь я умею говорить! Давай учиться вместе!',
     status: 'Подписка',
     until: 'до {{date}}',
     forever: 'Навсегда',

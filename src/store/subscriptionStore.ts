@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useFamilyStore } from './familyStore'
 
 export type PlanId = 'monthly' | 'yearly' | 'lifetime'
 export type ProSource = 'payment' | 'promo' | 'demo'
@@ -119,11 +120,23 @@ export const useSubscriptionStore = create<SubscriptionState>()(
   ),
 )
 
-/** The single source of truth for “is this family on PRO right now?”. */
-export function useIsPro(): boolean {
+/** Has the family paid for PRO (for the parent area)? */
+export function useHasProSubscription(): boolean {
   return useSubscriptionStore((state) => isProActive(state))
 }
 
+/**
+ * Are PRO features on for the one playing now? PRO belongs to the family’s
+ * children: a guest plays the free version even when the family has PRO.
+ */
+export function useIsPro(): boolean {
+  const paid = useHasProSubscription()
+  const child = useFamilyStore((state) => state.activeChildId !== null)
+  return paid && child
+}
+
 export function getIsPro(): boolean {
-  return isProActive(useSubscriptionStore.getState())
+  return (
+    isProActive(useSubscriptionStore.getState()) && useFamilyStore.getState().activeChildId !== null
+  )
 }

@@ -267,6 +267,10 @@ export const en: Translation = {
     },
   },
   pro: {
+    celebrateTitle: 'PRO is on!',
+    celebrateText: 'Now the robot talks: letters, words and tasks with a real voice.',
+    celebrateOk: 'Yay, let’s go!',
+    celebrateSay: 'Hooray, thank you! Now I can talk! Let’s learn together!',
     status: 'Subscription',
     until: 'until {{date}}',
     forever: 'Forever',
