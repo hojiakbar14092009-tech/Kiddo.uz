@@ -6,15 +6,18 @@ export function Panel({
   title,
   children,
   className,
+  id,
 }: {
   title: string
   children: ReactNode
   className?: string
+  id?: string
 }) {
   return (
     <section
+      id={id}
       className={clsx(
-        'flex flex-col gap-4 rounded-[28px] bg-surface p-5 shadow-[0_6px_0_var(--color-line)]',
+        'flex scroll-mt-24 flex-col gap-4 rounded-[28px] bg-surface p-5 shadow-[0_6px_0_var(--color-line)]',
         className,
       )}
     >

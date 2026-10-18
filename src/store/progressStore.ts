@@ -89,6 +89,8 @@ interface ProgressState {
   buyOutfit: (childKey: string, outfitId: OutfitId) => boolean
   /** Puts an owned item on, or takes it off if the robot already wears it. */
   toggleOutfit: (childKey: string, outfitId: OutfitId) => void
+  /** Adds coins as a gift (PRO purchase, or the admin). Negative amounts never go below zero. */
+  grantCoins: (childKey: string, amount: number) => void
   /** Adopts a pet for coins; it walks with the robot at once. */
   buyPet: (childKey: string, pet: PetId) => boolean
   /** Picks which owned pet walks with the robot (null: none). */
@@ -217,6 +219,13 @@ export const useProgressStore = create<ProgressState>()(
         set((state) => ({
           byChild: { ...state.byChild, [GUEST_KEY]: freshGuest(state.byChild[GUEST_KEY]) },
         })),
+
+      grantCoins: (childKey, amount) =>
+        set((state) => {
+          const current = state.byChild[childKey] ?? EMPTY_PROGRESS
+          const coins = Math.max(0, current.coins + Math.round(amount))
+          return { byChild: { ...state.byChild, [childKey]: { ...current, coins } } }
+        }),
 
       buyPet: (childKey, pet) => {
         const current = get().byChild[childKey] ?? EMPTY_PROGRESS

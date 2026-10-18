@@ -1,3 +1,4 @@
+import { getAppSettings, useAppSettingsStore, type AppSettings } from '@/store/appSettingsStore'
 import type { PlanId } from '@/store/subscriptionStore'
 
 export interface Plan {
@@ -8,24 +9,32 @@ export interface Plan {
   savingPercent?: number
 }
 
-const MONTHLY_PRICE = 29_000
-const YEARLY_PRICE = 199_000
+/** Plans on sale, at the prices set in the admin panel. (“Forever” is no longer sold.) */
+export function plansFor(prices: AppSettings['prices']): Plan[] {
+  return [
+    { id: 'monthly', price: prices.monthly },
+    {
+      id: 'yearly',
+      price: prices.yearly,
+      savingPercent: Math.max(0, Math.round((1 - prices.yearly / (prices.monthly * 12)) * 100)),
+    },
+  ]
+}
 
-/** Plans on sale. (“Forever” is no longer sold; old lifetime purchases still work.) */
-export const PLANS: readonly Plan[] = [
-  { id: 'monthly', price: MONTHLY_PRICE },
-  {
-    id: 'yearly',
-    price: YEARLY_PRICE,
-    savingPercent: Math.round((1 - YEARLY_PRICE / (MONTHLY_PRICE * 12)) * 100),
-  },
-]
+/** Plans at the current prices. */
+export function usePlans(): Plan[] {
+  const prices = useAppSettingsStore((state) => state.prices)
+  return plansFor(prices)
+}
 
 /** Only for receipts of earlier lifetime purchases. */
 const LIFETIME: Plan = { id: 'lifetime', price: 399_000 }
 
-export function findPlan(id: PlanId): Plan {
-  const plan = PLANS.find((item) => item.id === id) ?? (id === 'lifetime' ? LIFETIME : undefined)
+export function findPlan(
+  id: PlanId,
+  plans: readonly Plan[] = plansFor(getAppSettings().prices),
+): Plan {
+  const plan = plans.find((item) => item.id === id) ?? (id === 'lifetime' ? LIFETIME : undefined)
   if (!plan) throw new Error(`Unknown plan ${id}`)
   return plan
 }

@@ -14,7 +14,7 @@ export function TierBadge() {
       aria-label={isPro ? t('tier.proActive') : t('tier.freeActive')}
       className={clsx(
         'inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-1.5 font-display text-[11px] font-bold sm:h-9 sm:px-3 sm:text-sm',
-        isPro ? 'bg-coin text-ink' : 'bg-muted text-ink-soft',
+        isPro ? 'bg-coin text-ink' : 'bg-surface text-ink-soft shadow-[0_3px_0_var(--color-line)]',
       )}
     >
       {isPro && <CrownIcon size={16} />}

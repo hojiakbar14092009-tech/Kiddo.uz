@@ -1,9 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { getAppSettings } from './appSettingsStore'
 import { useFamilyStore } from './familyStore'
 
 export type PlanId = 'monthly' | 'yearly' | 'lifetime'
-export type ProSource = 'payment' | 'promo' | 'demo'
+export type ProSource = 'payment' | 'promo' | 'demo' | 'admin'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -32,10 +33,9 @@ interface SubscriptionState {
 
 export type PromoResult = 'ok' | 'invalid' | 'used' | 'lifetime'
 
-/** Promo codes and the PRO days they give. Codes are case-insensitive. */
-export const PROMO_CODES: Readonly<Record<string, number>> = {
-  KIDDO7: 7,
-  BOLAJON30: 30,
+/** Promo codes and the PRO days they give (set in the admin panel). Codes are case-insensitive. */
+export function promoCodes(): Readonly<Record<string, number>> {
+  return getAppSettings().promoCodes
 }
 
 export function normalizePromo(code: string): string {
@@ -99,7 +99,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       redeemPromo: (code, now = new Date()) => {
         const key = normalizePromo(code)
-        const days = PROMO_CODES[key]
+        const days = promoCodes()[key]
         if (days === undefined) return 'invalid'
         const state = get()
         if (state.usedPromoCodes.includes(key)) return 'used'

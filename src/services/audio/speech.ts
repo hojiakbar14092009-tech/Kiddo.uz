@@ -4,7 +4,7 @@ export interface SpeakOptions {
   language: Language
   /** Overrides the default child-friendly pitch (1.1). */
   pitch?: number
-  /** Overrides the default slow, clear rate (0.85). */
+  /** Overrides the default slow, clear rate (0.75). */
   rate?: number
   /** Overrides the locale, e.g. to say “Yahoooo!” with an English voice. */
   locale?: string
@@ -101,7 +101,7 @@ export const speech = {
             utterance.voice = voice
             utterance.lang = voice.lang
             utterance.pitch = options.pitch ?? 1.1
-            utterance.rate = options.rate ?? 0.85
+            utterance.rate = options.rate ?? 0.75
             utterance.volume = options.volume ?? 1
             utterance.onend = () => resolve()
             utterance.onerror = () => resolve()

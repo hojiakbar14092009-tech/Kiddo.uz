@@ -86,6 +86,12 @@ export const routes: RouteObject[] = [
           },
         ],
       },
+      {
+        path: '/admin',
+        lazy: async () => ({
+          Component: (await import('@/features/admin/AdminPage')).AdminPage,
+        }),
+      },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

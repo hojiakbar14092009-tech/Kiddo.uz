@@ -13,8 +13,10 @@ import {
   type PlanId,
   type PromoResult,
 } from '@/store/subscriptionStore'
-import { findPlan, formatSum, PLANS } from './plans'
+import { findPlan, formatSum, usePlans } from './plans'
+import { recordProPurchase } from './purchase'
 import { ProCelebration } from './ProCelebration'
+import { ProShowcase } from './ProShowcase'
 
 /** What each tier really offers – PRO adds the voice, nothing is taken from Free. */
 const FEATURES = [
@@ -39,7 +41,9 @@ export function ProSection() {
   const [promo, setPromo] = useState('')
   const [promoResult, setPromoResult] = useState<PromoResult | null>(null)
   const [celebrating, setCelebrating] = useState(false)
-  const plan = findPlan(planId)
+  const plans = usePlans()
+  const plan = findPlan(planId, plans)
+  const [gift, setGift] = useState(0)
   const demoOn = active && subscription.source === 'demo'
   // The demo switch must never wipe out PRO that was paid for or redeemed.
   const paidOrPromo = active && subscription.source !== 'demo'
@@ -49,6 +53,7 @@ export function ProSection() {
     setPayState('paying')
     const receipt = await payMock({ plan: planId, provider, amount: plan.price })
     subscription.activatePlan(receipt.plan, 'payment')
+    setGift(recordProPurchase(receipt.plan, provider, plan.price))
     setPayState('paid')
     setCelebrating(true)
   }
@@ -60,13 +65,23 @@ export function ProSection() {
     setPromoResult(result)
     if (result === 'ok') {
       setPromo('')
+      setGift(0)
       setCelebrating(true)
     }
   }
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      {celebrating && <ProCelebration onClose={() => setCelebrating(false)} />}
+      {celebrating && <ProCelebration gift={gift} onClose={() => setCelebrating(false)} />}
+      {!active && (
+        <ProShowcase
+          onChoose={() =>
+            document
+              .getElementById('pro-plans')
+              ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        />
+      )}
       <Panel title={t('pro.status')} className="lg:col-span-2">
         <div className="flex flex-wrap items-center gap-4">
           <span
@@ -128,7 +143,7 @@ export function ProSection() {
         </table>
       </Panel>
 
-      <Panel title={t('pro.buy')}>
+      <Panel title={t('pro.buy')} id="pro-plans">
         {hasLifetime && payState !== 'paid' ? (
           <p className="rounded-2xl bg-primary-soft px-4 py-3 text-primary-ink">
             {t('pro.lifetimeOwned')}
@@ -146,7 +161,7 @@ export function ProSection() {
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 font-semibold">{t('pro.plan')}</legend>
               <div className="grid gap-2 sm:grid-cols-3">
-                {PLANS.map((item) => (
+                {plans.map((item) => (
                   <button
                     key={item.id}
                     type="button"

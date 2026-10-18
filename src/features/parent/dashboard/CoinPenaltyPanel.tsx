@@ -1,0 +1,126 @@
+import { useRef, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import { CoinIcon } from '@/components/icons'
+import { Button } from '@/components/ui/Button'
+import { useFocusTrap } from '@/components/ui/useFocusTrap'
+import type { ChildProfile } from '@/store/familyStore'
+import { useProgress, useProgressStore } from '@/store/progressStore'
+import { Panel } from './Panel'
+
+/**
+ * If homework was not done, a parent may – only if they want to – take some
+ * coins away. They enter the amount and confirm it in a second step.
+ */
+export function CoinPenaltyPanel({ child }: { child: ChildProfile }) {
+  const { t } = useTranslation()
+  const { coins } = useProgress(child.id)
+  const grantCoins = useProgressStore((state) => state.grantCoins)
+  const [amount, setAmount] = useState('')
+  const [confirming, setConfirming] = useState(false)
+  const [done, setDone] = useState<number | null>(null)
+  const value = Math.min(coins, Math.max(0, Math.floor(Number(amount) || 0)))
+
+  const ask = (event: FormEvent) => {
+    event.preventDefault()
+    if (value <= 0) return
+    setDone(null)
+    setConfirming(true)
+  }
+
+  const confirm = () => {
+    grantCoins(child.id, -value)
+    setDone(value)
+    setAmount('')
+    setConfirming(false)
+  }
+
+  return (
+    <Panel title={t('parent.penalty.title')}>
+      <p className="text-ink-soft">{t('parent.penalty.text')}</p>
+      <p className="inline-flex items-center gap-2 self-start rounded-full bg-coin-soft px-4 py-2 font-display text-xl font-extrabold">
+        <CoinIcon size={26} />
+        {t('parent.penalty.balance', { name: child.name, count: coins })}
+      </p>
+      <form onSubmit={ask} className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1 font-semibold">
+          {t('parent.penalty.amount')}
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={coins}
+            value={amount}
+            disabled={coins === 0}
+            onChange={(event) => {
+              setAmount(event.target.value)
+              setDone(null)
+            }}
+            className="h-12 w-36 rounded-2xl border-2 border-line-strong bg-cream px-4 font-normal tabular-nums"
+          />
+        </label>
+        <Button type="submit" variant="soft" size="md" disabled={value <= 0}>
+          {t('parent.penalty.take')}
+        </Button>
+      </form>
+      {coins === 0 && (
+        <p className="text-ink-soft">{t('parent.penalty.empty', { name: child.name })}</p>
+      )}
+      {done !== null && (
+        <p role="status" className="font-semibold text-primary-ink">
+          {t('parent.penalty.done', { name: child.name, count: done })}
+        </p>
+      )}
+      {confirming && (
+        <ConfirmDialog
+          text={t('parent.penalty.confirm', { name: child.name, count: value })}
+          yes={t('parent.penalty.yes')}
+          no={t('parent.cancel')}
+          onYes={confirm}
+          onNo={() => setConfirming(false)}
+        />
+      )}
+    </Panel>
+  )
+}
+
+function ConfirmDialog({
+  text,
+  yes,
+  no,
+  onYes,
+  onNo,
+}: {
+  text: string
+  yes: string
+  no: string
+  onYes: () => void
+  onNo: () => void
+}) {
+  const dialog = useRef<HTMLDivElement>(null)
+  const cancel = useRef<HTMLButtonElement>(null)
+  useFocusTrap(dialog, cancel)
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 p-4">
+      <div
+        ref={dialog}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="penalty-confirm"
+        className="flex w-full max-w-sm flex-col gap-5 rounded-[28px] bg-surface p-6 text-ink shadow-[0_8px_0_var(--color-line)]"
+        onKeyDown={(event) => event.key === 'Escape' && onNo()}
+      >
+        <p id="penalty-confirm" className="font-display text-xl font-extrabold">
+          {text}
+        </p>
+        <div className="flex flex-wrap justify-end gap-3">
+          <Button ref={cancel} variant="soft" size="md" onClick={onNo}>
+            {no}
+          </Button>
+          <Button size="md" onClick={onYes}>
+            {yes}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}

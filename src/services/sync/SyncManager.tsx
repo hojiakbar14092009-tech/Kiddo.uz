@@ -3,7 +3,9 @@ import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
 import { useProgressStore } from '@/store/progressStore'
 import { useActivityStore } from '@/store/activityStore'
-import { eventRow } from './rows'
+import { eventRow, paymentRow } from './rows'
+import { usePaymentStore } from '@/store/paymentStore'
+import { useSubscriptionStore, type PlanId } from '@/store/subscriptionStore'
 import { flushQueue, useSyncStore, type SyncClient } from './syncQueue'
 import { childChanges, progressChanges, snapshot } from './trackChanges'
 
@@ -18,6 +20,28 @@ async function loadClient(): Promise<SyncClient | null> {
   ])
   const supabase = getSupabase()
   return supabase ? supabaseSyncClient(supabase) : null
+}
+
+/** Applies the family's PRO from the `subscriptions` table, when it ends later than ours. */
+async function pullSubscription() {
+  const { getSupabase } = await import('@/services/supabase/client')
+  const supabase = getSupabase()
+  if (!supabase) return
+  const { data } = await supabase
+    .from('subscriptions')
+    .select('plan, source, expires_at')
+    .maybeSingle()
+  if (!data) return
+  const local = useSubscriptionStore.getState()
+  const remoteEnd = data.expires_at ? Date.parse(String(data.expires_at)) : Infinity
+  const localEnd = !local.plan ? 0 : local.expiresAt ? Date.parse(local.expiresAt) : Infinity
+  if (remoteEnd > localEnd || (remoteEnd === Infinity && localEnd !== Infinity)) {
+    useSubscriptionStore.setState({
+      plan: data.plan as PlanId,
+      source: data.source === 'promo' ? 'promo' : data.source === 'admin' ? 'admin' : 'payment',
+      expiresAt: data.expires_at ? String(data.expires_at) : null,
+    })
+  }
 }
 
 /**
@@ -88,6 +112,16 @@ export function SyncManager() {
       fresh.forEach((event) => enqueue({ kind: 'upsertEvent', row: eventRow(event) }))
       flush()
     })
+    const stopPayments = usePaymentStore.subscribe((next, previous) => {
+      const known = new Set(previous.payments.map((payment) => payment.id))
+      const fresh = next.payments.filter((payment) => !known.has(payment.id))
+      if (fresh.length === 0) return
+      const { enqueue } = useSyncStore.getState()
+      fresh.forEach((payment) => enqueue({ kind: 'upsertPayment', row: paymentRow(payment) }))
+      flush()
+    })
+    // PRO given or changed by the admin (or a real payment server) comes back here.
+    void pullSubscription()
     const timer = setInterval(flush, FLUSH_EVERY_MS)
     window.addEventListener('online', flush)
     void loadClient().then((loaded) => {
@@ -99,6 +133,7 @@ export function SyncManager() {
       stopFamily()
       stopProgress()
       stopActivity()
+      stopPayments()
       clearInterval(timer)
       clearTimeout(soon)
       window.removeEventListener('online', flush)

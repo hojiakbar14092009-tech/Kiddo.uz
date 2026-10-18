@@ -62,17 +62,44 @@ Playwright birinchi marta: `npx playwright install chromium`.
 - Bola ilovadan chiqsa – vaqti bilan yoziladi va ota-ona bo‘limida ko‘rinadi (bulut hisobida boshqa qurilmada ham).
 - PRO: oylik va yillik tariflar, Click / Payme / Uzum Pay, promokod, Demo PRO.
 
+## Admin panel (`/admin`)
+
+Ilova egasi uchun alohida boshqaruv paneli: o‘z dizayni (qorong‘i va yorug‘ rejim, harf va raqamlardan iborat
+jonli “yulduzlar turkumi” foni) va faqat shu yerda ko‘rinadigan yordamchi – **Navi**. Navi gapirmaydi, matn
+bilan yozadi: bugun nechta oila PRO sotib olgani, yangi to‘lov kelganini va kim o‘ynay boshlaganini.
+
+- **Umumiy:** kunlik, haftalik, oylik va yillik daromad avtomatik hisoblanadi; 30 kun / 12 oy grafigi;
+  hozir onlayn bolalar; PRO ulushi; so‘nggi to‘lovlar (yangisi kelganda fon oltin to‘lqin bilan yonadi).
+- **Bolalar:** ro‘yxat, qidiruv, PRO / Bepul / Onlayn saralash; PRO bor-yo‘qligi va qachongacha; coin berish,
+  PRO berish (+30 kun) va bekor qilish.
+- **To‘lovlar:** barcha PRO to‘lovlari, jami summa, Excel (CSV) yuklab olish.
+- **Promokodlar** va **Sozlamalar** (PRO narxlari, PRO bilan beriladigan sovg‘a coin – standart 50).
+
+Kirish ikki xil:
+
+1. **Shu qurilma** – PIN bilan (standart `2026`, build’da `VITE_ADMIN_PIN` bilan o‘zgartiring). Shu brauzerdagi
+   ma’lumotlar ko‘rinadi; boshqa oynada ochilgan ilovadagi to‘lov va o‘yinlar ham jonli keladi.
+2. **Barcha oilalar (Supabase)** – `supabase/migrations/0003_admin.sql` ni bajaring va o‘z hisobingizni admin qiling:
+   `insert into public.admins (user_id) select id from auth.users where email = 'siz@misol.uz';`
+   Shunda barcha oilalar, to‘lovlar (Realtime orqali jonli) va onlayn bolalar (Realtime presence) ko‘rinadi.
+
+PRO sotib olinganda har bir farzandga sovg‘a coin beriladi va “Siz 50 coinga ega bo‘ldingiz!” chiqadi.
+PRO’si yo‘q ota-onalarga obuna sahifasida PRO animatsiyali oltin kartada ko‘rsatiladi.
+
 ## Ochiq aytilishi kerak bo‘lgan cheklovlar
 
 - **To‘lovlar sinov rejimida.** `src/services/payments/mockPayment.ts` to‘lovni faqat taqlid qiladi va pul yechmaydi. Haqiqiy to‘lov uchun Click/Payme/Uzum merchant hisobi va to‘lov xabarini (callback) tekshirib, `subscriptions` jadvaliga service role bilan yozadigan server kerak.
 - **Promokodlar** (`KIDDO7` – 7 kun, `BOLAJON30` – 30 kun) hozircha qurilmada tekshiriladi. Ishlab chiqarishda ularni ham serverga o‘tkazish kerak.
-- **Ovoz.** Ilova aytadigan har bir gap oldindan neyron ovoz bilan yozib olingan (`public/audio/voice/`):
-  rus tili – rus ovozi, ingliz tili – britan ovozi. Ochiq o‘zbek neyron ovozi hali yo‘q, shuning uchun
-  o‘zbekcha matn o‘zimizning qoidalar bilan tovushlarga aylantiriladi (oʻ, gʻ, sh, ch, ng, urg‘u oxirgi bo‘g‘inda,
-  savol/undov ohangi) va eng yaqin turkiy (turk) ovoz bilan o‘qiladi. Bolaning ismi kabi yozilmagan so‘zlar
-  qurilma ovozida aytiladi. Yangi matn qo‘shilsa: `npx tsx scripts/voices/collect.ts > scripts/voices/phrases.json`,
-  so‘ng `python3 scripts/voices/generate.py` (Piper modellari kerak, fayl ichida yozilgan).
-  Haqiqiy diktor yozuvlari bilan almashtirish eng yaxshi natija beradi.
+- **Ovoz.** Ilova aytadigan har bir gap oldindan neyron ovoz bilan, sekin va aniq yozib olingan
+  (`public/audio/voice/`), uchala tilda ham ayol ovozi: rus tili – rus ovozi, ingliz tili – britan ovozi.
+  Ochiq o‘zbek neyron ovozi hali yo‘q: o‘zbekcha matn qozoq kirill yozuviga o‘giriladi (q → қ, gʻ → ғ,
+  oʻ → ө, ng → ң, sonlar o‘zbekcha so‘z bilan) va eng yaqin turkiy tilning (qozoq, ISSAI) ayol ovozi bilan
+  o‘qiladi. Bolaning ismi kabi yozilmagan so‘zlar qurilma ovozida aytiladi.
+  Yangi matn qo‘shilsa: `npx tsx scripts/voices/collect.ts > scripts/voices/phrases.json`,
+  so‘ng `python3 scripts/voices/generate.py`.
+  **ElevenLabs bilan (eng chiroyli, o‘zbekchani ham tabiiy o‘qiydi):** elevenlabs.io’da API kalit oling va
+  internet bor kompyuterda `ELEVENLABS_API_KEY=... python3 scripts/voices/generate.py --engine elevenlabs --force`
+  ni ishga tushiring (Eleven v3 modeli, sekin ayol ovozi; ovozni `ELEVENLABS_VOICE_ID` bilan tanlash mumkin).
 - **Rasmlar** Fluent Emoji (MIT) SVG, oq fonda; 3D ko‘rinish shu rasmlardan quriladi.
 - **Chiqish xabari** ota-onaning telefoniga push-bildirishnoma sifatida emas, ota-ona bo‘limidagi ro‘yxat sifatida
   keladi (push uchun server kerak).

@@ -26,7 +26,7 @@ export function LanguagePage() {
     <Screen className="items-center justify-center gap-6 px-4 py-8 sm:gap-8">
       <div className="flex items-center gap-3">
         <KiddoMark size={72} />
-        <KiddoWordmark className="text-5xl sm:text-6xl" />
+        <KiddoWordmark className="h-16 w-auto sm:h-20" />
       </div>
       {/* The robots start here, then hop down and play on the language cards. */}
       <div className="flex items-end gap-2" aria-hidden="true">

@@ -120,3 +120,47 @@ def to_phonemes(text: str) -> list[str]:
     if not phonemes or phonemes[-1] not in '.!?':
         phonemes.append('.')
     return [p for p in phonemes if p != 'ʔ']
+
+
+# --- Uzbek for the Kazakh voice ---------------------------------------------
+# The Kazakh Piper voice (ISSAI, female speakers) reads Kazakh Cyrillic with its
+# own rules. Uzbek Latin maps onto it almost letter for letter: q → қ, gʻ → ғ,
+# oʻ → ө, ng → ң, x → х, h → һ… so the voice stays in the sounds it was trained on.
+KAZAKH_LETTERS = [
+    ('sh', 'ш'), ('ch', 'ч'), ('ng', 'ң'), ('ö', 'ө'), ('ğ', 'ғ'),
+    ('ye', 'е'), ('yo', 'йо'), ('yu', 'ю'), ('ya', 'я'),
+    ('a', 'а'), ('b', 'б'), ('d', 'д'), ('e', 'е'), ('f', 'ф'), ('g', 'г'), ('h', 'х'),
+    ('i', 'і'), ('j', 'ж'), ('k', 'к'), ('l', 'л'), ('m', 'м'), ('n', 'н'), ('o', 'о'),
+    ('p', 'п'), ('q', 'қ'), ('r', 'р'), ('s', 'с'), ('t', 'т'), ('u', 'у'), ('v', 'в'),
+    ('x', 'х'), ('y', 'й'), ('z', 'з'), ('c', 'с'), ('w', 'у'),
+]
+
+
+def to_kazakh_cyrillic(text: str) -> str:
+    """“Salom! Gʻoz, choynak” → “Салом! Ғоз, чойнак” (numbers read out in Uzbek first)."""
+    t = re.sub(r'\d+', lambda m: number_words(int(m.group())), text)
+    for word, said in SAY_AS.items():
+        t = re.sub(rf'\b{word}\b', said, t, flags=re.IGNORECASE)
+    t = t.replace('+', ' ').replace('/', ' ').replace('–', ' ')
+    out: list[str] = []
+    for part in re.split(r'([^\wʻʼ\'`‘’]+)', t):
+        lower = part.lower()
+        for a in APOSTROPHES:
+            lower = lower.replace('o' + a, 'ö').replace('g' + a, 'ğ')
+        for a in APOSTROPHES:
+            lower = lower.replace(a, '')
+        result = ''
+        i = 0
+        while i < len(lower):
+            for source, target in KAZAKH_LETTERS:
+                if lower.startswith(source, i):
+                    result += target
+                    i += len(source)
+                    break
+            else:
+                result += lower[i]
+                i += 1
+        if part[:1].isupper() and result:
+            result = result[0].upper() + result[1:]
+        out.append(result)
+    return ''.join(out)

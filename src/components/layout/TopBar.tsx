@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -7,6 +8,7 @@ import { IconButton } from '@/components/ui/IconButton'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { TierBadge } from '@/components/ui/TierBadge'
 import { useProgress } from '@/store/progressStore'
+import { useScrolled } from './useScrolled'
 
 interface TopBarProps {
   /** Extra content next to the home button, e.g. the child’s name or a back button. */
@@ -23,9 +25,16 @@ export function TopBar({ start, showHome = true, showCoins = true }: TopBarProps
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { coins } = useProgress()
+  const scrolled = useScrolled()
 
   return (
-    <header className="flex min-h-16 shrink-0 items-center gap-2 border-b-2 border-line bg-surface px-3 py-2.5 sm:min-h-20 sm:gap-3 sm:px-6 sm:py-3">
+    <header
+      className={clsx(
+        'topbar sticky top-0 z-20 flex min-h-16 shrink-0 items-center gap-2 px-3 py-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-300 sm:min-h-20 sm:gap-3 sm:px-6 sm:py-3',
+        // One surface with the page: see-through at the top, frosted once the page scrolls under it.
+        scrolled && 'topbar-scrolled',
+      )}
+    >
       {showHome && (
         <IconButton label={t('common.home')} tone="primary" onClick={() => navigate('/home')}>
           <HomeIcon size={28} />

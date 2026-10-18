@@ -155,4 +155,20 @@ describe('Parent dashboard', () => {
     await child.user.click(screen.getByRole('button', { name: 'Ch harfi' }))
     expect(screen.getByText(/^(Yahoooo|Wow|Hooray|Yay|Woohoo)! /)).toBeInTheDocument()
   })
+
+  it('lets a parent take coins away, only after confirming', async () => {
+    useParentStore.setState({ session: { mode: 'demo' } })
+    const ali = useFamilyStore
+      .getState()
+      .addChild({ name: 'Ali', birthDate: birthDateForAge(5, dayKey()), gender: 'boy' })
+    useProgressStore.getState().grantCoins(ali.id, 30)
+    const { user } = await renderRoute('/parent/dashboard?tab=homework')
+    await user.type(screen.getByLabelText('Necha coin ayiriladi'), '12')
+    await user.click(screen.getByRole('button', { name: 'Coin ayirish' }))
+    const dialog = screen.getByRole('alertdialog')
+    expect(dialog).toHaveTextContent('Alidan 12 coin ayirilsinmi?')
+    await user.click(within(dialog).getByRole('button', { name: 'Ha, ayirish' }))
+    expect(useProgressStore.getState().byChild[ali.id]?.coins).toBe(18)
+    expect(screen.getByRole('status')).toHaveTextContent('Alidan 12 coin ayirildi.')
+  })
 })

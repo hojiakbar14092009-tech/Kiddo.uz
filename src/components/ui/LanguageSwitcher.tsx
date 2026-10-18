@@ -12,7 +12,7 @@ export function LanguageSwitcher() {
     <div
       role="group"
       aria-label={t('common.languageSwitcher')}
-      className="flex gap-1 rounded-full bg-[#FFF1DC] p-1"
+      className="flex gap-1 rounded-full bg-surface p-1 shadow-[0_4px_0_var(--color-line)]"
     >
       {LANGUAGES.map((code) => {
         const isActive = code === language

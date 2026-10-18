@@ -6,7 +6,8 @@ import { useAgeLevel } from '@/store/familyStore'
 export function AgeTheme() {
   const level = useAgeLevel()
   const { pathname } = useLocation()
-  const neutral = pathname.startsWith('/parent') || pathname === '/'
+  const neutral =
+    pathname.startsWith('/parent') || pathname.startsWith('/admin') || pathname === '/'
 
   useEffect(() => {
     const root = document.documentElement

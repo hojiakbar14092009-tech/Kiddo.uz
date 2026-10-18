@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CrownIcon } from '@/components/icons'
+import { CoinIcon, CrownIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { useFocusTrap } from '@/components/ui/useFocusTrap'
 import { MascotFigure } from '@/features/mascot/MascotFigure'
@@ -15,7 +15,7 @@ const SPARKS = ['👑', '⭐', '✨', '🎉', '💛', '🌟']
  * Right after PRO is bought: a golden burst, the robot jumps for joy and says
  * thank you out loud – the first thing it can now do with its new voice.
  */
-export function ProCelebration({ onClose }: { onClose: () => void }) {
+export function ProCelebration({ onClose, gift = 0 }: { onClose: () => void; gift?: number }) {
   const { t } = useTranslation()
   const language = useLanguage()
   const model = useMascotModel()
@@ -86,6 +86,18 @@ export function ProCelebration({ onClose }: { onClose: () => void }) {
           {t('pro.celebrateTitle')}
         </h2>
         <p className="text-lg text-ink-soft">{t('pro.celebrateText')}</p>
+        {gift > 0 && (
+          <motion.p
+            role="status"
+            initial={reduceMotion ? false : { scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.8, type: 'spring', stiffness: 260, damping: 12 }}
+            className="inline-flex items-center gap-2 rounded-full bg-coin px-5 py-2 font-display text-xl font-extrabold text-ink shadow-[0_5px_0_var(--color-coin-shadow)]"
+          >
+            <CoinIcon size={28} />
+            {t('pro.giftCoins', { count: gift })}
+          </motion.p>
+        )}
         <Button ref={button} variant="coin" onClick={onClose}>
           {t('pro.celebrateOk')}
         </Button>

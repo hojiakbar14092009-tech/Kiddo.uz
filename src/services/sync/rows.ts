@@ -1,6 +1,7 @@
 import { childAge, type ChildProfile } from '@/store/familyStore'
 import type { ChildProgress, TaskResult } from '@/store/progressStore'
 import type { ActivityEvent } from '@/store/activityStore'
+import type { Payment } from '@/store/paymentStore'
 
 /* Local objects → rows of the Supabase tables in supabase/migrations. */
 
@@ -55,7 +56,19 @@ export function eventRow(event: ActivityEvent) {
   return { id: event.id, child_id: event.childId, kind: event.kind, at: event.at }
 }
 
+export function paymentRow(payment: Payment) {
+  return {
+    id: payment.id,
+    family: payment.family,
+    plan: payment.plan,
+    provider: payment.provider,
+    amount: payment.amount,
+    created_at: payment.at,
+  }
+}
+
 export type ChildRow = ReturnType<typeof childRow>
 export type ChildStateRow = ReturnType<typeof childStateRow>
 export type ResultRow = ReturnType<typeof resultRow>
 export type EventRow = ReturnType<typeof eventRow>
+export type PaymentRow = ReturnType<typeof paymentRow>

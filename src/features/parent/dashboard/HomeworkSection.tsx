@@ -17,6 +17,7 @@ import {
 import { useLanguage } from '@/store/settingsStore'
 import { formatDayMonth } from '@/lib/dates'
 import { ChoiceChips } from './ChoiceChips'
+import { CoinPenaltyPanel } from './CoinPenaltyPanel'
 import { Panel } from './Panel'
 
 /** The parent picks up to five letters and a game; the child sees it first on the home screen. */
@@ -147,6 +148,7 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
           {t('parent.homework.assign', { name: child.name })}
         </Button>
       </Panel>
+      <CoinPenaltyPanel child={child} />
     </div>
   )
 }

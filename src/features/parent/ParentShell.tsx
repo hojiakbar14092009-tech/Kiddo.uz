@@ -1,9 +1,11 @@
 import { KiddoMark, KiddoWordmark } from '@/components/brand/KiddoLogo'
+import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
+import { useScrolled } from '@/components/layout/useScrolled'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentGateStore } from '@/store/parentStore'
@@ -17,6 +19,7 @@ export function ParentShell({ children, actions }: { children: ReactNode; action
   const { t } = useTranslation()
   const navigate = useNavigate()
   const closeGate = useParentGateStore((state) => state.close)
+  const scrolled = useScrolled()
   const hasLanguage = useSettingsStore((state) => state.language !== null)
   const hasProfiles = useFamilyStore((state) => state.children.length > 0)
 
@@ -28,7 +31,12 @@ export function ParentShell({ children, actions }: { children: ReactNode; action
   return (
     <Screen
       header={
-        <header className="flex flex-wrap items-center gap-3 border-b-2 border-line bg-surface px-4 py-3 sm:px-6">
+        <header
+          className={clsx(
+            'topbar sticky top-0 z-20 flex flex-wrap items-center gap-3 px-4 py-3 transition-[background-color,box-shadow,backdrop-filter] duration-300 sm:px-6',
+            scrolled && 'topbar-scrolled',
+          )}
+        >
           <button
             type="button"
             onClick={backToChildren}
@@ -39,7 +47,7 @@ export function ParentShell({ children, actions }: { children: ReactNode; action
           </button>
           <KiddoMark size={44} className="shrink-0" />
           <div className="flex min-w-0 flex-1 flex-col">
-            <KiddoWordmark className="text-xl leading-tight" />
+            <KiddoWordmark className="h-7 w-auto" />
             <span className="text-sm text-ink-soft">{t('common.parentArea')}</span>
           </div>
           {actions}

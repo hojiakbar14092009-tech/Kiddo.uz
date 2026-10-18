@@ -1,10 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { isSupabaseConfigured, SUPABASE_ANON_KEY as anonKey, SUPABASE_URL as url } from './config'
 
-const url = import.meta.env.VITE_SUPABASE_URL?.trim() ?? ''
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? ''
-
-/** True when the build has Supabase keys; otherwise the app runs in offline demo mode. */
-export const isSupabaseConfigured = url.length > 0 && anonKey.length > 0
+export { isSupabaseConfigured }
 
 let client: SupabaseClient | null = null
 

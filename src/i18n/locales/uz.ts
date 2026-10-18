@@ -266,6 +266,17 @@ export const uz = {
       removeConfirm: '{{name}} profili va natijalari o‘chiriladi. Ishonchingiz komilmi?',
       removeYes: 'Ha, o‘chirish',
     },
+    penalty: {
+      title: 'Coin ayirish (ixtiyoriy)',
+      text: 'Uy vazifasi bajarilmagan bo‘lsa, xohlasangiz farzandingizdan coin ayirishingiz mumkin. Bu majburiy emas.',
+      balance: '{{name}}: {{count}} coin',
+      amount: 'Necha coin ayiriladi',
+      take: 'Coin ayirish',
+      confirm: '{{name}}dan {{count}} coin ayirilsinmi?',
+      yes: 'Ha, ayirish',
+      done: '{{name}}dan {{count}} coin ayirildi.',
+      empty: '{{name}}da hozir coin yo‘q.',
+    },
     homework: {
       current: 'Joriy uy vazifasi',
       none: '{{name}} uchun uy vazifasi berilmagan.',
@@ -292,6 +303,10 @@ export const uz = {
     },
   },
   pro: {
+    showcaseTitle: 'Robot gapirsin! PRO bilan farzandingiz eshitib o‘rganadi',
+    showcaseGift: 'Har bir farzandga {{count}} coin sovg‘a',
+    showcaseCta: 'PRO’ni tanlash',
+    giftCoins: 'Sovg‘a: siz {{count}} coinga ega bo‘ldingiz!',
     celebrateTitle: 'PRO ochildi!',
     celebrateText:
       'Endi robot gapiradi: harflarni, so‘zlarni va vazifalarni ovoz bilan o‘rganamiz.',
@@ -300,7 +315,7 @@ export const uz = {
     status: 'Obuna holati',
     until: '{{date}} gacha',
     forever: 'Umrbod',
-    source: { payment: 'to‘lov', promo: 'promokod', demo: 'demo' },
+    source: { payment: 'to‘lov', promo: 'promokod', demo: 'demo', admin: 'administrator sovg‘asi' },
     turnOff: 'PRO’ni o‘chirish',
     compare: 'Bepul va PRO',
     feature: 'Imkoniyat',

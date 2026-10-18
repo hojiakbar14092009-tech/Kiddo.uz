@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { AgeTheme } from '@/features/age/AgeTheme'
 import { InterfaceSounds } from './InterfaceSounds'
 import { LanguageSync } from './LanguageSync'
@@ -7,9 +7,12 @@ import { SyncManager } from '@/services/sync/SyncManager'
 import { SpeechUnlock } from './SpeechUnlock'
 import { SplashScreen } from './SplashScreen'
 import { ExitWatcher } from './ExitWatcher'
+import { PresenceBeacon } from './PresenceBeacon'
+import { AppSettingsSync } from './AppSettingsSync'
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
+  const { pathname } = useLocation()
   return (
     <>
       <LanguageSync />
@@ -19,8 +22,10 @@ export function AppShell() {
       <SyncManager />
       <ParentGateAutoLock />
       <ExitWatcher />
+      <PresenceBeacon />
+      <AppSettingsSync />
       <Outlet />
-      <SplashScreen />
+      {!pathname.startsWith('/admin') && <SplashScreen />}
     </>
   )
 }
