@@ -11,16 +11,16 @@ npm run dev        # http://localhost:5173 (lokal tarmoqdagi iPad’dan ham ochi
 
 ## Buyruqlar
 
-| Buyruq              | Vazifasi                                                |
-| ------------------- | ------------------------------------------------------- |
-| `npm run dev`       | ishlab chiqish serveri                                  |
-| `npm run build`     | production build (`dist/`, service worker bilan)        |
-| `npm run preview`   | buildni lokal ko‘rish                                   |
-| `npm run lint`      | oxlint tekshiruvi                                       |
-| `npm run typecheck` | TypeScript tekshiruvi                                   |
-| `npm run test`      | Vitest testlari                                         |
-| `npm run test:e2e`  | Playwright testlari (planshet va telefon, offline ham)  |
-| `npm run check`     | hammasi birga: format, lint, typecheck, test, build     |
+| Buyruq              | Vazifasi                                               |
+| ------------------- | ------------------------------------------------------ |
+| `npm run dev`       | ishlab chiqish serveri                                 |
+| `npm run build`     | production build (`dist/`, service worker bilan)       |
+| `npm run preview`   | buildni lokal ko‘rish                                  |
+| `npm run lint`      | oxlint tekshiruvi                                      |
+| `npm run typecheck` | TypeScript tekshiruvi                                  |
+| `npm run test`      | Vitest testlari                                        |
+| `npm run test:e2e`  | Playwright testlari (planshet va telefon, offline ham) |
+| `npm run check`     | hammasi birga: format, lint, typecheck, test, build    |
 
 Playwright birinchi marta: `npx playwright install chromium`.
 
