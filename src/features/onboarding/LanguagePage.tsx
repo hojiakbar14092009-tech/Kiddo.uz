@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { KiddoMark, KiddoWordmark } from '@/components/brand/KiddoLogo'
 import { Flag } from '@/components/flags/Flag'
 import { Screen } from '@/components/layout/Screen'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
@@ -23,9 +24,13 @@ export function LanguagePage() {
 
   return (
     <Screen className="items-center justify-center gap-6 px-4 py-8 sm:gap-8">
+      <div className="flex items-center gap-3">
+        <KiddoMark size={72} />
+        <KiddoWordmark className="text-5xl sm:text-6xl" />
+      </div>
       <div className="flex items-end gap-2" aria-hidden="true">
-        <MascotFigure model="girl" mood="wave" className="h-auto w-24 sm:w-32" />
-        <MascotFigure model="boy" mood="wave" className="h-auto w-24 sm:w-32" />
+        <MascotFigure model="girl" mood="wave" className="h-auto w-20 sm:w-28" />
+        <MascotFigure model="boy" mood="wave" className="h-auto w-20 sm:w-28" />
       </div>
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="font-display text-2xl font-bold sm:text-3xl">{t('language.greeting')}</p>

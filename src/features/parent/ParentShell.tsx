@@ -1,3 +1,4 @@
+import { KiddoMark, KiddoWordmark } from '@/components/brand/KiddoLogo'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -36,8 +37,9 @@ export function ParentShell({ children, actions }: { children: ReactNode; action
             <ChevronLeftIcon size={24} />
             {t('parent.toChildren')}
           </button>
+          <KiddoMark size={44} className="shrink-0" />
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="font-display text-lg leading-tight font-extrabold">Kiddo</span>
+            <KiddoWordmark className="text-xl leading-tight" />
             <span className="text-sm text-ink-soft">{t('common.parentArea')}</span>
           </div>
           {actions}

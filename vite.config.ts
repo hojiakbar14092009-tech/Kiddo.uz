@@ -16,7 +16,7 @@ export default defineConfig({
       manifest: {
         name: 'Kiddo – alifbo va sonlar',
         short_name: 'Kiddo',
-        description: '3–6 yoshli bolalar uchun o‘zbek, rus va ingliz alifbosi hamda sonlar',
+        description: '4–6 yoshli bolalar uchun o‘zbek, rus va ingliz alifbosi hamda sonlar',
         lang: 'uz',
         start_url: '/',
         scope: '/',

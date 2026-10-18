@@ -5,6 +5,7 @@ import { LanguageSync } from './LanguageSync'
 import { ParentGateAutoLock } from './ParentGateAutoLock'
 import { SyncManager } from '@/services/sync/SyncManager'
 import { SpeechUnlock } from './SpeechUnlock'
+import { SplashScreen } from './SplashScreen'
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
@@ -17,6 +18,7 @@ export function AppShell() {
       <SyncManager />
       <ParentGateAutoLock />
       <Outlet />
+      <SplashScreen />
     </>
   )
 }

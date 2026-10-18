@@ -14,7 +14,7 @@ function factor(random: RandomSource): number {
 }
 
 /**
- * A multiplication a 3–6 year old cannot solve (3×3 … 9×9) but any adult can.
+ * A multiplication a 4–6 year old cannot solve (3×3 … 9×9) but any adult can.
  * The question is never spoken aloud, so a child cannot just repeat it.
  */
 export function createMathQuestion(random: RandomSource = Math.random): MathQuestion {
