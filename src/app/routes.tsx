@@ -9,6 +9,9 @@ import { RequireParentGate } from '@/features/parent/gate/RequireParentGate'
 import { ParentDashboardPage } from '@/features/parent/dashboard/ParentDashboardPage'
 import { ParentLoginPage } from '@/features/parent/login/ParentLoginPage'
 import { RequireParentSession } from '@/features/parent/RequireParentSession'
+import { ExamPage } from '@/features/exam/ExamPage'
+import { RestPage } from '@/features/rest/RestPage'
+import { ScreenTimeGuard } from '@/features/rest/ScreenTimeGuard'
 import { ShopPage } from '@/features/shop/ShopPage'
 import { GamePage } from '@/features/tasks/GamePage'
 import { RewardPage } from '@/features/tasks/RewardPage'
@@ -23,13 +26,20 @@ export const routes: RouteObject[] = [
       {
         element: <RequireLanguage />,
         children: [
-          { path: '/child-select', element: <ChildSelectPage /> },
-          { path: '/home', element: <HomePage /> },
-          { path: '/alphabet', element: <AlphabetPage /> },
-          { path: '/alphabet/:itemId', element: <AlphabetItemPage /> },
-          { path: '/tasks/:type', element: <GamePage /> },
-          { path: '/reward', element: <RewardPage /> },
-          { path: '/shop', element: <ShopPage /> },
+          {
+            element: <ScreenTimeGuard />,
+            children: [
+              { path: '/child-select', element: <ChildSelectPage /> },
+              { path: '/home', element: <HomePage /> },
+              { path: '/alphabet', element: <AlphabetPage /> },
+              { path: '/alphabet/:itemId', element: <AlphabetItemPage /> },
+              { path: '/tasks/:type', element: <GamePage /> },
+              { path: '/reward', element: <RewardPage /> },
+              { path: '/shop', element: <ShopPage /> },
+              { path: '/exam', element: <ExamPage /> },
+              { path: '/rest', element: <RestPage /> },
+            ],
+          },
         ],
       },
       {

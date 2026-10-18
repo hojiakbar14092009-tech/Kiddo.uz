@@ -1,12 +1,13 @@
 import clsx from 'clsx'
-import { useCallback, useEffect, useReducer } from 'react'
+import { useCallback, useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getAlphabet, type LetterEntry } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
+import type { MistakeDetail } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import type { ChoiceGameType } from './games'
-import { generateRounds } from './generateRounds'
+import { generateRounds, type TaskRound } from './generateRounds'
 import { OptionCard, type OptionStatus } from './OptionCard'
 import {
   createSession,
@@ -29,14 +30,33 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
   const { t } = useTranslation()
   const language = useLanguage()
   const learner = useLearner(type)
+  const finish = useFinishTask(type)
+  // Rounds are drawn once when the game starts; progress updates must not reshuffle them.
+  const [rounds] = useState(() => generateRounds(type, getAlphabet(language).letters, learner))
+
+  return (
+    <ChoiceRounds
+      type={type}
+      rounds={rounds}
+      title={type === 'find-letter' ? t('task.findLetterTitle') : t('task.findPictureTitle')}
+      onFinish={finish}
+    />
+  )
+}
+
+interface ChoiceRoundsProps {
+  type: ChoiceGameType
+  rounds: TaskRound[]
+  title: string
+  onFinish: (letterIds: string[], mistakes: MistakeDetail[]) => void
+}
+
+/** Plays a fixed list of choice rounds; shared by the games and the big test. */
+export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProps) {
+  const { t } = useTranslation()
   const { react, reset } = useMascot()
   const { sayText, speaking } = useSpeaker()
-  const finish = useFinishTask(type)
-
-  // Rounds are drawn once when the game starts; progress updates must not reshuffle them.
-  const [session, dispatch] = useReducer(taskSessionReducer, undefined, () =>
-    createSession(generateRounds(type, getAlphabet(language).letters, learner)),
-  )
+  const [session, dispatch] = useReducer(taskSessionReducer, rounds, createSession)
   const round = currentRound(session)
 
   const prompt = useCallback(
@@ -68,7 +88,7 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
     if (!session.solved) return undefined
     const timer = setTimeout(() => {
       if (isLastRound(session)) {
-        finish(
+        onFinish(
           session.rounds.map((item) => item.target.id),
           session.mistakes,
         )
@@ -77,7 +97,7 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
       }
     }, ADVANCE_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [finish, session])
+  }, [onFinish, session])
 
   if (!round) return null
 
@@ -97,7 +117,7 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
 
   return (
     <TaskShell
-      title={type === 'find-letter' ? t('task.findLetterTitle') : t('task.findPictureTitle')}
+      title={title}
       round={session.index}
       rounds={session.rounds.length}
       speaking={speaking}

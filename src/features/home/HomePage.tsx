@@ -3,13 +3,16 @@ import { Link } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { PeekingMascot } from '@/features/mascot/PeekingMascot'
+import { getAlphabet } from '@/content/alphabet'
+import { examProgress } from '@/features/exam/exam'
 import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { GAME_META } from '@/features/tasks/gameMeta'
-import { dayKey } from '@/features/tasks/rules'
+import { dayKey, isFinalTestUnlocked } from '@/features/tasks/rules'
 import { usePendingHomework } from '@/features/tasks/useHomework'
 import { useActiveChild, useFamilyStore } from '@/store/familyStore'
 import { useProgress } from '@/store/progressStore'
+import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
 import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
@@ -18,9 +21,12 @@ export function HomePage() {
   const { t } = useTranslation()
   const child = useActiveChild()
   const hasProfiles = useFamilyStore((state) => state.children.length > 0)
-  const { results } = useProgress()
+  const { results, learned } = useProgress()
   const plan = dailyPlanState(results, dayKey())
   const homework = usePendingHomework()
+  const language = useLanguage()
+  const exam = examProgress(getAlphabet(language).letters, learned[language] ?? [])
+  const examUnlocked = isFinalTestUnlocked(exam.learned, exam.total)
 
   const hello = plan.complete
     ? t('mascot.homePlanDone')
@@ -78,7 +84,7 @@ export function HomePage() {
         <h2 id="more-title" className="font-display text-2xl font-extrabold sm:text-3xl">
           {t('home.more')}
         </h2>
-        <ul className="grid w-full max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
+        <ul className="grid w-full max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
           <ActivityCard to="/alphabet" label={t('home.alphabet')} symbol="Aa" tone="sky" />
           <ActivityCard
             to="/alphabet?tab=numbers"
@@ -93,6 +99,17 @@ export function HomePage() {
             tone="lilac"
           />
           <ActivityCard to="/shop" label={t('shop.open')} symbol="🛍️" tone="girl" />
+          <ActivityCard
+            to="/exam"
+            label={t('journey.finalTest')}
+            symbol="🏆"
+            tone="sky"
+            detail={
+              examUnlocked
+                ? t('home.examReady')
+                : `🔒 ${t('exam.progress', { learned: exam.learned, total: exam.total })}`
+            }
+          />
         </ul>
       </section>
 
@@ -115,9 +132,11 @@ interface ActivityCardProps {
   label: string
   symbol: string
   tone: keyof typeof CARD_TONES
+  /** A short line under the label, e.g. how far the big test is. */
+  detail?: string
 }
 
-function ActivityCard({ to, label, symbol, tone }: ActivityCardProps) {
+function ActivityCard({ to, label, symbol, tone, detail }: ActivityCardProps) {
   return (
     <li>
       <Link
@@ -133,6 +152,7 @@ function ActivityCard({ to, label, symbol, tone }: ActivityCardProps) {
         <span className="text-center font-display text-lg leading-tight font-bold sm:text-2xl">
           {label}
         </span>
+        {detail && <span className="text-center text-sm text-ink-soft sm:text-base">{detail}</span>}
       </Link>
     </li>
   )
