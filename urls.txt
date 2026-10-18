@@ -1,1 +1,5 @@
-kiddo-promo-uz-16x9.mp4 https://d2ol7oe51mr4n9.cloudfront.net/user_3FfZsiCoQxfF4prjulOnAHxO3wB/c673cb7f-f137-49d5-be97-f74719ce918b.mp4
+kiddo-promo-uz-9x16.mp4 https://d2ol7oe51mr4n9.cloudfront.net/user_3FfZsiCoQxfF4prjulOnAHxO3wB/f7008da3-e0ab-4a38-b281-48e2b9719487.mp4
+kiddo-promo-ru-16x9.mp4 https://d2ol7oe51mr4n9.cloudfront.net/user_3FfZsiCoQxfF4prjulOnAHxO3wB/ec8b9548-9e8d-4d2d-be40-ef8bb4fdf10a.mp4
+kiddo-promo-ru-9x16.mp4 https://d2ol7oe51mr4n9.cloudfront.net/user_3FfZsiCoQxfF4prjulOnAHxO3wB/d5715992-a0ee-48e9-808c-de5c36d88b03.mp4
+kiddo-promo-en-16x9.mp4 https://d2ol7oe51mr4n9.cloudfront.net/user_3FfZsiCoQxfF4prjulOnAHxO3wB/a0c1fbe5-6c1b-484c-bb2a-7b0fc4d9d251.mp4
+kiddo-promo-en-9x16.mp4 https://d2ol7oe51mr4n9.cloudfront.net/user_3FfZsiCoQxfF4prjulOnAHxO3wB/95cbd23c-75b2-4021-9d0e-dc6ca3a38e87.mp4
