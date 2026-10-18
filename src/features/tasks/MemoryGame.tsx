@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import { getAlphabet } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
-import { useProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { pickTargets } from './generateRounds'
 import {
@@ -17,6 +16,7 @@ import {
 } from './memory'
 import { TaskShell } from './TaskShell'
 import { useFinishTask } from './useFinishTask'
+import { useLearner } from './useHomework'
 
 const PAIRS = 4
 const HIDE_DELAY_MS = 1100
@@ -26,7 +26,7 @@ const FINISH_DELAY_MS = 1600
 export function MemoryGame() {
   const { t } = useTranslation()
   const language = useLanguage()
-  const progress = useProgress()
+  const learner = useLearner('memory')
   const reduceMotion = useReducedMotion() ?? false
   const { react, reset } = useMascot()
   const { sayText, sayLetter, speaking } = useSpeaker()
@@ -34,15 +34,7 @@ export function MemoryGame() {
 
   const [state, dispatch] = useReducer(memoryReducer, undefined, () =>
     createMemoryGame(
-      pickTargets(
-        getAlphabet(language).letters,
-        {
-          learned: progress.learned[language] ?? [],
-          struggles: progress.struggles[language] ?? {},
-        },
-        PAIRS,
-        Math.random,
-      ),
+      pickTargets(getAlphabet(language).letters, learner, PAIRS, Math.random),
       Math.random,
     ),
   )

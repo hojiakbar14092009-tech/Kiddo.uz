@@ -31,7 +31,7 @@ export function SegmentedTabs<T extends string>({
     <div
       role="tablist"
       aria-label={label}
-      className="flex gap-1 rounded-full bg-surface p-1.5 shadow-[0_4px_0_var(--color-line)]"
+      className="flex w-full gap-1 rounded-full bg-surface p-1.5 shadow-[0_4px_0_var(--color-line)] sm:w-auto"
     >
       {tabs.map((tab) => (
         <button
@@ -43,12 +43,12 @@ export function SegmentedTabs<T extends string>({
           aria-controls={`${idBase}-panel-${tab.value}`}
           onClick={() => onChange(tab.value)}
           className={clsx(
-            'h-14 min-w-28 rounded-full px-5 font-display text-xl font-bold whitespace-nowrap transition-colors',
+            'h-14 min-w-14 flex-1 rounded-full px-3 font-display text-xl font-bold whitespace-nowrap transition-colors sm:min-w-28 sm:flex-none sm:px-5',
             value === tab.value ? 'bg-primary text-white' : 'text-ink',
           )}
         >
           {tab.symbol}
-          <span className="ml-2 hidden sm:inline">{tab.label}</span>
+          <span className="sr-only sm:not-sr-only sm:ml-2">{tab.label}</span>
         </button>
       ))}
     </div>

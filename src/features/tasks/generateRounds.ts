@@ -11,6 +11,8 @@ export interface TaskRound {
 export interface LearnerState {
   learned: readonly string[]
   struggles: Readonly<Record<string, number>>
+  /** Letters that must be practised this time, e.g. homework set by a parent. */
+  focus?: readonly string[]
 }
 
 const OPTION_COUNT: Record<ChoiceGameType, number> = { 'find-letter': 4, 'find-picture': 3 }
@@ -20,7 +22,7 @@ const MAX_STRUGGLE_ROUNDS = 2
 const NEW_LETTER_WINDOW = 6
 
 /**
- * Picks which letters to practise: letters the child struggled with first,
+ * Picks which letters to practise: homework letters always, then letters the child struggled with,
  * then the next new letters in alphabet order, then a mix of known ones.
  */
 export function pickTargets(
@@ -41,6 +43,12 @@ export function pickTargets(
     }
   }
 
+  const focus = (learner.focus ?? [])
+    .map((id) => byId.get(id))
+    .filter((letter): letter is LetterEntry => letter !== undefined)
+  take(focus, count)
+  const focusCount = chosen.size
+
   const struggled = Object.entries(learner.struggles)
     .filter(([, mistakes]) => mistakes > 0)
     .sort(([, a], [, b]) => b - a)
@@ -53,7 +61,12 @@ export function pickTargets(
   take(shuffle(fresh, random), count)
   take(shuffle(letters, random), count)
 
-  return shuffle([...chosen.values()], random)
+  // Homework letters come first, so the child meets them while still fresh.
+  const picked = [...chosen.values()]
+  return [
+    ...shuffle(picked.slice(0, focusCount), random),
+    ...shuffle(picked.slice(focusCount), random),
+  ]
 }
 
 function canBeDistractor(type: ChoiceGameType, target: LetterEntry, other: LetterEntry): boolean {

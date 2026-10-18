@@ -1,8 +1,24 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { Language } from '@/content/languages'
+import type { GameType } from '@/features/tasks/games'
 
 export type Gender = 'girl' | 'boy'
 export type MascotModel = Gender
+
+/** Letters a parent picked for practice, played through one game. */
+export interface Homework {
+  id: string
+  language: Language
+  game: GameType
+  letterIds: string[]
+  assignedAt: string
+  completedAt: string | null
+  /** Mistakes in the finished homework, for the parent report. */
+  mistakes: number | null
+}
+
+export type NewHomework = Pick<Homework, 'language' | 'game' | 'letterIds'>
 
 export interface ChildProfile {
   id: string
@@ -14,14 +30,21 @@ export interface ChildProfile {
   /** Daily screen-time limit in minutes. */
   dailyLimitMinutes: number
   createdAt: string
+  /** The current homework, if a parent set one. */
+  homework?: Homework | null
 }
 
 export type NewChild = Pick<ChildProfile, 'name' | 'age' | 'gender'> &
   Partial<Pick<ChildProfile, 'mascot' | 'dailyLimitMinutes'>>
 
 export const DEFAULT_DAILY_LIMIT_MINUTES = 30
+/** Daily time limits a parent can choose, in minutes. */
+export const DAILY_LIMIT_OPTIONS = [15, 20, 30, 45, 60] as const
 export const MIN_CHILD_AGE = 3
 export const MAX_CHILD_AGE = 6
+export const MAX_CHILDREN = 3
+export const MAX_NAME_LENGTH = 20
+export const MAX_HOMEWORK_LETTERS = 5
 
 interface FamilyState {
   children: ChildProfile[]
@@ -30,6 +53,9 @@ interface FamilyState {
   updateChild: (id: string, changes: Partial<Omit<ChildProfile, 'id' | 'createdAt'>>) => void
   removeChild: (id: string) => void
   setActiveChild: (id: string | null) => void
+  assignHomework: (childId: string, homework: NewHomework) => void
+  clearHomework: (childId: string) => void
+  completeHomework: (childId: string, homeworkId: string, mistakes: number) => void
 }
 
 function createId(): string {
@@ -40,11 +66,14 @@ function createId(): string {
 
 export const useFamilyStore = create<FamilyState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       children: [],
       activeChildId: null,
 
       addChild: (input) => {
+        if (get().children.length >= MAX_CHILDREN) {
+          throw new Error(`A family has at most ${MAX_CHILDREN} child profiles`)
+        }
         const child: ChildProfile = {
           id: createId(),
           name: input.name.trim(),
@@ -74,6 +103,45 @@ export const useFamilyStore = create<FamilyState>()(
         })),
 
       setActiveChild: (id) => set({ activeChildId: id }),
+
+      assignHomework: (childId, input) =>
+        set((state) => ({
+          children: state.children.map((child) =>
+            child.id === childId
+              ? {
+                  ...child,
+                  homework: {
+                    id: createId(),
+                    language: input.language,
+                    game: input.game,
+                    letterIds: [...new Set(input.letterIds)].slice(0, MAX_HOMEWORK_LETTERS),
+                    assignedAt: new Date().toISOString(),
+                    completedAt: null,
+                    mistakes: null,
+                  },
+                }
+              : child,
+          ),
+        })),
+
+      clearHomework: (childId) =>
+        set((state) => ({
+          children: state.children.map((child) =>
+            child.id === childId ? { ...child, homework: null } : child,
+          ),
+        })),
+
+      completeHomework: (childId, homeworkId, mistakes) =>
+        set((state) => ({
+          children: state.children.map((child) =>
+            child.homework?.id === homeworkId && child.id === childId && !child.homework.completedAt
+              ? {
+                  ...child,
+                  homework: { ...child.homework, completedAt: new Date().toISOString(), mistakes },
+                }
+              : child,
+          ),
+        })),
     }),
     { name: 'kiddo.family', version: 1 },
   ),

@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/Button'
 import { getAlphabet, type LetterEntry } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
-import { useProgress, type MistakeDetail } from '@/store/progressStore'
+import type { MistakeDetail } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { pickTargets } from './generateRounds'
 import { TaskShell } from './TaskShell'
 import { TraceCanvas, type TraceCanvasHandle } from './TraceCanvas'
 import { AUTO_PASS, passes, type TraceScore } from './traceScoring'
 import { useFinishTask } from './useFinishTask'
+import { useLearner } from './useHomework'
 
 const LETTERS_PER_TASK = 3
 const ADVANCE_DELAY_MS = 1700
@@ -22,7 +23,7 @@ const TRACEABLE = (letter: LetterEntry) => letter.id !== 'tutuq'
 export function TraceGame() {
   const { t } = useTranslation()
   const language = useLanguage()
-  const progress = useProgress()
+  const learner = useLearner('trace')
   const { react, reset } = useMascot()
   const { sayText, speaking } = useSpeaker()
   const finish = useFinishTask('trace')
@@ -31,7 +32,7 @@ export function TraceGame() {
   const [letters] = useState(() =>
     pickTargets(
       getAlphabet(language).letters.filter(TRACEABLE),
-      { learned: progress.learned[language] ?? [], struggles: progress.struggles[language] ?? {} },
+      learner,
       LETTERS_PER_TASK,
       Math.random,
     ),

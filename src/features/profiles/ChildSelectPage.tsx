@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { useFamilyStore, type ChildProfile } from '@/store/familyStore'
+import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { ChildAvatar } from './ChildAvatar'
 
 /** `/child-select`: the child taps their own robot. No passwords – they cannot read yet. */
@@ -54,6 +55,7 @@ export function ChildSelectPage() {
       {children.length === 0 && (
         <p className="max-w-md text-center text-lg text-ink-soft">{t('childSelect.noProfiles')}</p>
       )}
+      <ParentAreaLink />
     </Screen>
   )
 }

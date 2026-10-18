@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { PeekingMascot } from '@/features/mascot/PeekingMascot'
+import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey } from '@/features/tasks/rules'
+import { usePendingHomework } from '@/features/tasks/useHomework'
 import { useActiveChild, useFamilyStore } from '@/store/familyStore'
 import { useProgress } from '@/store/progressStore'
 import { dailyPlanState } from './dailyPlan'
+import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
 
 export function HomePage() {
@@ -17,6 +20,7 @@ export function HomePage() {
   const hasProfiles = useFamilyStore((state) => state.children.length > 0)
   const { results } = useProgress()
   const plan = dailyPlanState(results, dayKey())
+  const homework = usePendingHomework()
 
   const hello = plan.complete
     ? t('mascot.homePlanDone')
@@ -50,6 +54,8 @@ export function HomePage() {
       <h1 className="text-center font-display text-4xl font-extrabold sm:text-5xl">
         {child ? t('home.greeting', { name: child.name }) : t('home.greetingNoName')}
       </h1>
+
+      {homework && <HomeworkCard homework={homework} />}
 
       <JourneyPath plan={plan} />
 
@@ -89,6 +95,8 @@ export function HomePage() {
           <ActivityCard to="/shop" label={t('shop.open')} symbol="🛍️" tone="girl" />
         </ul>
       </section>
+
+      <ParentAreaLink />
 
       <PeekingMascot message={hello} />
     </Screen>

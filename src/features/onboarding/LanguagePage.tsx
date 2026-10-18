@@ -4,6 +4,7 @@ import { Flag } from '@/components/flags/Flag'
 import { Screen } from '@/components/layout/Screen'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
 import { MascotFigure } from '@/features/mascot/MascotFigure'
+import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { useFamilyStore } from '@/store/familyStore'
 import { useSettingsStore } from '@/store/settingsStore'
 
@@ -51,6 +52,7 @@ export function LanguagePage() {
           </li>
         ))}
       </ul>
+      <ParentAreaLink />
     </Screen>
   )
 }

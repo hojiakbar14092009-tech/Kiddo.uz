@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { getAlphabet, type LetterEntry } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
-import { useProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import type { ChoiceGameType } from './games'
 import { generateRounds } from './generateRounds'
@@ -18,6 +17,7 @@ import {
 } from './taskSession'
 import { TaskShell } from './TaskShell'
 import { useFinishTask } from './useFinishTask'
+import { useLearner } from './useHomework'
 
 /** Pause after a right answer, so the celebration can play before moving on. */
 const ADVANCE_DELAY_MS = 1700
@@ -28,19 +28,14 @@ const HINT_AFTER_MISTAKES = 2
 export function ChoiceGame({ type }: { type: ChoiceGameType }) {
   const { t } = useTranslation()
   const language = useLanguage()
-  const progress = useProgress()
+  const learner = useLearner(type)
   const { react, reset } = useMascot()
   const { sayText, speaking } = useSpeaker()
   const finish = useFinishTask(type)
 
   // Rounds are drawn once when the game starts; progress updates must not reshuffle them.
   const [session, dispatch] = useReducer(taskSessionReducer, undefined, () =>
-    createSession(
-      generateRounds(type, getAlphabet(language).letters, {
-        learned: progress.learned[language] ?? [],
-        struggles: progress.struggles[language] ?? {},
-      }),
-    ),
+    createSession(generateRounds(type, getAlphabet(language).letters, learner)),
   )
   const round = currentRound(session)
 

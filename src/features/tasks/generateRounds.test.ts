@@ -53,3 +53,19 @@ describe('generateRounds', () => {
     expect(targets).not.toContain('a')
   })
 })
+
+describe('homework focus', () => {
+  it('puts homework letters first and always includes them', () => {
+    const letters = getAlphabet('uz').letters
+    for (let seed = 1; seed <= 20; seed += 1) {
+      const targets = pickTargets(
+        letters,
+        { learned: [], struggles: { a: 3 }, focus: ['ch', 'sh'] },
+        5,
+        seededRandom(seed),
+      )
+      expect(new Set(targets.slice(0, 2).map((letter) => letter.id))).toEqual(new Set(['ch', 'sh']))
+      expect(targets).toHaveLength(5)
+    }
+  })
+})
