@@ -33,12 +33,12 @@ export function MascotThoughtBubble({
     <div
       aria-live="polite"
       className={clsx(
-        'pointer-events-none flex items-end',
+        'pointer-events-none relative flex items-end',
         fromLeft ? 'flex-row' : 'flex-row-reverse',
         className,
       )}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {message && (
           <motion.div
             key={messageKey}

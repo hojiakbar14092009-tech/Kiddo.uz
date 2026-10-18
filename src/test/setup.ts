@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
+import { MotionGlobalConfig } from 'framer-motion'
 import { afterEach, vi } from 'vitest'
 
 afterEach(() => {
@@ -45,3 +46,10 @@ vi.mock('howler', () => {
   }
   return { Howl, Howler: { volume: () => undefined } }
 })
+
+// Animations finish instantly in tests, so assertions see the end state.
+MotionGlobalConfig.skipAnimations = true
+
+// jsdom has no canvas; behave like a browser without 2D/WebGL support.
+HTMLCanvasElement.prototype.getContext = (() =>
+  null) as typeof HTMLCanvasElement.prototype.getContext

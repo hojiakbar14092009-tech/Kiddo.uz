@@ -1,20 +1,30 @@
 import type { RouteObject } from 'react-router-dom'
 import { Navigate } from 'react-router-dom'
-import { AlphabetPage } from '@/features/alphabet/AlphabetPage'
 import { AlphabetItemPage } from '@/features/alphabet/AlphabetItemPage'
+import { AlphabetPage } from '@/features/alphabet/AlphabetPage'
 import { HomePage } from '@/features/home/HomePage'
 import { LanguagePage } from '@/features/onboarding/LanguagePage'
+import { GamePage } from '@/features/tasks/GamePage'
+import { RewardPage } from '@/features/tasks/RewardPage'
+import { AppShell } from './AppShell'
 import { RequireLanguage } from './RequireLanguage'
 
 export const routes: RouteObject[] = [
-  { path: '/', element: <LanguagePage /> },
   {
-    element: <RequireLanguage />,
+    element: <AppShell />,
     children: [
-      { path: '/home', element: <HomePage /> },
-      { path: '/alphabet', element: <AlphabetPage /> },
-      { path: '/alphabet/:itemId', element: <AlphabetItemPage /> },
+      { path: '/', element: <LanguagePage /> },
+      {
+        element: <RequireLanguage />,
+        children: [
+          { path: '/home', element: <HomePage /> },
+          { path: '/alphabet', element: <AlphabetPage /> },
+          { path: '/alphabet/:itemId', element: <AlphabetItemPage /> },
+          { path: '/tasks/:type', element: <GamePage /> },
+          { path: '/reward', element: <RewardPage /> },
+        ],
+      },
+      { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
-  { path: '*', element: <Navigate to="/" replace /> },
 ]

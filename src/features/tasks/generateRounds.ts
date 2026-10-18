@@ -1,14 +1,7 @@
 import type { LetterEntry } from '@/content/alphabet'
 import { shuffle, type RandomSource } from '@/lib/random'
+import type { ChoiceGameType } from './games'
 import { ROUNDS_PER_TASK } from './rules'
-
-export type PlayableTaskType = 'find-letter' | 'find-picture'
-
-export const PLAYABLE_TASK_TYPES: readonly PlayableTaskType[] = ['find-letter', 'find-picture']
-
-export function isPlayableTaskType(value: unknown): value is PlayableTaskType {
-  return typeof value === 'string' && (PLAYABLE_TASK_TYPES as readonly string[]).includes(value)
-}
 
 export interface TaskRound {
   target: LetterEntry
@@ -20,7 +13,7 @@ export interface LearnerState {
   struggles: Readonly<Record<string, number>>
 }
 
-const OPTION_COUNT: Record<PlayableTaskType, number> = { 'find-letter': 4, 'find-picture': 3 }
+const OPTION_COUNT: Record<ChoiceGameType, number> = { 'find-letter': 4, 'find-picture': 3 }
 /** Struggled letters come back first, but never take over a whole task. */
 const MAX_STRUGGLE_ROUNDS = 2
 /** New letters are introduced from a small window, in alphabet order. */
@@ -63,7 +56,7 @@ export function pickTargets(
   return shuffle([...chosen.values()], random)
 }
 
-function canBeDistractor(type: PlayableTaskType, target: LetterEntry, other: LetterEntry): boolean {
+function canBeDistractor(type: ChoiceGameType, target: LetterEntry, other: LetterEntry): boolean {
   if (other.id === target.id) return false
   if (type === 'find-letter') return true
   // A picture is only wrong if its word really lacks the letter (and looks different).
@@ -71,7 +64,7 @@ function canBeDistractor(type: PlayableTaskType, target: LetterEntry, other: Let
 }
 
 export function buildRound(
-  type: PlayableTaskType,
+  type: ChoiceGameType,
   target: LetterEntry,
   letters: readonly LetterEntry[],
   random: RandomSource,
@@ -84,7 +77,7 @@ export function buildRound(
 }
 
 export function generateRounds(
-  type: PlayableTaskType,
+  type: ChoiceGameType,
   letters: readonly LetterEntry[],
   learner: LearnerState,
   random: RandomSource = Math.random,

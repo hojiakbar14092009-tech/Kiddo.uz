@@ -2,10 +2,12 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import { nextSticker } from '@/features/stickers/stickers'
+import type { GameType } from '@/features/tasks/games'
 import { coinsFor, DAILY_BONUS, dayKey, starsFor } from '@/features/tasks/rules'
 import { useFamilyStore } from './familyStore'
 
-export type TaskType = 'find-letter' | 'find-picture' | 'final-test'
+/** Every kind of finished activity that earns coins. */
+export type TaskType = GameType | 'exam'
 
 export interface MistakeDetail {
   targetId: string
