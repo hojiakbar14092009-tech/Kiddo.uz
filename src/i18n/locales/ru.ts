@@ -22,5 +22,17 @@ export const ru: Translation = {
   home: {
     greeting: 'Привет, {{name}}!',
     greetingNoName: 'Привет!',
+    alphabet: 'Алфавит',
+  },
+  alphabet: {
+    title: 'Алфавит',
+    hint: 'Нажми на букву, я её назову!',
+  },
+  letter: {
+    hint: 'Буква в слове выделена цветом',
+    position: '{{current}} / {{total}}',
+    previous: 'Предыдущая буква',
+    next: 'Следующая буква',
+    backToAlphabet: 'Назад к алфавиту',
   },
 }

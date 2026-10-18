@@ -20,6 +20,18 @@ export const uz = {
   home: {
     greeting: 'Salom, {{name}}!',
     greetingNoName: 'Salom!',
+    alphabet: 'Alifbo',
+  },
+  alphabet: {
+    title: 'Alifbo',
+    hint: 'Harfni bos, men aytib beraman!',
+  },
+  letter: {
+    hint: 'Harf so‘z ichida rangli bo‘lib turibdi',
+    position: '{{current}} / {{total}}',
+    previous: 'Oldingi harf',
+    next: 'Keyingi harf',
+    backToAlphabet: 'Alifboga qaytish',
   },
 }
 

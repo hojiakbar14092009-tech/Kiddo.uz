@@ -1,0 +1,72 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { speech } from './speech'
+
+class FakeUtterance {
+  text: string
+  voice: SpeechSynthesisVoice | null = null
+  lang = ''
+  pitch = 1
+  rate = 1
+  volume = 1
+  onend: (() => void) | null = null
+  onerror: (() => void) | null = null
+  constructor(text: string) {
+    this.text = text
+  }
+}
+
+function installSynth(voices: Array<Pick<SpeechSynthesisVoice, 'lang' | 'localService'>>) {
+  const spoken: FakeUtterance[] = []
+  const synth = {
+    getVoices: () => voices as SpeechSynthesisVoice[],
+    speak: vi.fn((utterance: FakeUtterance) => {
+      spoken.push(utterance)
+      utterance.onend?.()
+    }),
+    cancel: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }
+  vi.stubGlobal('speechSynthesis', synth)
+  vi.stubGlobal('SpeechSynthesisUtterance', FakeUtterance)
+  return { synth, spoken }
+}
+
+describe('speech', () => {
+  beforeEach(() => {
+    vi.useRealTimers()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('speaks each phrase with a matching voice', async () => {
+    const { spoken } = installSynth([
+      { lang: 'en-US', localService: true },
+      { lang: 'ru-RU', localService: true },
+    ])
+
+    await speech.say(['Б', 'банан'], { language: 'ru' })
+
+    expect(spoken.map((u) => u.text)).toEqual(['Б', 'банан'])
+    expect(spoken.every((u) => u.lang === 'ru-RU')).toBe(true)
+  })
+
+  it('stays silent when no voice exists for the language', async () => {
+    const { synth } = installSynth([{ lang: 'en-US', localService: true }])
+
+    await speech.say('banan', { language: 'uz' })
+
+    expect(synth.speak).not.toHaveBeenCalled()
+    expect(await speech.hasVoice('uz')).toBe(false)
+  })
+
+  it('can borrow another locale, e.g. for the mascot’s “Yahoooo!”', async () => {
+    const { spoken } = installSynth([{ lang: 'en-GB', localService: true }])
+
+    await speech.say('Yahoooo!', { language: 'uz', locale: 'en-US' })
+
+    expect(spoken[0]?.lang).toBe('en-GB')
+  })
+})

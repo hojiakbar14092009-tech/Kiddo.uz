@@ -1,0 +1,31 @@
+import { createAlphabet } from './types'
+
+/** A1 words that are easy for a young child to pronounce. */
+export const enAlphabet = createAlphabet('en', [
+  ['a', 'A', 'apple', '🍎'],
+  ['b', 'B', 'ball', '⚽'],
+  ['c', 'C', 'cat', '🐱'],
+  ['d', 'D', 'dog', '🐶'],
+  ['e', 'E', 'egg', '🥚'],
+  ['f', 'F', 'fish', '🐟'],
+  ['g', 'G', 'grapes', '🍇'],
+  ['h', 'H', 'hat', '🎩'],
+  ['i', 'I', 'ice cream', '🍦'],
+  ['j', 'J', 'juice', '🧃'],
+  ['k', 'K', 'kite', '🪁'],
+  ['l', 'L', 'lion', '🦁'],
+  ['m', 'M', 'monkey', '🐒'],
+  ['n', 'N', 'nose', '👃'],
+  ['o', 'O', 'orange', '🍊'],
+  ['p', 'P', 'pen', '🖊️'],
+  ['q', 'Q', 'queen', '👸'],
+  ['r', 'R', 'robot', '🤖'],
+  ['s', 'S', 'sun', '☀️'],
+  ['t', 'T', 'tree', '🌳'],
+  ['u', 'U', 'umbrella', '☂️'],
+  ['v', 'V', 'van', '🚐'],
+  ['w', 'W', 'window', '🪟'],
+  ['x', 'X', 'box', '📦'],
+  ['y', 'Y', 'yo-yo', '🪀'],
+  ['z', 'Z', 'zebra', '🦓'],
+])

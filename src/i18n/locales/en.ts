@@ -22,5 +22,17 @@ export const en: Translation = {
   home: {
     greeting: 'Hi, {{name}}!',
     greetingNoName: 'Hi!',
+    alphabet: 'Alphabet',
+  },
+  alphabet: {
+    title: 'Alphabet',
+    hint: 'Tap a letter and I will say it!',
+  },
+  letter: {
+    hint: 'The letter is coloured inside the word',
+    position: '{{current}} / {{total}}',
+    previous: 'Previous letter',
+    next: 'Next letter',
+    backToAlphabet: 'Back to the alphabet',
   },
 }
