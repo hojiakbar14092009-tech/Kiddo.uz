@@ -12,6 +12,7 @@ import { dayKey, isFinalTestUnlocked } from '@/features/tasks/rules'
 import { usePendingHomework } from '@/features/tasks/useHomework'
 import { useActiveChild, useAgeLevel, useFamilyStore } from '@/store/familyStore'
 import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
+import { AppIcon, type AppIconName } from '@/features/age/AppIcon'
 import { UnlockCelebration } from '@/features/age/UnlockCelebration'
 import { GAME_TYPES } from '@/features/tasks/games'
 import { useSpeaker } from '@/services/audio/useSpeaker'
@@ -97,25 +98,25 @@ export function HomePage() {
           {t('home.more')}
         </h2>
         <ul className="grid w-full max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
-          <ActivityCard to="/alphabet" label={t('home.alphabet')} symbol="Aa" tone="sky" />
+          <ActivityCard to="/alphabet" label={t('home.alphabet')} icon="alphabet" tone="sky" />
           <ActivityCard
             to="/alphabet?tab=numbers"
             label={t('home.numbers')}
-            symbol="123"
+            icon="numbers"
             tone="coin"
           />
           <ActivityCard
             to="/tasks/memory"
             label={t(GAME_META.memory.titleKey)}
-            symbol={GAME_META.memory.emoji}
+            icon="memory"
             tone="lilac"
           />
-          <ActivityCard to="/shop" label={t('shop.open')} symbol="🛍️" tone="girl" />
+          <ActivityCard to="/shop" label={t('shop.open')} icon="shop" tone="girl" />
           {lockedGames.map((game) => (
             <LockedCard
               key={game}
               label={t(GAME_META[game].titleKey)}
-              symbol={GAME_META[game].emoji}
+              icon={game}
               age={GAME_MIN_LEVEL[game]}
             />
           ))}
@@ -123,7 +124,7 @@ export function HomePage() {
             <ActivityCard
               to="/exam"
               label={t('journey.finalTest')}
-              symbol="🏆"
+              icon="exam"
               tone="sky"
               detail={
                 examUnlocked
@@ -132,7 +133,7 @@ export function HomePage() {
               }
             />
           ) : (
-            <LockedCard label={t('journey.finalTest')} symbol="🏆" age={EXAM_MIN_LEVEL} />
+            <LockedCard label={t('journey.finalTest')} icon="exam" age={EXAM_MIN_LEVEL} />
           )}
         </ul>
       </section>
@@ -155,13 +156,13 @@ const CARD_TONES = {
 interface ActivityCardProps {
   to: string
   label: string
-  symbol: string
+  icon: AppIconName
   tone: keyof typeof CARD_TONES
   /** A short line under the label, e.g. how far the big test is. */
   detail?: string
 }
 
-function ActivityCard({ to, label, symbol, tone, detail }: ActivityCardProps) {
+function ActivityCard({ to, label, icon, tone, detail }: ActivityCardProps) {
   return (
     <li>
       <Link
@@ -172,7 +173,7 @@ function ActivityCard({ to, label, symbol, tone, detail }: ActivityCardProps) {
           aria-hidden="true"
           className={`flex size-20 items-center justify-center rounded-3xl font-display text-4xl font-extrabold sm:size-28 sm:text-5xl ${CARD_TONES[tone]}`}
         >
-          {symbol}
+          <AppIcon name={icon} className="size-[70%]" />
         </span>
         <span className="text-center font-display text-lg leading-tight font-bold sm:text-2xl">
           {label}
@@ -184,7 +185,7 @@ function ActivityCard({ to, label, symbol, tone, detail }: ActivityCardProps) {
 }
 
 /** A game for an older child: greyed, with a padlock and the age it opens at. */
-function LockedCard({ label, symbol, age }: { label: string; symbol: string; age: AgeLevel }) {
+function LockedCard({ label, icon, age }: { label: string; icon: AppIconName; age: AgeLevel }) {
   const { t } = useTranslation()
   const { sayText } = useSpeaker()
   const shake = useAnimationControls()
@@ -208,9 +209,9 @@ function LockedCard({ label, symbol, age }: { label: string; symbol: string; age
           aria-hidden="true"
           className="relative flex size-20 items-center justify-center rounded-3xl bg-cream text-4xl sm:size-28 sm:text-5xl"
         >
-          <span className="opacity-40 grayscale">{symbol}</span>
+          <AppIcon name={icon} className="size-[70%] opacity-40 grayscale" />
           <span className="absolute -right-2 -bottom-2 flex size-10 items-center justify-center rounded-full bg-coin text-xl shadow-[0_3px_0_var(--color-coin-shadow)] sm:size-12 sm:text-2xl">
-            🔒
+            <AppIcon name="lock" className="size-[70%]" />
           </span>
         </span>
         <span className="text-center font-display text-lg leading-tight font-bold text-ink-soft sm:text-2xl">

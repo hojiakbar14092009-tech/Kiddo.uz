@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { useFocusTrap } from '@/components/ui/useFocusTrap'
 import { GAME_META } from '@/features/tasks/gameMeta'
+import { AppIcon } from './AppIcon'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { levelOfChild, useActiveChild, useFamilyStore } from '@/store/familyStore'
 import { AGE_LEVELS, unlocksAt, type Unlock } from './ageLevel'
@@ -11,9 +12,9 @@ import { AGE_LEVELS, unlocksAt, type Unlock } from './ageLevel'
 const CONFETTI = ['🎉', '⭐', '🎈', '✨', '🎊', '🌟', '🎁', '💫']
 
 function unlockLabel(unlock: Unlock, t: ReturnType<typeof useTranslation>['t']) {
-  if (unlock === 'numbers') return { emoji: '🔢', text: t('age.numbers') }
-  if (unlock === 'exam') return { emoji: '🏆', text: t('age.exam') }
-  return { emoji: GAME_META[unlock].emoji, text: t(GAME_META[unlock].titleKey) }
+  if (unlock === 'numbers') return t('age.numbers')
+  if (unlock === 'exam') return t('age.exam')
+  return t(GAME_META[unlock].titleKey)
 }
 
 /**
@@ -86,7 +87,7 @@ function Celebration({ childId, from, to }: CelebrationProps) {
         <p className="text-xl text-ink-soft">{t('age.celebrateText')}</p>
         <ul className="flex w-full flex-col gap-2">
           {unlocks.map((unlock, index) => {
-            const { emoji, text } = unlockLabel(unlock, t)
+            const text = unlockLabel(unlock, t)
             return (
               <motion.li
                 key={unlock}
@@ -95,9 +96,7 @@ function Celebration({ childId, from, to }: CelebrationProps) {
                 transition={{ delay: 1 + index * 0.25, type: 'spring', stiffness: 200 }}
                 className="flex items-center gap-3 rounded-3xl bg-coin-soft px-4 py-3 font-display text-xl font-bold"
               >
-                <span aria-hidden="true" className="text-3xl">
-                  {emoji}
-                </span>
+                <AppIcon name={unlock} className="size-10 shrink-0" />
                 {text}
               </motion.li>
             )

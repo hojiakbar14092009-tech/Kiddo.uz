@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom'
+import { AgeTheme } from '@/features/age/AgeTheme'
 import { InterfaceSounds } from './InterfaceSounds'
 import { LanguageSync } from './LanguageSync'
 import { ParentGateAutoLock } from './ParentGateAutoLock'
@@ -10,6 +11,7 @@ export function AppShell() {
   return (
     <>
       <LanguageSync />
+      <AgeTheme />
       <SpeechUnlock />
       <InterfaceSounds />
       <SyncManager />

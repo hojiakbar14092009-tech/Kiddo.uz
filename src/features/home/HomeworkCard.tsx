@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { ChevronRightIcon } from '@/components/icons'
 import { findLetter } from '@/content/alphabet'
+import { AppIcon } from '@/features/age/AppIcon'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { homeworkPath } from '@/features/tasks/useHomework'
 import type { Homework } from '@/store/familyStore'
@@ -24,7 +25,7 @@ export function HomeworkCard({ homework }: { homework: Homework }) {
         aria-hidden="true"
         className="flex size-16 shrink-0 items-center justify-center rounded-3xl bg-coin-soft text-4xl sm:size-20 sm:text-5xl"
       >
-        📝
+        <AppIcon name="homework" className="size-[72%]" />
       </span>
       <span className="flex min-w-0 flex-1 flex-col" aria-hidden="true">
         <span className="font-display text-xl font-extrabold sm:text-2xl">

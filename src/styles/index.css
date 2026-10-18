@@ -84,3 +84,53 @@
     }
   }
 }
+
+/*
+ * One app, three ages. The active child's age sets `data-age` on <html>:
+ *  4 – a toy box: sunny, bigger type and buttons, candy colours, polka dots;
+ *  5 – the garden: Kiddo's own teal on cream;
+ *  6 – a school workbook: calm blue on squared paper, a step closer to school.
+ * The parent area always keeps the neutral look.
+ */
+html[data-age='4'] {
+  font-size: 112.5%;
+  --color-cream: #fff5d1;
+  --color-line: #ffe2a8;
+  --color-line-strong: #f5d08a;
+  --color-primary: #f2603c;
+  --color-primary-shadow: #c7411f;
+  --color-primary-soft: #ffe2d6;
+  --color-primary-ink: #b23a1a;
+  --color-sky-soft: #d9f1ff;
+  --color-lilac-soft: #f3e3ff;
+}
+
+html[data-age='4'] body {
+  background-color: var(--color-cream);
+  background-image:
+    radial-gradient(circle at 20px 20px, #ffe9a8 7px, transparent 8px),
+    radial-gradient(circle at 60px 60px, #ffd9e6 6px, transparent 7px);
+  background-size: 80px 80px;
+}
+
+html[data-age='6'] {
+  --color-cream: #f3f7ff;
+  --color-muted: #e9f0fb;
+  --color-line: #dbe5f5;
+  --color-line-strong: #c9d6ec;
+  --color-ink: #22304a;
+  --color-ink-soft: #4d5b78;
+  --color-primary: #2f6fdb;
+  --color-primary-shadow: #1f4fa8;
+  --color-primary-soft: #e0ebff;
+  --color-primary-ink: #1c4a9c;
+  --color-lilac-soft: #e8e6fb;
+}
+
+html[data-age='6'] body {
+  background-color: var(--color-cream);
+  background-image:
+    linear-gradient(#dfe8f7 1px, transparent 1px),
+    linear-gradient(90deg, #dfe8f7 1px, transparent 1px);
+  background-size: 28px 28px;
+}

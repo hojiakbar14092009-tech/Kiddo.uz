@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { CheckIcon } from '@/components/icons'
+import { AppIcon } from '@/features/age/AppIcon'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import type { DailyPlanState, PlanStepStatus } from './dailyPlan'
 
@@ -68,7 +69,7 @@ export function JourneyPath({ plan }: { plan: DailyPlanState }) {
                       STOP_CLASSES[step.status],
                     )}
                   >
-                    <span aria-hidden="true">{meta.emoji}</span>
+                    <AppIcon name={step.game} className="size-[62%]" />
                     {step.status === 'done' && (
                       <span
                         aria-hidden="true"
