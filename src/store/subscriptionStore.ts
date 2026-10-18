@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { getAppSettings } from './appSettingsStore'
 import { useFamilyStore } from './familyStore'
 
 export type PlanId = 'monthly' | 'yearly' | 'lifetime'
@@ -28,15 +27,11 @@ interface SubscriptionState {
   /** Developer/test switch from the parent area. */
   setDemoPro: (enabled: boolean) => void
   cancel: () => void
-  redeemPromo: (code: string, now?: Date) => PromoResult
+  /** Applies a code whose days were looked up (null: not a valid code). */
+  redeemPromo: (code: string, days: number | null, now?: Date) => PromoResult
 }
 
 export type PromoResult = 'ok' | 'invalid' | 'used' | 'lifetime'
-
-/** Promo codes and the PRO days they give (set in the admin panel). Codes are case-insensitive. */
-export function promoCodes(): Readonly<Record<string, number>> {
-  return getAppSettings().promoCodes
-}
 
 export function normalizePromo(code: string): string {
   return code.trim().toUpperCase()
@@ -97,10 +92,9 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       cancel: () => set({ plan: null, expiresAt: null, source: null }),
 
-      redeemPromo: (code, now = new Date()) => {
+      redeemPromo: (code, days, now = new Date()) => {
         const key = normalizePromo(code)
-        const days = promoCodes()[key]
-        if (days === undefined) return 'invalid'
+        if (days === null) return 'invalid'
         const state = get()
         if (state.usedPromoCodes.includes(key)) return 'used'
         if (state.plan && state.expiresAt === null && isProActive(state, now.getTime())) {

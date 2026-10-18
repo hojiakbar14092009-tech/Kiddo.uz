@@ -60,7 +60,11 @@ Playwright birinchi marta: `npx playwright install chromium`.
 - Bugungi hisobot, haftalik coinlar, xatolar tahlili (“Ch o‘rniga Sh”), mashq kerak harflar.
 - Bola profillari (cheklovsiz; tug‘ilgan kun, jins → robot, kunlik vaqt), uy vazifasi, ovoz va til sozlamalari.
 - Bola ilovadan chiqsa – vaqti bilan yoziladi va ota-ona bo‘limida ko‘rinadi (bulut hisobida boshqa qurilmada ham).
-- PRO: oylik va yillik tariflar, Click / Payme / Uzum Pay, promokod, Demo PRO.
+- PRO: oylik va yillik tariflar (yillik = 12 oy − 20 %, admin oylik narxdan avtomatik hisoblaydi), Click / Payme / Uzum Pay, promokod, Demo PRO.
+- **Sovg‘a promokod:** «Promokodni olish» tugmasi admin qo‘ygan reklamani ko‘rsatadi; reklamani o‘tkazib yuborib,
+  oldinga surib yoki yopib bo‘lmaydi (yopsa, promokod berilmaydi). Reklama oxirigacha ko‘rilgach promokod
+  animatsiya bilan chiqadi va bir bosishda faollashtiriladi. Har bir oilaga 1 marta. Reklama bo‘lmasa,
+  «Hozircha reklama yo‘q» deb yoziladi va promokod berilmaydi.
 
 ## Admin panel (`/admin`)
 
@@ -73,7 +77,11 @@ bilan yozadi: bugun nechta oila PRO sotib olgani, yangi to‘lov kelganini va ki
 - **Bolalar:** ro‘yxat, qidiruv, PRO / Bepul / Onlayn saralash; PRO bor-yo‘qligi va qachongacha; coin berish,
   PRO berish (+30 kun) va bekor qilish.
 - **To‘lovlar:** barcha PRO to‘lovlari, jami summa, Excel (CSV) yuklab olish.
-- **Promokodlar** va **Sozlamalar** (PRO narxlari, PRO bilan beriladigan sovg‘a coin – standart 50).
+- **Promokodlar:** `KIDDO07` (7 kun) va `BOLAJON30` (30 kun) bor; admin yangisini qo‘shadi, to‘xtatadi, o‘chiradi
+  va har bir kodni nechta oila olganini ko‘radi.
+- **Reklamalar:** video fayl yuklash yoki .mp4 havola; ko‘rish va oxirigacha ko‘rishlar soni; to‘xtatish, o‘chirish.
+- **Sozlamalar:** PRO oylik narxi – yillik narx avtomatik (12 × oylik − 20 %); “Saqlash”dan keyin ota-onalar shu
+  narxni ko‘radi va to‘laydi. PRO bilan beriladigan sovg‘a coin (standart 50).
 
 Kirish ikki xil:
 
@@ -82,6 +90,7 @@ Kirish ikki xil:
 2. **Barcha oilalar (Supabase)** – `supabase/migrations/0003_admin.sql` ni bajaring va o‘z hisobingizni admin qiling:
    `insert into public.admins (user_id) select id from auth.users where email = 'siz@misol.uz';`
    Shunda barcha oilalar, to‘lovlar (Realtime orqali jonli) va onlayn bolalar (Realtime presence) ko‘rinadi.
+   Promokod va reklamalar uchun `0004_promo_ads.sql` ni ham bajaring (reklama videolari `ads` storage bucket’iga yuklanadi).
 
 PRO sotib olinganda har bir farzandga sovg‘a coin beriladi va “Siz 50 coinga ega bo‘ldingiz!” chiqadi.
 PRO’si yo‘q ota-onalarga obuna sahifasida PRO animatsiyali oltin kartada ko‘rsatiladi.
@@ -89,7 +98,11 @@ PRO’si yo‘q ota-onalarga obuna sahifasida PRO animatsiyali oltin kartada ko�
 ## Ochiq aytilishi kerak bo‘lgan cheklovlar
 
 - **To‘lovlar sinov rejimida.** `src/services/payments/mockPayment.ts` to‘lovni faqat taqlid qiladi va pul yechmaydi. Haqiqiy to‘lov uchun Click/Payme/Uzum merchant hisobi va to‘lov xabarini (callback) tekshirib, `subscriptions` jadvaliga service role bilan yozadigan server kerak.
-- **Promokodlar** (`KIDDO7` – 7 kun, `BOLAJON30` – 30 kun) hozircha qurilmada tekshiriladi. Ishlab chiqarishda ularni ham serverga o‘tkazish kerak.
+- **Promokodlar maxfiyligi.** Supabase bilan (`supabase/migrations/0004_promo_ads.sql`) kodlar faqat serverda: brauzer
+  kodlar ro‘yxatini hech qachon olmaydi, reklama vaqtini server o‘z soati bilan tekshiradi va kodni oilaga 1 marta
+  beradi; kod ham serverda faollashtiriladi. Supabase’siz (bitta qurilma) kodlar sayt kodida va brauzer xotirasida
+  ochiq matn sifatida turmaydi – xesh va “muhrlangan” ko‘rinishda saqlanadi, lekin bu shifrlash emas: chuqur
+  bilgan odam brauzerdan topishi mumkin. Admin qo‘ygan reklama va kodlar barcha oilalarga yetishi uchun ham Supabase kerak.
 - **Ovoz.** Ilova aytadigan har bir gap oldindan neyron ovoz bilan, sekin va aniq yozib olingan
   (`public/audio/voice/`), uchala tilda ham ayol ovozi: rus tili – rus ovozi, ingliz tili – britan ovozi.
   Ochiq o‘zbek neyron ovozi hali yo‘q: o‘zbekcha matn qozoq kirill yozuviga o‘giriladi (q → қ, gʻ → ғ,

@@ -1,6 +1,8 @@
 import { act, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useAdsStore } from '@/store/adsStore'
 import { useParentGateStore, useParentStore } from '@/store/parentStore'
+import { usePromoStore } from '@/store/promoStore'
 import { isProActive, useSubscriptionStore } from '@/store/subscriptionStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
@@ -20,6 +22,7 @@ describe('PRO in the parent area', () => {
     useParentStore.setState({ session: { mode: 'demo' } })
     useSubscriptionStore.getState().cancel()
     useSubscriptionStore.setState({ usedPromoCodes: [] })
+    usePromoStore.setState({ claim: null, redeemed: [] })
   })
 
   it('is only reachable through the parent gate', async () => {
@@ -46,13 +49,35 @@ describe('PRO in the parent area', () => {
   it('redeems a promo code once', async () => {
     const { user } = await renderRoute('/parent/dashboard?tab=pro')
     const input = screen.getByRole('textbox', { name: 'Kodni kiriting' })
-    await user.type(input, 'kiddo7')
+    await user.type(input, 'kiddo07')
     await user.click(screen.getByRole('button', { name: 'Qo‘llash' }))
-    expect(screen.getByText('Promokod qabul qilindi! PRO kunlari qo‘shildi.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Promokod qabul qilindi! PRO kunlari qo‘shildi.'),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Zo‘r, boshladik!' }))
 
-    await user.type(input, 'KIDDO7')
+    await user.clear(input)
+    await user.type(input, 'KIDDO07')
     await user.click(screen.getByRole('button', { name: 'Qo‘llash' }))
-    expect(screen.getByText('Bu promokod allaqachon ishlatilgan.')).toBeInTheDocument()
+    expect(await screen.findByText('Bu promokod allaqachon ishlatilgan.')).toBeInTheDocument()
+  })
+
+  it('says there is no ad yet and gives no code', async () => {
+    useAdsStore.setState({ ads: [] })
+    const { user } = await renderRoute('/parent/dashboard?tab=pro')
+    await user.click(screen.getByRole('button', { name: 'Promokodni olish' }))
+    expect(
+      await screen.findByText(
+        'Hozircha reklama yo‘q. Reklama qo‘yilgach, promokodni shu yerdan olasiz.',
+      ),
+    ).toBeInTheDocument()
+    expect(usePromoStore.getState().claim).toBeNull()
+  })
+
+  it('shows the yearly price as twelve months less 20 %', async () => {
+    await renderRoute('/parent/dashboard?tab=pro')
+    expect(screen.getByRole('radio', { name: /1 yil.*278\s400/ })).toBeInTheDocument()
+    expect(screen.getByText('−20%')).toBeInTheDocument()
   })
 
   it('turns demo PRO on and off, but never over a paid plan', async () => {

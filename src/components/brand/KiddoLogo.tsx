@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useId } from 'react'
 
@@ -178,45 +179,121 @@ export function KiddoWordmark({ animate = false, delay = 0, className }: Wordmar
 }
 
 /**
- * The app mark: the logotype's face on its own – two visor eyes with antennas
- * and a smile – on a teal tile. It reads as Kiddo even at favicon size.
+ * The app mark: Kiddo's robot mascot's head on a teal tile – white shell,
+ * mint ears, a dark visor with glowing eyes and a smile, and a gold antenna.
+ * It is alive: the head bobs and tilts, the antenna tip pulses, the eyes look
+ * around and blink. Still for `animate={false}` and for reduced motion.
  */
-export function KiddoMark({ size = 96, className }: { size?: number; className?: string }) {
+export function KiddoMark({
+  size = 96,
+  className,
+  animate = true,
+}: {
+  size?: number
+  className?: string
+  animate?: boolean
+}) {
   const id = useId().replace(/:/g, '')
   return (
-    <svg viewBox="0 0 512 512" width={size} height={size} aria-hidden="true" className={className}>
+    <svg
+      viewBox="0 0 512 512"
+      width={size}
+      height={size}
+      aria-hidden="true"
+      className={clsx('kd-mark', animate && 'kd-mark-live', className)}
+    >
       <defs>
         <linearGradient id={`${id}-tile`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#22C3A6" />
           <stop offset="1" stopColor="#0B6F62" />
         </linearGradient>
+        <radialGradient id={`${id}-shell`} cx="38%" cy="26%" r="80%">
+          <stop offset="0" stopColor="#FFFFFF" />
+          <stop offset="0.6" stopColor="#F3F0F8" />
+          <stop offset="1" stopColor="#D3CCE2" />
+        </radialGradient>
+        <linearGradient id={`${id}-visor`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#4C3F66" />
+          <stop offset="1" stopColor="#1C162D" />
+        </linearGradient>
       </defs>
       <rect width="512" height="512" rx="128" fill={`url(#${id}-tile)`} />
-      <circle cx="256" cy="256" r="236" fill="#FFFFFF" opacity="0.06" />
-      {/* antennas (the d stems) */}
-      <path
-        d="M228 120 V300 M388 120 V300"
-        stroke="#FFFFFF"
-        strokeWidth="34"
-        strokeLinecap="round"
+      <circle cx="256" cy="256" r="236" fill="#FFFFFF" opacity="0.07" />
+      <ellipse
+        cx="256"
+        cy="440"
+        rx="120"
+        ry="16"
+        fill="#063F37"
+        opacity="0.28"
+        className="kd-mark-shadow"
       />
-      <circle cx="228" cy="96" r="26" fill="#F27BA6" stroke="#FFFFFF" strokeWidth="8" />
-      <circle cx="388" cy="96" r="26" fill="#5BB4F0" stroke="#FFFFFF" strokeWidth="8" />
-      {/* visor eyes (the d bowls) */}
-      {[164, 324].map((x) => (
-        <g key={x}>
-          <circle cx={x} cy="256" r="64" fill="#22192F" stroke="#FFFFFF" strokeWidth="34" />
-          <ellipse cx={x} cy="252" rx="20" ry="26" fill="#7CF5D9" />
-          <circle cx={x + 8} cy="240" r="8" fill="#FFFFFF" />
+
+      <g transform="translate(0 40)">
+        <g className="kd-mark-head">
+          {/* antenna */}
+          <rect x="246" y="62" width="20" height="74" rx="10" fill="#E3F7F2" />
+          <circle
+            cx="256"
+            cy="56"
+            r="28"
+            fill="#FFC93C"
+            stroke="#FFFFFF"
+            strokeWidth="9"
+            className="kd-mark-tip"
+          />
+          {/* ears */}
+          <ellipse
+            cx="108"
+            cy="250"
+            rx="40"
+            ry="70"
+            fill="#9BE8D6"
+            stroke="#FFFFFF"
+            strokeWidth="10"
+          />
+          <ellipse
+            cx="404"
+            cy="250"
+            rx="40"
+            ry="70"
+            fill="#9BE8D6"
+            stroke="#FFFFFF"
+            strokeWidth="10"
+          />
+          {/* shell */}
+          <rect x="122" y="118" width="268" height="246" rx="116" fill={`url(#${id}-shell)`} />
+          <ellipse cx="200" cy="148" rx="46" ry="12" fill="#FFFFFF" opacity="0.95" />
+          {/* visor */}
+          <rect x="154" y="166" width="204" height="164" rx="70" fill={`url(#${id}-visor)`} />
+          <path
+            d="M186 190 Q256 172 326 190"
+            stroke="#FFFFFF"
+            strokeOpacity="0.22"
+            strokeWidth="10"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <ellipse cx="184" cy="292" rx="16" ry="9" fill="#7FF0FF" opacity="0.28" />
+          <ellipse cx="328" cy="292" rx="16" ry="9" fill="#7FF0FF" opacity="0.28" />
+          {/* eyes that look around and blink */}
+          <g className="kd-mark-look">
+            <g className="kd-mark-eyes">
+              <rect x="196" y="208" width="32" height="50" rx="16" fill="#7FF0FF" />
+              <rect x="284" y="208" width="32" height="50" rx="16" fill="#7FF0FF" />
+              <circle cx="219" cy="220" r="6" fill="#FFFFFF" />
+              <circle cx="307" cy="220" r="6" fill="#FFFFFF" />
+            </g>
+          </g>
+          <path
+            d="M220 284 Q256 312 292 284"
+            stroke="#7FF0FF"
+            strokeWidth="12"
+            fill="none"
+            strokeLinecap="round"
+          />
         </g>
-      ))}
-      <path
-        d="M168 380 Q256 440 344 380"
-        fill="none"
-        stroke="#FFC93C"
-        strokeWidth="22"
-        strokeLinecap="round"
-      />
+      </g>
     </svg>
   )
 }

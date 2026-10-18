@@ -46,24 +46,24 @@ describe('promo codes', () => {
 
   it('gives PRO days once per code, ignoring case and spaces', () => {
     const store = useSubscriptionStore.getState()
-    expect(store.redeemPromo('  kiddo7 ', NOW)).toBe('ok')
+    expect(store.redeemPromo('  kiddo07 ', 7, NOW)).toBe('ok')
     expect(isProActive(useSubscriptionStore.getState(), NOW.getTime() + 6 * DAY)).toBe(true)
     expect(isProActive(useSubscriptionStore.getState(), NOW.getTime() + 8 * DAY)).toBe(false)
-    expect(store.redeemPromo('KIDDO7', NOW)).toBe('used')
+    expect(store.redeemPromo('KIDDO07', 7, NOW)).toBe('used')
   })
 
   it('adds promo days on top of an active plan', () => {
     const store = useSubscriptionStore.getState()
     store.activatePlan('monthly', 'payment', NOW)
-    store.redeemPromo('BOLAJON30', NOW)
+    store.redeemPromo('BOLAJON30', 30, NOW)
     expect(isProActive(useSubscriptionStore.getState(), NOW.getTime() + 59 * DAY)).toBe(true)
   })
 
   it('rejects unknown codes and does not touch lifetime PRO', () => {
     const store = useSubscriptionStore.getState()
-    expect(store.redeemPromo('FREE', NOW)).toBe('invalid')
+    expect(store.redeemPromo('FREE', null, NOW)).toBe('invalid')
     store.activatePlan('lifetime', 'payment', NOW)
-    expect(store.redeemPromo('KIDDO7', NOW)).toBe('lifetime')
+    expect(store.redeemPromo('KIDDO07', 7, NOW)).toBe('lifetime')
     expect(useSubscriptionStore.getState().usedPromoCodes).toEqual([])
   })
 })

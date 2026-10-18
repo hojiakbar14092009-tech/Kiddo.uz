@@ -3,6 +3,7 @@ import { useActivityStore } from '@/store/activityStore'
 import {
   DEFAULT_APP_SETTINGS,
   useAppSettingsStore,
+  yearlyPrice,
   type AppSettings,
 } from '@/store/appSettingsStore'
 import { childAge, useFamilyStore } from '@/store/familyStore'
@@ -213,7 +214,6 @@ function useDeviceData(): AdminData {
     settings: {
       prices: settingsState.prices,
       proGiftCoins: settingsState.proGiftCoins,
-      promoCodes: settingsState.promoCodes,
     },
     livePayment,
     loading: false,
@@ -280,7 +280,17 @@ function useCloudData(enabled: boolean): AdminData {
       states: states.data ?? [],
       subscriptions: subscriptions.data ?? [],
       payments: payments.data ?? [],
-      settings: { ...DEFAULT_APP_SETTINGS, ...(stored as Partial<AppSettings>) },
+      settings: {
+        proGiftCoins:
+          (stored as Partial<AppSettings>).proGiftCoins ?? DEFAULT_APP_SETTINGS.proGiftCoins,
+        prices: {
+          monthly:
+            (stored as Partial<AppSettings>).prices?.monthly ?? DEFAULT_APP_SETTINGS.prices.monthly,
+          yearly: yearlyPrice(
+            (stored as Partial<AppSettings>).prices?.monthly ?? DEFAULT_APP_SETTINGS.prices.monthly,
+          ),
+        },
+      },
       loadedAt: Date.now(),
     } as CloudRows
   }, [])
@@ -401,7 +411,16 @@ function useCloudData(enabled: boolean): AdminData {
     saveSettings: (settings) =>
       supabaseCall((client) =>
         client.from('app_settings').upsert(
-          Object.entries(settings).map(([key, value]) => ({ key, value })),
+          [
+            {
+              key: 'prices',
+              value: {
+                monthly: settings.prices.monthly,
+                yearly: yearlyPrice(settings.prices.monthly),
+              },
+            },
+            { key: 'proGiftCoins', value: settings.proGiftCoins },
+          ],
           { onConflict: 'key' },
         ),
       ),

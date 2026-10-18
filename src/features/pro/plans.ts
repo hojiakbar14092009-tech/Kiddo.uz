@@ -1,4 +1,9 @@
-import { getAppSettings, useAppSettingsStore, type AppSettings } from '@/store/appSettingsStore'
+import {
+  getAppSettings,
+  useAppSettingsStore,
+  yearlyPrice,
+  type AppSettings,
+} from '@/store/appSettingsStore'
 import type { PlanId } from '@/store/subscriptionStore'
 
 export interface Plan {
@@ -9,14 +14,18 @@ export interface Plan {
   savingPercent?: number
 }
 
-/** Plans on sale, at the prices set in the admin panel. (“Forever” is no longer sold.) */
+/**
+ * Plans on sale at the admin's monthly price; a year is always twelve months
+ * less 20 %. (“Forever” is no longer sold.)
+ */
 export function plansFor(prices: AppSettings['prices']): Plan[] {
+  const yearly = yearlyPrice(prices.monthly)
   return [
     { id: 'monthly', price: prices.monthly },
     {
       id: 'yearly',
-      price: prices.yearly,
-      savingPercent: Math.max(0, Math.round((1 - prices.yearly / (prices.monthly * 12)) * 100)),
+      price: yearly,
+      savingPercent: Math.max(0, Math.round((1 - yearly / (prices.monthly * 12)) * 100)),
     },
   ]
 }

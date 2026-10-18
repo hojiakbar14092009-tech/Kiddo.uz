@@ -1,8 +1,9 @@
 import clsx from 'clsx'
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import type { AppSettings } from '@/store/appSettingsStore'
+import { YEARLY_DISCOUNT, yearlyPrice } from '@/store/appSettingsStore'
 import type { Payment } from '@/store/paymentStore'
 import type { AdminChild, AdminData } from './adminData'
+import { CODE_PATTERN, type AdminPromo } from './adminPromo'
 import { dailyBars, formatSom, monthlyBars, revenueTotals } from './revenue'
 import { RevenueChart } from './RevenueChart'
 
@@ -531,32 +532,42 @@ export function PaymentsSection({ data }: { data: AdminData }) {
 
 /* ---------------------------------------------------------------- promo codes */
 
-export function PromoSection({ data }: { data: AdminData }) {
+const inputClass =
+  'h-10 rounded-lg border border-[var(--a-line)] bg-[var(--a-raise)] px-3 font-bold text-[var(--a-ink)] outline-none focus:border-[var(--a-accent)]'
+
+export function PromoSection({ promo }: { promo: AdminPromo }) {
   const [code, setCode] = useState('')
   const [days, setDays] = useState(7)
-  const codes = Object.entries(data.settings.promoCodes)
+  const [problem, setProblem] = useState<string | null>(null)
 
-  const save = (promoCodes: AppSettings['promoCodes']) =>
-    data.actions.saveSettings({ ...data.settings, promoCodes })
-
-  const add = (event: FormEvent) => {
+  const add = async (event: FormEvent) => {
     event.preventDefault()
     const key = code.trim().toUpperCase()
-    if (!/^[A-Z0-9]{3,20}$/.test(key)) return
-    void save({ ...data.settings.promoCodes, [key]: Math.max(1, days) })
+    if (!CODE_PATTERN.test(key)) {
+      setProblem('Kod 3–20 ta lotin harf yoki raqamdan iborat bo‘lsin.')
+      return
+    }
+    setProblem(null)
+    await promo
+      .addCode(key, Math.min(365, Math.max(1, days)))
+      .catch((reason: Error) => setProblem(reason.message))
     setCode('')
   }
 
   return (
     <Panel title="Promokodlar">
-      <form onSubmit={add} className="flex flex-wrap items-end gap-3">
+      <p className="text-sm text-[var(--a-ink-soft)]">
+        Ota-onalar promokodni faqat reklamani oxirigacha ko‘rgandan keyin oladi – har bir oila 1
+        marta. Kodlar saytda ochiq turmaydi: ular faqat shu yerda ko‘rinadi.
+      </p>
+      <form onSubmit={(event) => void add(event)} className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
           Kod (lotin harf va raqam)
           <input
             value={code}
             onChange={(event) => setCode(event.target.value.toUpperCase())}
             maxLength={20}
-            className="h-10 rounded-lg border border-[var(--a-line)] bg-[var(--a-raise)] px-3 font-bold text-[var(--a-ink)] uppercase outline-none focus:border-[var(--a-accent)]"
+            className={clsx(inputClass, 'uppercase')}
           />
         </label>
         <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
@@ -567,7 +578,7 @@ export function PromoSection({ data }: { data: AdminData }) {
             max={365}
             value={days}
             onChange={(event) => setDays(Number(event.target.value))}
-            className="h-10 w-28 rounded-lg border border-[var(--a-line)] bg-[var(--a-raise)] px-3 font-bold text-[var(--a-ink)] outline-none focus:border-[var(--a-accent)]"
+            className={clsx(inputClass, 'w-28')}
           />
         </label>
         <button
@@ -577,22 +588,31 @@ export function PromoSection({ data }: { data: AdminData }) {
           Kod qo‘shish
         </button>
       </form>
+      {(problem ?? promo.error) && (
+        <p role="alert" className="text-sm font-bold text-[var(--a-coral)]">
+          {problem ?? promo.error}
+        </p>
+      )}
       <ul className="flex flex-col">
-        {codes.map(([key, value]) => (
+        {promo.codes.map((item) => (
           <li
-            key={key}
-            className="flex items-center gap-4 border-b border-[var(--a-line)] py-3 last:border-0"
+            key={item.code}
+            className="flex flex-wrap items-center gap-4 border-b border-[var(--a-line)] py-3 last:border-0"
           >
-            <span className="kd-num flex-1 text-base font-bold tracking-wide">{key}</span>
-            <span className="text-[var(--a-ink-soft)]">{value} kun PRO</span>
-            <ActionButton
-              tone="danger"
-              onClick={() => {
-                const next = { ...data.settings.promoCodes }
-                delete next[key]
-                void save(next)
-              }}
+            <span
+              className={clsx(
+                'kd-num flex-1 text-base font-bold tracking-wide',
+                !item.active && 'text-[var(--a-ink-soft)] line-through',
+              )}
             >
+              {item.code}
+            </span>
+            <span className="text-[var(--a-ink-soft)]">{item.days} kun PRO</span>
+            <span className="text-[var(--a-ink-soft)]">{item.claims} ta oila oldi</span>
+            <ActionButton onClick={() => void promo.setCodeActive(item.code, !item.active)}>
+              {item.active ? 'To‘xtatish' : 'Yoqish'}
+            </ActionButton>
+            <ActionButton tone="danger" onClick={() => void promo.removeCode(item.code)}>
               O‘chirish
             </ActionButton>
           </li>
@@ -602,32 +622,194 @@ export function PromoSection({ data }: { data: AdminData }) {
   )
 }
 
+/* ---------------------------------------------------------------------- ads */
+
+export function AdsSection({ promo }: { promo: AdminPromo }) {
+  const [title, setTitle] = useState('')
+  const [kind, setKind] = useState<'file' | 'url'>('file')
+  const [file, setFile] = useState<File | null>(null)
+  const [url, setUrl] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [problem, setProblem] = useState<string | null>(null)
+  const [preview, setPreview] = useState<{ id: string; src: string } | null>(null)
+
+  const add = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!title.trim()) return setProblem('Reklama nomini yozing.')
+    if (kind === 'file' && !file) return setProblem('Video faylni tanlang.')
+    if (kind === 'url' && !/^https:\/\//.test(url.trim()))
+      return setProblem('https:// bilan boshlanadigan havola kiriting.')
+    setProblem(null)
+    setBusy(true)
+    try {
+      await promo.addAd(kind === 'file' ? { title, file: file! } : { title, url: url.trim() })
+      setTitle('')
+      setFile(null)
+      setUrl('')
+    } catch (reason) {
+      setProblem(
+        (reason as Error).message === 'video' || (reason as Error).message === 'duration'
+          ? 'Videoni o‘qib bo‘lmadi. MP4 yoki WebM fayl tanlang.'
+          : (reason as Error).message,
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Panel title="Reklamalar">
+      <p className="text-sm text-[var(--a-ink-soft)]">
+        Ota-ona «Promokodni olish» tugmasini bossa, shu yerdagi faol reklamalardan biri
+        ko‘rsatiladi. Reklama oxirigacha ko‘rilgandan keyin promokod beriladi. Reklama bo‘lmasa,
+        ota-onaga «Hozircha reklama yo‘q» deb yoziladi.
+      </p>
+      <form onSubmit={(event) => void add(event)} className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+            Reklama nomi
+            <input
+              value={title}
+              maxLength={80}
+              onChange={(event) => setTitle(event.target.value)}
+              className={clsx(inputClass, 'w-64')}
+            />
+          </label>
+          <Segmented
+            options={[
+              { value: 'file', label: 'Video fayl' },
+              { value: 'url', label: 'Havola' },
+            ]}
+            value={kind}
+            onChange={setKind}
+            label="Video qayerdan"
+          />
+        </div>
+        {kind === 'file' ? (
+          <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+            Video (MP4/WebM, 10 daqiqagacha)
+            <input
+              type="file"
+              accept="video/mp4,video/webm,video/*"
+              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              className="text-sm text-[var(--a-ink)]"
+            />
+          </label>
+        ) : (
+          <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+            Video havolasi (to‘g‘ridan-to‘g‘ri .mp4)
+            <input
+              value={url}
+              inputMode="url"
+              placeholder="https://…/reklama.mp4"
+              onChange={(event) => setUrl(event.target.value)}
+              className={clsx(inputClass, 'w-full max-w-xl font-normal')}
+            />
+          </label>
+        )}
+        <button
+          type="submit"
+          disabled={busy}
+          className="h-10 self-start rounded-full bg-[var(--a-accent)] px-5 text-sm font-bold text-[var(--a-accent-ink)] disabled:opacity-50"
+        >
+          {busy ? 'Yuklanmoqda…' : 'Reklama qo‘shish'}
+        </button>
+      </form>
+      {(problem ?? promo.error) && (
+        <p role="alert" className="text-sm font-bold text-[var(--a-coral)]">
+          {problem ?? promo.error}
+        </p>
+      )}
+      {promo.ads.length === 0 ? (
+        <p className="rounded-xl bg-[var(--a-raise)] px-4 py-3 text-sm text-[var(--a-ink-soft)]">
+          Hozircha reklama yo‘q – ota-onalar promokod ola olmaydi.
+        </p>
+      ) : (
+        <ul className="flex flex-col">
+          {promo.ads.map((ad) => (
+            <li
+              key={ad.id}
+              className="flex flex-col gap-3 border-b border-[var(--a-line)] py-3 last:border-0"
+            >
+              <div className="flex flex-wrap items-center gap-4">
+                <span
+                  className={clsx(
+                    'flex-1 font-bold',
+                    !ad.active && 'text-[var(--a-ink-soft)] line-through',
+                  )}
+                >
+                  {ad.title}
+                </span>
+                <span className="kd-num text-[var(--a-ink-soft)]">{Math.round(ad.duration)} s</span>
+                <span className="text-[var(--a-ink-soft)]">
+                  {ad.views} ko‘rish, {ad.completions} oxirigacha
+                </span>
+                <ActionButton
+                  onClick={() =>
+                    preview?.id === ad.id
+                      ? setPreview(null)
+                      : void promo
+                          .previewSrc(ad)
+                          .then((src) => src && setPreview({ id: ad.id, src }))
+                  }
+                >
+                  {preview?.id === ad.id ? 'Yopish' : 'Ko‘rish'}
+                </ActionButton>
+                <ActionButton onClick={() => void promo.setAdActive(ad, !ad.active)}>
+                  {ad.active ? 'To‘xtatish' : 'Yoqish'}
+                </ActionButton>
+                <ActionButton tone="danger" onClick={() => void promo.removeAd(ad)}>
+                  O‘chirish
+                </ActionButton>
+              </div>
+              {preview?.id === ad.id && (
+                <video
+                  src={preview.src}
+                  controls
+                  className="max-h-72 w-full max-w-xl rounded-xl bg-black"
+                />
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
+  )
+}
+
 /* ---------------------------------------------------------------- settings */
 
 export function SettingsSection({ data }: { data: AdminData }) {
   const [monthly, setMonthly] = useState(data.settings.prices.monthly)
-  const [yearly, setYearly] = useState(data.settings.prices.yearly)
   const [gift, setGift] = useState(data.settings.proGiftCoins)
   const [saved, setSaved] = useState(false)
+  const yearly = yearlyPrice(Math.max(0, monthly))
+  const full = Math.max(0, monthly) * 12
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     await data.actions.saveSettings({
       ...data.settings,
-      prices: { monthly: Math.max(0, monthly), yearly: Math.max(0, yearly) },
+      prices: { monthly: Math.max(0, monthly), yearly },
       proGiftCoins: Math.max(0, gift),
     })
     setSaved(true)
   }
 
-  const field = (label: string, value: number, set: (value: number) => void, suffix: string) => (
+  const field = (
+    label: string,
+    value: number,
+    set: (value: number) => void,
+    suffix: string,
+    step = 1,
+  ) => (
     <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
       {label}
       <span className="flex items-center gap-2">
         <input
           type="number"
           min={0}
-          step={1000}
+          step={step}
           value={value}
           onChange={(event) => {
             set(Number(event.target.value))
@@ -642,10 +824,22 @@ export function SettingsSection({ data }: { data: AdminData }) {
 
   return (
     <Panel title="Sozlamalar">
-      <form onSubmit={submit} className="flex flex-col gap-5">
-        <div className="flex flex-wrap gap-6">
-          {field('PRO – 1 oy narxi', monthly, setMonthly, 'so‘m')}
-          {field('PRO – 1 yil narxi', yearly, setYearly, 'so‘m')}
+      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+        <div className="flex flex-wrap items-end gap-6">
+          {field('PRO – 1 oy narxi', monthly, setMonthly, 'so‘m', 100)}
+          <div className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+            PRO – 1 yil narxi (avtomatik, −{Math.round(YEARLY_DISCOUNT * 100)}%)
+            <output
+              data-testid="yearly-price"
+              className="kd-num flex h-11 items-center rounded-lg border border-dashed border-[var(--a-line)] px-3 text-base font-bold text-[var(--a-ink)]"
+            >
+              {formatSom(yearly)} so‘m
+            </output>
+            <span className="kd-num text-xs">
+              12 × {formatSom(Math.max(0, monthly))} = {formatSom(full)} −{' '}
+              {Math.round(YEARLY_DISCOUNT * 100)}% = {formatSom(yearly)}
+            </span>
+          </div>
           {field('PRO sotib olinganda har bir bolaga', gift, setGift, 'coin sovg‘a')}
         </div>
         <div className="flex items-center gap-4">
@@ -657,7 +851,7 @@ export function SettingsSection({ data }: { data: AdminData }) {
           </button>
           {saved && (
             <span role="status" className="text-sm font-bold text-[var(--a-online)]">
-              Saqlandi. Ota-onalar yangi narxlarni ko‘radi.
+              Saqlandi. Ota-onalar endi shu narxlarni ko‘radi va to‘laydi.
             </span>
           )}
         </div>

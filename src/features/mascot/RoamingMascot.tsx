@@ -8,6 +8,16 @@ import { PetSprite } from '@/features/pets/PetSprite'
 import { useActivePet } from '@/store/progressStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
 import type { MascotMood } from './types'
+import {
+  claim,
+  clearStanding,
+  crossesAnother,
+  freeTargets,
+  othersTrips,
+  release,
+  setStanding,
+  type Point,
+} from './roamSpace'
 
 /**
  * How the robot spends its time on a page:
@@ -34,11 +44,6 @@ interface RoamingMascotProps {
   start?: 'edge' | 'first'
   /** Starts inside this `data-roam` element instead (e.g. its picture frame). */
   startAt?: string
-}
-
-interface Point {
-  x: number
-  y: number
 }
 
 type Pose = 'top' | 'point' | 'hang'
@@ -118,12 +123,14 @@ export function RoamingMascot({
     if (reduceMotion) return undefined
     const abort = new AbortController()
     const { signal } = abort
+    const me = Symbol(model)
     // Once the page is left, no more moves: the robot is gone.
     const go = (...args: Parameters<typeof body.start>) =>
       signal.aborted ? Promise.resolve() : body.start(...args)
 
     const place = (point: Point) => {
       position.current = point
+      setStanding(me, point)
       return go({ x: point.x, y: point.y, rotate: 0, scaleX: 1, scaleY: 1 }, { duration: 0 })
     }
 
@@ -133,7 +140,16 @@ export function RoamingMascot({
       const dx = to.x - from.x
       const distance = Math.hypot(dx, to.y - from.y)
       if (Math.abs(dx) > 4) setFacing(dx > 0 ? 1 : -1)
-      const lift = Math.min(160, 50 + distance * 0.25)
+      // A lower arc when another robot stands above, so it never jumps into it.
+      const others = othersTrips(me, (card) => spotOn(card, 'top', size)).map(([at]) => at)
+      let lift = Math.min(160, 50 + distance * 0.25)
+      const peak = () => ({ x: from.x + dx * 0.5, y: Math.min(from.y, to.y) - lift })
+      while (
+        lift > 12 &&
+        others.some((o) => Math.hypot(o.x - peak().x, o.y - peak().y) < size * 1.1)
+      ) {
+        lift -= 8
+      }
       const duration = Math.min(1.5, 0.55 + distance / 900)
       setMood('happy')
       await go({
@@ -151,6 +167,7 @@ export function RoamingMascot({
         transition: { duration: 0.35, ease: 'easeOut' },
       })
       position.current = to
+      setStanding(me, to)
       setMood('idle')
     }
 
@@ -231,13 +248,18 @@ export function RoamingMascot({
       let index = 0
       let visits = 0
       while (!signal.aborted) {
-        const all = list()
+        const others = othersTrips(me, (card) => spotOn(card, 'top', size))
+        const all = freeTargets(list(), me).filter(
+          (target) => !crossesAnother(position.current, spotOn(target, 'top', size), others, size),
+        )
         if (all.length === 0) {
-          await sleep(1000, signal)
+          // every card is taken by another robot: wait for one to be free
+          await sleep(800, signal)
           continue
         }
         const target =
           mode === 'tour' ? all[index % all.length]! : all[Math.floor(Math.random() * all.length)]!
+        claim(target, me)
         index += 1
         visits += 1
 
@@ -260,7 +282,11 @@ export function RoamingMascot({
           await sleep(700, signal)
         } else {
           await travel(spotOn(target, 'top', size))
-          if (visits % 4 === 0) await tumble()
+          const near = othersTrips(me, (card) => spotOn(card, 'top', size)).some(
+            ([at]) => Math.hypot(at.x - position.current.x, at.y - position.current.y) < size * 2,
+          )
+          // it only slips and falls where it cannot fall onto the other robot
+          if (visits % 4 === 0 && !near) await tumble()
           else {
             setMood(visits % 3 === 0 ? 'celebrate' : 'wave')
             await sleep(1400 + Math.random() * 1200, signal)
@@ -272,10 +298,14 @@ export function RoamingMascot({
     }
 
     void run()
-    return () => abort.abort()
+    return () => {
+      abort.abort()
+      release(me)
+      clearStanding(me)
+    }
     // facing is read only for the tumble direction; it must not restart the loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, delayMs, group, mode, reduceMotion, size, start, startAt])
+  }, [body, delayMs, group, mode, model, reduceMotion, size, start, startAt])
 
   if (reduceMotion || typeof document === 'undefined') return null
 

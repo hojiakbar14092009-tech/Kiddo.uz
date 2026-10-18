@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, CrownIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
@@ -7,12 +7,8 @@ import { ChoiceChips } from '@/features/parent/dashboard/ChoiceChips'
 import { Panel } from '@/features/parent/dashboard/Panel'
 import { formatDayMonth } from '@/lib/dates'
 import { PAYMENT_PROVIDERS, payMock, type PaymentProvider } from '@/services/payments/mockPayment'
-import {
-  isProActive,
-  useSubscriptionStore,
-  type PlanId,
-  type PromoResult,
-} from '@/store/subscriptionStore'
+import { PromoPanel } from '@/features/promo/PromoPanel'
+import { isProActive, useSubscriptionStore, type PlanId } from '@/store/subscriptionStore'
 import { findPlan, formatSum, usePlans } from './plans'
 import { recordProPurchase } from './purchase'
 import { ProCelebration } from './ProCelebration'
@@ -38,8 +34,6 @@ export function ProSection() {
   const [planId, setPlanId] = useState<PlanId>('yearly')
   const [provider, setProvider] = useState<PaymentProvider>('click')
   const [payState, setPayState] = useState<PayState>('idle')
-  const [promo, setPromo] = useState('')
-  const [promoResult, setPromoResult] = useState<PromoResult | null>(null)
   const [celebrating, setCelebrating] = useState(false)
   const plans = usePlans()
   const plan = findPlan(planId, plans)
@@ -56,18 +50,6 @@ export function ProSection() {
     setGift(recordProPurchase(receipt.plan, provider, plan.price))
     setPayState('paid')
     setCelebrating(true)
-  }
-
-  const redeem = (event: FormEvent) => {
-    event.preventDefault()
-    if (!promo.trim()) return
-    const result = subscription.redeemPromo(promo)
-    setPromoResult(result)
-    if (result === 'ok') {
-      setPromo('')
-      setGift(0)
-      setCelebrating(true)
-    }
   }
 
   return (
@@ -211,39 +193,12 @@ export function ProSection() {
         )}
       </Panel>
 
-      <Panel title={t('pro.promo')}>
-        <form onSubmit={redeem} className="flex flex-wrap items-end gap-3">
-          <label className="flex min-w-48 flex-1 flex-col gap-1 font-semibold">
-            {t('pro.promoLabel')}
-            <input
-              value={promo}
-              autoCapitalize="characters"
-              autoComplete="off"
-              onChange={(event) => {
-                setPromo(event.target.value)
-                setPromoResult(null)
-              }}
-              className="h-12 rounded-2xl border-2 border-line-strong bg-cream px-4 font-normal uppercase"
-            />
-          </label>
-          <Button type="submit" variant="soft" size="md">
-            {t('pro.apply')}
-          </Button>
-        </form>
-        {promoResult && (
-          <p
-            role="status"
-            className={clsx(
-              'rounded-2xl px-4 py-2',
-              promoResult === 'ok'
-                ? 'bg-primary-soft text-primary-ink'
-                : 'bg-oops-soft text-oops-ink',
-            )}
-          >
-            {t(`pro.promoResult.${promoResult}`)}
-          </p>
-        )}
-      </Panel>
+      <PromoPanel
+        onRedeemed={() => {
+          setGift(0)
+          setCelebrating(true)
+        }}
+      />
 
       <Panel title={t('pro.demo')}>
         <div className="flex items-center justify-between gap-4">

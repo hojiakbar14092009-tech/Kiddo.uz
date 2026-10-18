@@ -7,31 +7,27 @@ from playwright.sync_api import sync_playwright
 
 OUT = Path(__file__).resolve().parent.parent / 'public' / 'icons'
 
-# The robot head on Kiddo's cream background. `pad` keeps the head inside the
-# maskable safe zone (the inner 80 %) when the OS crops the icon to a circle.
+# The app mark: the robot mascot's head on Kiddo's teal tile (same drawing as
+# KiddoMark and favicon.svg). `pad` shrinks the head into the maskable safe
+# zone (the inner 80 %) when the OS crops the icon to a circle.
+HEAD_DEFS = '<defs><linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22C3A6"/><stop offset="1" stop-color="#0B6F62"/></linearGradient><radialGradient id="s" cx="38%" cy="26%" r="80%"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#F3F0F8"/><stop offset="1" stop-color="#D3CCE2"/></radialGradient><linearGradient id="v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4C3F66"/><stop offset="1" stop-color="#1C162D"/></linearGradient></defs>'
+HEAD = '<g transform="translate(0 40)"><rect x="246" y="62" width="20" height="74" rx="10" fill="#E3F7F2"/><circle cx="256" cy="56" r="28" fill="#FFC93C" stroke="#FFFFFF" stroke-width="9"/><ellipse cx="108" cy="250" rx="40" ry="70" fill="#9BE8D6" stroke="#FFFFFF" stroke-width="10"/><ellipse cx="404" cy="250" rx="40" ry="70" fill="#9BE8D6" stroke="#FFFFFF" stroke-width="10"/><rect x="122" y="118" width="268" height="246" rx="116" fill="url(#s)"/><ellipse cx="200" cy="148" rx="46" ry="12" fill="#FFFFFF" opacity="0.95"/><rect x="154" y="166" width="204" height="164" rx="70" fill="url(#v)"/><path d="M186 190 Q256 172 326 190" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="10" fill="none" stroke-linecap="round"/><rect x="196" y="208" width="32" height="50" rx="16" fill="#7FF0FF"/><rect x="284" y="208" width="32" height="50" rx="16" fill="#7FF0FF"/><circle cx="219" cy="220" r="6" fill="#FFFFFF"/><circle cx="307" cy="220" r="6" fill="#FFFFFF"/><path d="M220 284 Q256 312 292 284" stroke="#7FF0FF" stroke-width="12" fill="none" stroke-linecap="round"/></g>'
+
+
 def icon_svg(size: int, pad: float, rounded: bool) -> str:
-    radius = size * 0.22 if rounded else 0
-    inner = size * (1 - 2 * pad)
-    offset = size * pad
-    scale = inner / 64
+    radius = size * 0.25 if rounded else 0
+    scale = size / 512 * (1 - 2 * pad) / 0.76
+    offset = size / 2 - 256 * scale
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 {size} {size}">
-  <rect width="{size}" height="{size}" rx="{radius}" fill="#FFF8EC"/>
-  <g transform="translate({offset} {offset}) scale({scale})">
-    <ellipse cx="7" cy="33" rx="5.5" ry="10" fill="#13917E"/>
-    <ellipse cx="57" cy="33" rx="5.5" ry="10" fill="#13917E"/>
-    <rect x="31" y="2" width="2.5" height="9" rx="1.2" fill="#CFC8DD"/>
-    <circle cx="32.2" cy="3" r="3.4" fill="#13917E"/>
-    <rect x="7" y="9" width="50" height="46" rx="22" fill="#FFFFFF" stroke="#D9D3E4" stroke-width="1.5"/>
-    <rect x="13" y="17" width="38" height="30" rx="13" fill="#2B2240"/>
-    <rect x="21" y="25" width="6" height="9" rx="3" fill="#7FF0FF"/>
-    <rect x="37" y="25" width="6" height="9" rx="3" fill="#7FF0FF"/>
-    <path d="M26 39 Q32 43.5 38 39" stroke="#7FF0FF" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-  </g>
+  {HEAD_DEFS}
+  <rect width="{size}" height="{size}" rx="{radius}" fill="url(#t)"/>
+  <g transform="translate({offset} {offset}) scale({scale})">{HEAD}</g>
 </svg>'''
 
+
 ICONS = [
-    ('icon-192.png', 192, 0.12, True),
-    ('icon-512.png', 512, 0.12, True),
+    ('icon-192.png', 192, 0.12, False),
+    ('icon-512.png', 512, 0.12, False),
     ('maskable-512.png', 512, 0.2, False),
     ('apple-touch-icon.png', 180, 0.12, False),
 ]

@@ -7,18 +7,20 @@ import type { Payment } from '@/store/paymentStore'
 import './admin.css'
 import { AdminBackground } from './AdminBackground'
 import { useAdminData, type AdminData } from './adminData'
+import { useAdminPromo } from './adminPromo'
 import { AdminMascot, NaviFigure, type MascotNote } from './AdminMascot'
 import {
   ChildrenSection,
   Overview,
   PaymentsSection,
   PromoSection,
+  AdsSection,
   SettingsSection,
 } from './AdminSections'
 import { ADMIN_PIN, useAdminStore, type AdminSession } from './adminSession'
 import { formatSom, revenueTotals } from './revenue'
 
-type Section = 'overview' | 'children' | 'payments' | 'promo' | 'settings'
+type Section = 'overview' | 'children' | 'payments' | 'promo' | 'ads' | 'settings'
 
 const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
   {
@@ -35,6 +37,7 @@ const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
   },
   { id: 'payments', label: 'To‘lovlar', icon: <IconPath d="M3 6h18v12H3zm0 4h18M7 15h3" /> },
   { id: 'promo', label: 'Promokodlar', icon: <IconPath d="M4 8V4h4l12 12-4 4L4 8m4-1h.01" /> },
+  { id: 'ads', label: 'Reklamalar', icon: <IconPath d="M3 5h18v12H3zm7 4v4l4-2zM8 21h8" /> },
   {
     id: 'settings',
     label: 'Sozlamalar',
@@ -284,6 +287,7 @@ function useNaviNotes(data: AdminData) {
 function AdminConsole({ session }: { session: AdminSession }) {
   const navigate = useNavigate()
   const data = useAdminData(session.source)
+  const promo = useAdminPromo(session.source)
   const [section, setSection] = useState<Section>('overview')
   const theme = useAdminStore((state) => state.theme)
   const toggleTheme = useAdminStore((state) => state.toggleTheme)
@@ -412,9 +416,10 @@ function AdminConsole({ session }: { session: AdminSession }) {
               {section === 'overview' && <Overview data={data} />}
               {section === 'children' && <ChildrenSection data={data} />}
               {section === 'payments' && <PaymentsSection data={data} />}
-              {section === 'promo' && <PromoSection data={data} />}
+              {section === 'promo' && <PromoSection promo={promo} />}
+              {section === 'ads' && <AdsSection promo={promo} />}
               {section === 'settings' && (
-                <SettingsSection key={JSON.stringify(data.settings)} data={data} />
+                <SettingsSection key={data.loading ? 'loading' : data.source} data={data} />
               )}
             </>
           )}
