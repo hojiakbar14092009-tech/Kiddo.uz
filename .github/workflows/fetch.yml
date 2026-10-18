@@ -1,0 +1,27 @@
+name: fetch-promo
+on:
+  push:
+    branches: [promo-media]
+    paths: [urls.txt]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: download finished clips
+        run: |
+          mkdir -p final
+          while read name url; do
+            [ -z "$name" ] && continue
+            curl -sfL --retry 3 -o "final/$name" "$url"
+            ls -l "final/$name"
+          done < urls.txt
+      - name: commit
+        run: |
+          git config user.name "kiddo-bot"
+          git config user.email "kiddo-bot@users.noreply.github.com"
+          git add final
+          git commit -m "Finished promo clips" || exit 0
+          git push
