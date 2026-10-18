@@ -55,16 +55,9 @@ export function MemoryGame() {
 
   useEffect(() => {
     if (!complete) return undefined
-    const timer = setTimeout(
-      () =>
-        finish(
-          state.cards.filter((card) => card.face === 'letter').map((card) => card.letter.id),
-          state.mistakes,
-        ),
-      FINISH_DELAY_MS,
-    )
+    const timer = setTimeout(() => finish(state.matched, state.mistakes), FINISH_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [complete, finish, state.cards, state.mistakes])
+  }, [complete, finish, state.matched, state.mistakes])
 
   const flip = (index: number, card: MemoryCard) => {
     const verdict = judgeFlip(state, index)
@@ -93,11 +86,7 @@ export function MemoryGame() {
                 type="button"
                 onClick={() => flip(index, card)}
                 aria-label={
-                  faceUp
-                    ? card.face === 'letter'
-                      ? card.letter.upper
-                      : card.letter.word
-                    : t('task.memoryCard')
+                  faceUp ? `${card.letter.upper} — ${card.letter.word}` : t('task.memoryCard')
                 }
                 aria-pressed={faceUp}
                 animate={{ rotateY: faceUp ? 0 : 180 }}
@@ -114,15 +103,17 @@ export function MemoryGame() {
                 )}
               >
                 {faceUp ? (
-                  card.face === 'letter' ? (
-                    <span className="font-display text-[clamp(3rem,9vw,5rem)] leading-none font-extrabold">
+                  <span className="flex flex-col items-center gap-1 sm:gap-2">
+                    <span className="font-display text-[clamp(2rem,6vw,3.75rem)] leading-none font-extrabold">
                       {card.letter.upper}
                     </span>
-                  ) : (
-                    <span aria-hidden="true" className="text-[clamp(3rem,9vw,5rem)] leading-none">
+                    <span
+                      aria-hidden="true"
+                      className="text-[clamp(2rem,6vw,3.75rem)] leading-none"
+                    >
                       {card.letter.emoji}
                     </span>
-                  )
+                  </span>
                 ) : (
                   <span
                     aria-hidden="true"

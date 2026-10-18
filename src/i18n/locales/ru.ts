@@ -73,7 +73,7 @@ export const ru: Translation = {
   },
   task: {
     memoryTitle: 'Найди пару',
-    memoryPrompt: 'Соедини букву с её картинкой!',
+    memoryPrompt: 'Найди две одинаковые карточки!',
     memoryCard: 'Закрытая карточка',
     traceTitle: 'Напиши букву',
     tracePrompt: 'Обведи букву {{letter}} пальцем!',

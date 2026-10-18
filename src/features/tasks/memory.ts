@@ -2,10 +2,10 @@ import type { LetterEntry } from '@/content/alphabet'
 import { shuffle, type RandomSource } from '@/lib/random'
 import type { MistakeDetail } from '@/store/progressStore'
 
+/** Every letter has two identical cards: the letter with its picture. */
 export interface MemoryCard {
   key: string
   letter: LetterEntry
-  face: 'letter' | 'picture'
 }
 
 export interface MemoryState {
@@ -27,8 +27,8 @@ export function createMemoryGame(
   random: RandomSource,
 ): MemoryState {
   const cards = letters.flatMap((letter): MemoryCard[] => [
-    { key: `${letter.id}-letter`, letter, face: 'letter' },
-    { key: `${letter.id}-picture`, letter, face: 'picture' },
+    { key: `${letter.id}-1`, letter },
+    { key: `${letter.id}-2`, letter },
   ])
   return { cards: shuffle(cards, random), open: [], matched: [], seen: [], mistakes: [] }
 }

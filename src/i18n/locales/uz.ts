@@ -71,7 +71,7 @@ export const uz = {
   },
   task: {
     memoryTitle: 'Juftini top',
-    memoryPrompt: 'Harfni o‘z rasmi bilan juftla!',
+    memoryPrompt: 'Bir xil ikkita kartani top!',
     memoryCard: 'Yopiq karta',
     traceTitle: 'Harfni yoz',
     tracePrompt: '{{letter}} harfini barmog‘ing bilan chiz!',

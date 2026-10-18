@@ -73,7 +73,7 @@ export const en: Translation = {
   },
   task: {
     memoryTitle: 'Find the pair',
-    memoryPrompt: 'Match each letter with its picture!',
+    memoryPrompt: 'Find two cards that are the same!',
     memoryCard: 'Hidden card',
     traceTitle: 'Write the letter',
     tracePrompt: 'Trace the letter {{letter}} with your finger!',
