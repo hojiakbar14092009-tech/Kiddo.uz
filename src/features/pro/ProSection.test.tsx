@@ -22,15 +22,15 @@ describe('PRO in the parent area', () => {
     useSubscriptionStore.setState({ usedPromoCodes: [] })
   })
 
-  it('is only reachable through the parent gate', () => {
+  it('is only reachable through the parent gate', async () => {
     useParentGateStore.setState({ openedAt: null })
-    renderRoute('/parent/dashboard?tab=pro')
+    await renderRoute('/parent/dashboard?tab=pro')
     expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
     expect(screen.queryByText('PRO olish')).not.toBeInTheDocument()
   })
 
   it('buys a plan with a test payment', async () => {
-    const { user } = renderRoute('/parent/dashboard?tab=pro')
+    const { user } = await renderRoute('/parent/dashboard?tab=pro')
     expect(screen.getByText('Bepul versiya')).toBeInTheDocument()
     await user.click(screen.getByRole('radio', { name: /1 oy/ }))
     await user.click(screen.getByRole('radio', { name: 'Payme' }))
@@ -44,7 +44,7 @@ describe('PRO in the parent area', () => {
   })
 
   it('redeems a promo code once', async () => {
-    const { user } = renderRoute('/parent/dashboard?tab=pro')
+    const { user } = await renderRoute('/parent/dashboard?tab=pro')
     const input = screen.getByRole('textbox', { name: 'Kodni kiriting' })
     await user.type(input, 'kiddo7')
     await user.click(screen.getByRole('button', { name: 'Qo‘llash' }))
@@ -56,7 +56,7 @@ describe('PRO in the parent area', () => {
   })
 
   it('turns demo PRO on and off, but never over a paid plan', async () => {
-    const { user } = renderRoute('/parent/dashboard?tab=pro')
+    const { user } = await renderRoute('/parent/dashboard?tab=pro')
     const toggle = screen.getByRole('switch', { name: /PRO’ni sinab ko‘rish/ })
     await user.click(toggle)
     expect(useSubscriptionStore.getState().source).toBe('demo')

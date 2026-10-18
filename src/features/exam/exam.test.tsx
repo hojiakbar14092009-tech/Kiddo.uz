@@ -9,7 +9,7 @@ import { renderRoute } from '@/test/renderRoute'
 import { EXAM_ROUNDS, examLetters, firstTryCorrect, generateExamRounds } from './exam'
 
 describe('exam rounds', () => {
-  it('asks about ten different letters and never about silent signs', () => {
+  it('asks about ten different letters and never about silent signs', async () => {
     for (const language of ['uz', 'ru', 'en'] as const) {
       const rounds = generateExamRounds(getAlphabet(language).letters, seededRandom(7))
       const ids = rounds.map((round) => round.target.id)
@@ -20,7 +20,7 @@ describe('exam rounds', () => {
     }
   })
 
-  it('counts rounds answered right on the first tap', () => {
+  it('counts rounds answered right on the first tap', async () => {
     expect(firstTryCorrect([])).toBe(10)
     expect(
       firstTryCorrect([
@@ -40,8 +40,8 @@ describe('Exam page', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('stays locked until every letter is learned', () => {
-    renderRoute('/exam')
+  it('stays locked until every letter is learned', async () => {
+    await renderRoute('/exam')
     const total = examLetters(getAlphabet('uz').letters).length
     expect(screen.getByRole('progressbar', { name: `0 / ${total} harf` })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Boshladik!' })).not.toBeInTheDocument()
@@ -53,7 +53,7 @@ describe('Exam page', () => {
       byChild: { [GUEST_KEY]: { ...EMPTY_PROGRESS, learned: { uz: learned } } },
     })
     vi.useFakeTimers({ shouldAdvanceTime: true })
-    const { user } = renderRoute('/exam', { advanceTimers: vi.advanceTimersByTime })
+    const { user } = await renderRoute('/exam', { advanceTimers: vi.advanceTimersByTime })
     await user.click(screen.getByRole('button', { name: 'Boshladik!' }))
 
     for (let round = 0; round < EXAM_ROUNDS; round += 1) {

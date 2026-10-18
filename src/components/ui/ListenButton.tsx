@@ -14,6 +14,7 @@ interface ListenButtonProps {
 export function ListenButton({ onListen, onLocked, label }: ListenButtonProps) {
   const { t } = useTranslation()
   const isPro = useIsPro()
+  const text = label ?? t('common.listenAgain')
 
   return (
     <span className="relative inline-flex">
@@ -21,11 +22,15 @@ export function ListenButton({ onListen, onLocked, label }: ListenButtonProps) {
         icon={<SpeakerIcon size={30} />}
         onClick={isPro ? onListen : onLocked}
         variant={isPro ? 'primary' : 'soft'}
+        aria-label={isPro ? undefined : `${text} (${t('tier.proFeature')})`}
       >
-        {label ?? t('common.listenAgain')}
+        {text}
       </Button>
       {!isPro && (
-        <span className="pointer-events-none absolute -top-3 -right-2 inline-flex items-center gap-1 rounded-full bg-coin px-2 py-0.5 font-display text-sm font-bold text-ink shadow-[0_3px_0_var(--color-coin-shadow)]">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-3 -right-2 inline-flex items-center gap-1 rounded-full bg-coin px-2 py-0.5 font-display text-sm font-bold text-ink shadow-[0_3px_0_var(--color-coin-shadow)]"
+        >
           <CrownIcon size={14} />
           {t('tier.proFeature')}
         </span>

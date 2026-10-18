@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentGateStore, useParentStore } from '@/store/parentStore'
@@ -6,7 +6,7 @@ import { useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
 
-type User = ReturnType<typeof renderRoute>['user']
+type User = Awaited<ReturnType<typeof renderRoute>>['user']
 
 /** With Math.random() = 0 the gate always asks 3 × 3. */
 async function solveGate(user: User, answer = '9') {
@@ -24,7 +24,7 @@ describe('Parent gate', () => {
   afterEach(() => vi.restoreAllMocks())
 
   it('keeps the parent area closed until the sum is solved', async () => {
-    const { router, user } = renderRoute('/parent/dashboard')
+    const { router, user } = await renderRoute('/parent/dashboard')
     expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
     expect(screen.getByText('3 ko‘paytirish 3 nechaga teng?')).toBeInTheDocument()
 
@@ -33,17 +33,17 @@ describe('Parent gate', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument()
 
     await solveGate(user)
-    expect(router.state.location.pathname).toBe('/parent/login')
+    await waitFor(() => expect(router.state.location.pathname).toBe('/parent/login'))
   })
 
   it('goes back to the child area on cancel', async () => {
-    const { router, user } = renderRoute('/parent')
+    const { router, user } = await renderRoute('/parent')
     await user.click(screen.getByRole('button', { name: 'Orqaga' }))
     expect(router.state.location.pathname).toBe('/home')
   })
 
   it('is reached from the home screen', async () => {
-    const { router, user } = renderRoute('/home')
+    const { router, user } = await renderRoute('/home')
     await user.click(screen.getByRole('link', { name: 'Ota-ona bo‘limi' }))
     expect(router.state.location.pathname).toBe('/parent')
     expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
@@ -60,11 +60,11 @@ describe('Parent dashboard', () => {
   })
 
   it('enters demo mode and starts by adding a child', async () => {
-    const { router, user } = renderRoute('/parent/login')
+    const { router, user } = await renderRoute('/parent/login')
     await user.click(screen.getByRole('button', { name: 'Demo rejimda kirish' }))
-    expect(router.state.location.pathname).toBe('/parent/dashboard')
+    await waitFor(() => expect(router.state.location.pathname).toBe('/parent/dashboard'))
 
-    await user.type(screen.getByRole('textbox', { name: 'Ismi' }), 'Ali')
+    await user.type(await screen.findByRole('textbox', { name: 'Ismi' }), 'Ali')
     await user.click(screen.getByRole('radio', { name: '4' }))
     await user.click(screen.getByRole('radio', { name: 'O‘g‘il' }))
     await user.click(screen.getByRole('radio', { name: '45 daqiqa' }))
@@ -77,13 +77,13 @@ describe('Parent dashboard', () => {
 
   it('does not save a profile without a name', async () => {
     useParentStore.setState({ session: { mode: 'demo' } })
-    const { user } = renderRoute('/parent/dashboard')
+    const { user } = await renderRoute('/parent/dashboard')
     await user.click(screen.getByRole('button', { name: 'Saqlash' }))
     expect(screen.getByText('Ismni yozing.')).toBeInTheDocument()
     expect(useFamilyStore.getState().children).toHaveLength(0)
   })
 
-  it('reports today’s work and which letters get mixed up', () => {
+  it('reports today’s work and which letters get mixed up', async () => {
     useParentStore.setState({ session: { mode: 'demo' } })
     const ali = useFamilyStore.getState().addChild({ name: 'Ali', age: 5, gender: 'boy' })
     useProgressStore.getState().completeTask(ali.id, {
@@ -93,7 +93,7 @@ describe('Parent dashboard', () => {
       mistakeDetails: [{ targetId: 'ch', chosenId: 'sh' }],
     })
 
-    renderRoute('/parent/dashboard')
+    await renderRoute('/parent/dashboard')
     const today = screen.getByRole('heading', { name: 'Bugun' }).closest('section')!
     expect(within(today).getByText('Vazifalar').nextSibling).toHaveTextContent('1')
     expect(within(today).getByText('Coinlar').nextSibling).toHaveTextContent('5')
@@ -103,7 +103,7 @@ describe('Parent dashboard', () => {
   it('asks before deleting a profile', async () => {
     useParentStore.setState({ session: { mode: 'demo' } })
     useFamilyStore.getState().addChild({ name: 'Ali', age: 5, gender: 'boy' })
-    const { user } = renderRoute('/parent/dashboard?tab=profiles')
+    const { user } = await renderRoute('/parent/dashboard?tab=profiles')
     await user.click(screen.getByRole('button', { name: 'Ali profilini o‘chirish' }))
     expect(useFamilyStore.getState().children).toHaveLength(1)
     await user.click(screen.getByRole('button', { name: 'Ha, o‘chirish' }))
@@ -115,14 +115,14 @@ describe('Parent dashboard', () => {
     const ali = useFamilyStore.getState().addChild({ name: 'Ali', age: 5, gender: 'boy' })
     useFamilyStore.getState().setActiveChild(ali.id)
 
-    const parent = renderRoute('/parent/dashboard?tab=homework')
+    const parent = await renderRoute('/parent/dashboard?tab=homework')
     await parent.user.click(screen.getByRole('button', { name: 'Ch' }))
     await parent.user.click(screen.getByRole('button', { name: 'Aliga berish' }))
     const homework = useFamilyStore.getState().children[0]?.homework
     expect(homework).toMatchObject({ language: 'uz', game: 'find-letter', letterIds: ['ch'] })
     parent.unmount()
 
-    const child = renderRoute('/home')
+    const child = await renderRoute('/home')
     await child.user.click(screen.getByRole('link', { name: /Uy vazifasi: Ch/ }))
     expect(child.router.state.location.search).toBe(`?homework=${homework!.id}`)
     // The homework letter is practised in the game.

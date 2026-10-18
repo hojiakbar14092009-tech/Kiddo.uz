@@ -8,20 +8,20 @@ describe('Alphabet', () => {
     useSettingsStore.setState({ language: 'uz' })
   })
 
-  it('shows every letter of the chosen language', () => {
-    renderRoute('/alphabet')
+  it('shows every letter of the chosen language', async () => {
+    await renderRoute('/alphabet')
     expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(30)
     expect(screen.getByRole('button', { name: 'Ng — dengiz' })).toBeInTheDocument()
   })
 
   it('switches the alphabet when the language changes', async () => {
-    const { user } = renderRoute('/alphabet')
+    const { user } = await renderRoute('/alphabet')
     await user.click(screen.getByRole('button', { name: 'Русский' }))
     expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(33)
   })
 
   it('opens a letter page with the letter highlighted inside the word', async () => {
-    const { router, user } = renderRoute('/alphabet')
+    const { router, user } = await renderRoute('/alphabet')
     await user.click(screen.getByRole('button', { name: 'Ng — dengiz' }))
 
     expect(router.state.location.pathname).toBe('/alphabet/ng')
@@ -30,13 +30,13 @@ describe('Alphabet', () => {
   })
 
   it('moves to the next letter', async () => {
-    const { router, user } = renderRoute('/alphabet/a')
+    const { router, user } = await renderRoute('/alphabet/a')
     await user.click(screen.getByRole('link', { name: 'Keyingi harf' }))
     expect(router.state.location.pathname).toBe('/alphabet/b')
   })
 
-  it('returns to the alphabet for an unknown letter', () => {
-    const { router } = renderRoute('/alphabet/unknown')
+  it('returns to the alphabet for an unknown letter', async () => {
+    const { router } = await renderRoute('/alphabet/unknown')
     expect(router.state.location.pathname).toBe('/alphabet')
   })
 })
@@ -47,7 +47,7 @@ describe('Numbers', () => {
   })
 
   it('switches to the numbers tab and opens a number', async () => {
-    const { router, user } = renderRoute('/alphabet')
+    const { router, user } = await renderRoute('/alphabet')
     await user.click(screen.getByRole('tab', { name: /123/ }))
     expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(10)
 
@@ -56,7 +56,7 @@ describe('Numbers', () => {
   })
 
   it('counts the pictures one by one and celebrates at the end', async () => {
-    const { user } = renderRoute('/alphabet/num-3')
+    const { user } = await renderRoute('/alphabet/num-3')
     const pictures = screen.getAllByRole('button', { name: /-rasm$/ })
     expect(pictures).toHaveLength(3)
 

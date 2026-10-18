@@ -16,14 +16,14 @@ function usedToday(minutes: number) {
 }
 
 describe('screenTimeStatus', () => {
-  it('counts extra minutes and warns shortly before the end', () => {
+  it('counts extra minutes and warns shortly before the end', async () => {
     expect(screenTimeStatus(10, 30, 0)).toMatchObject({ over: false, warn: false, remaining: 20 })
     expect(screenTimeStatus(28.5, 30, 0)).toMatchObject({ over: false, warn: true })
     expect(screenTimeStatus(30, 30, 0)).toMatchObject({ over: true, warn: false, remaining: 0 })
     expect(screenTimeStatus(30, 30, 10)).toMatchObject({ over: false, limit: 40 })
   })
 
-  it('lets a started game and its reward finish', () => {
+  it('lets a started game and its reward finish', async () => {
     expect(mayFinishHere('/tasks/trace')).toBe(true)
     expect(mayFinishHere('/reward')).toBe(true)
     expect(mayFinishHere('/home')).toBe(false)
@@ -41,29 +41,29 @@ describe('Rest screen', () => {
   })
   afterEach(() => vi.restoreAllMocks())
 
-  it('takes over once the daily limit is used up', () => {
+  it('takes over once the daily limit is used up', async () => {
     usedToday(30)
-    const { router } = renderRoute('/home')
+    const { router } = await renderRoute('/home')
     expect(router.state.location.pathname).toBe('/rest')
     expect(screen.getByRole('heading', { name: 'Endi dam olamiz!' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Bosh sahifa' })).not.toBeInTheDocument()
   })
 
-  it('lets a game in progress finish', () => {
+  it('lets a game in progress finish', async () => {
     usedToday(30)
-    const { router } = renderRoute('/tasks/trace')
+    const { router } = await renderRoute('/tasks/trace')
     expect(router.state.location.pathname).toBe('/tasks/trace')
   })
 
-  it('warns gently two minutes before', () => {
+  it('warns gently two minutes before', async () => {
     usedToday(28.5)
-    renderRoute('/home')
+    await renderRoute('/home')
     expect(screen.getByText(/Yana 2 daqiqadan keyin dam olamiz/)).toBeInTheDocument()
   })
 
   it('only a parent can give extra time', async () => {
     usedToday(30)
-    const { router, user } = renderRoute('/rest')
+    const { router, user } = await renderRoute('/rest')
     await user.click(screen.getByRole('button', { name: 'Ota-onalar uchun' }))
     await user.click(screen.getByRole('button', { name: '9' }))
     await user.click(screen.getByRole('button', { name: 'Tekshirish' }))
@@ -71,11 +71,11 @@ describe('Rest screen', () => {
     expect(router.state.location.pathname).toBe('/home')
   })
 
-  it('counts time only while the screen is visible', () => {
-    vi.useFakeTimers()
+  it('counts time only while the screen is visible', async () => {
     Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true })
     usedToday(0)
-    renderRoute('/home')
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    await renderRoute('/home')
     act(() => vi.advanceTimersByTime(60_000))
     expect(useProgressStore.getState().byChild[GUEST_KEY]?.minutesByDay[dayKey()]).toBe(1)
 

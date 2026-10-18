@@ -6,6 +6,7 @@ import { SegmentedTabs } from '@/components/ui/SegmentedTabs'
 import { tabPanelProps } from '@/components/ui/tabPanel'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { signOutCloud } from '@/services/supabase/auth'
+import { useSyncStore } from '@/services/sync/syncQueue'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
 import { ProSection } from '@/features/pro/ProSection'
@@ -46,6 +47,8 @@ export function ParentDashboardPage() {
 
   const leave = async () => {
     if (session?.mode === 'cloud') await signOutCloud()
+    // Unsent cloud changes belong to this account; they must never reach the next one.
+    useSyncStore.getState().clear()
     signOut()
     navigate('/parent/login', { replace: true })
   }
@@ -110,7 +113,13 @@ export function ParentDashboardPage() {
 
         <div {...tabPanelProps('parent', tab)}>
           {tab === 'profiles' && (
-            <ProfilesSection onCreated={(created) => setSelectedId(created.id)} />
+            <ProfilesSection
+              onCreated={(created) => {
+                setSelectedId(created.id)
+                // Stay on the list, so the new profile is visible at once.
+                setParams({ tab: 'profiles' }, { replace: true })
+              }}
+            />
           )}
           {tab === 'report' && child && <ReportSection child={child} />}
           {tab === 'homework' && child && <HomeworkSection child={child} />}

@@ -2,6 +2,7 @@ import type { Translation } from './uz'
 
 export const ru: Translation = {
   common: {
+    loading: 'Загрузка…',
     appName: 'Kiddo',
     home: 'Главная',
     back: 'Назад',

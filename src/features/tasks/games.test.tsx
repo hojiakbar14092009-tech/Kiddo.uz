@@ -24,7 +24,7 @@ describe('find-letter game', () => {
   afterEach(() => vi.useRealTimers())
 
   it('plays five rounds without mistakes and pays 5 coins plus the daily gift', async () => {
-    const { router, user } = renderRoute('/tasks/find-letter', {
+    const { router, user } = await renderRoute('/tasks/find-letter', {
       advanceTimers: vi.advanceTimersByTime,
     })
 
@@ -40,7 +40,9 @@ describe('find-letter game', () => {
   })
 
   it('encourages after a wrong answer and pays 3 coins at the end', async () => {
-    const { user } = renderRoute('/tasks/find-letter', { advanceTimers: vi.advanceTimersByTime })
+    const { user } = await renderRoute('/tasks/find-letter', {
+      advanceTimers: vi.advanceTimersByTime,
+    })
 
     const target = currentTargetLetter()
     const wrong = screen
@@ -63,19 +65,19 @@ describe('find-letter game', () => {
 describe('other games', () => {
   beforeEach(() => useSettingsStore.setState({ language: 'en' }))
 
-  it('deals four pairs of hidden cards in the memory game', () => {
-    renderRoute('/tasks/memory')
+  it('deals four pairs of hidden cards in the memory game', async () => {
+    await renderRoute('/tasks/memory')
     expect(screen.getAllByRole('button', { name: 'Hidden card' })).toHaveLength(8)
   })
 
-  it('shows a tracing area in the writing game', () => {
-    renderRoute('/tasks/trace')
+  it('shows a tracing area in the writing game', async () => {
+    await renderRoute('/tasks/trace')
     expect(screen.getByRole('img', { name: /Space to trace the letter/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Done' })).toBeInTheDocument()
   })
 
-  it('sends unknown games home', () => {
-    const { router } = renderRoute('/tasks/unknown')
+  it('sends unknown games home', async () => {
+    const { router } = await renderRoute('/tasks/unknown')
     expect(router.state.location.pathname).toBe('/home')
   })
 })

@@ -1,5 +1,6 @@
 export const uz = {
   common: {
+    loading: 'Yuklanmoqda…',
     appName: 'Kiddo',
     home: 'Bosh sahifa',
     back: 'Orqaga',

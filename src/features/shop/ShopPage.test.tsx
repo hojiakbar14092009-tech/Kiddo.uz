@@ -18,7 +18,7 @@ describe('Shop', () => {
   })
 
   it('asks before spending coins, then puts the item on', async () => {
-    const { user } = renderRoute('/shop')
+    const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('button', { name: 'Kepka — 15 coin' }))
 
     const dialog = screen.getByRole('dialog', { name: 'Kepka olamizmi?' })
@@ -36,7 +36,7 @@ describe('Shop', () => {
   })
 
   it('spends nothing when the child says no', async () => {
-    const { user } = renderRoute('/shop')
+    const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('button', { name: 'Gul — 10 coin' }))
     await user.click(screen.getByRole('button', { name: 'Yo‘q' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -45,7 +45,7 @@ describe('Shop', () => {
   })
 
   it('encourages instead of buying when coins are short', async () => {
-    const { user } = renderRoute('/shop')
+    const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('button', { name: 'Toj — Yana 20 coin' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByText('Yana 20 coin yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
@@ -53,7 +53,7 @@ describe('Shop', () => {
   })
 
   it('shows the sticker album with empty slots', async () => {
-    const { user } = renderRoute('/shop')
+    const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('tab', { name: /Stikerlar/ }))
     expect(screen.getByText(`1 / ${STICKERS.length}`)).toBeInTheDocument()
     expect(screen.getByText(STICKERS[0]!.emoji)).toBeInTheDocument()
