@@ -2,7 +2,7 @@ import { createAlphabet } from './types'
 
 /** Uzbek Latin alphabet (29 letters incl. the tutuq belgisi) plus the Ng digraph. */
 export const uzAlphabet = createAlphabet('uz', [
-  ['a', 'A', 'anor', '🍎'],
+  ['a', 'A', 'ari', '🐝'],
   ['b', 'B', 'banan', '🍌'],
   ['d', 'D', 'daftar', '📓'],
   ['e', 'E', 'eshik', '🚪'],

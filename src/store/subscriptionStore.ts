@@ -18,12 +18,27 @@ interface SubscriptionState {
   /** ISO date when PRO ends; `null` together with a plan means it never ends. */
   expiresAt: string | null
   source: ProSource | null
+  /** Promo codes already used on this device; each works once. */
+  usedPromoCodes: string[]
   activatePlan: (plan: PlanId, source: ProSource, now?: Date) => void
   /** Adds PRO time, e.g. from a promo code. Extends an active subscription. */
   grantDays: (days: number, source: ProSource, now?: Date) => void
   /** Developer/test switch from the parent area. */
   setDemoPro: (enabled: boolean) => void
   cancel: () => void
+  redeemPromo: (code: string, now?: Date) => PromoResult
+}
+
+export type PromoResult = 'ok' | 'invalid' | 'used' | 'lifetime'
+
+/** Promo codes and the PRO days they give. Codes are case-insensitive. */
+export const PROMO_CODES: Readonly<Record<string, number>> = {
+  KIDDO7: 7,
+  BOLAJON30: 30,
+}
+
+export function normalizePromo(code: string): string {
+  return code.trim().toUpperCase()
 }
 
 interface ProSnapshot {
@@ -42,6 +57,7 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       plan: null,
       expiresAt: null,
       source: null,
+      usedPromoCodes: [],
 
       activatePlan: (plan, source, now = new Date()) => {
         const days = PLAN_DURATION_DAYS[plan]
@@ -73,8 +89,27 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         ),
 
       cancel: () => set({ plan: null, expiresAt: null, source: null }),
+
+      redeemPromo: (code, now = new Date()) => {
+        const key = normalizePromo(code)
+        const days = PROMO_CODES[key]
+        if (days === undefined) return 'invalid'
+        const state = get()
+        if (state.usedPromoCodes.includes(key)) return 'used'
+        if (state.plan && state.expiresAt === null && isProActive(state, now.getTime())) {
+          return 'lifetime'
+        }
+        get().grantDays(days, 'promo', now)
+        set((current) => ({ usedPromoCodes: [...current.usedPromoCodes, key] }))
+        return 'ok'
+      },
     }),
-    { name: 'kiddo.subscription', version: 1 },
+    {
+      name: 'kiddo.subscription',
+      version: 2,
+      // v1 did not remember used promo codes.
+      migrate: (persisted) => ({ usedPromoCodes: [], ...(persisted as object) }),
+    },
   ),
 )
 

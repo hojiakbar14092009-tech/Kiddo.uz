@@ -8,13 +8,14 @@ import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { signOutCloud } from '@/services/supabase/auth'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
+import { ProSection } from '@/features/pro/ProSection'
 import { ParentShell } from '../ParentShell'
 import { HomeworkSection } from './HomeworkSection'
 import { ProfilesSection } from './ProfilesSection'
 import { ReportSection } from './ReportSection'
 import { SettingsSection } from './SettingsSection'
 
-const TABS = ['report', 'profiles', 'homework', 'settings'] as const
+const TABS = ['report', 'profiles', 'homework', 'pro', 'settings'] as const
 type DashboardTab = (typeof TABS)[number]
 
 function isTab(value: string | null): value is DashboardTab {
@@ -38,8 +39,10 @@ export function ParentDashboardPage() {
     children.find((item) => item.id === activeChildId) ??
     children[0] ??
     null
-  // Without any child there is nothing to report yet: start with adding a profile.
-  const tab: DashboardTab = !child ? 'profiles' : isTab(requested) ? requested : 'report'
+  const wanted: DashboardTab = isTab(requested) ? requested : 'report'
+  // Report and homework belong to a child: without one, start by adding a profile.
+  const tab: DashboardTab =
+    !child && (wanted === 'report' || wanted === 'homework') ? 'profiles' : wanted
 
   const leave = async () => {
     if (session?.mode === 'cloud') await signOutCloud()
@@ -51,6 +54,7 @@ export function ParentDashboardPage() {
     report: '📊',
     profiles: '👧',
     homework: '📝',
+    pro: '👑',
     settings: '⚙️',
   }
 
@@ -110,6 +114,7 @@ export function ParentDashboardPage() {
           )}
           {tab === 'report' && child && <ReportSection child={child} />}
           {tab === 'homework' && child && <HomeworkSection child={child} />}
+          {tab === 'pro' && <ProSection />}
           {tab === 'settings' && <SettingsSection />}
         </div>
       </div>
