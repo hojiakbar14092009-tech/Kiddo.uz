@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Flag } from '@/components/flags/Flag'
 import { Screen } from '@/components/layout/Screen'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
-import { Robot } from '@/features/mascot/Robot'
+import { MascotFigure } from '@/features/mascot/MascotFigure'
 import { useSettingsStore } from '@/store/settingsStore'
 
 export function LanguagePage() {
@@ -20,8 +20,8 @@ export function LanguagePage() {
   return (
     <Screen className="items-center justify-center gap-6 px-4 py-8 sm:gap-8">
       <div className="flex items-end gap-2" aria-hidden="true">
-        <Robot model="girl" mood="wave" className="h-auto w-24 sm:w-32" />
-        <Robot model="boy" mood="wave" className="h-auto w-24 sm:w-32" />
+        <MascotFigure model="girl" mood="wave" className="h-auto w-24 sm:w-32" />
+        <MascotFigure model="boy" mood="wave" className="h-auto w-24 sm:w-32" />
       </div>
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="font-display text-2xl font-bold sm:text-3xl">{t('language.greeting')}</p>

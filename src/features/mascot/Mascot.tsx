@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useMascotModel } from '@/store/familyStore'
 import { useMascotStore } from './mascotStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
-import { Robot } from './Robot'
+import { MascotFigure } from './MascotFigure'
 
 interface MascotProps {
   /** Width classes for the robot, e.g. `w-24 sm:w-36`. */
@@ -38,7 +38,7 @@ export function Mascot({
         className,
       )}
     >
-      <Robot
+      <MascotFigure
         model={model}
         mood={mood === 'idle' && speaking ? 'talk' : mood}
         reactionKey={reactionKey}

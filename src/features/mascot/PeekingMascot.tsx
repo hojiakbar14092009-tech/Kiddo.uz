@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useMascotModel } from '@/store/familyStore'
-import { Robot } from './Robot'
+import { MascotFigure } from './MascotFigure'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
 
 const FIRST_APPEARANCE_MS = 900
@@ -110,7 +110,7 @@ export function PeekingMascot({
         transition={reduceMotion ? { duration: 0.2 } : PEEK_SPRING}
         className="pointer-events-auto w-[112px] sm:w-[150px]"
       >
-        <Robot model={model} mood={visible ? 'wave' : 'idle'} className="h-auto w-full" />
+        <MascotFigure model={model} mood={visible ? 'wave' : 'idle'} className="h-auto w-full" />
       </motion.button>
     </div>
   )
