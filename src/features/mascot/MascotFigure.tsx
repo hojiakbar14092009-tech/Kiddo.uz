@@ -26,6 +26,7 @@ export function MascotFigure(props: RobotProps) {
           reactionKey={props.reactionKey ?? 0}
           followPointer={props.followPointer ?? true}
           reducedMotion={reducedMotion}
+          wearing={props.wearing}
           label={props.label}
           className={props.className}
           onFail={() => setFailed(true)}

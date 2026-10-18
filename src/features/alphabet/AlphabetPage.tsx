@@ -1,8 +1,9 @@
-import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
+import { SegmentedTabs } from '@/components/ui/SegmentedTabs'
+import { tabPanelProps } from '@/components/ui/tabPanel'
 import { getAlphabet } from '@/content/alphabet'
 import { NUMBERS } from '@/content/numbers'
 import { useProgress } from '@/store/progressStore'
@@ -41,40 +42,19 @@ export function AlphabetPage() {
           </p>
         </div>
 
-        <div
-          role="tablist"
-          aria-label={t('alphabet.tabs')}
-          className="flex gap-1 rounded-full bg-surface p-1.5 shadow-[0_4px_0_var(--color-line)]"
-        >
-          {(['letters', 'numbers'] as const).map((value) => (
-            <button
-              key={value}
-              type="button"
-              role="tab"
-              id={`tab-${value}`}
-              aria-selected={tab === value}
-              aria-controls={`panel-${value}`}
-              onClick={() => selectTab(value)}
-              className={clsx(
-                'h-14 min-w-28 rounded-full px-5 font-display text-xl font-bold transition-colors',
-                tab === value ? 'bg-primary text-white' : 'text-ink',
-              )}
-            >
-              {value === 'letters' ? 'Aa' : '123'}
-              <span className="ml-2 hidden sm:inline">
-                {value === 'letters' ? t('alphabet.tabLetters') : t('alphabet.tabNumbers')}
-              </span>
-            </button>
-          ))}
-        </div>
+        <SegmentedTabs
+          tabs={[
+            { value: 'letters', symbol: 'Aa', label: t('alphabet.tabLetters') },
+            { value: 'numbers', symbol: '123', label: t('alphabet.tabNumbers') },
+          ]}
+          value={tab}
+          onChange={selectTab}
+          label={t('alphabet.tabs')}
+          idBase="alphabet"
+        />
       </div>
 
-      <ul
-        id={`panel-${tab}`}
-        role="tabpanel"
-        aria-labelledby={`tab-${tab}`}
-        className={GRID_CLASSES}
-      >
+      <ul {...tabPanelProps('alphabet', tab)} className={GRID_CLASSES}>
         {tab === 'letters'
           ? letters.map((letter, index) => (
               <li key={letter.id}>

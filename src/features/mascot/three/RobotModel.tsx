@@ -2,10 +2,12 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { MascotModel } from '@/store/familyStore'
+import type { Wearing } from '@/features/shop/outfits'
 import type { MascotMood } from '../types'
 import { RobotAnimator, type Gaze } from './animator'
 import type { Expression } from './clips'
 import { JOINTS, type JointName } from './rig'
+import { FaceOutfit3D, HeadOutfit3D, NeckOutfit3D } from './RobotOutfits3D'
 
 const POINTER_ATTENTION_MS = 3000
 
@@ -23,6 +25,7 @@ interface RobotModelProps {
   reactionKey: number
   followPointer: boolean
   reducedMotion: boolean
+  wearing?: Wearing
 }
 
 function heartShape(): THREE.Shape {
@@ -57,6 +60,7 @@ export function RobotModel({
   reactionKey,
   followPointer,
   reducedMotion,
+  wearing,
 }: RobotModelProps) {
   const palette = COLORS[model]
   const animator = useMemo(() => new RobotAnimator(), [])
@@ -249,6 +253,7 @@ export function RobotModel({
                 <mesh position={[0, 0.05, 0]} material={materials.joint}>
                   <cylinderGeometry args={[0.12, 0.14, 0.14, 20]} />
                 </mesh>
+                <NeckOutfit3D id={wearing?.neck} />
                 <group ref={bindJoint('head')} position={[0, 0.12, 0]}>
                   <group ref={headLook}>
                     <Head
@@ -258,6 +263,7 @@ export function RobotModel({
                       eyesRef={eyes}
                       mouthRef={mouth}
                       wobbleRef={wobble}
+                      wearing={wearing}
                     />
                   </group>
                 </group>
@@ -280,9 +286,10 @@ interface HeadProps {
   eyesRef: React.RefObject<THREE.Group | null>
   mouthRef: React.RefObject<THREE.Mesh | null>
   wobbleRef: React.RefObject<THREE.Group | null>
+  wearing: Wearing | undefined
 }
 
-function Head({ model, expression, materials, eyesRef, mouthRef, wobbleRef }: HeadProps) {
+function Head({ model, expression, materials, eyesRef, mouthRef, wobbleRef, wearing }: HeadProps) {
   return (
     <group position={[0, 0.5, 0]}>
       <mesh scale={[1.18, 1, 0.95]} material={materials.shell} castShadow>
@@ -330,8 +337,11 @@ function Head({ model, expression, materials, eyesRef, mouthRef, wobbleRef }: He
         </group>
       )}
 
+      <HeadOutfit3D id={wearing?.head} />
+
       {/* face, on the front of the visor */}
       <group position={[0, -0.02, 0.655]}>
+        <FaceOutfit3D id={wearing?.face} />
         {[-1, 1].map((side) => (
           <mesh key={side} position={[0.27 * side, -0.16, 0]} material={materials.cheek}>
             <circleGeometry args={[0.06, 20]} />

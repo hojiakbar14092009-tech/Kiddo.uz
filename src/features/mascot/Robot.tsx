@@ -8,7 +8,9 @@ import {
 import { useEffect, useId, useRef, useState } from 'react'
 import { randomBetween } from '@/lib/random'
 import type { MascotModel } from '@/store/familyStore'
+import type { Wearing } from '@/features/shop/outfits'
 import { RobotFace } from './RobotFace'
+import { FaceOutfit, HeadOutfit, NeckOutfit } from './RobotOutfits'
 import type { MascotMood, RobotPalette } from './types'
 import { useBlink } from './useBlink'
 import { useGaze } from './useGaze'
@@ -176,6 +178,8 @@ export interface RobotProps {
   followPointer?: boolean
   /** Accessible name; leave empty when the robot is purely decorative. */
   label?: string
+  /** Clothes bought in the shop. */
+  wearing?: Wearing
   className?: string
 }
 
@@ -192,6 +196,7 @@ export function Robot({
   size = 200,
   followPointer = true,
   label = '',
+  wearing,
   className,
 }: RobotProps) {
   const reduceMotion = useReducedMotion() ?? false
@@ -409,6 +414,7 @@ export function Robot({
                 strokeWidth="1.5"
               />
               <ellipse cx="72" cy="38" rx="20" ry="6" fill="#FFFFFF" opacity="0.85" />
+              <HeadOutfit id={wearing?.head} />
 
               {model === 'girl' && (
                 <g>
@@ -439,8 +445,10 @@ export function Robot({
                 eyeY={eyeY}
                 animateLoops={loops}
               />
+              <FaceOutfit id={wearing?.face} />
             </motion.g>
           </motion.g>
+          <NeckOutfit id={wearing?.neck} />
         </motion.g>
       </motion.g>
     </svg>

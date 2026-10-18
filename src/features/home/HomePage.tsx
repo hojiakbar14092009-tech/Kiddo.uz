@@ -72,7 +72,7 @@ export function HomePage() {
         <h2 id="more-title" className="font-display text-2xl font-extrabold sm:text-3xl">
           {t('home.more')}
         </h2>
-        <ul className="grid w-full max-w-3xl grid-cols-3 gap-3 sm:gap-6">
+        <ul className="grid w-full max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
           <ActivityCard to="/alphabet" label={t('home.alphabet')} symbol="Aa" tone="sky" />
           <ActivityCard
             to="/alphabet?tab=numbers"
@@ -86,6 +86,7 @@ export function HomePage() {
             symbol={GAME_META.memory.emoji}
             tone="lilac"
           />
+          <ActivityCard to="/shop" label={t('shop.open')} symbol="🛍️" tone="girl" />
         </ul>
       </section>
 
@@ -98,6 +99,7 @@ const CARD_TONES = {
   sky: 'bg-sky-soft text-ink',
   coin: 'bg-coin-soft text-ink',
   lilac: 'bg-lilac-soft text-ink',
+  girl: 'bg-girl-soft text-ink',
 } as const
 
 interface ActivityCardProps {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { STICKERS } from '@/features/stickers/stickers'
-import { EMPTY_PROGRESS, useProgressStore } from './progressStore'
+import { EMPTY_PROGRESS, migrateProgress, useProgressStore } from './progressStore'
 
 const KEY = 'child-1'
 const MORNING = new Date(2026, 9, 18, 9, 0)
@@ -94,5 +94,59 @@ describe('progressStore', () => {
     addMinutes(KEY, 1, MORNING)
     addMinutes(KEY, 2, EVENING)
     expect(progress().minutesByDay).toEqual({ '2026-10-18': 3 })
+  })
+})
+
+describe('robot clothes', () => {
+  beforeEach(() => {
+    useProgressStore.setState({ byChild: { [KEY]: { ...EMPTY_PROGRESS, coins: 30 } } })
+  })
+
+  it('buys an item, spends its price and puts it on', () => {
+    expect(useProgressStore.getState().buyOutfit(KEY, 'cap')).toBe(true)
+    expect(progress().coins).toBe(15)
+    expect(progress().outfits).toEqual(['cap'])
+    expect(progress().wearing).toEqual({ head: 'cap' })
+  })
+
+  it('never buys without enough coins, and never twice', () => {
+    expect(useProgressStore.getState().buyOutfit(KEY, 'crown')).toBe(false)
+    expect(progress().coins).toBe(30)
+    useProgressStore.getState().buyOutfit(KEY, 'cap')
+    expect(useProgressStore.getState().buyOutfit(KEY, 'cap')).toBe(false)
+    expect(progress().coins).toBe(15)
+  })
+
+  it('swaps items in the same slot and takes an item off on a second tap', () => {
+    const store = useProgressStore.getState()
+    store.buyOutfit(KEY, 'cap')
+    store.buyOutfit(KEY, 'flower')
+    expect(progress().wearing).toEqual({ head: 'flower' })
+    store.toggleOutfit(KEY, 'cap')
+    expect(progress().wearing).toEqual({ head: 'cap' })
+    store.toggleOutfit(KEY, 'cap')
+    expect(progress().wearing).toEqual({})
+  })
+
+  it('cannot put on an item that was not bought', () => {
+    useProgressStore.getState().toggleOutfit(KEY, 'glasses')
+    expect(progress().wearing).toEqual({})
+  })
+
+  it('gives saves from before the shop an empty wardrobe', () => {
+    const old = {
+      byChild: {
+        [KEY]: {
+          coins: 9,
+          learned: {},
+          struggles: {},
+          stickers: [],
+          results: [],
+          minutesByDay: {},
+        },
+      },
+    }
+    const migrated = migrateProgress(old, 1)
+    expect(migrated.byChild[KEY]).toMatchObject({ coins: 9, outfits: [], wearing: {} })
   })
 })

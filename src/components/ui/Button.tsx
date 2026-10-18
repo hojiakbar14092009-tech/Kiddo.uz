@@ -1,10 +1,10 @@
 import clsx from 'clsx'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 
 type ButtonVariant = 'primary' | 'coin' | 'soft' | 'oops'
 type ButtonSize = 'md' | 'lg'
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ComponentProps<'button'> {
   variant?: ButtonVariant
   size?: ButtonSize
   icon?: ReactNode

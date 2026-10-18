@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import type { MascotModel } from '@/store/familyStore'
+import type { Wearing } from '@/features/shop/outfits'
 import type { MascotMood } from '../types'
 import { RobotModel } from './RobotModel'
 
@@ -12,6 +13,7 @@ export interface Robot3DProps {
   reactionKey: number
   followPointer: boolean
   reducedMotion: boolean
+  wearing?: Wearing
   label?: string
   className?: string
   /** Called when WebGL breaks (e.g. the context is lost), to switch to the 2D robot. */
@@ -28,6 +30,7 @@ export default function Robot3D({
   reactionKey,
   followPointer,
   reducedMotion,
+  wearing,
   label,
   className,
   onFail,
@@ -78,6 +81,7 @@ export default function Robot3D({
           reactionKey={reactionKey}
           followPointer={followPointer}
           reducedMotion={reducedMotion}
+          wearing={wearing}
         />
         <ContactShadows
           position={[0, 0.001, 0]}

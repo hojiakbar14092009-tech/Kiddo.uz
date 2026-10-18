@@ -1,5 +1,7 @@
 import clsx from 'clsx'
+import type { Wearing } from '@/features/shop/outfits'
 import { useMascotModel } from '@/store/familyStore'
+import { useWearing } from '@/store/progressStore'
 import { useMascotStore } from './mascotStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
 import { MascotFigure } from './MascotFigure'
@@ -11,6 +13,8 @@ interface MascotProps {
   bubbleSide?: 'left' | 'right'
   /** When the screen is speaking (PRO), the robot moves its mouth. */
   speaking?: boolean
+  /** Overrides the child’s clothes, e.g. to try an item on in the shop. */
+  wearing?: Wearing
   className?: string
 }
 
@@ -23,9 +27,11 @@ export function Mascot({
   robotClassName = 'w-24 sm:w-36',
   bubbleSide = 'right',
   speaking = false,
+  wearing,
   className,
 }: MascotProps) {
   const model = useMascotModel()
+  const ownWearing = useWearing()
   const mood = useMascotStore((state) => state.mood)
   const message = useMascotStore((state) => state.message)
   const reactionKey = useMascotStore((state) => state.reactionKey)
@@ -40,6 +46,7 @@ export function Mascot({
     >
       <MascotFigure
         model={model}
+        wearing={wearing ?? ownWearing}
         mood={mood === 'idle' && speaking ? 'talk' : mood}
         reactionKey={reactionKey}
         className={clsx('h-auto shrink-0', robotClassName)}

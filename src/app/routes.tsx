@@ -5,6 +5,7 @@ import { AlphabetPage } from '@/features/alphabet/AlphabetPage'
 import { HomePage } from '@/features/home/HomePage'
 import { ChildSelectPage } from '@/features/profiles/ChildSelectPage'
 import { LanguagePage } from '@/features/onboarding/LanguagePage'
+import { ShopPage } from '@/features/shop/ShopPage'
 import { GamePage } from '@/features/tasks/GamePage'
 import { RewardPage } from '@/features/tasks/RewardPage'
 import { AppShell } from './AppShell'
@@ -24,6 +25,7 @@ export const routes: RouteObject[] = [
           { path: '/alphabet/:itemId', element: <AlphabetItemPage /> },
           { path: '/tasks/:type', element: <GamePage /> },
           { path: '/reward', element: <RewardPage /> },
+          { path: '/shop', element: <ShopPage /> },
         ],
       },
       { path: '*', element: <Navigate to="/" replace /> },

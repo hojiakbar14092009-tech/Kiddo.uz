@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
+import { findOutfit, type OutfitId, type Wearing } from '@/features/shop/outfits'
 import { nextSticker } from '@/features/stickers/stickers'
 import type { GameType } from '@/features/tasks/games'
 import { coinsFor, DAILY_BONUS, dayKey, starsFor } from '@/features/tasks/rules'
@@ -37,6 +38,9 @@ export interface ChildProgress {
   results: TaskResult[]
   /** Minutes spent in the child area per local day (YYYY-MM-DD). */
   minutesByDay: Record<string, number>
+  /** Robot clothes the child bought with coins, and what the robot wears now. */
+  outfits: OutfitId[]
+  wearing: Wearing
 }
 
 export interface CompletedTask {
@@ -64,6 +68,8 @@ export const EMPTY_PROGRESS: ChildProgress = Object.freeze({
   stickers: [],
   results: [],
   minutesByDay: {},
+  outfits: [],
+  wearing: {},
 }) as ChildProgress
 
 interface ProgressState {
@@ -71,6 +77,10 @@ interface ProgressState {
   completeTask: (childKey: string, task: CompletedTask, now?: Date) => TaskOutcome
   addMinutes: (childKey: string, minutes: number, now?: Date) => void
   resetChild: (childKey: string) => void
+  /** Spends coins on a robot item and puts it on. Returns false if it cannot be bought. */
+  buyOutfit: (childKey: string, outfitId: OutfitId) => boolean
+  /** Puts an owned item on, or takes it off if the robot already wears it. */
+  toggleOutfit: (childKey: string, outfitId: OutfitId) => void
 }
 
 function unique(values: readonly string[]): string[] {
@@ -164,6 +174,33 @@ export const useProgressStore = create<ProgressState>()(
           }
         }),
 
+      buyOutfit: (childKey, outfitId) => {
+        const outfit = findOutfit(outfitId)
+        const current = get().byChild[childKey] ?? EMPTY_PROGRESS
+        if (!outfit || current.outfits.includes(outfitId) || current.coins < outfit.price) {
+          return false
+        }
+        const next: ChildProgress = {
+          ...current,
+          coins: current.coins - outfit.price,
+          outfits: [...current.outfits, outfitId],
+          wearing: { ...current.wearing, [outfit.slot]: outfitId },
+        }
+        set((state) => ({ byChild: { ...state.byChild, [childKey]: next } }))
+        return true
+      },
+
+      toggleOutfit: (childKey, outfitId) =>
+        set((state) => {
+          const outfit = findOutfit(outfitId)
+          const current = state.byChild[childKey] ?? EMPTY_PROGRESS
+          if (!outfit || !current.outfits.includes(outfitId)) return state
+          const wearing = { ...current.wearing }
+          if (wearing[outfit.slot] === outfitId) delete wearing[outfit.slot]
+          else wearing[outfit.slot] = outfitId
+          return { byChild: { ...state.byChild, [childKey]: { ...current, wearing } } }
+        }),
+
       resetChild: (childKey) =>
         set((state) => {
           const byChild = { ...state.byChild }
@@ -171,9 +208,29 @@ export const useProgressStore = create<ProgressState>()(
           return { byChild }
         }),
     }),
-    { name: 'kiddo.progress', version: 1 },
+    {
+      name: 'kiddo.progress',
+      version: 2,
+      migrate: (persisted, version) => migrateProgress(persisted, version),
+    },
   ),
 )
+
+/** v1 had no robot clothes; older saves get an empty wardrobe. */
+export function migrateProgress(persisted: unknown, version: number) {
+  const state = (persisted ?? {}) as { byChild?: Record<string, Partial<ChildProgress>> }
+  if (version >= 2) return state as Pick<ProgressState, 'byChild'>
+  const byChild: Record<string, ChildProgress> = {}
+  for (const [key, progress] of Object.entries(state.byChild ?? {})) {
+    byChild[key] = { ...EMPTY_PROGRESS, ...progress, outfits: [], wearing: {} }
+  }
+  return { byChild }
+}
+
+/** The robot clothes of the active child (or of the given child). */
+export function useWearing(childKey?: string): Wearing {
+  return useProgress(childKey).wearing
+}
 
 /** Progress belongs to the active child, or to a guest before any profile exists. */
 export function useChildKey(): string {
