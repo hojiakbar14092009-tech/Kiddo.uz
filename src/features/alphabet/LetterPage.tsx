@@ -6,9 +6,9 @@ import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { ListenButton } from '@/components/ui/ListenButton'
 import { getAlphabet } from '@/content/alphabet'
-import { Robot } from '@/features/mascot/Robot'
+import { Mascot } from '@/features/mascot/Mascot'
+import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
-import { useMascotModel } from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
 import { HighlightedWord } from './HighlightedWord'
 import { paletteFor } from './letterPalette'
@@ -21,15 +21,24 @@ export function LetterPage() {
   const { letterId = '' } = useParams()
   const language = useLanguage()
   const { sayLetter, speaking } = useSpeaker()
-  const mascot = useMascotModel()
+  const { react, reset } = useMascot()
 
   const { letters } = getAlphabet(language)
   const index = letters.findIndex((entry) => entry.id === letterId)
   const letter = letters[index]
 
+  // New letter: the mascot shows it in its bubble; PRO also says “B … banan”.
   useEffect(() => {
-    if (letter) void sayLetter(letter)
-  }, [letter, sayLetter])
+    if (!letter) return
+    react(
+      'instruct',
+      { text: `${letter.upper} — ${letter.word}`, emoji: letter.emoji },
+      { speak: false },
+    )
+    void sayLetter(letter)
+  }, [letter, react, sayLetter])
+
+  useEffect(() => reset, [reset])
 
   if (!letter) return <Navigate to="/alphabet" replace />
 
@@ -82,12 +91,11 @@ export function LetterPage() {
             className="text-[clamp(3rem,9vw,4.75rem)] leading-tight"
           />
           <p className="text-lg text-ink-soft">{t('letter.hint')}</p>
-          <div className="flex items-center gap-4">
-            <ListenButton onListen={() => void sayLetter(letter)} />
-            <Robot
-              model={mascot}
-              mood={speaking ? 'talk' : 'idle'}
-              className="h-auto w-16 sm:w-20"
+          <div className="flex flex-col items-center gap-4 lg:items-start">
+            <Mascot robotClassName="w-20 sm:w-24" speaking={speaking} className="w-full max-w-md" />
+            <ListenButton
+              onListen={() => void sayLetter(letter)}
+              onLocked={() => react('locked')}
             />
           </div>
         </div>

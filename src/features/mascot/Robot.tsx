@@ -23,7 +23,10 @@ const EASE_IN_OUT = [0.42, 0, 0.58, 1] as const
 const LIMB_SPRING = { type: 'spring', stiffness: 110, damping: 11, mass: 0.9 } as const
 
 /** One-shot whole-body reactions, anchored at the feet. */
-const BODY_ACTIONS: Record<'happy' | 'oops' | 'rest', TargetAndTransition> = {
+const BODY_ACTIONS: Record<
+  'happy' | 'oops' | 'celebrate' | 'sleepy' | 'rest',
+  TargetAndTransition
+> = {
   // anticipation (crouch) → jump → land with a squash → settle
   happy: {
     y: [0, 8, -34, 4, 0],
@@ -38,6 +41,22 @@ const BODY_ACTIONS: Record<'happy' | 'oops' | 'rest', TargetAndTransition> = {
     rotate: [0, -9, 7, -4, 2, 0],
     scaleX: 1,
     scaleY: 1,
+    transition: { duration: 1.2, ease: 'easeInOut' },
+  },
+  // a happy little dance: side-to-side sway with small hops
+  celebrate: {
+    y: [0, -10, 0, -10, 0],
+    rotate: [0, -6, 0, 6, 0],
+    scaleX: 1,
+    scaleY: 1,
+    transition: { duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
+  },
+  // sinks a little and leans, like a sleepy child
+  sleepy: {
+    y: 4,
+    rotate: -3,
+    scaleX: 1,
+    scaleY: 0.98,
     transition: { duration: 1.2, ease: 'easeInOut' },
   },
   rest: { y: 0, rotate: 0, scaleX: 1, scaleY: 1, transition: { duration: 0.4 } },
@@ -70,6 +89,38 @@ function armPose(mood: MascotMood, loops: boolean): ArmPose {
               transition: { duration: 0.45, repeat: Infinity, ease: 'easeInOut', delay: 0.08 },
             }
           : { rotate: -150, transition: LIMB_SPRING },
+      }
+    case 'celebrate':
+      return {
+        left: loops
+          ? {
+              rotate: [140, 170, 140],
+              transition: { duration: 0.7, repeat: Infinity, ease: 'easeInOut' },
+            }
+          : { rotate: 150, transition: LIMB_SPRING },
+        right: loops
+          ? {
+              rotate: [-170, -140, -170],
+              transition: { duration: 0.7, repeat: Infinity, ease: 'easeInOut' },
+            }
+          : { rotate: -150, transition: LIMB_SPRING },
+      }
+    case 'sleepy':
+      return {
+        left: { rotate: 4, transition: { duration: 1.2, ease: 'easeInOut' } },
+        right: loops
+          ? {
+              // a slow “yawn” stretch of one arm, then rest
+              rotate: [-4, -60, -60, -4],
+              transition: {
+                duration: 4.5,
+                times: [0, 0.3, 0.55, 1],
+                repeat: Infinity,
+                repeatDelay: 3,
+                ease: 'easeInOut',
+              },
+            }
+          : { rotate: -4, transition: LIMB_SPRING },
       }
     case 'oops':
       return {
@@ -154,7 +205,7 @@ export function Robot({
   const [breathSeconds] = useState(() => randomBetween(3.2, 3.9))
   const [swaySeconds] = useState(() => randomBetween(4.8, 5.8))
 
-  const eyesClosed = useBlink(loops && mood !== 'happy' && mood !== 'oops')
+  const eyesClosed = useBlink(loops && (mood === 'idle' || mood === 'wave' || mood === 'talk'))
   const gaze = useGaze(svgRef, followPointer && loops)
   const eyeX = useTransform(gaze.x, (v) => v * 6)
   const eyeY = useTransform(gaze.y, (v) => v * 4)
@@ -169,6 +220,12 @@ export function Robot({
       void shadow.start(SHADOW_ACTIONS.happy)
     } else if (mood === 'oops' && loops) {
       void body.start(BODY_ACTIONS.oops)
+      void shadow.start(SHADOW_ACTIONS.rest)
+    } else if (mood === 'celebrate' && loops) {
+      void body.start(BODY_ACTIONS.celebrate)
+      void shadow.start(SHADOW_ACTIONS.rest)
+    } else if (mood === 'sleepy') {
+      void body.start(BODY_ACTIONS.sleepy)
       void shadow.start(SHADOW_ACTIONS.rest)
     } else {
       void body.start(BODY_ACTIONS.rest)

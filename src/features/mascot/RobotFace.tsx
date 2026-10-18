@@ -24,7 +24,40 @@ export function RobotFace({
   eyeY,
   animateLoops,
 }: RobotFaceProps) {
-  if (mood === 'happy') {
+  if (mood === 'sleepy') {
+    return (
+      <g>
+        <path d="M68 86 Q79 96 90 86" stroke={glow} strokeWidth={5} {...STROKE} />
+        <path d="M110 86 Q121 96 132 86" stroke={glow} strokeWidth={5} {...STROKE} />
+        <motion.ellipse
+          cx="100"
+          cy="112"
+          rx="7"
+          fill={glow}
+          initial={{ ry: 3 }}
+          animate={animateLoops ? { ry: [3, 3, 9, 9, 3] } : { ry: 4 }}
+          transition={{
+            duration: 4.5,
+            times: [0, 0.25, 0.4, 0.55, 0.7],
+            repeat: Infinity,
+            repeatDelay: 3,
+          }}
+        />
+        <text
+          x="140"
+          y="60"
+          fill={glow}
+          fontSize="16"
+          fontWeight="800"
+          fontFamily="Rubik, sans-serif"
+        >
+          z
+        </text>
+      </g>
+    )
+  }
+
+  if (mood === 'happy' || mood === 'celebrate') {
     return (
       <g>
         <path d="M68 92 Q79 76 90 92" stroke={glow} strokeWidth={6} {...STROKE} />

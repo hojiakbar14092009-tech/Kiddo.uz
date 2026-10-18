@@ -1,10 +1,10 @@
 import clsx from 'clsx'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useMascotModel } from '@/store/familyStore'
 import { Robot } from './Robot'
-import { SpeechBubble } from './SpeechBubble'
+import { MascotThoughtBubble } from './MascotThoughtBubble'
 
 const FIRST_APPEARANCE_MS = 900
 const VISIBLE_MS = 6500
@@ -33,6 +33,7 @@ export function PeekingMascot({
   const { sayText } = useSpeaker()
   const reduceMotion = useReducedMotion() ?? false
   const [visible, setVisible] = useState(false)
+  const [appearances, setAppearances] = useState(0)
 
   const latest = useRef({ message, sayText })
   const peekInRef = useRef<() => void>(() => undefined)
@@ -56,6 +57,7 @@ export function PeekingMascot({
       clearTimeout(hideTimer)
       isVisible = true
       setVisible(true)
+      setAppearances((count) => count + 1)
       void latest.current.sayText(latest.current.message)
       hideTimer = setTimeout(() => {
         isVisible = false
@@ -91,19 +93,11 @@ export function PeekingMascot({
         isRight ? 'right-0 flex-row' : 'left-0 flex-row-reverse',
       )}
     >
-      <AnimatePresence>
-        {visible && (
-          <motion.div
-            key="bubble"
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0, transition: { delay: 0.35 } }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="max-w-[46vw] sm:max-w-xs"
-          >
-            <SpeechBubble tail={isRight ? 'right' : 'left'}>{message}</SpeechBubble>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MascotThoughtBubble
+        message={visible ? { text: message, emoji: '👋' } : null}
+        messageKey={appearances}
+        side={isRight ? 'right' : 'left'}
+      />
 
       <motion.button
         type="button"
