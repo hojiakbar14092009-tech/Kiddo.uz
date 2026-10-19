@@ -39,14 +39,14 @@ export default defineConfig({
       workbox: {
         // Everything the child area needs is precached, so it works fully offline.
         // Voice clips (several MB) are cached as they are first played instead.
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}', 'audio/ui/*.mp3'],
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}', 'audio/ui/*.mp3', '3d/**/*.webp'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/audio/voice/'),
             handler: 'CacheFirst',
             options: {
               cacheName: 'kiddo-voice',
-              expiration: { maxEntries: 4000 },
+              expiration: { maxEntries: 8000 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
