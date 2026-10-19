@@ -1,6 +1,6 @@
 /**
  * Lists every sentence the app can say, per language, for the voice recorder
- * (generate.py). Run: npx tsx scripts/voices/collect.ts > scripts/voices/phrases.json
+ * (generate.py). Run: npx tsx --tsconfig tsconfig.app.json scripts/voices/collect.ts > scripts/voices/phrases.json
  */
 import { enAlphabet } from '../../src/content/alphabet/en'
 import { ruAlphabet } from '../../src/content/alphabet/ru'

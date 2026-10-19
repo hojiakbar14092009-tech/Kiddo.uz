@@ -1,6 +1,6 @@
 """Records Kiddo's voice clips with neural voices (Piper), one file per sentence.
 
-    npx tsx scripts/voices/collect.ts > scripts/voices/phrases.json
+    npx tsx --tsconfig tsconfig.app.json scripts/voices/collect.ts > scripts/voices/phrases.json
     python3 scripts/voices/generate.py            # only new sentences
     python3 scripts/voices/generate.py --force    # everything again
 

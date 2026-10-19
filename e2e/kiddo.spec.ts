@@ -142,3 +142,28 @@ test('the admin puts up an ad; a parent watches it to the end and gets a promo c
   await expect(page.getByRole('button', { name: 'Promokodni olish' })).toHaveCount(0)
   await expect(page.getByText('Promokod faqat 1 marta beriladi', { exact: false })).toBeVisible()
 })
+
+test('the six new learning sections open from home without errors', async ({ page }) => {
+  test.setTimeout(90_000)
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  await chooseUzbek(page)
+  await expect(page.getByRole('heading', { name: 'Yangi bo‘limlar' })).toBeVisible()
+  for (const name of [
+    'Birinchi so‘zim',
+    'Matematika',
+    'Koinot',
+    'Ertaklar',
+    'Bog‘da top',
+    'Maskotga yordam ber',
+  ]) {
+    await page.getByRole('link', { name, exact: true }).click()
+    await expect(page).toHaveURL(/\/learn\//)
+    await expect(page.locator('.learn-title').filter({ visible: true }).first()).toContainText(name)
+    await page.goto('/home')
+  }
+  expect(errors).toEqual([])
+})
