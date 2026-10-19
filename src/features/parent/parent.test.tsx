@@ -144,11 +144,24 @@ describe('Parent dashboard', () => {
     const parent = await renderRoute('/parent/dashboard?tab=homework')
     await parent.user.click(screen.getByRole('button', { name: 'Ch' }))
     await parent.user.click(screen.getByRole('button', { name: 'Aliga berish' }))
-    const homework = useFamilyStore.getState().children[0]?.homework
-    expect(homework).toMatchObject({ language: 'uz', game: 'find-letter', letterIds: ['ch'] })
+    expect(screen.getByRole('status')).toHaveTextContent('Qo‘shildi!')
+    // as many as the parent likes: a second and a third one
+    await parent.user.click(screen.getByRole('button', { name: 'Sh' }))
+    await parent.user.click(screen.getByRole('button', { name: 'Aliga berish' }))
+    await parent.user.click(screen.getByRole('button', { name: 'B' }))
+    await parent.user.click(screen.getByRole('button', { name: 'Aliga berish' }))
+    const homeworks = useFamilyStore.getState().children[0]?.homeworks ?? []
+    expect(homeworks.map((h) => h.letterIds)).toEqual([['ch'], ['sh'], ['b']])
+    expect(homeworks[0]).toMatchObject({ language: 'uz', game: 'find-letter' })
+    expect(screen.getByText('3 ta kutilmoqda, 0 ta bajarilgan')).toBeInTheDocument()
+    // one can be taken back
+    await parent.user.click(screen.getAllByRole('button', { name: 'Bekor qilish' })[2]!)
+    expect(useFamilyStore.getState().children[0]?.homeworks).toHaveLength(2)
     parent.unmount()
 
+    const homework = homeworks[0]
     const child = await renderRoute('/home')
+    expect(screen.getByRole('link', { name: /Uy vazifasi: Sh/ })).toBeInTheDocument()
     await child.user.click(screen.getByRole('link', { name: /Uy vazifasi: Ch/ }))
     expect(child.router.state.location.search).toBe(`?homework=${homework!.id}`)
     // The homework letter is practised in the game.

@@ -42,8 +42,8 @@ export interface ChildProfile {
   /** Daily screen-time limit in minutes. */
   dailyLimitMinutes: number
   createdAt: string
-  /** The current homework, if a parent set one. */
-  homework?: Homework | null
+  /** Homework a parent set – as many as they like; done ones stay for the report. */
+  homeworks?: Homework[]
 }
 
 export type NewChild = Pick<ChildProfile, 'name' | 'birthDate' | 'gender'> &
@@ -64,8 +64,11 @@ interface FamilyState {
   updateChild: (id: string, changes: Partial<Omit<ChildProfile, 'id' | 'createdAt'>>) => void
   removeChild: (id: string) => void
   setActiveChild: (id: string | null) => void
+  /** Adds one more homework to the child's list. */
   assignHomework: (childId: string, homework: NewHomework) => void
-  clearHomework: (childId: string) => void
+  removeHomework: (childId: string, homeworkId: string) => void
+  /** Removes the finished ones from the list. */
+  clearDoneHomework: (childId: string) => void
   completeHomework: (childId: string, homeworkId: string, mistakes: number) => void
 }
 
@@ -134,34 +137,52 @@ export const useFamilyStore = create<FamilyState>()(
             child.id === childId
               ? {
                   ...child,
-                  homework: {
-                    id: createId(),
-                    language: input.language,
-                    game: input.game,
-                    letterIds: [...new Set(input.letterIds)].slice(0, MAX_HOMEWORK_LETTERS),
-                    assignedAt: new Date().toISOString(),
-                    completedAt: null,
-                    mistakes: null,
-                  },
+                  homeworks: [
+                    ...(child.homeworks ?? []),
+                    {
+                      id: createId(),
+                      language: input.language,
+                      game: input.game,
+                      letterIds: [...new Set(input.letterIds)].slice(0, MAX_HOMEWORK_LETTERS),
+                      assignedAt: new Date().toISOString(),
+                      completedAt: null,
+                      mistakes: null,
+                    },
+                  ],
                 }
               : child,
           ),
         })),
 
-      clearHomework: (childId) =>
+      removeHomework: (childId, homeworkId) =>
         set((state) => ({
           children: state.children.map((child) =>
-            child.id === childId ? { ...child, homework: null } : child,
+            child.id === childId
+              ? { ...child, homeworks: (child.homeworks ?? []).filter((h) => h.id !== homeworkId) }
+              : child,
+          ),
+        })),
+
+      clearDoneHomework: (childId) =>
+        set((state) => ({
+          children: state.children.map((child) =>
+            child.id === childId
+              ? { ...child, homeworks: (child.homeworks ?? []).filter((h) => !h.completedAt) }
+              : child,
           ),
         })),
 
       completeHomework: (childId, homeworkId, mistakes) =>
         set((state) => ({
           children: state.children.map((child) =>
-            child.homework?.id === homeworkId && child.id === childId && !child.homework.completedAt
+            child.id === childId
               ? {
                   ...child,
-                  homework: { ...child.homework, completedAt: new Date().toISOString(), mistakes },
+                  homeworks: (child.homeworks ?? []).map((homework) =>
+                    homework.id === homeworkId && !homework.completedAt
+                      ? { ...homework, completedAt: new Date().toISOString(), mistakes }
+                      : homework,
+                  ),
                 }
               : child,
           ),
@@ -169,9 +190,16 @@ export const useFamilyStore = create<FamilyState>()(
     }),
     {
       name: 'kiddo.family',
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => {
         const state = persisted as { children?: Array<Record<string, unknown>> }
+        // v2 had one homework per child; now a list.
+        if (version < 3 && Array.isArray(state.children)) {
+          state.children = state.children.map((child) => {
+            const { homework, ...rest } = child
+            return { ...rest, homeworks: homework ? [homework] : [] }
+          })
+        }
         if (version < 2 && Array.isArray(state.children)) {
           state.children = state.children.map((child) => {
             const age = typeof child.age === 'number' ? child.age : MAX_AGE

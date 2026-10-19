@@ -6,23 +6,30 @@ import { useLanguage } from '@/store/settingsStore'
 import type { GameType } from './games'
 import type { LearnerState } from './generateRounds'
 
-/** The active child’s unfinished homework in the current language, if any. */
-export function usePendingHomework(): Homework | null {
+const NONE: Homework[] = []
+
+/** The active child’s unfinished homework in the current language, oldest first. */
+export function usePendingHomework(): Homework[] {
   const child = useActiveChild()
   const language = useLanguage()
-  const homework = child?.homework
-  if (!homework || homework.completedAt || homework.language !== language) return null
-  // A game for an older child (e.g. after the birthday was corrected) waits until it opens.
-  if (!isGameOpen(homework.game, levelOfChild(child ?? null))) return null
-  return homework
+  const level = levelOfChild(child ?? null)
+  const list = child?.homeworks ?? NONE
+  return list.filter(
+    (homework) =>
+      !homework.completedAt &&
+      homework.language === language &&
+      // A game for an older child (e.g. after the birthday was corrected) waits until it opens.
+      isGameOpen(homework.game, level),
+  )
 }
 
 /** The homework this game was opened for (`/tasks/:type?homework=<id>`). */
 export function useHomeworkFor(game: GameType | 'exam'): Homework | null {
   const [params] = useSearchParams()
-  const homework = usePendingHomework()
-  if (!homework || homework.game !== game || params.get('homework') !== homework.id) return null
-  return homework
+  const id = params.get('homework')
+  return (
+    usePendingHomework().find((homework) => homework.game === game && homework.id === id) ?? null
+  )
 }
 
 export function homeworkPath(homework: Homework): string {

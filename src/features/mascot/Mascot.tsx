@@ -3,6 +3,7 @@ import type { Wearing } from '@/features/shop/outfits'
 import { useMascotModel } from '@/store/familyStore'
 import { useActivePet, useWearing } from '@/store/progressStore'
 import { PetCompanion } from '@/features/pets/PetCompanion'
+import type { PetId } from '@/features/pets/pets'
 import { useMascotStore } from './mascotStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
 import { MascotFigure } from './MascotFigure'
@@ -18,6 +19,8 @@ interface MascotProps {
   wearing?: Wearing
   /** Marks the robot’s spot (`data-roam`), so a roaming robot can start from it. */
   robotRoam?: string
+  /** Overrides the pet at its feet, e.g. to try a pet before adopting it (null: none). */
+  pet?: PetId | null
   className?: string
 }
 
@@ -32,11 +35,13 @@ export function Mascot({
   speaking = false,
   wearing,
   robotRoam,
+  pet: petOverride,
   className,
 }: MascotProps) {
   const model = useMascotModel()
   const ownWearing = useWearing()
-  const pet = useActivePet()
+  const activePet = useActivePet()
+  const pet = petOverride === undefined ? activePet : petOverride
   const mood = useMascotStore((state) => state.mood)
   const message = useMascotStore((state) => state.message)
   const reactionKey = useMascotStore((state) => state.reactionKey)
@@ -57,7 +62,7 @@ export function Mascot({
           reactionKey={reactionKey}
           className="h-auto w-full"
         />
-        {pet && <PetCompanion pet={pet} mood={mood} />}
+        {pet && <PetCompanion key={pet} pet={pet} mood={mood} />}
       </div>
       <MascotThoughtBubble
         message={message}

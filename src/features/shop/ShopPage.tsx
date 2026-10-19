@@ -16,6 +16,7 @@ import { OutfitCard } from './OutfitCard'
 import { OUTFITS, type Outfit, type Wearing } from './outfits'
 import { StickerAlbum } from './StickerAlbum'
 import { PetsPanel } from '@/features/pets/PetsPanel'
+import type { PetId } from '@/features/pets/pets'
 
 type ShopTab = 'outfits' | 'pets' | 'stickers'
 
@@ -32,6 +33,9 @@ export function ShopPage() {
   const tab: ShopTab = requested === 'stickers' || requested === 'pets' ? requested : 'outfits'
   const [pending, setPending] = useState<Outfit | null>(null)
   const model = useMascotModel()
+  // A pet on trial stands next to the robot before it is bought.
+  const [previewPet, setPreviewPet] = useState<PetId | null>(null)
+  const shownPet = tab === 'pets' && previewPet ? previewPet : undefined
 
   useEffect(() => reset, [reset])
 
@@ -40,10 +44,10 @@ export function ShopPage() {
   const [roaming, setRoaming] = useState(false)
   const [lastTap, setLastTap] = useState(0)
   useEffect(() => {
-    if (roaming || pending || tab === 'stickers') return undefined
+    if (roaming || pending || shownPet || tab === 'stickers') return undefined
     const timer = setTimeout(() => setRoaming(true), 4000)
     return () => clearTimeout(timer)
-  }, [roaming, pending, tab, lastTap])
+  }, [roaming, pending, shownPet, tab, lastTap])
 
   /** While the child is deciding, the robot already tries the item on. */
   const shownWearing: Wearing = pending ? { ...wearing, [pending.slot]: pending.id } : wearing
@@ -100,6 +104,7 @@ export function ShopPage() {
               wearing={shownWearing}
               robotClassName={clsx('w-32 sm:w-44', roaming && 'invisible')}
               robotRoam="shop-frame"
+              pet={shownPet}
               bubbleSide="right"
               className="w-full max-w-md lg:flex-col"
             />
@@ -116,8 +121,26 @@ export function ShopPage() {
                 {t('shop.callRobot')}
               </button>
             )}
+            {shownPet && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="rounded-full bg-coin px-3 py-1 font-bold">
+                  👀 {t('shop.petTrying')}: {t(`shop.pets.${shownPet}`)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewPet(null)}
+                  className="rounded-full bg-cream px-3 py-1 font-bold text-ink-soft"
+                >
+                  {t('shop.petStopTry')}
+                </button>
+              </div>
+            )}
             <p className="text-center text-lg text-ink-soft">
-              {tab === 'pets' ? t('shop.petsHint') : t('shop.outfitsHint')}
+              {tab === 'pets'
+                ? shownPet
+                  ? t('shop.petTryHint')
+                  : t('shop.petsHint')
+                : t('shop.outfitsHint')}
             </p>
           </div>
 
@@ -132,7 +155,14 @@ export function ShopPage() {
             />
           )}
           {tab === 'pets' ? (
-            <PetsPanel />
+            <PetsPanel
+              previewing={previewPet}
+              onPreview={(pet) => {
+                setPreviewPet(pet)
+                setRoaming(false)
+                setLastTap((count) => count + 1)
+              }}
+            />
           ) : (
             <ul className="grid w-full flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
               {OUTFITS.map((outfit) => (

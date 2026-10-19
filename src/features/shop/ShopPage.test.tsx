@@ -59,4 +59,37 @@ describe('Shop', () => {
     expect(document.querySelectorAll('li img')).toHaveLength(1)
     expect(screen.getAllByLabelText('Bo‘sh joy')).toHaveLength(STICKERS.length - 1)
   })
+
+  it('lets a child try a pet next to the robot before buying it', async () => {
+    useProgressStore.setState({ byChild: { [GUEST_KEY]: { ...EMPTY_PROGRESS, coins: 20 } } })
+    const { user } = await renderRoute('/shop?tab=pets')
+    // with only 20 coins the kitten can still be tried, for free
+    await user.click(screen.getByRole('button', { name: 'Mushuk — Yana 55 coin' }))
+    expect(screen.getByText('👀 Sinab ko‘rilyapti: Mushuk')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mushuk' })).toBeInTheDocument() // at the robot's feet
+    expect(screen.getByText('Mushuk yonimda mana shunday turadi! Yoqdimi?')).toBeInTheDocument()
+    expect(guest().coins).toBe(20)
+    expect(guest().pets ?? []).toEqual([])
+
+    // adopting it still needs the coins
+    await user.click(screen.getByRole('button', { name: /Olish · 75/ }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByText('Yana 55 coin yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Qaytarish' }))
+    expect(screen.queryByRole('button', { name: 'Mushuk' })).not.toBeInTheDocument()
+  })
+
+  it('buys a tried pet after a second tap, showing the robot and pet together', async () => {
+    useProgressStore.setState({ byChild: { [GUEST_KEY]: { ...EMPTY_PROGRESS, coins: 80 } } })
+    const { user } = await renderRoute('/shop?tab=pets')
+    await user.click(screen.getByRole('button', { name: 'Quyoncha — 75 coin' }))
+    expect(guest().coins).toBe(80)
+    await user.click(screen.getByRole('button', { name: /^Quyoncha — Sinab ko‘rilyapti/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Quyonchani olamizmi?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Ha, olaman' }))
+    expect(guest().coins).toBe(5)
+    expect(guest().pets).toEqual(['bunny'])
+    expect(screen.queryByText(/Sinab ko‘rilyapti/)).not.toBeInTheDocument()
+  })
 })

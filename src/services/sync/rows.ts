@@ -15,7 +15,8 @@ export function childRow(child: ChildProfile) {
     gender: child.gender,
     mascot: child.mascot,
     daily_limit_minutes: child.dailyLimitMinutes,
-    homework: child.homework ?? null,
+    // the jsonb column keeps the whole list
+    homework: child.homeworks ?? [],
     created_at: child.createdAt,
   }
 }

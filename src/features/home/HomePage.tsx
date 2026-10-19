@@ -34,7 +34,7 @@ export function HomePage() {
   const { sayText: sayHello } = useSpeaker()
   const plan = dailyPlanState(results, dayKey(), level)
   const lockedGames = GAME_TYPES.filter((game) => !isGameOpen(game, level))
-  const homework = usePendingHomework()
+  const homeworks = usePendingHomework()
   const language = useLanguage()
   const exam = examProgress(getAlphabet(language).letters, learned[language] ?? [])
   const examUnlocked = isFinalTestUnlocked(exam.learned, exam.total)
@@ -77,7 +77,15 @@ export function HomePage() {
         </span>
       )}
 
-      {homework && <HomeworkCard homework={homework} />}
+      {homeworks.length > 0 && (
+        <ul className="flex w-full max-w-3xl flex-col gap-4">
+          {homeworks.map((homework) => (
+            <li key={homework.id}>
+              <HomeworkCard homework={homework} />
+            </li>
+          ))}
+        </ul>
+      )}
 
       <JourneyPath plan={plan} />
 
