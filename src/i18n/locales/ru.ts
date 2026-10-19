@@ -469,6 +469,7 @@ export const ru: Translation = {
     voiceLocked: 'Озвучка есть в PRO. Продолжаем с текстом!',
     listen: 'Слушать',
     result: {
+      learnTitle: 'Занятие окончено!',
       title: 'Проверка окончена!',
       independent: 'Правильно без помощи: {{correct}}/{{total}}',
       helped: 'С помощью: {{count}}',

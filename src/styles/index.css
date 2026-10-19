@@ -1,8 +1,29 @@
 @import 'tailwindcss';
 
+/*
+ * The Uzbek ʻ and ʼ (U+02BB/U+02BC) drawn with the ‘ ’ shapes of Rubik and
+ * Nunito (scripts/make-okina-fonts.py): Rubik has no ʻ, and Nunito's leaves a
+ * gap inside oʻ and gʻ.
+ */
+@font-face {
+  font-family: 'Kiddo Okina Display';
+  src: url('/fonts/okina-rubik.woff2') format('woff2');
+  unicode-range: U+02BB-02BC;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Kiddo Okina';
+  src: url('/fonts/okina-nunito.woff2') format('woff2');
+  unicode-range: U+02BB-02BC;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 @theme {
-  --font-display: 'Rubik', ui-rounded, system-ui, sans-serif;
-  --font-body: 'Nunito', ui-rounded, system-ui, sans-serif;
+  --font-display: 'Kiddo Okina Display', 'Rubik', ui-rounded, system-ui, sans-serif;
+  --font-body: 'Kiddo Okina', 'Nunito', ui-rounded, system-ui, sans-serif;
 
   --color-cream: #fff8ec;
   --color-surface: #ffffff;

@@ -469,6 +469,7 @@ export const en: Translation = {
     voiceLocked: 'Reading aloud is part of PRO. Let’s go on with the text!',
     listen: 'Listen',
     result: {
+      learnTitle: 'Practice done!',
       title: 'All done!',
       independent: 'Right on your own: {{correct}}/{{total}}',
       helped: 'Done with help: {{count}}',

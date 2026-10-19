@@ -40,7 +40,7 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
         <Img3D name={allOwn ? 'trophy' : 'glowing-star'} className="size-28" eager />
       </motion.div>
       <h2 id="learn-result-title" className="font-display text-3xl font-extrabold">
-        {t('learn.result.title')}
+        {result.mode === 'learn' ? t('learn.result.learnTitle') : t('learn.result.title')}
       </h2>
       <p className="font-display text-2xl font-bold text-primary-ink" data-testid="learn-score">
         {t('learn.result.independent', { correct: summary.independent, total: summary.total })}

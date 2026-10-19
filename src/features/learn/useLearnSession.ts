@@ -21,6 +21,7 @@ export interface FinishedSession {
   summary: SessionSummary
   /** Coins given now (0 if this session was already rewarded). */
   coins: number
+  mode: LearnMode
 }
 
 function newId(): string {
@@ -94,7 +95,7 @@ export function useLearnSession({
       if (finished.current) return finished.current
       const summary = summarize(sheetRef.current, total)
       const coins = finishSession(childKey, { id, section, stage, language, mode, ...summary })
-      finished.current = { id, summary, coins }
+      finished.current = { id, summary, coins, mode }
       return finished.current
     },
     [childKey, finishSession, id, language, mode, section, stage],

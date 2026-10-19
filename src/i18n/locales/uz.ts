@@ -468,6 +468,7 @@ export const uz = {
     voiceLocked: 'Ovozli o‘qish PRO versiyada. Matn bilan davom etamiz!',
     listen: 'Tinglash',
     result: {
+      learnTitle: 'Mashg‘ulot tugadi!',
       title: 'Tekshiruv tugadi!',
       independent: 'Mustaqil to‘g‘ri javoblar: {{correct}}/{{total}}',
       helped: 'Yordam bilan bajarildi: {{count}}',
