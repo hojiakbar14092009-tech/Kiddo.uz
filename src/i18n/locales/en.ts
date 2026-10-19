@@ -305,6 +305,8 @@ export const en: Translation = {
       sound: 'Sound',
       volume: 'Volume',
       testSound: 'Play a test sound',
+      voiceNote:
+        'Uzbek voice lines are made with an open speech model: a Kazakh-model voice reads the Uzbek text, so the accent is not always fully Uzbek. The text is always shown on screen.',
       language: 'Language',
       languageHint: 'App and learning language',
       account: 'Account',
@@ -478,10 +480,21 @@ export const en: Translation = {
     },
     review: 'Let’s review',
     reviewText: '{{section}}: a little review',
-    offline: 'No internet. Your results are kept; pictures and sounds not loaded yet will come later.',
+    offline:
+      'No internet. Your results are kept; pictures and sounds not loaded yet will come later.',
     retry: 'Have another go!',
     correct: 'Right!',
     lockedAge: 'Opens at age {{age}}',
+    parent: {
+      title: 'New sections: results',
+      empty: 'Your child has not started the new sections yet.',
+      notStarted: 'Not started yet',
+      noTest: 'Practised, no check yet',
+      tests: 'Checks taken: {{count}}',
+      review: 'Topics to practise again: {{count}}',
+      latest: 'Latest checks',
+      helpedShort: 'with help: {{count}}',
+    },
   },
   mascot: {
     praises: {

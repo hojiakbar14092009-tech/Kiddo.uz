@@ -43,6 +43,7 @@ export function SettingsSection() {
         >
           {t('parent.settings.testSound')}
         </Button>
+        <p className="text-sm text-ink-soft">{t('parent.settings.voiceNote')}</p>
       </Panel>
 
       <Panel title={t('parent.settings.language')}>

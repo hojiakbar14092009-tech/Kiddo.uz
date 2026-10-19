@@ -142,3 +142,37 @@ describe('learning record', () => {
     expect(orderOf(next, (i) => i)).not.toBe('a,b,c,d')
   })
 })
+
+describe('home review card', () => {
+  it('points to the section with the most to practise, in the current language', async () => {
+    const { reviewSection } = await import('./LearnHome')
+    useLearnStore.setState({ byChild: {} })
+    const store = useLearnStore.getState()
+    const base = { mode: 'learn' as const, first: 'x', final: 'y', finalCorrect: true }
+    expect(reviewSection(getLearnChild('kid'), 'uz')).toBeNull()
+    store.recordAttempt('kid', {
+      ...base,
+      section: 'words',
+      language: 'ru',
+      questionId: 'w1',
+      skill: 'initial:m',
+      firstCorrect: false,
+      helped: false,
+      errorType: 'wrong-initial',
+    })
+    // a Russian mistake does not ask for review in Uzbek
+    expect(reviewSection(getLearnChild('kid'), 'uz')).toBeNull()
+    store.recordAttempt('kid', {
+      ...base,
+      section: 'math',
+      language: 'any',
+      questionId: 'm1',
+      skill: 'add:make10',
+      firstCorrect: false,
+      helped: true,
+      errorType: 'off-by-one',
+    })
+    expect(reviewSection(getLearnChild('kid'), 'uz')).toBe('math')
+    expect(reviewSection(getLearnChild('kid'), 'ru')).toBe('math')
+  })
+})

@@ -7,6 +7,7 @@ import { Mascot } from '@/features/mascot/Mascot'
 import { useMascotStore } from '@/features/mascot/mascotStore'
 import { HelpButton } from './HelpButton'
 import { VoiceToggle } from './VoiceToggle'
+import { useOnline } from './useOnline'
 import { useLearnVoice } from './voice'
 
 export interface ShellHelp {
@@ -52,6 +53,7 @@ export function LearnShell({
   const { t } = useTranslation()
   const learnVoice = useLearnVoice()
   const resetMascot = useMascotStore((state) => state.reset)
+  const online = useOnline()
 
   // leaving the screen: the bubble clears and any voice stops
   useEffect(
@@ -86,6 +88,15 @@ export function LearnShell({
         }
         className={clsx('gap-4 px-4 py-4 sm:gap-6 sm:px-8 sm:py-6', className)}
       >
+        {!online && (
+          <p
+            role="status"
+            data-testid="learn-offline"
+            className="rounded-2xl bg-coin-soft px-4 py-2 text-center font-semibold text-ink"
+          >
+            {t('learn.offline')}
+          </p>
+        )}
         {(mascot || help || voice) && (
           <div className="flex items-center gap-3">
             {mascot ? (

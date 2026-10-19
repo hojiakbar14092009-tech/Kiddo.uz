@@ -303,6 +303,8 @@ export const uz = {
       sound: 'Ovoz',
       volume: 'Balandligi',
       testSound: 'Tekshirib eshitish',
+      voiceNote:
+        'O‘zbekcha ovozlar ochiq sintez modeli bilan yozilgan: o‘zbekcha matnni qozoqcha model ovozi o‘qiydi, shuning uchun talaffuz ba’zan to‘liq o‘zbekcha bo‘lmaydi. Matn har doim ekranda ko‘rinadi.',
       language: 'Til',
       languageHint: 'Ilova va o‘rganish tili',
       account: 'Hisob',
@@ -481,6 +483,16 @@ export const uz = {
     retry: 'Yana bir urinib ko‘r!',
     correct: 'To‘g‘ri!',
     lockedAge: '{{age}} yoshda ochiladi',
+    parent: {
+      title: 'Yangi bo‘limlar natijalari',
+      empty: 'Farzandingiz yangi bo‘limlarni hali boshlamagan.',
+      notStarted: 'Hali boshlanmagan',
+      noTest: 'Mashq qilgan, tekshiruv hali yo‘q',
+      tests: 'Tekshiruvlar soni: {{count}}',
+      review: 'Takrorlash kerak bo‘lgan mavzular: {{count}}',
+      latest: 'Oxirgi tekshiruvlar',
+      helpedShort: 'yordam bilan: {{count}}',
+    },
   },
   mascot: {
     praises: {

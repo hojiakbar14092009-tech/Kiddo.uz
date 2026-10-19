@@ -22,6 +22,7 @@ import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
 import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
+import { LearnHome } from '@/features/learn/LearnHome'
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -103,6 +104,8 @@ export function HomePage() {
           </div>
         </div>
       )}
+
+      <LearnHome />
 
       <section aria-labelledby="more-title" className="flex w-full flex-col items-center gap-4">
         <h2 id="more-title" className="font-display text-2xl font-extrabold sm:text-3xl">
