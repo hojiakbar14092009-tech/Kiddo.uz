@@ -56,6 +56,43 @@ export const routes: RouteObject[] = [
                   },
                 ],
               },
+              // The new learning sections load on demand (3D and content only when opened).
+              {
+                path: '/learn/words',
+                lazy: async () => ({
+                  Component: (await import('@/features/firstWords/FirstWordsPage')).FirstWordsPage,
+                }),
+              },
+              {
+                path: '/learn/help',
+                lazy: async () => ({
+                  Component: (await import('@/features/helpMascot/HelpMascotPage')).HelpMascotPage,
+                }),
+              },
+              {
+                path: '/learn/tales/*',
+                lazy: async () => ({
+                  Component: (await import('@/features/tales/TalesPage')).TalesPage,
+                }),
+              },
+              {
+                path: '/learn/space/*',
+                lazy: async () => ({
+                  Component: (await import('@/features/space/SpacePage')).SpacePage,
+                }),
+              },
+              {
+                path: '/learn/math',
+                lazy: async () => ({
+                  Component: (await import('@/features/math/MathPage')).MathPage,
+                }),
+              },
+              {
+                path: '/learn/garden',
+                lazy: async () => ({
+                  Component: (await import('@/features/garden/GardenPage')).GardenPage,
+                }),
+              },
               { path: '/rest', element: <RestPage /> },
             ],
           },

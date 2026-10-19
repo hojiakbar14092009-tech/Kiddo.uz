@@ -1,0 +1,133 @@
+import clsx from 'clsx'
+import { useEffect, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Screen } from '@/components/layout/Screen'
+import { TopBar } from '@/components/layout/TopBar'
+import { Mascot } from '@/features/mascot/Mascot'
+import { useMascotStore } from '@/features/mascot/mascotStore'
+import { HelpButton } from './HelpButton'
+import { VoiceToggle } from './VoiceToggle'
+import { useLearnVoice } from './voice'
+
+export interface ShellHelp {
+  text: string
+  visual?: ReactNode
+  glow?: boolean
+  onOpen?: () => void
+}
+
+interface LearnShellProps {
+  title: string
+  /** Zero-based step and number of steps (shown as dots), if the screen has steps. */
+  step?: { current: number; total: number }
+  help?: ShellHelp
+  /** Show the voice switch (PRO, off by default). */
+  voice?: boolean
+  onVoiceOn?: () => void
+  /** Hide the mascot row (e.g. on a full-screen scene that has its own narrator). */
+  mascot?: boolean
+  /** Extra classes on the page; a section with its own look (Koinot) adds its theme class. */
+  className?: string
+  /** Wraps the whole page, e.g. `learn-space` for the space theme (scoped to that section). */
+  themeClassName?: string
+  children: ReactNode
+}
+
+/**
+ * The frame of every new learning screen, built from the same parts as the
+ * existing games: top bar, step dots, the mascot with its bubble, the voice
+ * switch and the help bulb.
+ */
+export function LearnShell({
+  title,
+  step,
+  help,
+  voice = true,
+  onVoiceOn,
+  mascot = true,
+  className,
+  themeClassName,
+  children,
+}: LearnShellProps) {
+  const { t } = useTranslation()
+  const learnVoice = useLearnVoice()
+  const resetMascot = useMascotStore((state) => state.reset)
+
+  // leaving the screen: the bubble clears and any voice stops
+  useEffect(
+    () => () => {
+      resetMascot()
+      learnVoice.stop()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  return (
+    <div className={clsx('min-h-dvh', themeClassName)}>
+      <Screen
+        header={
+          <TopBar
+            start={
+              <div className="flex min-w-0 flex-col">
+                <span className="learn-title truncate font-display text-lg font-bold sm:text-xl">
+                  {title}
+                </span>
+                {step && step.total > 1 && (
+                  <StepDots
+                    current={step.current}
+                    total={step.total}
+                    label={t('learn.question', { current: step.current + 1, total: step.total })}
+                  />
+                )}
+              </div>
+            }
+          />
+        }
+        className={clsx('gap-4 px-4 py-4 sm:gap-6 sm:px-8 sm:py-6', className)}
+      >
+        {(mascot || help || voice) && (
+          <div className="flex items-center gap-3">
+            {mascot ? (
+              <Mascot robotClassName="w-20 sm:w-28" className="min-w-0 flex-1" />
+            ) : (
+              <div className="flex-1" />
+            )}
+            {voice && <VoiceToggle onTurnedOn={onVoiceOn} />}
+            {help && (
+              <HelpButton text={help.text} glow={help.glow} onOpen={help.onOpen}>
+                {help.visual}
+              </HelpButton>
+            )}
+          </div>
+        )}
+        {children}
+      </Screen>
+    </div>
+  )
+}
+
+function StepDots({ total, current, label }: { total: number; current: number; label: string }) {
+  return (
+    <div
+      className="mt-1 flex gap-1.5"
+      role="progressbar"
+      aria-valuenow={current + 1}
+      aria-valuemin={1}
+      aria-valuemax={total}
+      aria-label={label}
+    >
+      {Array.from({ length: total }, (_, index) => (
+        <span
+          key={index}
+          className={clsx(
+            'h-2.5 rounded-full transition-all',
+            index < current && 'w-2.5 bg-primary',
+            index === current && 'w-7 bg-coin',
+            index > current && 'w-2.5 bg-line-strong',
+          )}
+        />
+      ))}
+    </div>
+  )
+}

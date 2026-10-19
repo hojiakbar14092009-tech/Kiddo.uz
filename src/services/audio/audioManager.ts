@@ -56,8 +56,20 @@ class AudioManager {
   async speak(
     items: readonly Utterance[],
     options: VoiceOptions,
-    { requirePro = true }: { requirePro?: boolean } = {},
+    {
+      requirePro = true,
+      clipsOnly = false,
+    }: {
+      requirePro?: boolean
+      /**
+       * Only recorded clips: a sentence without a recording stays silent
+       * (the text is on screen) instead of using the device voice, which may
+       * not speak this language.
+       */
+      clipsOnly?: boolean
+    } = {},
   ): Promise<boolean> {
+    // The PRO check runs right before any sound, not only when the button is drawn.
     if (requirePro && !this.canSpeak()) return false
     const volume = currentVolume()
     if (volume <= 0) return true
@@ -74,7 +86,7 @@ class AudioManager {
         // A newer phrase or stop() wins: the rest of this one is dropped.
         if (generation !== this.generation) return true
         if (part.kind === 'clip') await this.playClip(part.url, volume)
-        else await speech.say(part.text, { ...options, volume })
+        else if (!clipsOnly) await speech.say(part.text, { ...options, volume })
       }
     }
     return true

@@ -9,12 +9,14 @@ import { NUMBERS } from '../../src/content/numbers'
 import { en } from '../../src/i18n/locales/en'
 import { ru } from '../../src/i18n/locales/ru'
 import { uz } from '../../src/i18n/locales/uz'
+import { LEARN_SPOKEN } from '../../src/features/learn/spoken'
 import { splitSentences, tidyPhrase } from '../../src/services/audio/phrases'
 
 type Tree = { [key: string]: string | Tree }
 
 /** Parts of the interface the robot reads aloud. */
 const SPOKEN = [
+  'learn',
   'task',
   'reward',
   'mascot',
@@ -89,6 +91,8 @@ for (const [language, { tree, alphabet }] of Object.entries(sources)) {
       alphabet.letters.map((letter) => letter.word),
     ).forEach(add)
   }
+  // The new learning sections (their own content files).
+  LEARN_SPOKEN[language as 'uz' | 'ru' | 'en'].forEach(add)
   // Cheers are said in English whatever the language (see useMascot).
   if (language === 'en') {
     ;['Yahoooo!', 'Wow!', 'Hooray!', 'Yay!', 'Woohoo!', 'Oops!', 'Uh-oh!', 'Hmm!'].forEach(add)
