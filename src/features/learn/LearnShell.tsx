@@ -72,7 +72,7 @@ export function LearnShell({
           <TopBar
             start={
               <div className="flex min-w-0 flex-col">
-                <span className="learn-title truncate font-display text-lg font-bold sm:text-xl">
+                <span className="learn-title hidden truncate font-display text-lg font-bold sm:block sm:text-xl">
                   {title}
                 </span>
                 {step && step.total > 1 && (
@@ -97,19 +97,24 @@ export function LearnShell({
             {t('learn.offline')}
           </p>
         )}
+        <h1 className="learn-title -mb-2 text-center font-display text-2xl leading-tight font-extrabold sm:hidden">
+          {title}
+        </h1>
         {(mascot || help || voice) && (
           <div className="flex items-center gap-3">
             {mascot ? (
-              <Mascot robotClassName="w-20 sm:w-28" className="min-w-0 flex-1" />
+              <Mascot robotClassName="w-16 sm:w-28" className="min-w-0 flex-1" />
             ) : (
               <div className="flex-1" />
             )}
-            {voice && <VoiceToggle onTurnedOn={onVoiceOn} />}
-            {help && (
-              <HelpButton text={help.text} glow={help.glow} onOpen={help.onOpen}>
-                {help.visual}
-              </HelpButton>
-            )}
+            <div className="flex shrink-0 flex-col items-center gap-2 sm:flex-row sm:gap-3">
+              {voice && <VoiceToggle onTurnedOn={onVoiceOn} />}
+              {help && (
+                <HelpButton text={help.text} glow={help.glow} onOpen={help.onOpen}>
+                  {help.visual}
+                </HelpButton>
+              )}
+            </div>
           </div>
         )}
         {children}

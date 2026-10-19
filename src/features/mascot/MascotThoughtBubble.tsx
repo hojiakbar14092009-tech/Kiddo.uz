@@ -42,7 +42,10 @@ export function MascotThoughtBubble({
         {message && (
           <motion.div
             key={messageKey}
-            className={clsx('flex items-end gap-1.5', fromLeft ? 'flex-row' : 'flex-row-reverse')}
+            className={clsx(
+              'flex min-w-0 items-end gap-1.5',
+              fromLeft ? 'flex-row' : 'flex-row-reverse',
+            )}
             exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.18 } }}
           >
             {!isPro && (
@@ -72,12 +75,12 @@ export function MascotThoughtBubble({
               transition={{ ...POP, delay: isPro ? 0 : 0.28 }}
               style={{ transformOrigin: fromLeft ? '0% 100%' : '100% 100%' }}
               className={clsx(
-                'relative flex max-w-[min(22rem,60vw)] items-center gap-3 bg-surface px-5 py-3 shadow-[0_5px_0_var(--color-line)]',
+                'relative flex max-w-[min(22rem,60vw)] min-w-0 items-center gap-3 bg-surface px-5 py-3 shadow-[0_5px_0_var(--color-line)]',
                 isPro ? 'rounded-3xl' : 'rounded-[2.5rem]',
               )}
             >
               {!isPro && <CloudBumps />}
-              <span className="relative font-body text-lg leading-snug font-extrabold sm:text-xl">
+              <span className="relative min-w-0 font-body text-lg leading-snug font-extrabold sm:text-xl">
                 {message.text}
               </span>
               {message.emoji && (
