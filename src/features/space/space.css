@@ -1,0 +1,474 @@
+/*
+ * The Koinot look: a deep blue-violet night with soft stars and slow light.
+ * Everything is scoped under .learn-space, so no other page changes.
+ */
+
+.learn-space {
+  --space-bg-1: #0b1036;
+  --space-bg-2: #1c1458;
+  --space-bg-3: #2b1d6e;
+  --space-panel: rgb(20 22 66 / 0.78);
+  --space-panel-line: rgb(170 160 255 / 0.28);
+  --space-text: #f6f3ff;
+  --space-soft: #c9c3f2;
+  --space-gold: #ffd56a;
+
+  position: relative;
+  isolation: isolate;
+  color: var(--space-text);
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgb(132 94 247 / 0.35), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgb(56 120 255 / 0.22), transparent 60%),
+    radial-gradient(700px 500px at 60% 110%, rgb(236 94 190 / 0.16), transparent 60%),
+    linear-gradient(180deg, var(--space-bg-1), var(--space-bg-2) 55%, var(--space-bg-3));
+  background-color: var(--space-bg-1);
+}
+
+/* two layers of small soft stars; they glow slowly, never flash */
+.learn-space::before,
+.learn-space::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+
+.learn-space::before {
+  background-image:
+    radial-gradient(1.5px 1.5px at 20px 30px, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 90px 120px, #e8e4ff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 160px 60px, #fff6d8 50%, transparent 51%),
+    radial-gradient(1px 1px at 230px 180px, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 60px 210px, #dfe8ff 50%, transparent 51%);
+  background-size: 260px 240px;
+  opacity: 0.75;
+}
+
+.learn-space::after {
+  background-image:
+    radial-gradient(2px 2px at 50px 80px, #fff 45%, transparent 55%),
+    radial-gradient(1.5px 1.5px at 300px 40px, #ffe9a8 45%, transparent 55%),
+    radial-gradient(2px 2px at 220px 260px, #d9e3ff 45%, transparent 55%),
+    radial-gradient(1.5px 1.5px at 380px 190px, #fff 45%, transparent 55%);
+  background-size: 420px 320px;
+  opacity: 0.5;
+  animation: space-glow 9s ease-in-out infinite alternate;
+}
+
+@keyframes space-glow {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 0.75;
+  }
+}
+
+/* the top bar stays readable on the dark sky */
+.learn-space .topbar-scrolled {
+  background-color: rgb(14 16 52 / 0.86);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.35);
+}
+
+.learn-space .learn-title {
+  color: var(--space-text);
+  text-shadow: 0 2px 8px rgb(0 0 0 / 0.45);
+}
+
+.learn-space :focus-visible {
+  outline: 4px solid var(--space-gold);
+  outline-offset: 3px;
+}
+
+/* panels behind text, for contrast */
+.learn-space .space-panel {
+  background: var(--space-panel);
+  border: 2px solid var(--space-panel-line);
+  border-radius: 32px;
+  box-shadow:
+    0 10px 30px rgb(4 6 30 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.learn-space .space-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.learn-space .space-hero-planet {
+  width: clamp(84px, 22vw, 140px);
+  height: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 22px rgb(255 214 140 / 0.35));
+}
+
+.learn-space .space-heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 0.5);
+}
+
+.learn-space .space-lesson {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 9rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.1rem 1rem 1.25rem;
+  border-radius: 32px;
+  border: 2px solid var(--space-panel-line);
+  background: linear-gradient(160deg, rgb(58 48 150 / 0.92), rgb(28 26 92 / 0.92));
+  box-shadow: 0 7px 0 rgb(8 8 40 / 0.85);
+  color: var(--space-text);
+  text-align: center;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.learn-space .space-lesson:active {
+  transform: translateY(4px);
+  box-shadow: 0 3px 0 rgb(8 8 40 / 0.85);
+}
+
+.learn-space .space-lesson-number {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.9rem;
+  display: flex;
+  width: 2.2rem;
+  height: 2.2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--space-gold);
+  color: #2a1f00;
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.learn-space .space-lesson-pictures {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.learn-space .space-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  background: #3ccf91;
+  color: #06301c;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.learn-space .space-note {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  background: rgb(255 213 106 / 0.16);
+  color: var(--space-gold);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* the solar system: Sun first, then the planets in order (sizes are not to scale) */
+.learn-space .space-exhibit {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 0.5rem 0.25rem 0.75rem;
+  scroll-snap-type: x proximity;
+}
+
+.learn-space .space-exhibit li {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.learn-space .space-exhibit-item {
+  display: flex;
+  min-width: 4.75rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  border-radius: 24px;
+  color: var(--space-text);
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.learn-space .space-exhibit-item:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.learn-space .space-exhibit-picture {
+  width: 4rem;
+  height: 4rem;
+}
+
+.learn-space .space-exhibit [data-body='sun'] .space-exhibit-picture {
+  width: 7rem;
+  height: 7rem;
+}
+.learn-space .space-exhibit [data-body='jupiter'] .space-exhibit-picture,
+.learn-space .space-exhibit [data-body='saturn'] .space-exhibit-picture {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+.learn-space .space-exhibit [data-body='mercury'] .space-exhibit-picture,
+.learn-space .space-exhibit [data-body='moon'] .space-exhibit-picture {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* the object card */
+.learn-space .space-card {
+  display: grid;
+  width: 100%;
+  max-width: 64rem;
+  justify-items: center;
+  align-items: center;
+  gap: 1rem 2rem;
+  padding: 1.25rem;
+  border-radius: 36px;
+  border: 2px solid var(--space-panel-line);
+  background: var(--space-panel);
+  box-shadow: 0 10px 30px rgb(4 6 30 / 0.45);
+}
+
+@media (min-width: 640px) {
+  .learn-space .space-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 1.75rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .learn-space .space-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .learn-space .space-card .space-stage {
+    max-height: 70vh;
+    width: auto;
+  }
+}
+
+.learn-space .space-stage {
+  position: relative;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 50%, rgb(120 110 255 / 0.18), transparent 68%);
+}
+
+.learn-space .space-model {
+  cursor: grab;
+  touch-action: pan-y;
+  border-radius: 999px;
+}
+
+.learn-space .space-model:active {
+  cursor: grabbing;
+}
+
+.learn-space .space-caption {
+  color: var(--space-soft);
+}
+
+.learn-space .space-fact {
+  padding: 0.55rem 0.9rem;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.08);
+}
+
+.learn-space .space-chip {
+  display: inline-block;
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 1rem;
+}
+.learn-space .space-chip-star {
+  background: var(--space-gold);
+  color: #3a2600;
+}
+.learn-space .space-chip-planet {
+  background: #8fd3ff;
+  color: #06263d;
+}
+.learn-space .space-chip-moon {
+  background: #d9d9e6;
+  color: #24243a;
+}
+
+.learn-space .space-badge {
+  padding: 0.25rem 1rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  color: var(--space-soft);
+  font-weight: 700;
+}
+
+.learn-space .space-prompt {
+  max-width: 40rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 28px;
+  background: var(--space-panel);
+  border: 2px solid var(--space-panel-line);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4.6vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* answer cards stay light (so right/wrong colours read well); the picture sits in a dark window */
+.learn-space .space-choice {
+  color: var(--color-ink);
+}
+
+.learn-space .space-porthole {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle at 40% 35%, #2c2a86, #0d0f3a 75%);
+  box-shadow:
+    inset 0 0 0 4px rgb(255 255 255 / 0.65),
+    inset 0 6px 18px rgb(0 0 0 / 0.45);
+}
+
+/* "stars": one big glowing star and two small ones */
+.learn-space .space-stars,
+.space-stars {
+  position: relative;
+  display: inline-block;
+  aspect-ratio: 1;
+}
+.space-stars .space-stars-big {
+  position: absolute;
+  inset: 12% 12% 12% 12%;
+  width: 76%;
+  height: 76%;
+}
+.space-stars .space-stars-small {
+  position: absolute;
+  width: 26%;
+  height: 26%;
+}
+.space-stars .space-stars-a {
+  top: 2%;
+  right: 4%;
+}
+.space-stars .space-stars-b {
+  bottom: 6%;
+  left: 2%;
+}
+
+/* order game */
+.learn-space .space-order-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 28px;
+  background: var(--space-panel);
+  border: 2px solid var(--space-panel-line);
+}
+
+.learn-space .space-order-row li {
+  display: flex;
+  width: 5rem;
+  min-height: 6rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .learn-space .space-order-row li {
+    width: 6.5rem;
+    font-size: 1rem;
+  }
+}
+
+.learn-space .space-order-slot {
+  border-radius: 22px;
+  border: 2px dashed rgb(255 255 255 / 0.35);
+}
+
+.learn-space .space-order-slot[data-filled='yes'] {
+  border-style: solid;
+  border-color: #3ccf91;
+  background: rgb(60 207 145 / 0.14);
+}
+
+.learn-space .space-order-empty {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: rgb(255 255 255 / 0.45);
+}
+
+/* the order strip inside the help (shown in a light dialog) */
+.space-order-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 0.6rem;
+  color: var(--color-ink);
+}
+
+.space-order-strip li {
+  display: flex;
+  width: 4.6rem;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .learn-space::after {
+    animation: none;
+  }
+  .learn-space .space-lesson {
+    transition: none;
+  }
+}
+
+/*
+ * Light parts shared with the rest of the app (thought bubble, help dialog,
+ * result card, buttons) keep dark text. In the base layer, so any text colour
+ * utility on them still wins.
+ */
+@layer base {
+  .learn-space .bg-surface,
+  .learn-space .bg-white,
+  .learn-space .bg-cream,
+  .learn-space .bg-coin,
+  .learn-space .bg-coin-soft,
+  .learn-space .bg-primary-soft {
+    color: var(--color-ink);
+  }
+}
