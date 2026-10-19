@@ -145,7 +145,7 @@ describe('learning record', () => {
 
 describe('home review card', () => {
   it('points to the section with the most to practise, in the current language', async () => {
-    const { reviewSection } = await import('./LearnHome')
+    const { reviewSection } = await import('./reviewSection')
     useLearnStore.setState({ byChild: {} })
     const store = useLearnStore.getState()
     const base = { mode: 'learn' as const, first: 'x', final: 'y', finalCorrect: true }
