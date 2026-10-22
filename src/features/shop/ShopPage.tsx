@@ -107,20 +107,27 @@ export function ShopPage() {
               pet={shownPet}
               bubbleSide="right"
               className="w-full max-w-md lg:flex-col"
+              // Beside the robot's (empty) frame, not under it: the robot starts
+              // its walk from the frame, so the button is never hidden behind it
+              // (on phones and tablets it stays in front of the robot while it hops past;
+              // on wide screens the sticky column is its own layer, but the robot never
+              // takes taps, so the button always works).
+              aside={
+                roaming ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRoaming(false)
+                      setLastTap((count) => count + 1)
+                    }}
+                    className="relative z-[16] min-h-12 animate-fade-in rounded-card bg-primary-soft px-4 py-2 text-center font-display text-lg leading-tight font-bold text-primary-ink shadow-press-sm active:translate-y-0.5 active:shadow-none"
+                  >
+                    <span aria-hidden="true">👋 </span>
+                    {t('shop.callRobot')}
+                  </button>
+                ) : undefined
+              }
             />
-            {roaming && (
-              <button
-                type="button"
-                onClick={() => {
-                  setRoaming(false)
-                  setLastTap((count) => count + 1)
-                }}
-                className="-mt-24 rounded-full bg-primary-soft px-4 py-2 font-display font-bold text-primary-ink sm:-mt-32"
-              >
-                <span aria-hidden="true">👋 </span>
-                {t('shop.callRobot')}
-              </button>
-            )}
             {shownPet && (
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <span className="rounded-full bg-coin px-3 py-1 font-bold">

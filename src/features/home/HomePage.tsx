@@ -16,7 +16,9 @@ import { AppIcon, type AppIconName } from '@/features/age/AppIcon'
 import { UnlockCelebration } from '@/features/age/UnlockCelebration'
 import { GAME_TYPES } from '@/features/tasks/games'
 import { useSpeaker } from '@/services/audio/useSpeaker'
-import { motion, useAnimationControls } from 'framer-motion'
+import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
+import clsx from 'clsx'
+import { useState } from 'react'
 import { useProgress, useWearing } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
@@ -30,6 +32,7 @@ export function HomePage() {
   const hasProfiles = useFamilyStore((state) => state.children.length > 0)
   const { results, learned } = useProgress()
   const level = useAgeLevel()
+  const reduceMotion = useReducedMotion() ?? false
   const mascotModel = useMascotModel()
   const wearing = useWearing()
   const { sayText: sayHello } = useSpeaker()
@@ -39,6 +42,8 @@ export function HomePage() {
   const language = useLanguage()
   const exam = examProgress(getAlphabet(language).letters, learned[language] ?? [])
   const examUnlocked = isFinalTestUnlocked(exam.learned, exam.total)
+  // While the robot says hello in its spot under the heading, the age badge steps aside.
+  const [greetingInStage, setGreetingInStage] = useState(false)
 
   const hello = plan.complete
     ? t('mascot.homePlanDone')
@@ -56,7 +61,7 @@ export function HomePage() {
               <Link
                 to="/child-select"
                 aria-label={t('childSelect.switch')}
-                className="flex min-w-0 items-center gap-2 rounded-full py-1 pr-3 pl-1 active:scale-95"
+                className="flex min-h-11 min-w-11 shrink-0 items-center gap-2 rounded-full active:scale-95 sm:py-1 sm:pr-3 sm:pl-1"
               >
                 <ChildAvatar child={child} size={44} />
                 <span className="hidden truncate font-display text-lg font-bold sm:inline">
@@ -72,11 +77,32 @@ export function HomePage() {
       <h1 className="text-center font-display text-4xl font-extrabold sm:text-5xl">
         {child ? t('home.greeting', { name: child.name }) : t('home.greetingNoName')}
       </h1>
-      {child && (
-        <span className="-mt-5 rounded-full bg-surface px-4 py-1 font-display text-lg font-bold text-primary-ink shadow-[0_4px_0_var(--color-line)] sm:-mt-7">
-          {t('age.badge', { age: level })}
-        </span>
-      )}
+      {/*
+        The robot's greeting spot: it stands here with its bubble while it says
+        hello, so the bubble never covers the plan or the cards. Otherwise it holds
+        the age badge.
+      */}
+      <div
+        data-roam="home-greet"
+        className={clsx(
+          '-mt-5 flex w-full max-w-3xl items-center justify-center sm:-mt-7',
+          // the room is kept only while a robot can greet in it (none with reduced
+          // motion); on a phone held sideways it is smaller, but still there, so the
+          // bubble never has to cover the heading or the plan
+          !reduceMotion && 'min-h-32 sm:min-h-40 short:min-h-28',
+        )}
+      >
+        {child && (
+          <span
+            className={clsx(
+              'rounded-full bg-surface px-4 py-1 font-display text-lg font-bold text-primary-ink shadow-press-sm transition-opacity duration-300',
+              greetingInStage && 'opacity-0',
+            )}
+          >
+            {t('age.badge', { age: level })}
+          </span>
+        )}
+      </div>
 
       {homeworks.length > 0 && (
         <ul className="flex w-full max-w-3xl flex-col gap-4">
@@ -160,7 +186,12 @@ export function HomePage() {
         mode="tour"
         group="home"
         greeting={hello}
-        onGreet={() => void sayHello(hello)}
+        greetAt="home-greet"
+        onGreet={(inStage) => {
+          setGreetingInStage(inStage)
+          void sayHello(hello)
+        }}
+        onGreetEnd={() => setGreetingInStage(false)}
         delayMs={900}
       />
       <UnlockCelebration />

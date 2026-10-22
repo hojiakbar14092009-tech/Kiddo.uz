@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SpeakerIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
+import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TopBar } from '@/components/layout/TopBar'
 import { IconButton } from '@/components/ui/IconButton'
 import { Mascot } from '@/features/mascot/Mascot'
@@ -24,7 +25,13 @@ interface TaskShellProps {
   children: ReactNode
 }
 
-/** Shared frame of every game: title and progress dots, the mascot with its bubble, then the game. */
+/**
+ * Shared frame of every game: title and progress dots, the mascot with its
+ * bubble, then the game. Like `LearnShell`, phones show the title as a
+ * heading in the page (the top bar is too narrow for it) and tablets up in
+ * the top bar; on a short landscape phone the mascot row is compact, so the
+ * game starts above the fold.
+ */
 export function TaskShell({
   title,
   round,
@@ -44,7 +51,9 @@ export function TaskShell({
         <TopBar
           start={
             <div className="flex min-w-0 flex-col">
-              <span className="truncate font-display text-lg font-bold sm:text-xl">{title}</span>
+              <span className="task-title hidden truncate font-display text-lg font-bold sm:block sm:text-xl">
+                {title}
+              </span>
               <RoundDots
                 current={round}
                 total={rounds}
@@ -54,10 +63,17 @@ export function TaskShell({
           }
         />
       }
-      className="gap-4 px-4 py-4 sm:gap-6 sm:px-8 sm:py-6"
+      className={clsx('gap-4 px-4 py-4 sm:gap-6 sm:px-8 sm:py-6', SHORT_SCREEN.page)}
     >
-      <div className="flex items-center gap-3">
-        <Mascot robotClassName="w-24 sm:w-32" speaking={speaking} className="min-w-0 flex-1" />
+      <h1 className="task-title -mb-2 text-center font-display text-2xl leading-tight font-extrabold sm:hidden">
+        {title}
+      </h1>
+      <div className={clsx('flex items-center gap-3', SHORT_SCREEN.mascotRow)}>
+        <Mascot
+          robotClassName={clsx('w-20 sm:w-32', SHORT_SCREEN.robot)}
+          speaking={speaking}
+          className="min-w-0 flex-1"
+        />
         {isPro && (
           <IconButton label={t('task.repeatPrompt')} tone="primary" onClick={onRepeat}>
             <SpeakerIcon size={28} />

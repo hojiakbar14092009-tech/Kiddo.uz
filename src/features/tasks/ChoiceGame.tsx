@@ -143,10 +143,10 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
         className={clsx(
           'mx-auto grid w-full flex-1 content-center gap-4 sm:gap-6',
           round.options.length === 2
-            ? 'max-w-2xl grid-cols-2'
+            ? 'max-w-2xl grid-cols-2 short:max-w-[calc((100dvh-10rem)*2+1.5rem)]'
             : round.options.length === 3
-              ? 'max-w-3xl grid-cols-3'
-              : 'max-w-md grid-cols-2 landscape:max-w-4xl landscape:grid-cols-4',
+              ? 'max-w-3xl grid-cols-3 short:max-w-[calc((100dvh-10rem)*3+3rem)]'
+              : 'max-w-md grid-cols-2 landscape:max-w-4xl landscape:grid-cols-4 short:max-w-[calc((100dvh-10rem)*4+4.5rem)]',
         )}
       >
         {round.options.map((option) => (

@@ -129,7 +129,7 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
       ref={canvasRef}
       role="img"
       aria-label={label}
-      className="aspect-square w-full max-w-[min(440px,80vw)] touch-none rounded-[32px] bg-surface shadow-[0_8px_0_var(--color-line)]"
+      className="aspect-square w-full max-w-[min(440px,80vw)] touch-none short:max-w-[calc(100dvh-11rem)] rounded-[32px] bg-surface shadow-[0_8px_0_var(--color-line)]"
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId)
         lastPoint.current = null

@@ -15,6 +15,13 @@ export const ru: Translation = {
     coins: 'Монеты',
     languageSwitcher: 'Сменить язык',
   },
+  errors: {
+    title: 'Ой, эта страница не открылась',
+    text: 'Ничего не потерялось. Попробуем ещё раз или вернёмся на главную.',
+    retry: 'Попробовать снова',
+    updatingTitle: 'Kiddo обновляется…',
+    updatingText: 'Загружается новая версия, подожди немного.',
+  },
   tier: {
     pro: 'PRO',
     free: 'Free',

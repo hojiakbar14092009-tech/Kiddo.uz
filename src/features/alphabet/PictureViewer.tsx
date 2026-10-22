@@ -1,6 +1,7 @@
 import { useReducedMotion } from 'framer-motion'
 import { lazy, Suspense, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Picture } from '@/components/ui/Picture'
 import { PICTURE_FILES } from '@/content/pictures'
 import { canRender3D } from '@/features/mascot/webgl'
@@ -22,15 +23,18 @@ export function PictureViewer({ emoji, word }: { emoji: string; word: string }) 
   if (!file || failed === emoji || !canRender3D()) return flat
   return (
     <div className="relative size-full">
-      <Suspense fallback={flat}>
-        <PictureModel3D
-          key={file}
-          file={file}
-          label={t('letter.model3d', { word })}
-          reducedMotion={reduceMotion}
-          onFail={onFail}
-        />
-      </Suspense>
+      {/* a 3D crash or a model that fails to load falls back to the flat picture */}
+      <ErrorBoundary fallback={flat} onError={onFail}>
+        <Suspense fallback={flat}>
+          <PictureModel3D
+            key={file}
+            file={file}
+            label={t('letter.model3d', { word })}
+            reducedMotion={reduceMotion}
+            onFail={onFail}
+          />
+        </Suspense>
+      </ErrorBoundary>
       <span className="pointer-events-none absolute right-0 bottom-0 rounded-full bg-primary-soft px-3 py-1 text-sm font-bold text-primary-ink">
         <span aria-hidden="true">🔄 </span>
         {t('letter.spin')}

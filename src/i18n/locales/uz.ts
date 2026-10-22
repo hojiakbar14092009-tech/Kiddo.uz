@@ -13,6 +13,13 @@ export const uz = {
     coins: 'Coinlar',
     languageSwitcher: 'Tilni almashtirish',
   },
+  errors: {
+    title: 'Voy, bu sahifa ochilmadi',
+    text: 'Hech narsa yo‘qolmadi. Qaytadan urinib ko‘ramiz yoki bosh sahifaga qaytamiz.',
+    retry: 'Qayta urinish',
+    updatingTitle: 'Kiddo yangilanmoqda…',
+    updatingText: 'Yangi versiya yuklanmoqda, bir lahza kuting.',
+  },
   tier: {
     pro: 'PRO',
     free: 'Bepul',

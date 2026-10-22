@@ -101,7 +101,7 @@ export function TraceGame() {
       hint={{ kind: 'write', letter }}
       struggling={mistakes.some((mistake) => mistake.targetId === letter.id)}
     >
-      <div className="flex flex-1 flex-col items-center justify-center gap-5">
+      <div className="flex flex-1 flex-col items-center justify-center gap-5 short:flex-row">
         <TraceCanvas
           key={letter.id}
           ref={canvas}
@@ -109,7 +109,7 @@ export function TraceGame() {
           label={t('task.traceCanvas', { letter: letter.upper })}
           onStrokeEnd={onStrokeEnd}
         />
-        <div className="flex gap-4">
+        <div className="flex gap-4 short:flex-col">
           <Button
             variant="soft"
             size="md"

@@ -68,7 +68,7 @@ function Board({
   const reduceMotion = useReducedMotion() ?? false
   return (
     <div
-      className="relative overflow-hidden rounded-[36px] p-4 pt-14 shadow-[0_8px_0_var(--color-line)] sm:p-6 sm:pt-16"
+      className="relative overflow-hidden rounded-[36px] p-4 pt-14 shadow-[0_8px_0_var(--color-line)] sm:p-6 sm:pt-16 short:pt-4!"
       style={{ background: 'linear-gradient(#BEE6FF 0%, #E4F6FF 22%, #A9DD90 22%, #8ED07A 100%)' }}
     >
       <Img3D name="sun" className="absolute top-2 right-4 size-12 sm:size-14" />
@@ -111,6 +111,8 @@ function Board({
                 }
                 className={clsx(
                   'relative flex aspect-square w-full max-w-36 min-w-20 items-center justify-center rounded-[28px] transition-colors',
+                  // a short landscape phone: the whole row fits under the task
+                  'short:max-w-[calc(100dvh-17rem)]',
                   'focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary',
                   isFound
                     ? 'bg-primary-soft/90 ring-4 ring-primary'
@@ -186,11 +188,13 @@ function GardenGame({
     return () => current.forEach(clearTimeout)
   }, [])
 
-  // each task: the mascot asks (spoken only on PRO with the voice switched on)
+  // each task: the task itself is the big heading (and what the speaker reads);
+  // the mascot only adds the short "how" (tap it / tap each), so nothing shows twice
+  const tapHow = task.count > 1 ? ui.tapEach : ui.tapOne
   useEffect(() => {
     if (result || learnDone) return
-    say('instruct', { text: prompt, emoji: '🔍' })
-  }, [index, learnDone, prompt, result, say])
+    say('instruct', { text: tapHow, emoji: '🔍' })
+  }, [index, learnDone, tapHow, result, say])
 
   // stuck for a while (no new find): a soft hint is offered
   useEffect(() => {
@@ -303,9 +307,9 @@ function GardenGame({
         onOpen: () => applyHelp(pressHelp(help), false),
       }}
     >
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-2 short:flex-row short:flex-wrap short:justify-center short:gap-x-3">
         <p
-          className="text-center font-display text-3xl font-extrabold"
+          className="text-center font-display text-3xl font-extrabold short:text-2xl"
           aria-live="polite"
           data-testid="garden-prompt"
         >

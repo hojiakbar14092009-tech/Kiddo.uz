@@ -34,6 +34,8 @@ export function MascotThoughtBubble({
       aria-live="polite"
       className={clsx(
         'pointer-events-none relative flex items-end',
+        // room for the cloud's bumps, so they never sit on the line above
+        !isPro && 'pt-3',
         fromLeft ? 'flex-row' : 'flex-row-reverse',
         className,
       )}
@@ -43,7 +45,7 @@ export function MascotThoughtBubble({
           <motion.div
             key={messageKey}
             className={clsx(
-              'flex min-w-0 items-end gap-1.5',
+              'relative flex min-w-0 items-end gap-1.5',
               fromLeft ? 'flex-row' : 'flex-row-reverse',
             )}
             exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.18 } }}
@@ -51,21 +53,29 @@ export function MascotThoughtBubble({
             {!isPro && (
               <div
                 className={clsx(
-                  'flex items-end gap-1 pb-1',
-                  fromLeft ? 'flex-row' : 'flex-row-reverse',
+                  'flex shrink-0 items-end gap-0.5 pb-1 sm:gap-1',
+                  // On phones the trail hangs from the cloud's corner instead of taking
+                  // width from the words.
+                  'max-sm:absolute max-sm:-bottom-3',
+                  fromLeft ? 'flex-row max-sm:-left-3' : 'flex-row-reverse max-sm:-right-3',
                 )}
                 aria-hidden="true"
               >
-                {[10, 15, 21].map((size, index) => (
-                  <motion.span
-                    key={size}
-                    className="rounded-full bg-surface shadow-[0_3px_0_var(--color-line)]"
-                    style={{ width: size, height: size, marginBottom: index * 6 }}
-                    initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ ...POP, delay: index * 0.09 }}
-                  />
-                ))}
+                {['size-1.5 sm:size-2.5', 'size-2.5 sm:size-[15px]', 'size-3.5 sm:size-[21px]'].map(
+                  (size, index) => (
+                    <motion.span
+                      key={size}
+                      className={clsx(
+                        'rounded-full bg-surface shadow-[0_3px_0_var(--color-line)]',
+                        size,
+                      )}
+                      style={{ marginBottom: index * 6 }}
+                      initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ ...POP, delay: index * 0.09 }}
+                    />
+                  ),
+                )}
               </div>
             )}
 
@@ -75,18 +85,24 @@ export function MascotThoughtBubble({
               transition={{ ...POP, delay: isPro ? 0 : 0.28 }}
               style={{ transformOrigin: fromLeft ? '0% 100%' : '100% 100%' }}
               className={clsx(
-                'relative flex max-w-[min(22rem,60vw)] min-w-0 items-center gap-3 bg-surface px-5 py-3 shadow-[0_5px_0_var(--color-line)]',
+                // Never wider than the screen; on phones the emoji sits on the corner like a sticker.
+                'relative flex max-w-[min(22rem,calc(100vw-2rem))] min-w-0 items-center gap-3 bg-surface px-4 py-3 shadow-[0_5px_0_var(--color-line)] sm:px-5',
                 isPro ? 'rounded-3xl' : 'rounded-[2.5rem]',
               )}
             >
               {!isPro && <CloudBumps />}
-              <span className="relative min-w-0 font-body text-lg leading-snug font-extrabold sm:text-xl">
+              {/* A readable width, so it never wraps one word per line (but fits small phones). */}
+              <span className="relative min-w-[min(8.5rem,calc(100vw-13rem))] font-body text-lg leading-snug font-extrabold sm:min-w-[10rem] sm:text-xl">
                 {message.text}
               </span>
               {message.emoji && (
                 <span
                   aria-hidden="true"
-                  className="relative shrink-0 text-3xl leading-none sm:text-4xl"
+                  className={clsx(
+                    'shrink-0 leading-none sm:relative sm:text-4xl',
+                    'max-sm:absolute max-sm:-top-3 max-sm:text-2xl',
+                    fromLeft ? 'max-sm:-right-1.5' : 'max-sm:-left-1.5',
+                  )}
                 >
                   {message.emoji}
                 </span>

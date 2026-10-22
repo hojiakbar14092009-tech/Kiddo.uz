@@ -29,7 +29,8 @@ export function ObjectCard({ id, lines }: { id: SpaceId; lines: readonly string[
   useSpeakable([name, ...lines])
   return (
     <article className="space-card">
-      <PlanetView id={id} className="w-full max-w-[min(420px,80vw)]" />
+      {/* never taller than ~40% of the screen, so the card and its "next" button fit a laptop screen */}
+      <PlanetView id={id} className="w-full max-w-[min(420px,80vw,40dvh)]" />
       <div className="flex min-w-0 flex-col items-center gap-3 text-center sm:items-start sm:text-left">
         <KindChip id={id} />
         <h2 className="font-display text-4xl font-extrabold sm:text-5xl">{name}</h2>
@@ -133,7 +134,7 @@ export function SpaceLesson({
       speak={phase.name === 'done' ? [text.ui.lessonDone, text.ui.lessonDoneText] : null}
     >
       {phase.name === 'card' && (
-        <div className="flex flex-col items-center gap-5">
+        <div className="flex flex-col items-center gap-5 short:gap-2">
           <p className="space-badge">{text.ui.lessonTitles[lesson.stage]}</p>
           <ObjectCard
             key={lesson.cards[phase.index]}

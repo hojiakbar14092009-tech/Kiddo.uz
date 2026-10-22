@@ -16,6 +16,7 @@ import { RequireAge } from '@/features/age/RequireAge'
 import { AppShell } from './AppShell'
 import { LoadingScreen } from './LoadingScreen'
 import { RequireLanguage } from './RequireLanguage'
+import { RouteErrorScreen } from './errors/RouteErrorScreen'
 
 /*
  * Everyday child screens are in the main bundle so they open instantly.
@@ -25,6 +26,8 @@ export const routes: RouteObject[] = [
   {
     element: <AppShell />,
     hydrateFallbackElement: <LoadingScreen />,
+    // a screen that fails to render or to load never leaves the child on a blank page
+    errorElement: <RouteErrorScreen />,
     children: [
       { path: '/', element: <LanguagePage /> },
       {

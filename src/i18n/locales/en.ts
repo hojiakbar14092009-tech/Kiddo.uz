@@ -15,6 +15,13 @@ export const en: Translation = {
     coins: 'Coins',
     languageSwitcher: 'Change language',
   },
+  errors: {
+    title: 'Oops, this page didn’t open',
+    text: 'Nothing was lost. Let’s try again or go back home.',
+    retry: 'Try again',
+    updatingTitle: 'Kiddo is updating…',
+    updatingText: 'The new version is loading, just a moment.',
+  },
   tier: {
     pro: 'PRO',
     free: 'Free',

@@ -37,10 +37,26 @@ Prettier. Vercel deploys `main` automatically (kiddo-uz.vercel.app).
 - Supabase: `supabase/migrations/0001–0004`, `services/supabase`, `services/sync`
   (push-only backup in cloud mode; cloud mode only if `VITE_SUPABASE_*` are set).
 
-## Baseline (Phase 0, commit e93937e)
+## Baseline
 
-340 unit tests, 34 e2e pass; build OK; initial JS ≈ 237 KB gzip; R3F chunk 234 KB
-gzip (lazy); 0 npm audit findings.
+Phase 0 (e93937e): 340 unit, 34 e2e; initial JS ≈ 237 KB gzip; R3F 234 KB gzip (lazy).
+Phase 1: 350 unit, 34 e2e; initial JS ≈ 240 KB gzip.
+
+## UI foundation (Phase 1)
+
+- Errors: root route `errorElement` → `app/errors/RouteErrorScreen`; `AppErrorBoundary`
+  around the router; `vite:preloadError` + stale-chunk errors reload once
+  (`app/errors/staleBuild.ts`, never loops, no reload if storage is blocked); 3D viewers
+  wrapped in `ErrorBoundary` with a still fallback.
+- Tokens (`styles/index.css @theme`): `rounded-tile|card|panel`, `shadow-press-sm|press|
+press-lg|press-primary|press-coin`, `ease-pop|soft`, `animate-pop-in|fade-in`;
+  `styles/motion.ts` for framer-motion. Use them in new/changed code; ~65 old literals remain.
+- `short:` variant = `@media (max-height: 500px)` (phone held sideways); shared classes in
+  `components/layout/shortScreen.ts`; TopBar is not sticky on short screens.
+- Home greeting: reserved spot `data-roam="home-greet"`, placement in
+  `mascot/greetPlacement.ts` (robot + bubble always inside the screen, never over content).
+- `Mascot` has an `aside` slot; `SegmentedTabs showLabels="always"` = labelled scrolling pills.
+- LearnShell scrolls to top only when the kind of screen changes (title + steps).
 
 ## Key decisions
 
@@ -58,13 +74,22 @@ gzip (lazy); 0 npm audit findings.
 Critical: Pro is client-only (localStorage, Demo PRO switch in prod, mock payment);
 voice clips are public. High: parents can write `payments`; public presence channel leaks
 child names; device admin PIN 2026; published promo codes, no rate limit. Arch: two reward
-paths without ledger, two progress models, learnStore not synced, no route errorElement.
-UI: home greeting bubble covers the daily plan, shop robot covers its button, landscape
-games below the fold, parent header on phones.
+paths without ledger, two progress models, learnStore not synced.
+UI leftovers (low): Koinot lesson card scrolls on 844×390; 8-object garden board shows one
+row above the fold on 844×390; tabs have no arrow-key navigation (was never there);
+motion tokens not yet adopted; board height caps are per-component calc values.
 
 ## Blockers (owner)
 
-B1 Supabase on Vercel prod? migrations applied? · B2 payment provider credentials ·
+**Phase 3 blocker – Supabase not verified.** Evidence (2026-10-22): the deployed
+`assets/client-*.js` has `isSupabaseConfigured` compiled to `false` and no `*.supabase.co`
+address → production is built without `VITE_SUPABASE_*` and runs device/demo mode only
+(no reads/writes to Supabase). This environment has no Vercel env access (connector lacks
+env tools), no Supabase credentials, and the sandbox cannot reach either API. The owner
+must run `docs/architecture/supabase-verification.md` (vercel env ls, supabase migration
+list, RLS queries, network check) before Phase 3 starts.
+
+B1 Supabase on Vercel prod (see above) · B2 payment provider credentials ·
 B3 service-role/Edge secrets · B4 TTS provider (real Uzbek voice) · B5 AI provider +
 consent/data location · B6 product decisions (free voice set, offline grace, demo mode in
 prod) · B7 promo policy.
@@ -72,7 +97,7 @@ prod) · B7 promo policy.
 ## Phases
 
 - [x] 0 Discovery & architecture (2026-10-22)
-- [ ] 1 Foundation: errorElement/boundaries, responsive fixes from the audit, tokens
+- [x] 1 Foundation: error screens, responsive fixes from the audit, tokens (2026-10-22)
 - [ ] 2 Design system primitives (Dialog, BottomSheet, Toast, ProgressBar, EmptyState, ProLock, RewardBurst)
 - [ ] 3 Domain foundation (rewards ledger, progress facade, entitlements) + Supabase steps 1–2
 - [ ] 4 Kiddo City, Adventure Map, Daily Quest, rewards UI
@@ -86,6 +111,8 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 1 – start with: route `errorElement` + app error boundary; home bubble overlap
-(`RoamingMascot`); shop robot over button; landscape layout of `TaskShell`/`LearnShell`;
-parent header on phones; title behaviour of `TaskShell`.
+Phase 2 – design system primitives: Dialog (migrate the 10 hand-made dialogs: BuyDialog,
+TaskHint, HelpButton, PetsPanel, ParentGate, CoinPenaltyPanel, UnlockCelebration,
+ProCelebration, PromoReveal, AdPlayer), BottomSheet, Toast, ProgressBar/StepDots (from
+ExamPage/LearnShell), EmptyState, ProLock (from ListenButton/SpeakButton/bubble/TaleView),
+RewardBurst, Img3D → components/ui; one icon family instead of emoji icons in tabs.

@@ -85,9 +85,10 @@ export function MemoryGame() {
       <ul
         className={clsx(
           'mx-auto grid w-full flex-1 content-center gap-2.5 sm:gap-5',
+          // a short landscape phone: two rows of cards fit under the mascot row
           pairs === 3
-            ? 'max-w-2xl grid-cols-3 portrait:max-w-lg'
-            : 'max-w-3xl grid-cols-4 portrait:max-w-xl',
+            ? 'max-w-2xl grid-cols-3 portrait:max-w-lg short:max-w-[calc((100dvh-10rem)*1.2+1rem)]'
+            : 'max-w-3xl grid-cols-4 portrait:max-w-xl short:max-w-[calc((100dvh-10rem)*1.6+1.75rem)]',
         )}
       >
         {state.cards.map((card, index) => {

@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Screen } from '@/components/layout/Screen'
+import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TopBar } from '@/components/layout/TopBar'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascotStore } from '@/features/mascot/mascotStore'
@@ -45,6 +46,9 @@ interface LearnShellProps {
  * existing games: top bar, step dots, the mascot with its bubble, the voice
  * switch and the help bulb.
  */
+/** The kind of learning screen shown last (title + whether it has steps). */
+let lastScreenKind: string | null = null
+
 export function LearnShell({
   title,
   step,
@@ -61,6 +65,15 @@ export function LearnShell({
   const resetMascot = useMascotStore((state) => state.reset)
   const online = useOnline()
   useSpeakable(speak, SPEAK_PRIORITY.page)
+
+  // A new kind of screen starts at the top: a menu scrolled down to its button
+  // must not leave the next screen (e.g. the garden board) under the top bar.
+  // The next question of the same exercise keeps the child's scroll position.
+  const screenKind = `${title}|${step ? 'steps' : 'single'}`
+  useEffect(() => {
+    if (lastScreenKind !== screenKind && window.scrollY > 0) window.scrollTo({ top: 0 })
+    lastScreenKind = screenKind
+  }, [screenKind])
 
   // leaving the screen: the bubble clears and any voice stops
   useEffect(
@@ -93,7 +106,7 @@ export function LearnShell({
             }
           />
         }
-        className={clsx('gap-4 px-4 py-4 sm:gap-6 sm:px-8 sm:py-6', className)}
+        className={clsx('gap-4 px-4 py-4 sm:gap-6 sm:px-8 sm:py-6', SHORT_SCREEN.page, className)}
       >
         {!online && (
           <p
@@ -108,10 +121,10 @@ export function LearnShell({
           {title}
         </h1>
         {(mascot || help || voice) && (
-          <div className="flex items-center gap-3">
+          <div className={clsx('flex items-center gap-3', SHORT_SCREEN.mascotRow)}>
             {mascot ? (
               <Mascot
-                robotClassName="w-16 sm:w-28"
+                robotClassName={clsx('w-16 sm:w-28', SHORT_SCREEN.robot)}
                 className="min-w-0 flex-1"
                 speaking={learnVoice.speaking}
                 talkOnlyWhileSpeaking
@@ -119,7 +132,12 @@ export function LearnShell({
             ) : (
               <div className="flex-1" />
             )}
-            <div className="flex shrink-0 flex-col items-center gap-2 sm:flex-row sm:gap-3">
+            <div
+              className={clsx(
+                'flex shrink-0 flex-col items-center gap-2 sm:flex-row sm:gap-3',
+                SHORT_SCREEN.actions,
+              )}
+            >
               {voice && <SpeakButton fallback={[title]} />}
               {help && (
                 <HelpButton text={help.text} glow={help.glow} onOpen={help.onOpen}>

@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import type { ReactNode } from 'react'
 import type { Wearing } from '@/features/shop/outfits'
 import { useMascotModel } from '@/store/familyStore'
 import { useActivePet, useWearing } from '@/store/progressStore'
@@ -26,6 +27,8 @@ interface MascotProps {
   robotRoam?: string
   /** Overrides the pet at its feet, e.g. to try a pet before adopting it (null: none). */
   pet?: PetId | null
+  /** Shown under the bubble, beside the robot (e.g. a button), never on top of the robot. */
+  aside?: ReactNode
   className?: string
 }
 
@@ -45,6 +48,7 @@ export function Mascot({
   wearing,
   robotRoam,
   pet: petOverride,
+  aside,
   className,
 }: MascotProps) {
   const model = useMascotModel()
@@ -84,12 +88,24 @@ export function Mascot({
         />
         {pet && <PetCompanion key={pet} pet={pet} mood={mood} />}
       </div>
-      <MascotThoughtBubble
-        message={message}
-        messageKey={reactionKey}
-        side={bubbleSide === 'right' ? 'left' : 'right'}
-        className="min-w-0 flex-1"
-      />
+      {aside ? (
+        <div className="flex min-w-0 flex-1 flex-col items-center justify-start gap-2 self-stretch">
+          <MascotThoughtBubble
+            message={message}
+            messageKey={reactionKey}
+            side={bubbleSide === 'right' ? 'left' : 'right'}
+            className="w-full min-w-0"
+          />
+          {aside}
+        </div>
+      ) : (
+        <MascotThoughtBubble
+          message={message}
+          messageKey={reactionKey}
+          side={bubbleSide === 'right' ? 'left' : 'right'}
+          className="min-w-0 flex-1"
+        />
+      )}
     </div>
   )
 }

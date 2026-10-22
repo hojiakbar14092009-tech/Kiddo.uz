@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Short screens (a phone held sideways): compact chrome so the game stays above the fold. */
+@custom-variant short (@media (max-height: 500px));
+
 /*
  * The Uzbek ʻ and ʼ (U+02BB/U+02BC) drawn with the ‘ ’ shapes of Rubik and
  * Nunito (scripts/make-okina-fonts.py): Rubik has no ʻ, and Nunito's leaves a
@@ -55,6 +58,52 @@
   --color-sky: #7cc4f5;
   --color-sky-soft: #ddeefc;
   --color-lilac-soft: #eee6fb;
+
+  /*
+   * Shape and depth. Kiddo's "pressable toy" look is a solid shadow under a
+   * rounded card. Use these instead of rounded-[28px] / shadow-[0_6px_0_…].
+   */
+  --radius-tile: 20px; /* small tiles, chips with images */
+  --radius-card: 28px; /* cards, activity tiles */
+  --radius-panel: 36px; /* large panels, dialogs */
+
+  --shadow-press-sm: 0 4px 0 var(--color-line);
+  --shadow-press: 0 6px 0 var(--color-line);
+  --shadow-press-lg: 0 8px 0 var(--color-line);
+  --shadow-press-primary: 0 6px 0 var(--color-primary-shadow);
+  --shadow-press-coin: 0 6px 0 var(--color-coin-shadow);
+
+  /* Motion: short, soft, never longer than needed (reduced motion turns it off). */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --animate-pop-in: pop-in 260ms var(--ease-pop) both;
+  --animate-fade-in: fade-in 200ms var(--ease-soft) both;
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* The same motion values for scripts (framer-motion durations, in ms): see src/styles/motion.ts. */
+:root {
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-slow: 400ms;
 }
 
 @layer base {

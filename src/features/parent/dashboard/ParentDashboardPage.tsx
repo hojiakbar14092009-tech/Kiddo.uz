@@ -68,7 +68,7 @@ export function ParentDashboardPage() {
         <button
           type="button"
           onClick={() => void leave()}
-          className="min-h-12 rounded-full px-4 font-semibold text-ink-soft"
+          className="min-h-12 rounded-full border-2 border-line-strong bg-surface px-4 font-semibold whitespace-nowrap text-ink-soft"
         >
           {t('parent.signOut')}
         </button>
@@ -109,6 +109,7 @@ export function ParentDashboardPage() {
             onChange={(next) => setParams({ tab: next }, { replace: true })}
             label={t('parent.tabs.label')}
             idBase="parent"
+            showLabels="always"
           />
         </div>
 

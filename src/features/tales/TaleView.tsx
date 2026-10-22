@@ -139,7 +139,7 @@ export function TaleView({ tale, language }: { tale: TaleSpec; language: Languag
   const { t } = useTranslation()
   const ui = TALES_UI[language]
   const text = taleText(language, tale.id)
-  const { react } = useMascot()
+  const { react, reset } = useMascot()
   const voice = useLearnVoice()
   const childKey = useChildKey()
   const markStage = useLearnStore((state) => state.markStage)
@@ -167,11 +167,13 @@ export function TaleView({ tale, language }: { tale: TaleSpec; language: Languag
   const last = sceneIndex === tale.scenes.length - 1
   const taskPending = Boolean(scene.task) && !solved.has(sceneIndex)
 
-  // the narrator opens each scene in its bubble (written only; reading aloud waits for the button)
+  // each scene starts with an empty bubble: the story card below is the text to read
+  // (repeating its first line in the bubble only took space); notes such as
+  // "PRO only" or "no recording" still appear in the bubble when they happen
   useEffect(() => {
     if (phase !== 'story') return
-    react('instruct', { text: sceneText.lines[0] ?? '', emoji: '📖' }, { speak: false })
-  }, [phase, react, sceneKey, sceneText])
+    reset()
+  }, [phase, reset, sceneKey])
 
   const go = (next: number) => setSceneIndex(Math.max(0, Math.min(tale.scenes.length - 1, next)))
   const toCheck = () => {
