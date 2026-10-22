@@ -1,5 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 
+/** The device admin PIN the e2e build gets (playwright.config.ts webServer env). */
+const E2E_ADMIN_PIN = process.env.VITE_ADMIN_PIN ?? '481516'
+
 /** Starts every test as a first visit, with a fixed Math.random so the parent gate asks 3 × 3. */
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -103,7 +106,7 @@ test('the admin puts up an ad; a parent watches it to the end and gets a promo c
 }) => {
   // The admin adds an ad and sets the monthly price; the year is worked out (−20 %).
   await page.goto('/admin')
-  await page.getByLabel('Admin PIN').fill('2026')
+  await page.getByLabel('Admin PIN').fill(E2E_ADMIN_PIN)
   await page.getByRole('button', { name: 'Ochish' }).click()
   await page.getByRole('button', { name: 'Reklamalar' }).click()
   await expect(

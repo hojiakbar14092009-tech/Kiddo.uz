@@ -6,6 +6,7 @@ import type { AdminChild, AdminData } from './adminData'
 import { CODE_PATTERN, type AdminPromo } from './adminPromo'
 import { dailyBars, formatSom, monthlyBars, revenueTotals } from './revenue'
 import { RevenueChart } from './RevenueChart'
+import { clampGift, MAX_PRO_GIFT_COINS } from './settingsLimits'
 
 const MONTHS = [
   'yan',
@@ -791,7 +792,7 @@ export function SettingsSection({ data }: { data: AdminData }) {
     await data.actions.saveSettings({
       ...data.settings,
       prices: { monthly: Math.max(0, monthly), yearly },
-      proGiftCoins: Math.max(0, gift),
+      proGiftCoins: clampGift(gift),
     })
     setSaved(true)
   }
@@ -802,6 +803,7 @@ export function SettingsSection({ data }: { data: AdminData }) {
     set: (value: number) => void,
     suffix: string,
     step = 1,
+    max?: number,
   ) => (
     <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
       {label}
@@ -809,6 +811,7 @@ export function SettingsSection({ data }: { data: AdminData }) {
         <input
           type="number"
           min={0}
+          max={max}
           step={step}
           value={value}
           onChange={(event) => {
@@ -840,7 +843,14 @@ export function SettingsSection({ data }: { data: AdminData }) {
               {Math.round(YEARLY_DISCOUNT * 100)}% = {formatSom(yearly)}
             </span>
           </div>
-          {field('PRO sotib olinganda har bir bolaga', gift, setGift, 'coin sovg‘a')}
+          {field(
+            'PRO sotib olinganda har bir bolaga',
+            gift,
+            setGift,
+            `coin sovg‘a (ko‘pi bilan ${MAX_PRO_GIFT_COINS})`,
+            1,
+            MAX_PRO_GIFT_COINS,
+          )}
         </div>
         <div className="flex items-center gap-4">
           <button

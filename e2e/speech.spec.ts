@@ -50,7 +50,7 @@ async function seed(page: Page, { language, pro }: { language: Lang; pro: boolea
         localStorage.setItem(
           'kiddo.subscription',
           JSON.stringify({
-            state: { plan: 'lifetime', expiresAt: null, source: 'demo', usedPromoCodes: [] },
+            state: { plan: 'lifetime', expiresAt: null, source: 'promo', usedPromoCodes: [] },
             version: 2,
           }),
         )

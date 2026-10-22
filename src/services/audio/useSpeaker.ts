@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { LetterEntry } from '@/content/alphabet'
 import type { NumberEntry } from '@/content/numbers'
 import { useLanguage } from '@/store/settingsStore'
-import { useIsPro } from '@/store/subscriptionStore'
+import { useCanUse } from '@/domain/entitlements'
 import { audioManager, type Utterance } from './audioManager'
 
 /**
@@ -13,7 +13,7 @@ import { audioManager, type Utterance } from './audioManager'
  */
 export function useSpeaker() {
   const language = useLanguage()
-  const canSpeak = useIsPro()
+  const canSpeak = useCanUse('audio')
   const [speaking, setSpeaking] = useState(false)
   const latestRequest = useRef(0)
 

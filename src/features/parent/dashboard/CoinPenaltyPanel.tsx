@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { CoinIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
+import { grantReward } from '@/domain/rewards'
 import type { ChildProfile } from '@/store/familyStore'
-import { useProgress, useProgressStore } from '@/store/progressStore'
+import { useProgress } from '@/store/progressStore'
 import { Panel } from './Panel'
+import { newId } from '@/lib/id'
 
 /**
  * If homework was not done, a parent may – only if they want to – take some
@@ -14,7 +16,6 @@ import { Panel } from './Panel'
 export function CoinPenaltyPanel({ child }: { child: ChildProfile }) {
   const { t } = useTranslation()
   const { coins } = useProgress(child.id)
-  const grantCoins = useProgressStore((state) => state.grantCoins)
   const [amount, setAmount] = useState('')
   const [confirming, setConfirming] = useState(false)
   const [done, setDone] = useState<number | null>(null)
@@ -28,8 +29,14 @@ export function CoinPenaltyPanel({ child }: { child: ChildProfile }) {
   }
 
   const confirm = () => {
-    grantCoins(child.id, -value)
-    setDone(value)
+    // Each confirmed penalty is its own ledger entry; the balance never goes below zero.
+    const entry = grantReward({
+      childKey: child.id,
+      coins: -value,
+      reason: 'penalty',
+      refId: newId(),
+    })
+    setDone(entry ? -entry.coins : 0)
     setAmount('')
     setConfirming(false)
   }

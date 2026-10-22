@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { ChoiceChips } from '@/features/parent/dashboard/ChoiceChips'
 import { Panel } from '@/features/parent/dashboard/Panel'
 import { formatDayMonth } from '@/lib/dates'
+import { paymentsAvailable } from '@/services/payments/availability'
 import { PAYMENT_PROVIDERS, payMock, type PaymentProvider } from '@/services/payments/mockPayment'
 import { PromoPanel } from '@/features/promo/PromoPanel'
 import { isProActive, useSubscriptionStore, type PlanId } from '@/store/subscriptionStore'
@@ -42,8 +43,13 @@ export function ProSection() {
   // The demo switch must never wipe out PRO that was paid for or redeemed.
   const paidOrPromo = active && subscription.source !== 'demo'
   const hasLifetime = paidOrPromo && subscription.expiresAt === null
+  // A developer switch: never in a production build (Vite drops the panel there).
+  const showDemo = !import.meta.env.PROD
+
+  const canPay = paymentsAvailable()
 
   const pay = async () => {
+    if (!canPay) return
     setPayState('paying')
     const receipt = await payMock({ plan: planId, provider, amount: plan.price })
     subscription.activatePlan(receipt.plan, 'payment')
@@ -176,13 +182,15 @@ export function ProSection() {
               onChange={setProvider}
             />
 
-            <p className="rounded-2xl bg-sky-soft px-4 py-2 text-sm">{t('pro.testNote')}</p>
+            <p className="rounded-2xl bg-sky-soft px-4 py-2 text-sm">
+              {canPay ? t('pro.testNote') : t('pro.paymentsSoon')}
+            </p>
 
             <Button
               variant="coin"
               size="md"
               className="self-start"
-              disabled={payState === 'paying'}
+              disabled={!canPay || payState === 'paying'}
               onClick={() => void pay()}
             >
               {payState === 'paying'
@@ -200,36 +208,38 @@ export function ProSection() {
         }}
       />
 
-      <Panel title={t('pro.demo')}>
-        <div className="flex items-center justify-between gap-4">
-          <span id="demo-pro-label">
-            <span className="block font-semibold">{t('pro.demoLabel')}</span>
-            <span className="text-sm text-ink-soft">
-              {paidOrPromo ? t('pro.demoBlocked') : t('pro.demoHint')}
+      {showDemo && (
+        <Panel title={t('pro.demo')}>
+          <div className="flex items-center justify-between gap-4">
+            <span id="demo-pro-label">
+              <span className="block font-semibold">{t('pro.demoLabel')}</span>
+              <span className="text-sm text-ink-soft">
+                {paidOrPromo ? t('pro.demoBlocked') : t('pro.demoHint')}
+              </span>
             </span>
-          </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={demoOn}
-            aria-labelledby="demo-pro-label"
-            disabled={paidOrPromo}
-            onClick={() => subscription.setDemoPro(!demoOn)}
-            className={clsx(
-              'flex h-9 w-16 shrink-0 items-center rounded-full p-1 transition-colors disabled:opacity-40',
-              demoOn ? 'bg-primary' : 'bg-line-strong',
-            )}
-          >
-            <span
-              aria-hidden="true"
+            <button
+              type="button"
+              role="switch"
+              aria-checked={demoOn}
+              aria-labelledby="demo-pro-label"
+              disabled={paidOrPromo}
+              onClick={() => subscription.setDemoPro(!demoOn)}
               className={clsx(
-                'size-7 rounded-full bg-surface shadow transition-transform',
-                demoOn && 'translate-x-7',
+                'flex h-9 w-16 shrink-0 items-center rounded-full p-1 transition-colors disabled:opacity-40',
+                demoOn ? 'bg-primary' : 'bg-line-strong',
               )}
-            />
-          </button>
-        </div>
-      </Panel>
+            >
+              <span
+                aria-hidden="true"
+                className={clsx(
+                  'size-7 rounded-full bg-surface shadow transition-transform',
+                  demoOn && 'translate-x-7',
+                )}
+              />
+            </button>
+          </div>
+        </Panel>
+      )}
     </div>
   )
 }

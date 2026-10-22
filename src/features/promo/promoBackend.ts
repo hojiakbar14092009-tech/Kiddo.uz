@@ -119,6 +119,42 @@ async function supabase() {
   return client
 }
 
+type ServerRedeem = { ok: true; expiresAt: string } | { ok: false; result: RedeemOutcome }
+
+const REDEEM_ERRORS: Record<string, RedeemOutcome> = {
+  invalid: 'invalid',
+  used: 'used',
+  lifetime: 'lifetime',
+  // Too many wrong codes in 10 minutes (0005): shown like any other failure.
+  rate_limited: 'error',
+}
+
+/**
+ * Redeems through `redeem_promo_code` (0005: rate-limited, failures are
+ * counted), or through the older `redeem_promo` when the server does not
+ * have 0005 yet.
+ */
+async function redeemOnServer(
+  client: Awaited<ReturnType<typeof supabase>>,
+  key: string,
+): Promise<ServerRedeem> {
+  const { data, error } = await client.rpc('redeem_promo_code', { p_code: key })
+  if (!error) {
+    const row = data as { ok: boolean; expires_at?: string; error?: string } | null
+    if (row?.ok && row.expires_at) return { ok: true, expiresAt: String(row.expires_at) }
+    return { ok: false, result: REDEEM_ERRORS[row?.error ?? ''] ?? 'error' }
+  }
+  // PGRST202: no such function in the schema cache – a server without 0005.
+  if (error.code !== 'PGRST202') return { ok: false, result: 'error' }
+  const legacy = await client.rpc('redeem_promo', { p_code: key })
+  if (legacy.error) {
+    const { message } = legacy.error
+    const name = Object.keys(REDEEM_ERRORS).find((item) => message.includes(item))
+    return { ok: false, result: name ? REDEEM_ERRORS[name]! : 'error' }
+  }
+  return { ok: true, expiresAt: String(legacy.data) }
+}
+
 const FAILURES: Record<string, ClaimFailure> = {
   already_claimed: 'already',
   not_finished: 'notFinished',
@@ -176,17 +212,12 @@ export const cloudBackend: PromoBackend = {
   redeem: async (code) => {
     const client = await supabase()
     const key = normalizePromo(code)
-    const { data, error } = await client.rpc('redeem_promo', { p_code: key })
-    if (error) {
-      if (error.message.includes('invalid')) return 'invalid'
-      if (error.message.includes('used')) return 'used'
-      if (error.message.includes('lifetime')) return 'lifetime'
-      return 'error'
-    }
+    const outcome = await redeemOnServer(client, key)
+    if (outcome.ok === false) return outcome.result
     useSubscriptionStore.setState((state) => ({
       plan: state.plan && state.source !== 'demo' ? state.plan : 'monthly',
       source: 'promo',
-      expiresAt: String(data),
+      expiresAt: outcome.expiresAt,
       usedPromoCodes: [...state.usedPromoCodes, key],
     }))
     return 'ok'

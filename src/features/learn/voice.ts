@@ -3,7 +3,7 @@ import type { Language } from '@/content/languages'
 import { audioManager, type SpeakOutcome } from '@/services/audio/audioManager'
 import { useSpeechStatus } from '@/services/audio/useSpeechStatus'
 import { useSettingsStore } from '@/store/settingsStore'
-import { canUse, useCanUse } from '@/store/subscriptionStore'
+import { canUse, useCanUse } from '@/domain/entitlements'
 
 /*
  * Voice in the new sections:

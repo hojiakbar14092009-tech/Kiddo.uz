@@ -7,7 +7,7 @@ import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TopBar } from '@/components/layout/TopBar'
 import { IconButton } from '@/components/ui/IconButton'
 import { Mascot } from '@/features/mascot/Mascot'
-import { useIsPro } from '@/store/subscriptionStore'
+import { useCanUse } from '@/domain/entitlements'
 import { TaskHint, type HintContent } from './TaskHint'
 
 interface TaskShellProps {
@@ -43,7 +43,7 @@ export function TaskShell({
   children,
 }: TaskShellProps) {
   const { t } = useTranslation()
-  const isPro = useIsPro()
+  const isPro = useCanUse('audio')
 
   return (
     <Screen

@@ -1,7 +1,8 @@
 import { childAge, type ChildProfile } from '@/store/familyStore'
 import type { ChildProgress, TaskResult } from '@/store/progressStore'
 import type { ActivityEvent } from '@/store/activityStore'
-import type { Payment } from '@/store/paymentStore'
+import type { RewardEntry } from '@/domain/rewards'
+import type { LearnChild } from '@/features/learn/learnStore'
 
 /* Local objects → rows of the Supabase tables in supabase/migrations. */
 
@@ -57,19 +58,24 @@ export function eventRow(event: ActivityEvent) {
   return { id: event.id, child_id: event.childId, kind: event.kind, at: event.at }
 }
 
-export function paymentRow(payment: Payment) {
+/** Arguments of the `record_reward` RPC (0005); the server checks and caps them. */
+export function rewardRow(entry: RewardEntry) {
   return {
-    id: payment.id,
-    family: payment.family,
-    plan: payment.plan,
-    provider: payment.provider,
-    amount: payment.amount,
-    created_at: payment.at,
+    p_child: entry.childKey,
+    p_coins: entry.coins,
+    p_reason: entry.reason,
+    p_ref: entry.refId,
   }
+}
+
+/** One child's learning data from the new sections, as one jsonb document. */
+export function learnRow(childId: string, data: LearnChild) {
+  return { child_id: childId, data }
 }
 
 export type ChildRow = ReturnType<typeof childRow>
 export type ChildStateRow = ReturnType<typeof childStateRow>
 export type ResultRow = ReturnType<typeof resultRow>
 export type EventRow = ReturnType<typeof eventRow>
-export type PaymentRow = ReturnType<typeof paymentRow>
+export type RewardRow = ReturnType<typeof rewardRow>
+export type LearnRow = ReturnType<typeof learnRow>

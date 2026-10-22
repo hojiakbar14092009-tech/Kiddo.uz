@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { grantReward } from '@/domain/rewards'
 import { useActivityStore } from '@/store/activityStore'
 import {
   DEFAULT_APP_SETTINGS,
@@ -56,15 +57,51 @@ export interface AdminData {
 
 /** A child counts as online when it was heard from within this window. */
 export const ONLINE_MS = 20_000
+/** Cloud devices beat once a minute (PresenceBeacon), so the window is wider. */
+export const CLOUD_ONLINE_MS = 120_000
+/** How often the admin panel reads the cloud heartbeats. */
+const CLOUD_PRESENCE_POLL_MS = 30_000
 const DAY_MS = 86_400_000
 
 interface Presence {
-  name: string
   at: number
   screen: string
+  /** How long this beat counts as "online". */
+  ttl: number
 }
 
-/** Children playing right now, from the browser channel (this device) or Supabase presence. */
+interface HeartbeatRow {
+  child_id: string
+  screen: string
+  seen_at: string
+}
+
+/** Heartbeats seen within the cloud window (admins may read all of them, see 0005). */
+export async function loadHeartbeats(now: number = Date.now()): Promise<Map<string, Presence>> {
+  const { getSupabase } = await import('@/services/supabase/client')
+  const supabase = getSupabase()
+  const beats = new Map<string, Presence>()
+  if (!supabase) return beats
+  const { data, error } = await supabase
+    .from('presence_heartbeats')
+    .select('child_id, screen, seen_at')
+    .gt('seen_at', new Date(now - CLOUD_ONLINE_MS).toISOString())
+  if (error) return beats
+  for (const row of (data ?? []) as HeartbeatRow[]) {
+    beats.set(row.child_id, {
+      at: Date.parse(row.seen_at),
+      screen: row.screen,
+      ttl: CLOUD_ONLINE_MS,
+    })
+  }
+  return beats
+}
+
+/**
+ * Children playing right now: from the browser channel (this device) and, for
+ * the cloud panel, from the private `presence_heartbeats` table. Names never
+ * travel with a heartbeat; the panel already has them from `children`.
+ */
 function usePresence(cloud: boolean): Map<string, Presence> {
   const [beats, setBeats] = useState<Map<string, Presence>>(new Map())
   const [now, setNow] = useState(() => Date.now())
@@ -82,9 +119,9 @@ function usePresence(cloud: boolean): Map<string, Presence> {
       if (message.type === 'presence') {
         setBeats((current) =>
           new Map(current).set(message.childId, {
-            name: message.name,
             at: message.at,
             screen: message.screen,
+            ttl: ONLINE_MS,
           }),
         )
       } else if (message.type === 'leave') {
@@ -100,38 +137,31 @@ function usePresence(cloud: boolean): Map<string, Presence> {
 
   useEffect(() => {
     if (!cloud) return undefined
-    let remove = () => undefined as void
     let alive = true
-    void import('@/services/supabase/client').then(({ getSupabase }) => {
-      const supabase = getSupabase()
-      if (!supabase || !alive) return
-      const channel = supabase.channel('kiddo-online')
-      channel
-        .on('presence', { event: 'sync' }, () => {
-          const state = channel.presenceState<{ childId: string; name: string; screen: string }>()
-          setBeats((current) => {
-            const next = new Map(current)
-            for (const entries of Object.values(state)) {
-              for (const entry of entries) {
-                next.set(entry.childId, { name: entry.name, at: Date.now(), screen: entry.screen })
-              }
-            }
-            return next
+    const poll = () =>
+      void loadHeartbeats().then((cloudBeats) => {
+        if (!alive) return
+        setBeats((current) => {
+          const next = new Map(current)
+          cloudBeats.forEach((value, key) => {
+            const known = next.get(key)
+            if (!known || known.at < value.at) next.set(key, value)
           })
+          return next
         })
-        .subscribe()
-      remove = () => void supabase.removeChannel(channel)
-    })
+      })
+    poll()
+    const timer = setInterval(poll, CLOUD_PRESENCE_POLL_MS)
     return () => {
       alive = false
-      remove()
+      clearInterval(timer)
     }
   }, [cloud])
 
   return useMemo(() => {
     const live = new Map<string, Presence>()
     beats.forEach((value, key) => {
-      if (now - value.at < ONLINE_MS) live.set(key, value)
+      if (now - value.at < value.ttl) live.set(key, value)
     })
     return live
   }, [beats, now])
@@ -201,7 +231,15 @@ function useDeviceData(): AdminData {
   })
 
   const actions: AdminActions = {
-    grantCoins: async (child, amount) => useProgressStore.getState().grantCoins(child.id, amount),
+    // Through the ledger like every other coin, once per press.
+    grantCoins: async (child, amount) => {
+      grantReward({
+        childKey: child.id,
+        coins: amount,
+        reason: 'admin',
+        refId: crypto.randomUUID(),
+      })
+    },
     grantPro: async (_child, days) => useSubscriptionStore.getState().grantDays(days, 'admin'),
     revokePro: async () => useSubscriptionStore.getState().cancel(),
     saveSettings: async (settings) => useAppSettingsStore.getState().update(settings),
@@ -383,13 +421,23 @@ function useCloudData(enabled: boolean): AdminData {
   }
 
   const actions: AdminActions = {
-    grantCoins: (child, amount) =>
-      supabaseCall((client) =>
+    grantCoins: async (child, amount) => {
+      await supabaseCall((client) =>
         client
           .from('child_state')
           .update({ coins: Math.max(0, child.coins + amount) })
           .eq('child_id', child.id),
-      ),
+      )
+      // The audit trail: only an admin account may write reason 'admin' (0005).
+      await supabaseCall((client) =>
+        client.rpc('record_reward', {
+          p_child: child.id,
+          p_coins: amount,
+          p_reason: 'admin',
+          p_ref: crypto.randomUUID(),
+        }),
+      )
+    },
     grantPro: (child, days) => {
       const base = child.proUntil ? Math.max(Date.parse(child.proUntil), now) : now
       return supabaseCall((client) =>

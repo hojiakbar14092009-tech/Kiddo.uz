@@ -1,12 +1,12 @@
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { CrownIcon } from '@/components/icons'
-import { useIsPro } from '@/store/subscriptionStore'
+import { useProTier } from '@/domain/entitlements'
 
 /** Shows whether the family is on Free or PRO, always in the same place in the top bar. */
 export function TierBadge() {
   const { t } = useTranslation()
-  const isPro = useIsPro()
+  const isPro = useProTier() === 'pro'
 
   return (
     <span

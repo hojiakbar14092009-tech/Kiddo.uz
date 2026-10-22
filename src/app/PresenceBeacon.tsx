@@ -1,15 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useActiveChild } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
 import { postAdminMessage } from '@/store/paymentStore'
+import { CLOUD_BEAT_MS, sendHeartbeat } from './presenceHeartbeat'
 
 const BEAT_MS = 8000
 
 /**
  * Tells the admin panel who is playing right now: on this device through a
- * browser channel, and – with a cloud account – through Supabase Realtime
- * presence, so the admin sees children online on every device.
+ * browser channel, and – with a cloud account – through a private heartbeat
+ * row that only this family and admins can read.
  */
 export function PresenceBeacon() {
   const child = useActiveChild()
@@ -19,6 +20,10 @@ export function PresenceBeacon() {
     child !== null && !pathname.startsWith('/parent') && !pathname.startsWith('/admin')
   const childId = child?.id
   const name = child?.name ?? ''
+  const screen = useRef(pathname)
+  useEffect(() => {
+    screen.current = pathname
+  }, [pathname])
 
   // This device: a heartbeat while the app is visible.
   useEffect(() => {
@@ -40,25 +45,22 @@ export function PresenceBeacon() {
     }
   }, [childId, name, pathname, playing])
 
-  // Every device: Supabase presence, only for families with a cloud account.
+  // Every device: one heartbeat a minute while visible, only with a cloud account.
+  // The screen is read from a ref, so moving between screens sends nothing extra.
   useEffect(() => {
     if (!playing || !childId || !cloud) return undefined
-    let stop = () => undefined as void
-    let alive = true
-    void import('@/services/supabase/client').then(({ getSupabase }) => {
-      const supabase = getSupabase()
-      if (!supabase || !alive) return
-      const channel = supabase.channel('kiddo-online', { config: { presence: { key: childId } } })
-      channel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') void channel.track({ childId, name, screen: pathname })
-      })
-      stop = () => void supabase.removeChannel(channel)
-    })
-    return () => {
-      alive = false
-      stop()
+    const beat = () => {
+      if (document.visibilityState !== 'visible') return
+      void sendHeartbeat(childId, screen.current).catch(() => undefined)
     }
-  }, [childId, cloud, name, pathname, playing])
+    beat()
+    const timer = setInterval(beat, CLOUD_BEAT_MS)
+    document.addEventListener('visibilitychange', beat)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', beat)
+    }
+  }, [childId, cloud, playing])
 
   return null
 }

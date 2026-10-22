@@ -1,16 +1,9 @@
-/** Coins for a finished task: 5 without mistakes, 3 with mistakes. Coins are never taken away. */
-export const COINS_PERFECT = 5
-export const COINS_WITH_MISTAKES = 3
-/** Extra coins for the first finished task of the day. */
-export const DAILY_BONUS = 2
+export { COINS_PERFECT, COINS_WITH_MISTAKES, coinsFor, DAILY_BONUS } from '@/domain/rewards/rules'
+
 /** Questions in one task. */
 export const ROUNDS_PER_TASK = 5
 /** Tasks in the daily plan shown on the home screen. */
 export const DAILY_PLAN_SIZE = 3
-
-export function coinsFor(mistakes: number): number {
-  return mistakes === 0 ? COINS_PERFECT : COINS_WITH_MISTAKES
-}
 
 export function starsFor(mistakes: number): 1 | 2 | 3 {
   if (mistakes === 0) return 3

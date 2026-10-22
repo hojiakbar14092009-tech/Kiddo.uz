@@ -354,6 +354,8 @@ export const uz = {
     method: 'To‘lov usuli',
     providers: { click: 'Click', payme: 'Payme', uzum: 'Uzum Pay' },
     testNote: 'Sinov rejimi: to‘lov taqlid qilinadi, kartangizdan pul yechilmaydi.',
+    paymentsSoon:
+      'Onlayn to‘lov (Click, Payme, Uzum) hali ulanmagan – pul yechilmaydi. Hozircha PRO ni promokod bilan yoqish mumkin.',
     pay: '{{amount}} so‘m to‘lash',
     paying: 'To‘lanmoqda…',
     paid: 'Rahmat! PRO yoqildi 👑',

@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import type { GameType } from '@/features/tasks/games'
+import { clearChildRewards } from '@/domain/rewards/rewardStore'
+import { useLearnStore } from '@/features/learn/learnStore'
 import {
   ageOn,
   birthDateForAge,
@@ -123,11 +125,16 @@ export const useFamilyStore = create<FamilyState>()(
           ),
         })),
 
-      removeChild: (id) =>
+      // The child's coin ledger and learning record go with the profile
+      // (ProfilesSection clears their progress with `resetChild`).
+      removeChild: (id) => {
         set((state) => ({
           children: state.children.filter((child) => child.id !== id),
           activeChildId: state.activeChildId === id ? null : state.activeChildId,
-        })),
+        }))
+        clearChildRewards(id)
+        useLearnStore.getState().clearChild(id)
+      },
 
       setActiveChild: (id) => set({ activeChildId: id }),
 

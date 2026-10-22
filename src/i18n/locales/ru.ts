@@ -355,6 +355,8 @@ export const ru: Translation = {
     method: 'Способ оплаты',
     providers: { click: 'Click', payme: 'Payme', uzum: 'Uzum Pay' },
     testNote: 'Тестовый режим: оплата имитируется, деньги с карты не списываются.',
+    paymentsSoon:
+      'Онлайн-оплата (Click, Payme, Uzum) ещё не подключена – деньги не списываются. Пока PRO можно включить промокодом.',
     pay: 'Оплатить {{amount}} сум',
     paying: 'Оплата…',
     paid: 'Спасибо! PRO включён 👑',

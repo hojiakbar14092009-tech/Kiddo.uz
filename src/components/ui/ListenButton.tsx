@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { SpeakerIcon } from '@/components/icons'
-import { useIsPro } from '@/store/subscriptionStore'
+import { useCanUse } from '@/domain/entitlements'
 import { Button } from './Button'
 import { ProBadge } from './ProLock'
 import { useProLabel } from './useProLabel'
@@ -15,7 +15,7 @@ interface ListenButtonProps {
 /** “Listen” button. On Free it carries a small gold PRO crown and does not speak. */
 export function ListenButton({ onListen, onLocked, label }: ListenButtonProps) {
   const { t } = useTranslation()
-  const isPro = useIsPro()
+  const isPro = useCanUse('audio')
   const proLabel = useProLabel()
   const text = label ?? t('common.listenAgain')
 

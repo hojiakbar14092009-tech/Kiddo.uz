@@ -3,8 +3,20 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type AdminSession = { source: 'device' } | { source: 'cloud'; email: string }
 
-/** PIN for the device admin view. Change it with VITE_ADMIN_PIN when building. */
-export const ADMIN_PIN = (import.meta.env.VITE_ADMIN_PIN as string | undefined)?.trim() || '2026'
+/** The PIN everyone could read in the old README; only ever accepted in development. */
+const DEV_PIN = '2026'
+
+/**
+ * PIN for the device admin view, from VITE_ADMIN_PIN at build time. A
+ * production build without it has no device admin at all (`null`): a default
+ * PIN that ships with the app is no PIN. Development and tests fall back to
+ * the old one so local work stays easy.
+ */
+export function adminPin(): string | null {
+  const configured = (import.meta.env.VITE_ADMIN_PIN as string | undefined)?.trim()
+  if (configured) return configured
+  return import.meta.env.PROD ? null : DEV_PIN
+}
 
 interface AdminState {
   session: AdminSession | null

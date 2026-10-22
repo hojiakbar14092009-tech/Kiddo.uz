@@ -5,6 +5,7 @@ import { childRow, resultRow } from './rows'
 import {
   coalesce,
   MAX_ATTEMPTS,
+  SyncError,
   flushQueue,
   retryDelay,
   useSyncStore,
@@ -48,11 +49,19 @@ function queued(operation: SyncOperation, id = Math.random().toString()): Queued
 class FakeClient implements SyncClient {
   calls: string[] = []
   failNext = 0
-  async upsert(table: string, row: object) {
+  failWith: () => Error = () => new Error('offline')
+  private maybeFail() {
     if (this.failNext > 0) {
       this.failNext -= 1
-      throw new Error('offline')
+      throw this.failWith()
     }
+  }
+  async rpc(fn: string, args: object) {
+    this.maybeFail()
+    this.calls.push(`rpc ${fn} ${(args as { p_ref: string }).p_ref}`)
+  }
+  async upsert(table: string, row: object) {
+    this.maybeFail()
     this.calls.push(
       `upsert ${table} ${(row as { id?: string; child_id?: string }).id ?? (row as { child_id: string }).child_id}`,
     )
@@ -152,9 +161,11 @@ describe('change tracking', () => {
 })
 
 describe('queue robustness', () => {
-  beforeEach(() => useSyncStore.setState({ queue: [], snapshotFor: null }))
+  beforeEach(() =>
+    useSyncStore.setState({ queue: [], deadLetter: [], paused: null, snapshotFor: null }),
+  )
 
-  it('drops an operation the server keeps refusing, so later ones still go out', async () => {
+  it('moves an operation the server keeps refusing to the dead-letter list, so later ones still go out', async () => {
     const client = new FakeClient()
     useSyncStore.getState().enqueue({ kind: 'upsertChild', row: childRow(ALI) })
     useSyncStore.getState().enqueue({ kind: 'deleteChild', childId: 'other' })
@@ -165,16 +176,103 @@ describe('queue robustness', () => {
       await flushQueue(client, () => time)
     }
     expect(client.calls).toEqual(['delete children other'])
-    expect(useSyncStore.getState().queue).toHaveLength(0)
+    const { queue, deadLetter } = useSyncStore.getState()
+    expect(queue).toHaveLength(0)
+    expect(deadLetter).toHaveLength(1)
+    expect(deadLetter[0]).toMatchObject({
+      attempts: MAX_ATTEMPTS,
+      error: 'offline',
+      operation: { kind: 'upsertChild' },
+    })
   })
 
-  it('keeps pending deletions when a parent signs out', () => {
+  it('dead-letters a refused operation at once instead of retrying it', async () => {
+    const client = new FakeClient()
+    client.failNext = 1
+    client.failWith = () => new SyncError('daily_cap', 'rejected')
+    const store = useSyncStore.getState()
+    store.enqueue({
+      kind: 'recordReward',
+      row: { p_child: 'ali', p_coins: 50, p_reason: 'task', p_ref: 'r1' },
+    })
+    store.enqueue({ kind: 'deleteChild', childId: 'other' })
+    expect(await flushQueue(client, () => 0)).toEqual({ sent: 1, failed: true })
+    expect(useSyncStore.getState().deadLetter.map((item) => item.error)).toEqual(['daily_cap'])
+
+    // A parent can send it again from the list.
+    const [letter] = useSyncStore.getState().deadLetter
+    useSyncStore.getState().retryDeadLetter(letter!.id)
+    await flushQueue(client, () => 0)
+    expect(client.calls).toEqual(['delete children other', 'rpc record_reward r1'])
+    expect(useSyncStore.getState().deadLetter).toHaveLength(0)
+  })
+
+  it('pauses on an auth error without counting an attempt, and goes on after resume', async () => {
+    const client = new FakeClient()
+    client.failNext = 1
+    client.failWith = () => new SyncError('JWT expired', 'auth')
+    useSyncStore.getState().enqueue({ kind: 'upsertChild', row: childRow(ALI) })
+    expect(await flushQueue(client, () => 0)).toEqual({ sent: 0, failed: true })
+    expect(useSyncStore.getState()).toMatchObject({ paused: 'auth' })
+    expect(useSyncStore.getState().queue[0]).toMatchObject({ attempts: 0, notBefore: 0 })
+
+    // Paused: nothing is tried, however often a flush is asked for.
+    for (let i = 0; i < MAX_ATTEMPTS + 2; i += 1) await flushQueue(client, () => 0)
+    expect(client.calls).toEqual([])
+
+    useSyncStore.getState().resume()
+    expect(await flushQueue(client, () => 0)).toEqual({ sent: 1, failed: false })
+    expect(client.calls).toEqual(['upsert children ali'])
+  })
+
+  it('keeps pending deletions when a parent signs out, and forgets the rest', () => {
     const store = useSyncStore.getState()
     store.enqueue({ kind: 'upsertChild', row: childRow(ALI) })
     store.enqueue({ kind: 'deleteChild', childId: 'lola' })
+    useSyncStore.setState({
+      paused: 'auth',
+      deadLetter: [
+        {
+          id: 'x',
+          operation: { kind: 'upsertChild', row: childRow(ALI) },
+          attempts: 8,
+          error: 'e',
+          at: '2026-10-23T00:00:00.000Z',
+        },
+      ],
+    })
     store.clear()
-    expect(useSyncStore.getState().queue.map((item) => item.operation.kind)).toEqual([
-      'deleteChild',
-    ])
+    const after = useSyncStore.getState()
+    expect(after.queue.map((item) => item.operation.kind)).toEqual(['deleteChild'])
+    expect(after.deadLetter).toEqual([])
+    expect(after.paused).toBeNull()
+  })
+
+  it('coalesces reward entries by reason and ref, and learning data per child', () => {
+    const store = useSyncStore.getState()
+    const reward = { p_child: 'ali', p_coins: 5, p_reason: 'task' as const, p_ref: 'r1' }
+    store.enqueue({ kind: 'recordReward', row: reward })
+    store.enqueue({ kind: 'recordReward', row: reward })
+    store.enqueue({ kind: 'recordReward', row: { ...reward, p_reason: 'learn' as const } })
+    store.enqueue({ kind: 'upsertLearn', row: { child_id: 'ali', data: { v: 1 } as never } })
+    store.enqueue({ kind: 'upsertLearn', row: { child_id: 'ali', data: { v: 2 } as never } })
+    const kinds = useSyncStore.getState().queue.map((item) => item.operation)
+    expect(kinds).toHaveLength(3)
+    expect(kinds[2]).toMatchObject({ kind: 'upsertLearn', row: { data: { v: 2 } } })
+  })
+
+  it('drops client-written payments from a queue saved by an older version', async () => {
+    const migrate = useSyncStore.persist.getOptions().migrate!
+    const old = {
+      queue: [
+        queued({ kind: 'upsertPayment', row: { id: 'p1' } } as never, 'p'),
+        queued({ kind: 'deleteChild', childId: 'lola' }, 'd'),
+      ],
+      snapshotFor: 'user-1',
+    }
+    const next = (await migrate(old, 1)) as { queue: QueuedOperation[]; snapshotFor: string | null }
+    expect(next.queue.map((item) => item.id)).toEqual(['d'])
+    // Queued again once, now with learning data.
+    expect(next.snapshotFor).toBeNull()
   })
 })

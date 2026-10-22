@@ -40,10 +40,16 @@ export function normalizePromo(code: string): string {
 interface ProSnapshot {
   plan: PlanId | null
   expiresAt: string | null
+  source?: ProSource | null
 }
 
-export function isProActive({ plan, expiresAt }: ProSnapshot, now: number = Date.now()): boolean {
+export function isProActive(
+  { plan, expiresAt, source }: ProSnapshot,
+  now: number = Date.now(),
+): boolean {
   if (!plan) return false
+  // the developer "Demo PRO" switch never counts in a production build
+  if (source === 'demo' && import.meta.env.PROD) return false
   return expiresAt === null || Date.parse(expiresAt) > now
 }
 
@@ -122,6 +128,7 @@ export function useHasProSubscription(): boolean {
 /**
  * Are PRO features on for the one playing now? PRO belongs to the family’s
  * children: a guest plays the free version even when the family has PRO.
+ * @deprecated Screens ask `useCanUse(feature)` / `useProTier()` from `@/domain/entitlements`.
  */
 export function useIsPro(): boolean {
   const paid = useHasProSubscription()
@@ -129,28 +136,5 @@ export function useIsPro(): boolean {
   return paid && child
 }
 
-export function getIsPro(): boolean {
-  return (
-    isProActive(useSubscriptionStore.getState()) && useFamilyStore.getState().activeChildId !== null
-  )
-}
-
-/** Paid capabilities. Every PRO-only feature asks here, never `plan === …` on its own. */
-export type ProFeature = 'audio'
-
-/** May the one playing now use this feature? Checked right before it is used. */
-export function canUse(feature: ProFeature): boolean {
-  switch (feature) {
-    case 'audio':
-      return getIsPro()
-  }
-}
-
-/** The same answer as `canUse`, for drawing the screen (it updates when PRO changes). */
-export function useCanUse(feature: ProFeature): boolean {
-  const pro = useIsPro()
-  switch (feature) {
-    case 'audio':
-      return pro
-  }
-}
+// The capability check lives in `@/domain/entitlements`; these names stay here for old imports.
+export { canUse, getIsPro, useCanUse, type ProFeature } from '@/domain/entitlements/features'

@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
-import { useChildKey, useProgressStore } from '@/store/progressStore'
+import { grantReward, wasRewarded } from '@/domain/rewards/rewardStore'
+import { sessionCoins } from '@/domain/rewards/rules'
+import { useChildKey } from '@/store/progressStore'
 import type { AnswerRecord, LearnMode, SessionSummary } from './session'
 
 /*
@@ -10,7 +12,8 @@ import type { AnswerRecord, LearnMode, SessionSummary } from './session'
  * - every answer (first answer, error type, help, later try, date),
  * - a running record per skill, used to bring weak skills back for review,
  * - finished sessions with their independent score, for the parent area,
- * - which sessions were already rewarded, so a reload never pays twice,
+ * - (legacy) which sessions were rewarded before the rewards ledger existed;
+ *   coins now go through `grantReward`, which pays each session id once,
  * - stages a child has been taught, so a test never asks about anything else.
  */
 
@@ -56,6 +59,10 @@ export interface LearnChild {
   skills: Record<string, SkillStat>
   attempts: AttemptRecord[]
   sessions: SessionRecord[]
+  /**
+   * Legacy: sessions paid before the rewards ledger. Still read (so an old
+   * session is never paid again) but no longer written.
+   */
   rewarded: string[]
   /** "section|language" → stages taught. */
   stages: Record<string, string[]>
@@ -72,9 +79,11 @@ const EMPTY: LearnChild = Object.freeze({
   lastOrder: {},
 }) as LearnChild
 
+/** A child with no learning record yet (a stable object, safe in selectors). */
+export const EMPTY_LEARN_CHILD = EMPTY
+
 const MAX_ATTEMPTS = 600
 const MAX_SESSIONS = 200
-const MAX_REWARDED = 400
 
 export function skillKey(section: SectionId, language: LearnLanguage, skill: string): string {
   return `${section}|${language}|${skill}`
@@ -83,9 +92,7 @@ export function skillKey(section: SectionId, language: LearnLanguage, skill: str
 export const stageKey = (section: SectionId, language: LearnLanguage) => `${section}|${language}`
 
 /** Coins for a finished session: a little for trying, more for independent answers. */
-export function sessionCoins(summary: SessionSummary): number {
-  return 1 + summary.independent
-}
+export { sessionCoins }
 
 interface LearnState {
   byChild: Record<string, LearnChild>
@@ -97,6 +104,8 @@ interface LearnState {
   finishSession: (childKey: string, session: Omit<SessionRecord, 'coins' | 'at'>) => number
   markStage: (childKey: string, section: SectionId, language: LearnLanguage, stage: string) => void
   setLastOrder: (childKey: string, key: string, order: string) => void
+  /** Forgets everything a child did here (the child was removed). */
+  clearChild: (childKey: string) => void
 }
 
 function child(state: LearnState, key: string): LearnChild {
@@ -143,9 +152,17 @@ export const useLearnStore = create<LearnState>()(
 
       finishSession: (childKey, input) => {
         const current = child(get(), childKey)
-        if (current.rewarded.includes(input.id)) return 0
-        const coins = sessionCoins(input)
-        const record: SessionRecord = { ...input, coins, at: new Date().toISOString() }
+        if (current.rewarded.includes(input.id) || wasRewarded(childKey, 'learn', input.id)) {
+          return 0
+        }
+        const entry = grantReward({
+          childKey,
+          coins: sessionCoins(input),
+          reason: 'learn',
+          refId: input.id,
+        })
+        if (!entry) return 0
+        const record: SessionRecord = { ...input, coins: entry.coins, at: entry.at }
         set((state) => {
           const latest = child(state, childKey)
           return {
@@ -154,13 +171,11 @@ export const useLearnStore = create<LearnState>()(
               [childKey]: {
                 ...latest,
                 sessions: [record, ...latest.sessions].slice(0, MAX_SESSIONS),
-                rewarded: [input.id, ...latest.rewarded].slice(0, MAX_REWARDED),
               },
             },
           }
         })
-        useProgressStore.getState().grantCoins(childKey, coins)
-        return coins
+        return entry.coins
       },
 
       markStage: (childKey, section, language, stage) =>
@@ -186,6 +201,14 @@ export const useLearnStore = create<LearnState>()(
               [childKey]: { ...current, lastOrder: { ...current.lastOrder, [key]: order } },
             },
           }
+        }),
+
+      clearChild: (childKey) =>
+        set((state) => {
+          if (!state.byChild[childKey]) return state
+          const byChild = { ...state.byChild }
+          delete byChild[childKey]
+          return { byChild }
         }),
     }),
     { name: 'kiddo.learn', version: 1 },

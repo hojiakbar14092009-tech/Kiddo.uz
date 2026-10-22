@@ -60,7 +60,7 @@ Playwright birinchi marta: `npx playwright install chromium`.
 - Bugungi hisobot, haftalik coinlar, xatolar tahlili (“Ch o‘rniga Sh”), mashq kerak harflar.
 - Bola profillari (cheklovsiz; tug‘ilgan kun, jins → robot, kunlik vaqt), uy vazifasi, ovoz va til sozlamalari.
 - Bola ilovadan chiqsa – vaqti bilan yoziladi va ota-ona bo‘limida ko‘rinadi (bulut hisobida boshqa qurilmada ham).
-- PRO: oylik va yillik tariflar (yillik = 12 oy − 20 %, admin oylik narxdan avtomatik hisoblaydi), Click / Payme / Uzum Pay, promokod, Demo PRO.
+- PRO: oylik va yillik tariflar (yillik = 12 oy − 20 %, admin oylik narxdan avtomatik hisoblaydi), Click / Payme / Uzum Pay, promokod; Demo PRO almashtirgichi faqat ishlab chiqish (dev) build’ida ko‘rinadi.
 - **Sovg‘a promokod:** «Promokodni olish» tugmasi admin qo‘ygan reklamani ko‘rsatadi; reklamani o‘tkazib yuborib,
   oldinga surib yoki yopib bo‘lmaydi (yopsa, promokod berilmaydi). Reklama oxirigacha ko‘rilgach promokod
   animatsiya bilan chiqadi va bir bosishda faollashtiriladi. Har bir oilaga 1 marta. Reklama bo‘lmasa,
@@ -77,20 +77,37 @@ bilan yozadi: bugun nechta oila PRO sotib olgani, yangi to‘lov kelganini va ki
 - **Bolalar:** ro‘yxat, qidiruv, PRO / Bepul / Onlayn saralash; PRO bor-yo‘qligi va qachongacha; coin berish,
   PRO berish (+30 kun) va bekor qilish.
 - **To‘lovlar:** barcha PRO to‘lovlari, jami summa, Excel (CSV) yuklab olish.
-- **Promokodlar:** `KIDDO07` (7 kun) va `BOLAJON30` (30 kun) bor; admin yangisini qo‘shadi, to‘xtatadi, o‘chiradi
-  va har bir kodni nechta oila olganini ko‘radi.
+- **Promokodlar:** admin kod qo‘shadi (necha kun PRO berishini tanlaydi), to‘xtatadi, o‘chiradi va har bir kodni
+  nechta oila olganini ko‘radi. Kodlarni README’ga, kodga yoki ochiq joyga yozmang: ular faqat admin panelida
+  (Supabase bilan – `promo_codes` jadvalida) turadi. Ishga tushirish kodlari faol qoladi, lekin Supabase bilan
+  kodni faqat reklamani oxirigacha ko‘rib, shu kodni olgan hisob faollashtira oladi (har oilaga bitta); boshqa
+  har qanday kod “noto‘g‘ri” deb javob oladi. Noto‘g‘ri kod 10 daqiqada 5 martadan ko‘p kiritilsa, server
+  vaqtincha rad etadi.
 - **Reklamalar:** video fayl yuklash yoki .mp4 havola; ko‘rish va oxirigacha ko‘rishlar soni; to‘xtatish, o‘chirish.
 - **Sozlamalar:** PRO oylik narxi – yillik narx avtomatik (12 × oylik − 20 %); “Saqlash”dan keyin ota-onalar shu
   narxni ko‘radi va to‘laydi. PRO bilan beriladigan sovg‘a coin (standart 50).
 
 Kirish ikki xil:
 
-1. **Shu qurilma** – PIN bilan (standart `2026`, build’da `VITE_ADMIN_PIN` bilan o‘zgartiring). Shu brauzerdagi
+1. **Shu qurilma** – PIN bilan. PIN build vaqtida `VITE_ADMIN_PIN` muhit o‘zgaruvchisi bilan beriladi
+   (masalan Vercel → Settings → Environment Variables, yoki `VITE_ADMIN_PIN=... npm run build`); uni README
+   yoki kodga yozmang. **Diqqat:** `VITE_*` o‘zgaruvchilari build paytida sayt kodiga ochiq holda yoziladi, shuning
+   uchun bu PIN maxfiy kalit emas – sayt fayllarini o‘qigan odam uni topa oladi. U faqat shu qurilmadagi bolani
+   admin panelidan tasodifan uzoqlashtiradi: “Shu qurilma” admini faqat shu brauzerdagi ma’lumotlarni ko‘radi va
+   o‘zgartiradi, boshqa oilalar va serverga hech qanday kirish bermaydi. Production build’da PIN berilmasa, bu
+   kirish butunlay o‘chiq bo‘ladi (“PIN sozlanmagan”), avval saqlangan kirish ham ochilmaydi; faqat
+   `npm run dev` va unit testlarda ishlab chiqish uchun vaqtinchalik PIN bor. Shu brauzerdagi
    ma’lumotlar ko‘rinadi; boshqa oynada ochilgan ilovadagi to‘lov va o‘yinlar ham jonli keladi.
 2. **Barcha oilalar (Supabase)** – `supabase/migrations/0003_admin.sql` ni bajaring va o‘z hisobingizni admin qiling:
    `insert into public.admins (user_id) select id from auth.users where email = 'siz@misol.uz';`
-   Shunda barcha oilalar, to‘lovlar (Realtime orqali jonli) va onlayn bolalar (Realtime presence) ko‘rinadi.
+   Shunda barcha oilalar, to‘lovlar (Realtime orqali jonli) va onlayn bolalar ko‘rinadi.
    Promokod va reklamalar uchun `0004_promo_ads.sql` ni ham bajaring (reklama videolari `ads` storage bucket’iga yuklanadi).
+   So‘ng `0005_security.sql` ni bajaring: to‘lovlarni faqat server/admin yozadi, onlayn bolalar ochiq Realtime kanali
+   o‘rniga yopiq `presence_heartbeats` jadvalidan o‘qiladi (ismsiz), coinlar `reward_ledger` ga faqat
+   `record_reward` orqali yoziladi. Qadamlar: `docs/architecture/supabase-verification.md`.
+   Hozircha ilovada ko‘rinadigan coin balansi (`child_state.coins`) hali qurilmadan yoziladi, shuning uchun
+   kunlik coin chegarasi faqat `reward_ledger` uchun; balans ledger’dan hisoblanmaguncha bu xavfsizlik chegarasi
+   emas (rejada bor).
 
 PRO sotib olinganda har bir farzandga sovg‘a coin beriladi va “Siz 50 coinga ega bo‘ldingiz!” chiqadi.
 PRO’si yo‘q ota-onalarga obuna sahifasida PRO animatsiyali oltin kartada ko‘rsatiladi.

@@ -5,8 +5,17 @@ import { findOutfit, type OutfitId, type Wearing } from '@/features/shop/outfits
 import { PET_PRICE, type PetId } from '@/features/pets/pets'
 import { nextSticker } from '@/features/stickers/stickers'
 import type { GameType } from '@/features/tasks/games'
-import { coinsFor, DAILY_BONUS, dayKey, starsFor } from '@/features/tasks/rules'
+import { dayKey, starsFor } from '@/features/tasks/rules'
+import { GUEST_KEY } from '@/domain/childKey'
+import {
+  clearChildRewards,
+  grantReward,
+  spendCoins,
+  wasRewarded,
+} from '@/domain/rewards/rewardStore'
+import { coinsFor, DAILY_BONUS } from '@/domain/rewards/rules'
 import { useFamilyStore } from './familyStore'
+import { newId } from '@/lib/id'
 
 /** Every kind of finished activity that earns coins. */
 export type TaskType = GameType | 'exam'
@@ -62,7 +71,7 @@ export interface TaskOutcome {
   mistakes: number
 }
 
-export const GUEST_KEY = 'guest'
+export { GUEST_KEY }
 const MAX_RESULTS = 300
 
 export const EMPTY_PROGRESS: ChildProgress = Object.freeze({
@@ -89,7 +98,11 @@ interface ProgressState {
   buyOutfit: (childKey: string, outfitId: OutfitId) => boolean
   /** Puts an owned item on, or takes it off if the robot already wears it. */
   toggleOutfit: (childKey: string, outfitId: OutfitId) => void
-  /** Adds coins as a gift (PRO purchase, or the admin). Negative amounts never go below zero. */
+  /**
+   * Low-level balance change; negative amounts never go below zero. Call
+   * `grantReward` / `spendCoins` from `@/domain/rewards` instead, so the change
+   * is recorded once in the ledger.
+   */
   grantCoins: (childKey: string, amount: number) => void
   /** Adopts a pet for coins; it walks with the robot at once. */
   buyPet: (childKey: string, pet: PetId) => boolean
@@ -101,10 +114,19 @@ function unique(values: readonly string[]): string[] {
   return [...new Set(values)]
 }
 
-function applyTask(progress: ChildProgress, task: CompletedTask, now: Date) {
+/** The ledger key of the daily bonus: once per child and local day. */
+export const dailyBonusRef = (day: string) => `daily|${day}`
+
+/**
+ * The task's effect on progress (letters, struggles, sticker, result). Coins are
+ * not added here: `completeTask` pays them through the rewards ledger.
+ */
+function applyTask(childKey: string, progress: ChildProgress, task: CompletedTask, now: Date) {
   const day = dayKey(now)
   const mistakes = task.mistakeDetails.length
-  const firstTaskToday = !progress.results.some((result) => result.day === day)
+  const firstTaskToday =
+    !progress.results.some((result) => result.day === day) &&
+    !wasRewarded(childKey, 'daily-bonus', dailyBonusRef(day))
   const bonus = firstTaskToday ? DAILY_BONUS : 0
   const coins = coinsFor(mistakes)
   const sticker = nextSticker(progress.stickers)
@@ -123,7 +145,7 @@ function applyTask(progress: ChildProgress, task: CompletedTask, now: Date) {
   })
 
   const result: TaskResult = {
-    id: `${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: newId(),
     type: task.type,
     language: task.language,
     letterIds: task.letterIds,
@@ -138,7 +160,6 @@ function applyTask(progress: ChildProgress, task: CompletedTask, now: Date) {
 
   const next: ChildProgress = {
     ...progress,
-    coins: progress.coins + coins + bonus,
     learned: {
       ...progress.learned,
       [task.language]: unique([...(progress.learned[task.language] ?? []), ...masteredNow]),
@@ -155,7 +176,7 @@ function applyTask(progress: ChildProgress, task: CompletedTask, now: Date) {
     stickerId: result.stickerId,
     mistakes,
   }
-  return { next, outcome }
+  return { next, outcome, result }
 }
 
 export const useProgressStore = create<ProgressState>()(
@@ -165,8 +186,28 @@ export const useProgressStore = create<ProgressState>()(
 
       completeTask: (childKey, task, now = new Date()) => {
         const current = get().byChild[childKey] ?? EMPTY_PROGRESS
-        const { next, outcome } = applyTask(current, task, now)
+        const { next, outcome, result } = applyTask(childKey, current, task, now)
         set((state) => ({ byChild: { ...state.byChild, [childKey]: next } }))
+        // A result id is new for every finished task; the bonus key is once per day.
+        grantReward({ childKey, coins: outcome.coins, reason: 'task', refId: result.id })
+        if (outcome.bonus > 0) {
+          const paid = grantReward({
+            childKey,
+            coins: outcome.bonus,
+            reason: 'daily-bonus',
+            refId: dailyBonusRef(result.day),
+          })
+          if (!paid) {
+            outcome.bonus = 0
+            set((state) => {
+              const latest = state.byChild[childKey] ?? EMPTY_PROGRESS
+              const results = latest.results.map((item) =>
+                item.id === result.id ? { ...item, coins: outcome.coins } : item,
+              )
+              return { byChild: { ...state.byChild, [childKey]: { ...latest, results } } }
+            })
+          }
+        }
         return outcome
       },
 
@@ -194,13 +235,20 @@ export const useProgressStore = create<ProgressState>()(
         if (!outfit || current.outfits.includes(outfitId) || current.coins < outfit.price) {
           return false
         }
-        const next: ChildProgress = {
-          ...current,
-          coins: current.coins - outfit.price,
-          outfits: [...current.outfits, outfitId],
-          wearing: { ...current.wearing, [outfit.slot]: outfitId },
+        if (
+          !spendCoins({ childKey, coins: outfit.price, refId: `outfit|${outfitId}|${newId()}` })
+        ) {
+          return false
         }
-        set((state) => ({ byChild: { ...state.byChild, [childKey]: next } }))
+        set((state) => {
+          const latest = state.byChild[childKey] ?? EMPTY_PROGRESS
+          const next: ChildProgress = {
+            ...latest,
+            outfits: [...latest.outfits, outfitId],
+            wearing: { ...latest.wearing, [outfit.slot]: outfitId },
+          }
+          return { byChild: { ...state.byChild, [childKey]: next } }
+        })
         return true
       },
 
@@ -215,10 +263,12 @@ export const useProgressStore = create<ProgressState>()(
           return { byChild: { ...state.byChild, [childKey]: { ...current, wearing } } }
         }),
 
-      startGuest: () =>
+      startGuest: () => {
+        clearChildRewards(GUEST_KEY)
         set((state) => ({
           byChild: { ...state.byChild, [GUEST_KEY]: freshGuest(state.byChild[GUEST_KEY]) },
-        })),
+        }))
+      },
 
       grantCoins: (childKey, amount) =>
         set((state) => {
@@ -231,13 +281,13 @@ export const useProgressStore = create<ProgressState>()(
         const current = get().byChild[childKey] ?? EMPTY_PROGRESS
         const owned = current.pets ?? []
         if (owned.includes(pet) || current.coins < PET_PRICE) return false
-        const next: ChildProgress = {
-          ...current,
-          coins: current.coins - PET_PRICE,
-          pets: [...owned, pet],
-          pet,
-        }
-        set((state) => ({ byChild: { ...state.byChild, [childKey]: next } }))
+        if (!spendCoins({ childKey, coins: PET_PRICE, refId: `pet|${pet}|${newId()}` }))
+          return false
+        set((state) => {
+          const latest = state.byChild[childKey] ?? EMPTY_PROGRESS
+          const next: ChildProgress = { ...latest, pets: [...(latest.pets ?? []), pet], pet }
+          return { byChild: { ...state.byChild, [childKey]: next } }
+        })
         return true
       },
 
@@ -248,12 +298,14 @@ export const useProgressStore = create<ProgressState>()(
           return { byChild: { ...state.byChild, [childKey]: { ...current, pet } } }
         }),
 
-      resetChild: (childKey) =>
+      resetChild: (childKey) => {
+        clearChildRewards(childKey)
         set((state) => {
           const byChild = { ...state.byChild }
           delete byChild[childKey]
           return { byChild }
-        }),
+        })
+      },
     }),
     {
       name: 'kiddo.progress',

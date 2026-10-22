@@ -8,7 +8,7 @@ import { IconButton } from '@/components/ui/IconButton'
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { TierBadge } from '@/components/ui/TierBadge'
 import { useProgress } from '@/store/progressStore'
-import { useIsPro } from '@/store/subscriptionStore'
+import { useProTier } from '@/domain/entitlements'
 import { useScrolled } from './useScrolled'
 
 interface TopBarProps {
@@ -27,7 +27,7 @@ export function TopBar({ start, showHome = true, showCoins = true }: TopBarProps
   const navigate = useNavigate()
   const { coins } = useProgress()
   const scrolled = useScrolled()
-  const isPro = useIsPro()
+  const isPro = useProTier() === 'pro'
 
   return (
     <header

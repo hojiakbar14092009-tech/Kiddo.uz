@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useIsPro } from '@/store/subscriptionStore'
+import { useCanUse } from '@/domain/entitlements'
 import type { MascotMessage } from './types'
 
 interface MascotThoughtBubbleProps {
@@ -25,7 +25,7 @@ export function MascotThoughtBubble({
   side = 'left',
   className,
 }: MascotThoughtBubbleProps) {
-  const isPro = useIsPro()
+  const isPro = useCanUse('audio')
   const reduceMotion = useReducedMotion() ?? false
   const fromLeft = side === 'left'
 

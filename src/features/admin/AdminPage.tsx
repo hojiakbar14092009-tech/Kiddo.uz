@@ -17,7 +17,7 @@ import {
   AdsSection,
   SettingsSection,
 } from './AdminSections'
-import { ADMIN_PIN, useAdminStore, type AdminSession } from './adminSession'
+import { adminPin, useAdminStore, type AdminSession } from './adminSession'
 import { formatSom, revenueTotals } from './revenue'
 
 type Section = 'overview' | 'children' | 'payments' | 'promo' | 'ads' | 'settings'
@@ -72,8 +72,11 @@ const PLAN_NAMES: Record<string, string> = {
 
 /** `/admin`: the owner's control room – separate from the children's app and its design. */
 export function AdminPage() {
-  const session = useAdminStore((state) => state.session)
+  const stored = useAdminStore((state) => state.session)
   const theme = useAdminStore((state) => state.theme)
+  // A device session saved earlier (another build, a copied sessionStorage)
+  // never opens the panel when this build has no device admin PIN.
+  const session = stored?.source === 'device' && adminPin() === null ? null : stored
 
   return (
     <div className="kd-admin relative min-h-dvh" data-theme={theme}>
@@ -92,9 +95,11 @@ function AdminLogin() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
+  const expectedPin = adminPin()
+
   const device = (event: FormEvent) => {
     event.preventDefault()
-    if (pin === ADMIN_PIN) signIn({ source: 'device' })
+    if (expectedPin !== null && pin === expectedPin) signIn({ source: 'device' })
     else setError('PIN noto‘g‘ri. Qaytadan kiriting.')
   }
 
@@ -174,33 +179,42 @@ function AdminLogin() {
             </form>
           )}
 
-          <form onSubmit={device} className="flex flex-col gap-3">
-            <h2 className="font-display font-semibold">Shu qurilma</h2>
-            <p className="text-sm text-[var(--a-ink-soft)]">
-              Shu brauzerdagi bolalar, obuna va to‘lovlar. Boshqa oynada ochilgan ilovadagi to‘lov
-              va o‘yinlar ham jonli ko‘rinadi.
-            </p>
-            <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
-              Admin PIN
-              <input
-                type="password"
-                inputMode="numeric"
-                autoComplete="off"
-                value={pin}
-                onChange={(event) => {
-                  setPin(event.target.value)
-                  setError(null)
-                }}
-                className={clsx(input, 'kd-num tracking-[0.3em]')}
-              />
-            </label>
-            <button
-              type="submit"
-              className="h-11 rounded-full border border-[var(--a-accent)] font-bold text-[var(--a-accent)]"
-            >
-              Ochish
-            </button>
-          </form>
+          {expectedPin === null ? (
+            <section className="flex flex-col gap-2">
+              <h2 className="font-display font-semibold">Shu qurilma</h2>
+              <p className="rounded-lg bg-[var(--a-raise)] px-3 py-2 text-sm text-[var(--a-ink-soft)]">
+                Shu qurilma uchun admin PIN sozlanmagan. Uni build’da VITE_ADMIN_PIN bilan bering.
+              </p>
+            </section>
+          ) : (
+            <form onSubmit={device} className="flex flex-col gap-3">
+              <h2 className="font-display font-semibold">Shu qurilma</h2>
+              <p className="text-sm text-[var(--a-ink-soft)]">
+                Shu brauzerdagi bolalar, obuna va to‘lovlar. Boshqa oynada ochilgan ilovadagi to‘lov
+                va o‘yinlar ham jonli ko‘rinadi.
+              </p>
+              <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+                Admin PIN
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={pin}
+                  onChange={(event) => {
+                    setPin(event.target.value)
+                    setError(null)
+                  }}
+                  className={clsx(input, 'kd-num tracking-[0.3em]')}
+                />
+              </label>
+              <button
+                type="submit"
+                className="h-11 rounded-full border border-[var(--a-accent)] font-bold text-[var(--a-accent)]"
+              >
+                Ochish
+              </button>
+            </form>
+          )}
 
           {error && (
             <p

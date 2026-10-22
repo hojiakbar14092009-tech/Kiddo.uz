@@ -5,7 +5,7 @@ import { ProBadge } from '@/components/ui/ProLock'
 import { useProLabel } from '@/components/ui/useProLabel'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSettingsStore } from '@/store/settingsStore'
-import { canUse } from '@/store/subscriptionStore'
+import { canUse } from '@/domain/entitlements'
 import { takeCurrentSpeakable } from './speakable'
 import { setLearnVoiceOn, speakLines, useLearnVoice } from './voice'
 

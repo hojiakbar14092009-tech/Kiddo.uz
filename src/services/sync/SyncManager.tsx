@@ -1,53 +1,37 @@
 import { useEffect } from 'react'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
-import { useProgressStore } from '@/store/progressStore'
-import { useActivityStore } from '@/store/activityStore'
-import { eventRow, paymentRow } from './rows'
-import { usePaymentStore } from '@/store/paymentStore'
-import { useSubscriptionStore, type PlanId } from '@/store/subscriptionStore'
+import { watchCloudSession } from './cloudSession'
+import {
+  enforceVerifyGrace,
+  forgetCloudPro,
+  pullSubscription,
+  SUBSCRIPTION_REFRESH_MS,
+} from './subscription'
 import { flushQueue, useSyncStore, type SyncClient } from './syncQueue'
-import { childChanges, progressChanges, snapshot } from './trackChanges'
+import { childChanges } from './trackChanges'
+import { trackCloudChanges } from './trackCloud'
 
 const FLUSH_EVERY_MS = 60_000
 const FLUSH_AFTER_CHANGE_MS = 2_000
-
-async function loadClient(): Promise<SyncClient | null> {
+async function loadSupabase(): Promise<{
+  supabase: SupabaseClient
+  client: SyncClient
+} | null> {
   // Loaded on demand, so families without a cloud account never download Supabase.
   const [{ getSupabase }, { supabaseSyncClient }] = await Promise.all([
     import('@/services/supabase/client'),
     import('./supabaseSyncClient'),
   ])
   const supabase = getSupabase()
-  return supabase ? supabaseSyncClient(supabase) : null
-}
-
-/** Applies the family's PRO from the `subscriptions` table, when it ends later than ours. */
-async function pullSubscription() {
-  const { getSupabase } = await import('@/services/supabase/client')
-  const supabase = getSupabase()
-  if (!supabase) return
-  const { data } = await supabase
-    .from('subscriptions')
-    .select('plan, source, expires_at')
-    .maybeSingle()
-  if (!data) return
-  const local = useSubscriptionStore.getState()
-  const remoteEnd = data.expires_at ? Date.parse(String(data.expires_at)) : Infinity
-  const localEnd = !local.plan ? 0 : local.expiresAt ? Date.parse(local.expiresAt) : Infinity
-  if (remoteEnd > localEnd || (remoteEnd === Infinity && localEnd !== Infinity)) {
-    useSubscriptionStore.setState({
-      plan: data.plan as PlanId,
-      source: data.source === 'promo' ? 'promo' : data.source === 'admin' ? 'admin' : 'payment',
-      expiresAt: data.expires_at ? String(data.expires_at) : null,
-    })
-  }
+  return supabase ? { supabase, client: supabaseSyncClient(supabase) } : null
 }
 
 /**
  * Keeps a cloud copy of profiles and progress while a parent is signed in
- * with a Supabase account. Works offline-first: changes wait in a persisted
- * queue and are sent when the device is online.
+ * with a Supabase account, and takes PRO from the server. Works offline-first:
+ * changes wait in a persisted queue and are sent when the device is online.
  */
 export function SyncManager() {
   const userId = useParentStore((state) =>
@@ -67,76 +51,71 @@ export function SyncManager() {
     })
   }, [userId])
 
+  // Leaving a cloud account (sign-out here, or the session ended): its PRO
+  // was the server's, not this device's.
+  useEffect(
+    () =>
+      useParentStore.subscribe((next, previous) => {
+        if (previous.session?.mode === 'cloud' && next.session?.mode !== 'cloud') {
+          forgetCloudPro()
+        }
+      }),
+    [],
+  )
+
   useEffect(() => {
     if (!userId) return undefined
+    let alive = true
     let client: SyncClient | null = null
+    let supabase: SupabaseClient | null = null
     let soon: ReturnType<typeof setTimeout> | undefined
+    let stopAuth = () => undefined as void
+
     const flush = () => {
       if (client && navigator.onLine !== false) void flushQueue(client)
     }
-    const flushSoon = () => {
+    const onChange = (urgent: boolean) => {
       clearTimeout(soon)
-      soon = setTimeout(flush, FLUSH_AFTER_CHANGE_MS)
+      if (urgent) flush()
+      else soon = setTimeout(flush, FLUSH_AFTER_CHANGE_MS)
     }
-    const enqueueAll = (operations: ReturnType<typeof snapshot>) => {
-      if (operations.length === 0) return
-      const { enqueue } = useSyncStore.getState()
-      operations.forEach(enqueue)
-      flushSoon()
+    // Without Supabase loaded yet, at least the offline grace is checked.
+    const refreshPro = () => {
+      if (supabase) void pullSubscription(supabase, userId)
+      else enforceVerifyGrace(userId)
+    }
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      refreshPro()
+      flush()
     }
 
-    const sync = useSyncStore.getState()
-    if (sync.snapshotFor !== userId) {
-      enqueueAll(snapshot(useFamilyStore.getState().children, useProgressStore.getState().byChild))
-      sync.setSnapshotFor(userId)
-    }
-
-    const stopFamily = useFamilyStore.subscribe((next, previous) =>
-      enqueueAll(childChanges(previous.children, next.children)),
-    )
-    const stopProgress = useProgressStore.subscribe((next, previous) =>
-      enqueueAll(
-        progressChanges(
-          previous.byChild,
-          next.byChild,
-          new Set(useFamilyStore.getState().children.map((child) => child.id)),
-        ),
-      ),
-    )
-    // A child leaving the app is sent at once, while the page can still send.
-    const stopActivity = useActivityStore.subscribe((next, previous) => {
-      const known = new Set(previous.events.map((event) => event.id))
-      const fresh = next.events.filter((event) => !known.has(event.id))
-      if (fresh.length === 0) return
-      const { enqueue } = useSyncStore.getState()
-      fresh.forEach((event) => enqueue({ kind: 'upsertEvent', row: eventRow(event) }))
-      flush()
-    })
-    const stopPayments = usePaymentStore.subscribe((next, previous) => {
-      const known = new Set(previous.payments.map((payment) => payment.id))
-      const fresh = next.payments.filter((payment) => !known.has(payment.id))
-      if (fresh.length === 0) return
-      const { enqueue } = useSyncStore.getState()
-      fresh.forEach((payment) => enqueue({ kind: 'upsertPayment', row: paymentRow(payment) }))
-      flush()
-    })
-    // PRO given or changed by the admin (or a real payment server) comes back here.
-    void pullSubscription()
-    const timer = setInterval(flush, FLUSH_EVERY_MS)
+    enforceVerifyGrace(userId)
+    const stopTracking = trackCloudChanges(userId, onChange)
+    const flushTimer = setInterval(flush, FLUSH_EVERY_MS)
+    const proTimer = setInterval(refreshPro, SUBSCRIPTION_REFRESH_MS)
     window.addEventListener('online', flush)
-    void loadClient().then((loaded) => {
-      client = loaded
+    document.addEventListener('visibilitychange', onVisible)
+
+    void loadSupabase().then((loaded) => {
+      if (!loaded || !alive) return
+      supabase = loaded.supabase
+      client = loaded.client
+      // The parent area's session follows the real Supabase session.
+      stopAuth = watchCloudSession(loaded.supabase, userId, flush)
+      refreshPro()
       flush()
     })
 
     return () => {
-      stopFamily()
-      stopProgress()
-      stopActivity()
-      stopPayments()
-      clearInterval(timer)
+      alive = false
+      stopTracking()
+      stopAuth()
+      clearInterval(flushTimer)
+      clearInterval(proTimer)
       clearTimeout(soon)
       window.removeEventListener('online', flush)
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [userId])
 

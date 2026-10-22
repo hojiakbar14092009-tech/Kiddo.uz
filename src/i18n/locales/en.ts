@@ -355,6 +355,8 @@ export const en: Translation = {
     method: 'Payment method',
     providers: { click: 'Click', payme: 'Payme', uzum: 'Uzum Pay' },
     testNote: 'Test mode: the payment is simulated and no money is taken from your card.',
+    paymentsSoon:
+      'Online payment (Click, Payme, Uzum) is not connected yet – nothing is charged. For now PRO can be turned on with a promo code.',
     pay: 'Pay {{amount}} UZS',
     paying: 'Paying…',
     paid: 'Thank you! PRO is on 👑',

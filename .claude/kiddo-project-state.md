@@ -42,6 +42,7 @@ Prettier. Vercel deploys `main` automatically (kiddo-uz.vercel.app).
 Phase 0 (e93937e): 340 unit, 34 e2e; initial JS ≈ 237 KB gzip; R3F 234 KB gzip (lazy).
 Phase 1: 350 unit, 34 e2e; initial JS ≈ 240 KB gzip.
 Phase 2: 368 unit, 34 e2e.
+Phase 3: 419 unit, 34 e2e, 62 SQL assertions (`supabase/tests/run.sh`, local Postgres).
 
 ## UI foundation (Phase 1)
 
@@ -72,6 +73,27 @@ the title, `onKeyDown`, `role="alertdialog"` for questions); `toast()` + `Toaste
 no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens added:
 `oops-shadow`, `night`. All 10 former hand-made dialogs use Dialog.
 
+## Domain + security (Phase 3)
+
+- `src/domain/ledger` generic idempotent append-only ledger; `domain/rewards`
+  (`grantReward`, `spendCoins`, `subscribeRewards`, `kiddo.rewards`) = the ONLY way coins
+  change (tasks, daily bonus, learn sessions, pro gift, penalty, admin, shop);
+  `domain/progress` (`useMastery`, `childActivityForDay`); `domain/entitlements`
+  (`canUse/useCanUse/useEntitlement/useProTier`; `useIsPro` deprecated);
+  `domain/quests/types`. Child removal clears ledger + learn data.
+- Migration `0005_security.sql` (NOT applied to prod – blocker): payments select-only,
+  `presence_heartbeats` (no names) replaces public Realtime presence, append-only
+  `reward_ledger` via `record_reward` RPC (sign/bounds/daily cap, pro-gift service-role
+  only), `child_learn`, promo needs an ad claim + rate limit, anon revoked.
+  KIDDO07/BOLAJON30 stay active (owner's launch codes).
+- Cloud mode: server subscription authoritative (downgrade, 7-day offline grace, cleared
+  on sign-out); sync queues ledger entries and learn data; dead-letter + auth pause.
+- Production builds: no Demo PRO (ignored even if persisted), no mock payment
+  (`services/payments/availability.ts`; e2e may set `VITE_PAYMENTS_MOCK`), device admin
+  only with `VITE_ADMIN_PIN` (inlined, not a secret).
+- Known gap: `child_state.coins` is still client-written; the cap is not a security
+  boundary until coins derive from the ledger (rollout step 5).
+
 ## Key decisions
 
 - Incremental: new `src/domain/{rewards,progress,entitlements,quests}` wrap existing
@@ -95,7 +117,7 @@ motion tokens not yet adopted; board height caps are per-component calc values.
 
 ## Blockers (owner)
 
-**Phase 3 blocker – Supabase not verified.** Evidence (2026-10-22): the deployed
+**Supabase not verified / not configured in production.** Evidence (2026-10-22): the deployed
 `assets/client-*.js` has `isSupabaseConfigured` compiled to `false` and no `*.supabase.co`
 address → production is built without `VITE_SUPABASE_*` and runs device/demo mode only
 (no reads/writes to Supabase). This environment has no Vercel env access (connector lacks
@@ -113,7 +135,7 @@ prod) · B7 promo policy.
 - [x] 0 Discovery & architecture (2026-10-22)
 - [x] 1 Foundation: error screens, responsive fixes from the audit, tokens (2026-10-22)
 - [x] 2 Design system primitives + migration of all dialogs, PRO chips, step dots, tab icons (2026-10-22)
-- [ ] 3 Domain foundation (rewards ledger, progress facade, entitlements) + Supabase steps 1–2
+- [x] 3 Domain foundation + Supabase security migration 0005 (2026-10-23)
 - [ ] 4 Kiddo City, Adventure Map, Daily Quest, rewards UI
 - [ ] 5 Smart Math, Tracing, Adaptive, Emotions, Creative Studio
 - [ ] 6 Worlds: Explorer3D, Dinosaur, Uzbekistan
@@ -125,12 +147,8 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 3 – domain foundation. Blocked part: Supabase rollout steps 1–2 need the owner's
-verification (docs/architecture/supabase-verification.md). Unblocked part can start:
-`src/domain/rewards` (ledger + `grantReward` with idempotency; migrate the 5 coin paths:
-progressStore.completeTask, learnStore.finishSession, pro/purchase gift, CoinPenaltyPanel,
-admin), `src/domain/progress` (mastery facade over progressStore + learnStore; clean
-learnStore on child removal), `src/domain/entitlements` (features, `useEntitlement`,
-replace the remaining direct `useIsPro()` reads), `src/domain/quests` types.
-Leftovers from Phase 2 (low): `toast()`/`EmptyState` not yet used by screens; RewardPage
-stars pop twice (burst + per-star); body scroll-lock restores the overflow saved at open.
+Phase 4 – Kiddo City, Adventure Map, Daily Quest, resources (stars, crystals, …),
+medals/badges/achievements, built on `docs/architecture/universe.md` (domain
+`src/domain/universe`, reuses `domain/ledger`). Phases 5–24 follow the master list.
+Owner actions: apply 0005 + Realtime private-only setting (see
+docs/architecture/supabase-verification.md §6), set Vercel `VITE_SUPABASE_*`.
