@@ -2,8 +2,9 @@ import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BulbIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
-import { useFocusTrap } from '@/components/ui/useFocusTrap'
+import { BottomSheet } from '@/components/ui/Dialog'
 import { useLearnVoice } from './voice'
 
 /**
@@ -44,13 +45,11 @@ export function HelpButton({
         }
         transition={glow ? { duration: 1.1, repeat: Infinity, repeatDelay: 1.2 } : undefined}
         className={clsx(
-          'relative flex size-14 shrink-0 items-center justify-center rounded-full text-3xl transition-colors sm:size-16',
-          glow
-            ? 'bg-coin shadow-[0_0_0_6px_rgba(255,201,60,0.35),0_5px_0_var(--color-coin-shadow)]'
-            : 'bg-surface shadow-[0_5px_0_var(--color-line)]',
+          'relative flex size-14 shrink-0 items-center justify-center rounded-full text-ink transition-colors sm:size-16',
+          glow ? 'bg-coin shadow-press-coin ring-6 ring-coin/35' : 'bg-surface shadow-press',
         )}
       >
-        <span aria-hidden="true">💡</span>
+        <BulbIcon size={30} />
       </motion.button>
       {open && (
         <HelpSheet text={text} onClose={() => setOpen(false)}>
@@ -72,9 +71,7 @@ function HelpSheet({
 }) {
   const { t } = useTranslation()
   const voice = useLearnVoice()
-  const dialog = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLButtonElement>(null)
-  useFocusTrap(dialog, button)
 
   useEffect(() => {
     void voice.speak([text])
@@ -83,30 +80,23 @@ function HelpSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text])
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 p-4">
-      <div
-        ref={dialog}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="learn-help-title"
-        className="flex max-h-full w-full max-w-lg flex-col items-center gap-4 overflow-y-auto rounded-[36px] bg-surface p-6 text-center text-ink shadow-[0_8px_0_var(--color-line)]"
-      >
-        <h2 id="learn-help-title" className="font-display text-2xl font-extrabold sm:text-3xl">
-          <span aria-hidden="true">💡 </span>
+    <BottomSheet
+      title={
+        <>
+          <BulbIcon size={30} className="mr-2 inline-block align-[-0.2em] text-coin-shadow" />
           {text}
-        </h2>
-        {children}
-        <Button ref={button} onClick={onClose}>
-          {t('learn.helpOk')}
-        </Button>
-      </div>
-    </div>
+        </>
+      }
+      onClose={onClose}
+      initialFocus={button}
+      size="lg"
+      testId="learn-help"
+    >
+      {children}
+      <Button ref={button} onClick={onClose}>
+        {t('learn.helpOk')}
+      </Button>
+    </BottomSheet>
   )
 }

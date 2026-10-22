@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckIcon } from '@/components/icons'
+import { BulbIcon, CheckIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import type { Language } from '@/content/languages'
 import { Img3D } from '@/features/learn/Img3D'
@@ -347,11 +347,11 @@ function GardenGame({
 
       {showsOffer(help, mode) && (
         <div
-          className="mx-auto flex flex-wrap items-center justify-center gap-3 rounded-[28px] bg-coin-soft px-4 py-3"
+          className="mx-auto flex flex-wrap items-center justify-center gap-3 rounded-card bg-coin-soft px-4 py-3"
           role="status"
         >
-          <span className="font-display text-xl font-bold">
-            <span aria-hidden="true">💡 </span>
+          <span className="inline-flex items-center gap-2 font-display text-xl font-bold">
+            <BulbIcon size={26} />
             {ui.offer}
           </span>
           <Button

@@ -2,7 +2,7 @@ import { useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CoinIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
-import { useFocusTrap } from '@/components/ui/useFocusTrap'
+import { Dialog } from '@/components/ui/Dialog'
 import type { ChildProfile } from '@/store/familyStore'
 import { useProgress, useProgressStore } from '@/store/progressStore'
 import { Panel } from './Panel'
@@ -96,31 +96,27 @@ function ConfirmDialog({
   onYes: () => void
   onNo: () => void
 }) {
-  const dialog = useRef<HTMLDivElement>(null)
   const cancel = useRef<HTMLButtonElement>(null)
-  useFocusTrap(dialog, cancel)
+  // Taking coins away needs an explicit answer: a tap outside does nothing,
+  // Escape and the focused default both mean “cancel”.
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 p-4">
-      <div
-        ref={dialog}
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="penalty-confirm"
-        className="flex w-full max-w-sm flex-col gap-5 rounded-[28px] bg-surface p-6 text-ink shadow-[0_8px_0_var(--color-line)]"
-        onKeyDown={(event) => event.key === 'Escape' && onNo()}
-      >
-        <p id="penalty-confirm" className="font-display text-xl font-extrabold">
-          {text}
-        </p>
-        <div className="flex flex-wrap justify-end gap-3">
-          <Button ref={cancel} variant="soft" size="md" onClick={onNo}>
-            {no}
-          </Button>
-          <Button size="md" onClick={onYes}>
-            {yes}
-          </Button>
-        </div>
+    <Dialog
+      role="alertdialog"
+      dismissible={false}
+      initialFocus={cancel}
+      onClose={onNo}
+      size="sm"
+      title={text}
+      testId="penalty-confirm"
+    >
+      <div className="flex w-full flex-wrap justify-center gap-3">
+        <Button ref={cancel} variant="soft" size="md" onClick={onNo}>
+          {no}
+        </Button>
+        <Button size="md" onClick={onYes}>
+          {yes}
+        </Button>
       </div>
-    </div>
+    </Dialog>
   )
 }

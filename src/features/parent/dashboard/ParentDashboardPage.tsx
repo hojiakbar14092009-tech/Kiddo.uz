@@ -1,7 +1,8 @@
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ChartIcon, ChildIcon, ClipboardIcon, CrownIcon, GearIcon } from '@/components/icons'
 import { SegmentedTabs } from '@/components/ui/SegmentedTabs'
 import { tabPanelProps } from '@/components/ui/tabPanel'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
@@ -19,6 +20,15 @@ import { SettingsSection } from './SettingsSection'
 
 const TABS = ['report', 'profiles', 'homework', 'pro', 'settings'] as const
 type DashboardTab = (typeof TABS)[number]
+
+/** One stroke icon family for the tabs, instead of platform emoji. */
+const ICONS: Record<DashboardTab, ComponentType<{ size?: number }>> = {
+  report: ChartIcon,
+  profiles: ChildIcon,
+  homework: ClipboardIcon,
+  pro: CrownIcon,
+  settings: GearIcon,
+}
 
 function isTab(value: string | null): value is DashboardTab {
   return (TABS as readonly (string | null)[]).includes(value)
@@ -52,14 +62,6 @@ export function ParentDashboardPage() {
     useSyncStore.getState().clear()
     signOut()
     navigate('/parent/login', { replace: true })
-  }
-
-  const icons: Record<DashboardTab, string> = {
-    report: '📊',
-    profiles: '👧',
-    homework: '📝',
-    pro: '👑',
-    settings: '⚙️',
   }
 
   return (
@@ -100,11 +102,10 @@ export function ParentDashboardPage() {
             <h1 className="font-display text-2xl font-extrabold">{t('parent.welcome')}</h1>
           )}
           <SegmentedTabs
-            tabs={TABS.map((value) => ({
-              value,
-              symbol: icons[value],
-              label: t(`parent.tabs.${value}`),
-            }))}
+            tabs={TABS.map((value) => {
+              const Icon = ICONS[value]
+              return { value, symbol: <Icon size={22} />, label: t(`parent.tabs.${value}`) }
+            })}
             value={tab}
             onChange={(next) => setParams({ tab: next }, { replace: true })}
             label={t('parent.tabs.label')}

@@ -182,6 +182,26 @@ describe('Parent dashboard', () => {
     expect(dialog).toHaveTextContent('Alidan 12 coin ayirilsinmi?')
     await user.click(within(dialog).getByRole('button', { name: 'Ha, ayirish' }))
     expect(useProgressStore.getState().byChild[ali.id]?.coins).toBe(18)
-    expect(screen.getByRole('status')).toHaveTextContent('Alidan 12 coin ayirildi.')
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(screen.getByText('Alidan 12 coin ayirildi.')).toHaveAttribute('role', 'status')
+  })
+
+  it('keeps the coins when the take-away question is cancelled with Escape', async () => {
+    useParentStore.setState({ session: { mode: 'demo' } })
+    const ali = useFamilyStore
+      .getState()
+      .addChild({ name: 'Ali', birthDate: birthDateForAge(5, dayKey()), gender: 'boy' })
+    useProgressStore.getState().grantCoins(ali.id, 30)
+    const { user } = await renderRoute('/parent/dashboard?tab=homework')
+    await user.type(screen.getByLabelText('Necha coin ayiriladi'), '12')
+    await user.click(screen.getByRole('button', { name: 'Coin ayirish' }))
+    const dialog = screen.getByRole('alertdialog', { name: 'Alidan 12 coin ayirilsinmi?' })
+    // the safe answer is focused, a tap outside does nothing
+    expect(within(dialog).getByRole('button', { name: 'Bekor qilish' })).toHaveFocus()
+    fireEvent.pointerDown(dialog.parentElement!)
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(useProgressStore.getState().byChild[ali.id]?.coins).toBe(30)
   })
 })

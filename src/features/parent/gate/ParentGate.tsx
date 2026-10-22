@@ -3,7 +3,7 @@ import { motion, useAnimationControls } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
-import { useFocusTrap } from '@/components/ui/useFocusTrap'
+import { Dialog } from '@/components/ui/Dialog'
 import { createMathQuestion, MAX_ANSWER_DIGITS } from './mathQuestion'
 
 interface ParentGateProps {
@@ -28,14 +28,10 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
   const [answer, setAnswer] = useState('')
   const [wrong, setWrong] = useState(false)
   const shake = useAnimationControls()
-  const dialog = useRef<HTMLDivElement>(null)
+  const body = useRef<HTMLDivElement>(null)
   const [wrongInRow, setWrongInRow] = useState(0)
   const [secondsLeft, setSecondsLeft] = useState(0)
   const locked = secondsLeft > 0
-
-  // Focus the dialog so a keyboard (or a tablet’s hardware keyboard) works at
-  // once, and keep Tab inside it.
-  useFocusTrap(dialog)
 
   // A random tapper would eventually hit the answer; a short rest makes that
   // impractical while costing a parent who mistyped almost nothing.
@@ -56,7 +52,11 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
     }
     const wrongCount = wrongInRow + 1
     setWrongInRow(wrongCount)
-    if (wrongCount >= MAX_WRONG_ANSWERS) setSecondsLeft(LOCKOUT_SECONDS)
+    if (wrongCount >= MAX_WRONG_ANSWERS) {
+      setSecondsLeft(LOCKOUT_SECONDS)
+      // the keys are about to be disabled: keep focus inside the dialog
+      body.current?.focus()
+    }
     setWrong(true)
     setAnswer('')
     setQuestion(createMathQuestion())
@@ -73,92 +73,93 @@ export function ParentGate({ onPass, onCancel }: ParentGateProps) {
     }
   }
 
+  // The keypad body takes focus first, so a keyboard (or a tablet’s hardware
+  // keyboard) works at once. A tap outside does not cancel: a child poking
+  // around should not close it by accident; “Back” and Escape do.
   return (
-    <motion.div
-      ref={dialog}
-      tabIndex={-1}
-      animate={shake}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="gate-title"
-      aria-describedby="gate-text"
-      className="flex w-full max-w-sm flex-col items-center gap-4 rounded-[32px] bg-surface p-6 text-center text-ink shadow-[0_8px_0_var(--color-line)] outline-none"
+    <Dialog
+      title={t('parent.gate.title')}
+      description={t('parent.gate.text')}
+      onClose={onCancel}
+      dismissible={false}
+      initialFocus={body}
+      size="sm"
+      testId="parent-gate"
+      // digits, Enter and Backspace work wherever focus is inside the gate
       onKeyDown={(event) => {
         if (/^\d$/.test(event.key)) press(event.key as Key)
         else if (event.key === 'Enter') submit()
         else if (event.key === 'Backspace') setAnswer(answer.slice(0, -1))
-        else if (event.key === 'Escape') onCancel()
       }}
     >
-      <h2 id="gate-title" className="font-display text-2xl font-extrabold">
-        {t('parent.gate.title')}
-      </h2>
-      <p id="gate-text" className="text-ink-soft">
-        {t('parent.gate.text')}
-      </p>
-
-      <p className="font-display text-4xl font-extrabold tabular-nums" aria-live="polite">
-        <span className="sr-only">
-          {t('parent.gate.question', { a: question.a, b: question.b })}
-        </span>
-        <span aria-hidden="true">
-          {question.a} × {question.b} ={' '}
-          <span
-            className={clsx(
-              'inline-block min-w-16 rounded-2xl border-[3px] px-2',
-              wrong ? 'border-oops' : 'border-line-strong',
-            )}
-          >
-            {answer || '?'}
+      <motion.div
+        ref={body}
+        tabIndex={-1}
+        animate={shake}
+        className="flex w-full flex-col items-center gap-4 outline-none"
+      >
+        <p className="font-display text-4xl font-extrabold tabular-nums" aria-live="polite">
+          <span className="sr-only">
+            {t('parent.gate.question', { a: question.a, b: question.b })}
           </span>
-        </span>
-      </p>
-      <p role="status" className="min-h-6 font-semibold text-oops-ink">
-        {locked
-          ? t('parent.gate.wait', { count: secondsLeft })
-          : wrong
-            ? t('parent.gate.wrong')
-            : ''}
-      </p>
+          <span aria-hidden="true">
+            {question.a} × {question.b} ={' '}
+            <span
+              className={clsx(
+                'inline-block min-w-16 rounded-2xl border-[3px] px-2',
+                wrong ? 'border-oops' : 'border-line-strong',
+              )}
+            >
+              {answer || '?'}
+            </span>
+          </span>
+        </p>
+        <p role="status" className="min-h-6 font-semibold text-oops-ink">
+          {locked
+            ? t('parent.gate.wait', { count: secondsLeft })
+            : wrong
+              ? t('parent.gate.wrong')
+              : ''}
+        </p>
 
-      <div className="grid w-full grid-cols-3 gap-2">
-        {KEYS.map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => press(key)}
-            disabled={locked}
-            aria-label={
-              key === 'ok'
-                ? t('parent.gate.check')
-                : key === 'clear'
-                  ? t('parent.gate.clear')
-                  : undefined
-            }
-            className={clsx(
-              'h-14 rounded-2xl font-display text-2xl font-bold transition-transform active:translate-y-0.5',
-              key === 'ok'
-                ? 'bg-primary text-white shadow-[0_4px_0_var(--color-primary-shadow)]'
-                : 'bg-cream text-ink shadow-[0_4px_0_var(--color-line)]',
-            )}
-          >
-            {key === 'ok' ? '✓' : key === 'clear' ? '⌫' : key}
-          </button>
-        ))}
-      </div>
+        <div className="grid w-full grid-cols-3 gap-2">
+          {KEYS.map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => press(key)}
+              disabled={locked}
+              aria-label={
+                key === 'ok'
+                  ? t('parent.gate.check')
+                  : key === 'clear'
+                    ? t('parent.gate.clear')
+                    : undefined
+              }
+              className={clsx(
+                'h-14 rounded-2xl font-display text-2xl font-bold transition-transform active:translate-y-0.5',
+                key === 'ok'
+                  ? 'bg-primary text-white shadow-[0_4px_0_var(--color-primary-shadow)]'
+                  : 'bg-cream text-ink shadow-press-sm',
+              )}
+            >
+              {key === 'ok' ? '✓' : key === 'clear' ? '⌫' : key}
+            </button>
+          ))}
+        </div>
 
-      <Button variant="soft" size="md" onClick={onCancel}>
-        {t('parent.gate.cancel')}
-      </Button>
-    </motion.div>
+        <Button variant="soft" size="md" onClick={onCancel}>
+          {t('parent.gate.cancel')}
+        </Button>
+      </motion.div>
+    </Dialog>
   )
 }
 
-/** The gate centred over a dimmed screen. */
+/**
+ * The gate over the current screen. Kept for the call sites that open it on
+ * demand; the gate itself is already a modal dialog over a dimmed screen.
+ */
 export function ParentGateOverlay(props: ParentGateProps) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/40 p-4">
-      <ParentGate {...props} />
-    </div>
-  )
+  return <ParentGate {...props} />
 }

@@ -162,3 +162,85 @@ export function CrownIcon({ size = 20, ...rest }: IconProps) {
     </svg>
   )
 }
+
+/* Section icons (tabs, help): one stroke family instead of platform emoji. */
+
+export function ChartIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M4 20h16" />
+      <path d="M7 16v-5" />
+      <path d="M12 16V7" />
+      <path d="M17 16v-8" />
+    </StrokeIcon>
+  )
+}
+
+export function ChildIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+    </StrokeIcon>
+  )
+}
+
+export function ClipboardIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <rect x="5" y="4" width="14" height="17" rx="2.5" />
+      <path d="M9 4.5V3h6v1.5" />
+      <path d="M9 11l2 2 4-4" />
+      <path d="M9 17h6" />
+    </StrokeIcon>
+  )
+}
+
+export function GearIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" />
+    </StrokeIcon>
+  )
+}
+
+export function ShirtIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M8 3.5 4 5.5 2.5 10l3 1.5V20h13v-8.5l3-1.5L20 5.5l-4-2a4 4 0 0 1-8 0Z" />
+    </StrokeIcon>
+  )
+}
+
+export function PawIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 12.5c-3 0-5.5 3-5.5 5.2 0 1.6 1.3 2.3 2.7 2.3 1.2 0 1.8-.6 2.8-.6s1.6.6 2.8.6c1.4 0 2.7-.7 2.7-2.3 0-2.2-2.5-5.2-5.5-5.2Z" />
+      <circle cx="6" cy="9.5" r="1.8" />
+      <circle cx="9.5" cy="5.5" r="1.8" />
+      <circle cx="14.5" cy="5.5" r="1.8" />
+      <circle cx="18" cy="9.5" r="1.8" />
+    </StrokeIcon>
+  )
+}
+
+export function AlbumIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z" />
+      <path d="M5 17a3 3 0 0 1 3-3h11" />
+      <path d="M11 7.5l.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3Z" />
+    </StrokeIcon>
+  )
+}
+
+export function BulbIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M9 17h6" />
+      <path d="M10 20.5h4" />
+      <path d="M8.5 14.5A6.5 6.5 0 1 1 15.5 14.5c-.6.5-1 1.2-1 2v.5h-5v-.5c0-.8-.4-1.5-1-2Z" />
+    </StrokeIcon>
+  )
+}

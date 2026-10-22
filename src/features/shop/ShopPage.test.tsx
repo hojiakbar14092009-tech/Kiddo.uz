@@ -21,11 +21,11 @@ describe('Shop', () => {
     const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('button', { name: 'Kepka — 15 coin' }))
 
-    const dialog = screen.getByRole('dialog', { name: 'Kepka olamizmi?' })
+    const dialog = screen.getByRole('alertdialog', { name: 'Kepka olamizmi?' })
     expect(guest().coins).toBe(20)
     await user.click(within(dialog).getByRole('button', { name: 'Ha, olaman' }))
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(guest().coins).toBe(5)
     expect(guest().wearing).toEqual({ head: 'cap' })
     expect(screen.getByRole('button', { name: 'Kepka — Kiyilgan' })).toHaveAttribute(
@@ -39,7 +39,7 @@ describe('Shop', () => {
     const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('button', { name: 'Gul — 10 coin' }))
     await user.click(screen.getByRole('button', { name: 'Yo‘q' }))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(guest().coins).toBe(20)
     expect(guest().outfits).toEqual([])
   })
@@ -47,7 +47,7 @@ describe('Shop', () => {
   it('encourages instead of buying when coins are short', async () => {
     const { user } = await renderRoute('/shop')
     await user.click(screen.getByRole('button', { name: 'Toj — Yana 20 coin' }))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(screen.getByText('Yana 20 coin yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
     expect(guest().coins).toBe(20)
   })
@@ -73,7 +73,7 @@ describe('Shop', () => {
 
     // adopting it still needs the coins
     await user.click(screen.getByRole('button', { name: /Olish · 75/ }))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(screen.getByText('Yana 55 coin yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Qaytarish' }))
@@ -86,7 +86,7 @@ describe('Shop', () => {
     await user.click(screen.getByRole('button', { name: 'Quyoncha — 75 coin' }))
     expect(guest().coins).toBe(80)
     await user.click(screen.getByRole('button', { name: /^Quyoncha — Sinab ko‘rilyapti/ }))
-    const dialog = screen.getByRole('dialog', { name: 'Quyonchani olamizmi?' })
+    const dialog = screen.getByRole('alertdialog', { name: 'Quyonchani olamizmi?' })
     await user.click(within(dialog).getByRole('button', { name: 'Ha, olaman' }))
     expect(guest().coins).toBe(5)
     expect(guest().pets).toEqual(['bunny'])

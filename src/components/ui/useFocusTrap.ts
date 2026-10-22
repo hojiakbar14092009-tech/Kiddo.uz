@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -10,15 +10,22 @@ const FOCUSABLE =
 export function useFocusTrap(
   container: RefObject<HTMLElement | null>,
   initial?: RefObject<HTMLElement | null>,
+  /** With dialogs on top of each other, only the top one traps focus. */
+  isActive: () => boolean = () => true,
 ) {
+  const activeCheck = useRef(isActive)
+  useEffect(() => {
+    activeCheck.current = isActive
+  })
+
   useEffect(() => {
     const element = container.current
     if (!element) return undefined
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    ;(initial?.current ?? element).focus()
+    if (activeCheck.current()) (initial?.current ?? element).focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab') return
+      if (event.key !== 'Tab' || !activeCheck.current()) return
       const items = [...element.querySelectorAll<HTMLElement>(FOCUSABLE)]
       const first = items[0]
       const last = items[items.length - 1]

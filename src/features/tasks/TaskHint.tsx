@@ -2,9 +2,10 @@ import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BulbIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { BottomSheet } from '@/components/ui/Dialog'
 import { Picture } from '@/components/ui/Picture'
-import { useFocusTrap } from '@/components/ui/useFocusTrap'
 import type { LetterEntry } from '@/content/alphabet'
 import { HighlightedWord } from '@/features/alphabet/HighlightedWord'
 import { useSpeaker } from '@/services/audio/useSpeaker'
@@ -57,13 +58,11 @@ export function TaskHint({ hint, struggling }: TaskHintProps) {
         }
         transition={glow ? { duration: 1.1, repeat: Infinity, repeatDelay: 1.2 } : undefined}
         className={clsx(
-          'relative flex size-14 shrink-0 items-center justify-center rounded-full text-3xl transition-colors sm:size-16',
-          glow
-            ? 'bg-coin shadow-[0_0_0_6px_rgba(255,201,60,0.35),0_5px_0_var(--color-coin-shadow)]'
-            : 'bg-surface shadow-[0_5px_0_var(--color-line)]',
+          'relative flex size-14 shrink-0 items-center justify-center rounded-full text-ink transition-colors sm:size-16',
+          glow ? 'bg-coin shadow-press-coin ring-6 ring-coin/35' : 'bg-surface shadow-press',
         )}
       >
-        <span aria-hidden="true">💡</span>
+        <BulbIcon size={30} />
         {glow && (
           <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 rounded-full bg-coin px-2 py-0.5 text-xs font-bold whitespace-nowrap text-ink">
             {t('task.hintShort')}
@@ -78,9 +77,7 @@ export function TaskHint({ hint, struggling }: TaskHintProps) {
 function HintSheet({ hint, onClose }: { hint: HintContent; onClose: () => void }) {
   const { t } = useTranslation()
   const { sayText } = useSpeaker()
-  const dialog = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLButtonElement>(null)
-  useFocusTrap(dialog, button)
 
   const letter = hint.letter
   const text =
@@ -104,36 +101,27 @@ function HintSheet({ hint, onClose }: { hint: HintContent; onClose: () => void }
     void sayText(spoken)
   }, [sayText, spoken])
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 p-4">
-      <div
-        ref={dialog}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="hint-title"
-        className="flex max-h-full w-full max-w-lg flex-col items-center gap-4 overflow-y-auto rounded-[36px] bg-surface p-6 text-center text-ink shadow-[0_8px_0_var(--color-line)]"
-      >
-        <h2 id="hint-title" className="font-display text-2xl font-extrabold sm:text-3xl">
-          <span aria-hidden="true">💡 </span>
+    <BottomSheet
+      title={
+        <>
+          <BulbIcon size={30} className="mr-2 inline-block align-[-0.2em] text-coin-shadow" />
           {text}
-        </h2>
-        {hint.kind === 'write' && letter && <WritingAnimation letter={letter} />}
-        {hint.kind === 'find-letter' && letter && <LetterSpotlight letter={letter} />}
-        {hint.kind === 'find-picture' && letter && <PictureClue letter={letter} />}
-        {hint.kind === 'memory' && <MemoryDemo letter={letter} />}
-        <Button ref={button} onClick={onClose}>
-          {t('task.hintOk')}
-        </Button>
-      </div>
-    </div>
+        </>
+      }
+      onClose={onClose}
+      initialFocus={button}
+      size="lg"
+      testId="task-hint"
+    >
+      {hint.kind === 'write' && letter && <WritingAnimation letter={letter} />}
+      {hint.kind === 'find-letter' && letter && <LetterSpotlight letter={letter} />}
+      {hint.kind === 'find-picture' && letter && <PictureClue letter={letter} />}
+      {hint.kind === 'memory' && <MemoryDemo letter={letter} />}
+      <Button ref={button} onClick={onClose}>
+        {t('task.hintOk')}
+      </Button>
+    </BottomSheet>
   )
 }
 
@@ -181,7 +169,7 @@ function LetterSpotlight({ letter }: { letter: LetterEntry }) {
     <div className="flex items-center gap-6">
       <motion.span
         aria-hidden="true"
-        className="flex size-36 items-center justify-center rounded-[32px] bg-coin-soft font-display text-8xl font-extrabold text-primary-ink shadow-[0_0_0_8px_var(--color-coin)]"
+        className="flex size-36 items-center justify-center rounded-card bg-coin-soft font-display text-8xl font-extrabold text-primary-ink ring-8 ring-coin"
         animate={reduceMotion ? undefined : { scale: [1, 1.12, 1], rotate: [0, -4, 4, 0] }}
         transition={{ duration: 1.6, repeat: Infinity }}
       >
@@ -209,7 +197,7 @@ function PictureClue({ letter }: { letter: LetterEntry }) {
       </motion.span>
       <HighlightedWord letter={letter} className="text-5xl" />
       <motion.span
-        className="flex size-36 items-center justify-center rounded-[28px] bg-white p-4 shadow-[0_5px_0_var(--color-line)]"
+        className="flex size-36 items-center justify-center rounded-card bg-white p-4 shadow-press"
         animate={reduceMotion ? undefined : { scale: [0.9, 1.05, 0.9] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
@@ -227,7 +215,7 @@ function MemoryDemo({ letter }: { letter: LetterEntry | null }) {
       {[0, 1].map((card) => (
         <motion.div
           key={card}
-          className="flex h-40 w-32 flex-col items-center justify-center gap-1 rounded-[24px] bg-primary-soft shadow-[0_6px_0_var(--color-line)]"
+          className="flex h-40 w-32 flex-col items-center justify-center gap-1 rounded-tile bg-primary-soft shadow-press"
           animate={reduceMotion ? undefined : { rotateY: [180, 180, 0, 0, 180] }}
           transition={{
             duration: 4,

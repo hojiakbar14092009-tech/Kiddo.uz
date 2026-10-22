@@ -53,11 +53,14 @@
   --color-oops: #ff8a4c;
   --color-oops-soft: #ffe4d3;
   --color-oops-ink: #8f3b14;
+  --color-oops-shadow: #f6c2a3;
 
   --color-highlight: #d93d78;
   --color-sky: #7cc4f5;
   --color-sky-soft: #ddeefc;
   --color-lilac-soft: #eee6fb;
+  /* full-screen media (the ad player) */
+  --color-night: #120d1d;
 
   /*
    * Shape and depth. Kiddo's "pressable toy" look is a solid shadow under a

@@ -1,9 +1,9 @@
-import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { CoinIcon, HomeIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { RewardBurst } from '@/components/ui/RewardBurst'
 import { Img3D } from './Img3D'
 import { useSpeakable } from './speakable'
 import type { FinishedSession } from './useLearnSession'
@@ -16,7 +16,6 @@ import { useLearnMascot } from './useLearnMascot'
  */
 export function LearnResult({ result, onAgain }: { result: FinishedSession; onAgain: () => void }) {
   const { t } = useTranslation()
-  const reduceMotion = useReducedMotion() ?? false
   const { say } = useLearnMascot()
   const { summary, coins } = result
   const allOwn = summary.independent === summary.total
@@ -39,15 +38,11 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
   return (
     <section
       aria-labelledby="learn-result-title"
-      className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-[36px] bg-surface p-6 text-center shadow-[0_8px_0_var(--color-line)]"
+      className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-panel bg-surface p-6 text-center shadow-press-lg"
     >
-      <motion.div
-        initial={reduceMotion ? false : { scale: 0.4, rotate: -10, opacity: 0 }}
-        animate={{ scale: 1, rotate: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 220, damping: 13 }}
-      >
+      <RewardBurst kind={coins > 0 ? 'coins' : 'stars'}>
         <Img3D name={allOwn ? 'trophy' : 'glowing-star'} className="size-28" eager />
-      </motion.div>
+      </RewardBurst>
       <h2 id="learn-result-title" className="font-display text-3xl font-extrabold">
         {title}
       </h2>
@@ -75,7 +70,7 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
         </Button>
         <Link
           to="/home"
-          className="inline-flex min-h-14 items-center gap-2 rounded-full bg-surface px-6 font-display text-xl font-bold shadow-[0_6px_0_var(--color-line)]"
+          className="inline-flex min-h-14 items-center gap-2 rounded-full bg-surface px-6 font-display text-xl font-bold shadow-press"
         >
           <HomeIcon size={24} />
           {t('learn.home')}

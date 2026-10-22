@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { CrownIcon, SpeakerIcon } from '@/components/icons'
+import { SpeakerIcon } from '@/components/icons'
 import { useIsPro } from '@/store/subscriptionStore'
 import { Button } from './Button'
+import { ProBadge } from './ProLock'
+import { useProLabel } from './useProLabel'
 
 interface ListenButtonProps {
   onListen: () => void
@@ -14,6 +16,7 @@ interface ListenButtonProps {
 export function ListenButton({ onListen, onLocked, label }: ListenButtonProps) {
   const { t } = useTranslation()
   const isPro = useIsPro()
+  const proLabel = useProLabel()
   const text = label ?? t('common.listenAgain')
 
   return (
@@ -22,19 +25,11 @@ export function ListenButton({ onListen, onLocked, label }: ListenButtonProps) {
         icon={<SpeakerIcon size={30} />}
         onClick={isPro ? onListen : onLocked}
         variant={isPro ? 'primary' : 'soft'}
-        aria-label={isPro ? undefined : `${text} (${t('tier.proFeature')})`}
+        aria-label={isPro ? undefined : proLabel(text)}
       >
         {text}
       </Button>
-      {!isPro && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-3 -right-2 inline-flex items-center gap-1 rounded-full bg-coin px-2 py-0.5 font-display text-sm font-bold text-ink shadow-[0_3px_0_var(--color-coin-shadow)]"
-        >
-          <CrownIcon size={14} />
-          {t('tier.proFeature')}
-        </span>
-      )}
+      {!isPro && <ProBadge />}
     </span>
   )
 }

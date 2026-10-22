@@ -5,6 +5,7 @@ import { HomeIcon, TrophyIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/Button'
+import { ProgressBar } from '@/components/ui/Progress'
 import { getAlphabet } from '@/content/alphabet'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
@@ -132,11 +133,15 @@ export function ExamPage() {
               ) : (
                 <>
                   <p className="max-w-md text-xl text-ink-soft">{t('exam.locked')}</p>
-                  <ProgressBar
-                    value={learned}
-                    max={total}
-                    label={t('exam.progress', { learned, total })}
-                  />
+                  <div className="flex w-full max-w-md flex-col gap-2">
+                    <ProgressBar
+                      value={learned}
+                      max={total}
+                      label={t('exam.progress', { learned, total })}
+                      className="h-6"
+                    />
+                    <p className="font-semibold">{t('exam.progress', { learned, total })}</p>
+                  </div>
                 </>
               )}
               <Button
@@ -206,26 +211,5 @@ function ExamResult({
         {!passed && onAgain && <Button onClick={onAgain}>{t('exam.again')}</Button>}
       </div>
     </>
-  )
-}
-
-function ProgressBar({ value, max, label }: { value: number; max: number; label: string }) {
-  return (
-    <div className="flex w-full max-w-md flex-col gap-2">
-      <div
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={max}
-        aria-valuenow={value}
-        aria-label={label}
-        className="h-6 overflow-hidden rounded-full bg-line"
-      >
-        <div
-          className="h-full rounded-full bg-primary"
-          style={{ width: `${(value / Math.max(1, max)) * 100}%` }}
-        />
-      </div>
-      <p className="font-semibold">{label}</p>
-    </div>
   )
 }

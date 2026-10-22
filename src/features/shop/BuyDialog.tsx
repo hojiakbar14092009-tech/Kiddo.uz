@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CoinIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
-import { useFocusTrap } from '@/components/ui/useFocusTrap'
+import { BottomSheet } from '@/components/ui/Dialog'
 import { Robot } from '@/features/mascot/Robot'
 import type { MascotModel } from '@/store/familyStore'
 import type { Outfit, Wearing } from './outfits'
@@ -18,52 +18,49 @@ interface BuyDialogProps {
 
 /**
  * A second, explicit “yes” before coins are spent, so a stray tap never buys
- * anything. Big buttons, one question, the price shown as coins.
+ * anything. Big buttons, one question, the price shown as coins. A tap
+ * outside does not answer it (only “no”, “yes” or Escape do).
  */
 export function BuyDialog({ outfit, model, wearing, onConfirm, onCancel }: BuyDialogProps) {
   const { t } = useTranslation()
   const yes = useRef<HTMLButtonElement>(null)
   const name = t(`shop.items.${outfit.id}`)
 
-  const dialog = useRef<HTMLDivElement>(null)
-  useFocusTrap(dialog, yes)
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onCancel()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onCancel])
-
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/30 p-4 sm:items-center">
-      <div
-        ref={dialog}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="buy-title"
-        aria-describedby="buy-text"
-        className="flex w-full max-w-md flex-col items-center gap-4 rounded-[36px] bg-surface p-6 text-center text-ink shadow-[0_8px_0_var(--color-line)]"
-      >
-        <Robot model={model} wearing={wearing} size={120} followPointer={false} />
-        <h2 id="buy-title" className="font-display text-3xl font-extrabold">
+    <BottomSheet
+      role="alertdialog"
+      dismissible={false}
+      initialFocus={yes}
+      onClose={onCancel}
+      testId="buy-dialog"
+      media={<Robot model={model} wearing={wearing} size={120} followPointer={false} />}
+      title={
+        <>
           <span aria-hidden="true">{outfit.emoji} </span>
           {t('shop.confirm', { name })}
-        </h2>
-        <p id="buy-text" className="inline-flex items-center gap-2 text-xl text-ink-soft">
-          <CoinIcon size={28} />
-          {t('shop.confirmText', { count: outfit.price })}
-        </p>
-        <div className="flex w-full flex-wrap justify-center gap-3">
-          <Button variant="soft" onClick={onCancel}>
-            {t('shop.no')}
-          </Button>
-          <Button ref={yes} variant="coin" onClick={onConfirm}>
-            {t('shop.yes')}
-          </Button>
-        </div>
+        </>
+      }
+      description={<PriceLine price={outfit.price} />}
+    >
+      <div className="flex w-full flex-wrap justify-center gap-3">
+        <Button variant="soft" onClick={onCancel}>
+          {t('shop.no')}
+        </Button>
+        <Button ref={yes} variant="coin" onClick={onConfirm}>
+          {t('shop.yes')}
+        </Button>
       </div>
-    </div>
+    </BottomSheet>
+  )
+}
+
+/** “It costs N coins”, with the coin. Shared by the outfit and the pet purchase. */
+export function PriceLine({ price }: { price: number }) {
+  const { t } = useTranslation()
+  return (
+    <span className="inline-flex items-center gap-2 text-xl">
+      <CoinIcon size={28} />
+      {t('shop.confirmText', { count: price })}
+    </span>
   )
 }

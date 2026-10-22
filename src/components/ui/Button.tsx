@@ -16,7 +16,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     'bg-primary text-white shadow-[0_6px_0_var(--color-primary-shadow)] active:shadow-[0_2px_0_var(--color-primary-shadow)]',
   coin: 'bg-coin text-ink shadow-[0_6px_0_var(--color-coin-shadow)] active:shadow-[0_2px_0_var(--color-coin-shadow)]',
   soft: 'bg-surface text-ink shadow-[0_6px_0_var(--color-line)] active:shadow-[0_2px_0_var(--color-line)]',
-  oops: 'bg-oops-soft text-oops-ink shadow-[0_6px_0_#F6C2A3] active:shadow-[0_2px_0_#F6C2A3]',
+  oops: 'bg-oops-soft text-oops-ink shadow-[0_6px_0_var(--color-oops-shadow)] active:shadow-[0_2px_0_var(--color-oops-shadow)]',
 }
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {

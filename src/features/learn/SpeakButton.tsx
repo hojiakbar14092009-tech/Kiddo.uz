@@ -1,6 +1,8 @@
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
-import { CrownIcon, SpeakerIcon } from '@/components/icons'
+import { SpeakerIcon } from '@/components/icons'
+import { ProBadge } from '@/components/ui/ProLock'
+import { useProLabel } from '@/components/ui/useProLabel'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSettingsStore } from '@/store/settingsStore'
 import { canUse } from '@/store/subscriptionStore'
@@ -20,6 +22,7 @@ import { setLearnVoiceOn, speakLines, useLearnVoice } from './voice'
 export function SpeakButton({ fallback = [] }: { fallback?: readonly string[] }) {
   const { t } = useTranslation()
   const voice = useLearnVoice()
+  const proLabel = useProLabel()
   const { react } = useMascot()
   const status = voice.status
   const note = (text: string, emoji: string, event: 'locked' | 'instruct' = 'instruct') =>
@@ -48,7 +51,7 @@ export function SpeakButton({ fallback = [] }: { fallback?: readonly string[] })
   }
 
   const label = !voice.isPro
-    ? `${t('learn.listen')} (${t('tier.proFeature')})`
+    ? proLabel(t('learn.listen'))
     : status === 'speaking'
       ? t('learn.voiceAgain')
       : t('learn.listen')
@@ -64,16 +67,14 @@ export function SpeakButton({ fallback = [] }: { fallback?: readonly string[] })
         data-status={voice.isPro ? status : 'locked'}
         className={clsx(
           'learn-speak relative flex size-14 items-center justify-center rounded-full transition-colors sm:size-16',
-          !voice.isPro && 'bg-surface text-ink shadow-[0_5px_0_var(--color-line)]',
-          voice.isPro &&
-            status === 'idle' &&
-            'bg-surface text-primary-ink shadow-[0_5px_0_var(--color-line)]',
+          !voice.isPro && 'bg-surface text-ink shadow-press',
+          voice.isPro && status === 'idle' && 'bg-surface text-primary-ink shadow-press',
           voice.isPro &&
             (status === 'loading' || status === 'speaking') &&
-            'bg-primary text-white shadow-[0_5px_0_var(--color-primary-shadow)]',
+            'bg-primary text-white shadow-press-primary',
           voice.isPro &&
             status === 'error' &&
-            'bg-oops-soft text-oops-ink shadow-[0_5px_0_#F6C2A3]',
+            'bg-oops-soft text-oops-ink shadow-[0_5px_0_var(--color-oops-shadow)]',
         )}
       >
         {voice.isPro && status === 'speaking' && (
@@ -84,15 +85,7 @@ export function SpeakButton({ fallback = [] }: { fallback?: readonly string[] })
         )}
         <SpeakerIcon size={28} />
       </button>
-      {!voice.isPro && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-2 -right-2 inline-flex items-center gap-0.5 rounded-full bg-coin px-1.5 py-0.5 font-display text-xs font-bold text-ink shadow-[0_2px_0_var(--color-coin-shadow)]"
-        >
-          <CrownIcon size={12} />
-          {t('tier.proFeature')}
-        </span>
-      )}
+      {!voice.isPro && <ProBadge size="sm" />}
     </span>
   )
 }

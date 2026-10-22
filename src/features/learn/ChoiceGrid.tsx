@@ -16,7 +16,7 @@ const STATUS_CLASSES: Record<ChoiceStatus, string> = {
   idle: 'bg-white shadow-[0_7px_0_var(--color-line)]',
   hint: 'bg-white shadow-[0_7px_0_var(--color-line)] ring-4 ring-coin',
   correct: 'bg-primary-soft shadow-[0_7px_0_#B5E3D2] ring-4 ring-primary',
-  wrong: 'bg-oops-soft text-oops-ink shadow-[0_7px_0_#F6C2A3] opacity-70',
+  wrong: 'bg-oops-soft text-oops-ink shadow-[0_7px_0_var(--color-oops-shadow)] opacity-70',
 }
 
 const STATUS_MOTION: Record<ChoiceStatus, TargetAndTransition> = {

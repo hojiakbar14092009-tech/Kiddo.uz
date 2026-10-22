@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { AlbumIcon, PawIcon, ShirtIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { SegmentedTabs } from '@/components/ui/SegmentedTabs'
@@ -79,13 +80,9 @@ export function ShopPage() {
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{t('shop.title')}</h1>
         <SegmentedTabs
           tabs={[
-            { value: 'outfits', symbol: '🧢', label: t('shop.tabOutfits') },
-            {
-              value: 'pets',
-              symbol: <img src="/pets/paw-button.webp" alt="" className="inline size-8" />,
-              label: t('shop.tabPets'),
-            },
-            { value: 'stickers', symbol: '📒', label: t('shop.tabStickers') },
+            { value: 'outfits', symbol: <ShirtIcon size={28} />, label: t('shop.tabOutfits') },
+            { value: 'pets', symbol: <PawIcon size={28} />, label: t('shop.tabPets') },
+            { value: 'stickers', symbol: <AlbumIcon size={28} />, label: t('shop.tabStickers') },
           ]}
           value={tab}
           onChange={(next) => setParams(next === 'outfits' ? {} : { tab: next }, { replace: true })}
@@ -99,7 +96,7 @@ export function ShopPage() {
           {...tabPanelProps('shop', tab)}
           className="flex flex-1 flex-col items-center gap-6 lg:flex-row lg:items-start"
         >
-          <div className="flex w-full flex-col items-center gap-3 rounded-[32px] bg-surface p-4 shadow-[0_6px_0_var(--color-line)] lg:sticky lg:top-0 lg:w-80">
+          <div className="flex w-full flex-col items-center gap-3 rounded-card bg-surface p-4 shadow-press lg:sticky lg:top-0 lg:w-80">
             <Mascot
               wearing={shownWearing}
               robotClassName={clsx('w-32 sm:w-44', roaming && 'invisible')}

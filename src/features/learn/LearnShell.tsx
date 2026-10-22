@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Screen } from '@/components/layout/Screen'
 import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TopBar } from '@/components/layout/TopBar'
+import { StepDots } from '@/components/ui/Progress'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascotStore } from '@/features/mascot/mascotStore'
 import { HelpButton } from './HelpButton'
@@ -100,6 +101,7 @@ export function LearnShell({
                     current={step.current}
                     total={step.total}
                     label={t('learn.question', { current: step.current + 1, total: step.total })}
+                    className="mt-1"
                   />
                 )}
               </div>
@@ -149,31 +151,6 @@ export function LearnShell({
         )}
         {children}
       </Screen>
-    </div>
-  )
-}
-
-function StepDots({ total, current, label }: { total: number; current: number; label: string }) {
-  return (
-    <div
-      className="mt-1 flex gap-1.5"
-      role="progressbar"
-      aria-valuenow={current + 1}
-      aria-valuemin={1}
-      aria-valuemax={total}
-      aria-label={label}
-    >
-      {Array.from({ length: total }, (_, index) => (
-        <span
-          key={index}
-          className={clsx(
-            'h-2.5 rounded-full transition-all',
-            index < current && 'w-2.5 bg-primary',
-            index === current && 'w-7 bg-coin',
-            index > current && 'w-2.5 bg-line-strong',
-          )}
-        />
-      ))}
     </div>
   )
 }

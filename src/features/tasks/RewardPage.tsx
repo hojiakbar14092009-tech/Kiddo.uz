@@ -6,6 +6,7 @@ import { ChevronRightIcon, CoinIcon, HomeIcon, StarIcon } from '@/components/ico
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/Button'
+import { RewardBurst } from '@/components/ui/RewardBurst'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { findSticker } from '@/features/stickers/stickers'
@@ -56,21 +57,23 @@ function RewardContent({ taskType, outcome }: RewardState) {
       <h1 className="font-display text-4xl font-extrabold sm:text-5xl">{title}</h1>
       <p className="max-w-md text-xl text-ink-soft">{text}</p>
 
-      <div
-        className="flex items-end gap-2"
-        role="img"
-        aria-label={t('reward.stars', { count: outcome.stars })}
-      >
-        {Array.from({ length: MAX_STARS }, (_, index) => (
-          <motion.div
-            key={index}
-            {...pop(0.35 + index * 0.15)}
-            className={index < outcome.stars ? 'text-coin' : 'text-line-strong'}
-          >
-            <StarIcon size={index === 1 ? 84 : 64} />
-          </motion.div>
-        ))}
-      </div>
+      <RewardBurst kind="stars" pieces={outcome.stars > 0 ? 10 : 0} delay={0.3}>
+        <div
+          className="flex items-end gap-2"
+          role="img"
+          aria-label={t('reward.stars', { count: outcome.stars })}
+        >
+          {Array.from({ length: MAX_STARS }, (_, index) => (
+            <motion.div
+              key={index}
+              {...pop(0.35 + index * 0.15)}
+              className={index < outcome.stars ? 'text-coin' : 'text-line-strong'}
+            >
+              <StarIcon size={index === 1 ? 84 : 64} />
+            </motion.div>
+          ))}
+        </div>
+      </RewardBurst>
 
       <div className="flex flex-wrap items-center justify-center gap-3">
         <motion.div
@@ -90,7 +93,7 @@ function RewardContent({ taskType, outcome }: RewardState) {
         {sticker && (
           <motion.div
             {...pop(1.2)}
-            className="flex items-center gap-3 rounded-3xl bg-surface py-2 pr-5 pl-2 shadow-[0_5px_0_var(--color-line)]"
+            className="flex items-center gap-3 rounded-3xl bg-surface py-2 pr-5 pl-2 shadow-press"
           >
             <span
               aria-hidden="true"

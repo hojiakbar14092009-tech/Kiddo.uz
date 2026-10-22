@@ -6,6 +6,7 @@ import { ParentGateAutoLock } from './ParentGateAutoLock'
 import { SyncManager } from '@/services/sync/SyncManager'
 import { SpeechUnlock } from './SpeechUnlock'
 import { SplashScreen } from './SplashScreen'
+import { Toaster } from '@/components/ui/Toaster'
 import { ExitWatcher } from './ExitWatcher'
 import { PresenceBeacon } from './PresenceBeacon'
 import { AppSettingsSync } from './AppSettingsSync'
@@ -26,6 +27,7 @@ export function AppShell() {
       <AppSettingsSync />
       <Outlet />
       {!pathname.startsWith('/admin') && <SplashScreen />}
+      <Toaster />
     </>
   )
 }

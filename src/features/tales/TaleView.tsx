@@ -3,8 +3,10 @@ import { useReducedMotion } from 'framer-motion'
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { ChevronLeftIcon, ChevronRightIcon, CrownIcon, SpeakerIcon } from '@/components/icons'
+import { ChevronLeftIcon, ChevronRightIcon, SpeakerIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { ProBadge } from '@/components/ui/ProLock'
+import { useProLabel } from '@/components/ui/useProLabel'
 import type { Language } from '@/content/languages'
 import { LearnShell } from '@/features/learn/LearnShell'
 import { useLearnStore } from '@/features/learn/learnStore'
@@ -37,7 +39,7 @@ function SceneStage({
   const onFail = useCallback(() => setFailed(true), [])
   const flat = <StaticScene scene={scene} label={label} />
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[32px] bg-sky-soft shadow-[0_8px_0_var(--color-line)] sm:aspect-[16/10] landscape:max-h-[64dvh]">
+    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card bg-sky-soft shadow-press-lg sm:aspect-[16/10] landscape:max-h-[64dvh]">
       {failed || !canRender3D() ? (
         flat
       ) : (
@@ -66,7 +68,7 @@ function ReadControls({
   isPro: boolean
   onLocked: () => void
 }) {
-  const { t } = useTranslation()
+  const proLabel = useProLabel()
   if (!isPro) {
     return (
       <div className="flex justify-center">
@@ -76,18 +78,12 @@ function ReadControls({
             size="md"
             onClick={onLocked}
             icon={<SpeakerIcon size={24} />}
-            aria-label={`${ui.readAloud} (${t('tier.proFeature')})`}
+            aria-label={proLabel(ui.readAloud)}
             data-testid="tale-read-locked"
           >
             {ui.readAloud}
           </Button>
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-2 -right-2 inline-flex items-center gap-0.5 rounded-full bg-coin px-1.5 py-0.5 font-display text-xs font-bold text-ink shadow-[0_2px_0_var(--color-coin-shadow)]"
-          >
-            <CrownIcon size={12} />
-            {t('tier.proFeature')}
-          </span>
+          <ProBadge size="sm" />
         </span>
       </div>
     )
@@ -219,7 +215,7 @@ export function TaleView({ tale, language }: { tale: TaleSpec; language: Languag
               {ui.scene(sceneIndex + 1, tale.scenes.length)}
             </p>
             <article
-              className="flex flex-col gap-2 rounded-[28px] bg-surface p-4 text-lg leading-snug shadow-[0_6px_0_var(--color-line)] sm:p-5 sm:text-xl"
+              className="flex flex-col gap-2 rounded-card bg-surface p-4 text-lg leading-snug shadow-press sm:p-5 sm:text-xl"
               data-testid="tale-text"
             >
               {sceneText.lines.map((line, index) => (

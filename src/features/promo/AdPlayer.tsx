@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
-import { useFocusTrap } from '@/components/ui/useFocusTrap'
+import { Dialog } from '@/components/ui/Dialog'
 import type { PlayableAd } from './promoBackend'
 
 interface AdPlayerProps {
@@ -16,13 +16,14 @@ interface AdPlayerProps {
 /**
  * Plays the ad full screen. It cannot be skipped or fast-forwarded: only
  * seconds actually played count, seeking jumps back, and the video pauses
- * while the tab is hidden. Closing early asks first – no ad, no code.
+ * while the tab is hidden. Closing early (× or Escape) asks first – no ad, no
+ * code; there is no backdrop to tap.
  */
 export function AdPlayer({ ad, onComplete, onCancel, onError }: AdPlayerProps) {
   const { t } = useTranslation()
   const video = useRef<HTMLVideoElement>(null)
-  const dialog = useRef<HTMLDivElement>(null)
   const closeButton = useRef<HTMLButtonElement>(null)
+  const keepButton = useRef<HTMLButtonElement>(null)
   const last = useRef(0)
   const watchedRef = useRef(0)
   const done = useRef(false)
@@ -31,7 +32,6 @@ export function AdPlayer({ ad, onComplete, onCancel, onError }: AdPlayerProps) {
   const [blocked, setBlocked] = useState(false)
   const [asking, setAskingState] = useState(false)
   const askingRef = useRef(false)
-  useFocusTrap(dialog, closeButton)
 
   const setAsking = (value: boolean) => {
     askingRef.current = value
@@ -53,6 +53,18 @@ export function AdPlayer({ ad, onComplete, onCancel, onError }: AdPlayerProps) {
     document.addEventListener('visibilitychange', onVisibility)
     return () => document.removeEventListener('visibilitychange', onVisibility)
   }, [])
+
+  const askToLeave = () => {
+    // once the ad has been watched to the end there is nothing to lose: no question
+    if (askingRef.current || done.current) return
+    video.current?.pause()
+    setAsking(true)
+  }
+
+  const keepWatching = () => {
+    setAsking(false)
+    play()
+  }
 
   const play = () => {
     video.current?.play().then(
@@ -79,13 +91,18 @@ export function AdPlayer({ ad, onComplete, onCancel, onError }: AdPlayerProps) {
   const remaining = Math.max(0, Math.ceil(length - watched))
   const progress = length > 0 ? Math.min(1, watched / length) : 0
 
+  // Full screen and dark: the Dialog's panel and backdrop are stretched edge
+  // to edge. Escape does not close it, it asks first (like ×).
   return (
-    <div
-      ref={dialog}
-      role="dialog"
-      aria-modal="true"
-      aria-label={t('pro.getPromo.ad')}
-      className="fixed inset-0 z-[90] flex flex-col bg-[#120d1d] text-white"
+    <Dialog
+      title={t('pro.getPromo.ad')}
+      hideTitle
+      onClose={askToLeave}
+      dismissible={false}
+      initialFocus={closeButton}
+      testId="ad-player"
+      placement="full"
+      className="bg-night text-left text-white"
     >
       <div className="flex items-center gap-3 px-4 py-3">
         <span className="rounded-full bg-white/15 px-3 py-1 text-sm font-bold">
@@ -102,10 +119,7 @@ export function AdPlayer({ ad, onComplete, onCancel, onError }: AdPlayerProps) {
         <button
           ref={closeButton}
           type="button"
-          onClick={() => {
-            video.current?.pause()
-            setAsking(true)
-          }}
+          onClick={askToLeave}
           className="flex size-11 items-center justify-center rounded-full bg-white/15 text-2xl leading-none"
           aria-label={t('pro.getPromo.close')}
         >
@@ -171,33 +185,25 @@ export function AdPlayer({ ad, onComplete, onCancel, onError }: AdPlayerProps) {
       </div>
 
       {asking && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60 p-4">
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="ad-leave"
-            className="flex w-full max-w-sm flex-col gap-5 rounded-[28px] bg-surface p-6 text-ink"
-          >
-            <p id="ad-leave" className="font-display text-xl font-extrabold">
-              {t('pro.getPromo.leave')}
-            </p>
-            <div className="flex flex-wrap justify-end gap-3">
-              <Button variant="soft" size="md" onClick={onCancel}>
-                {t('pro.getPromo.leaveYes')}
-              </Button>
-              <Button
-                size="md"
-                onClick={() => {
-                  setAsking(false)
-                  play()
-                }}
-              >
-                {t('pro.getPromo.leaveNo')}
-              </Button>
-            </div>
+        <Dialog
+          role="alertdialog"
+          title={t('pro.getPromo.leave')}
+          onClose={keepWatching}
+          dismissible={false}
+          initialFocus={keepButton}
+          size="sm"
+          testId="ad-leave"
+        >
+          <div className="flex w-full flex-wrap justify-center gap-3">
+            <Button variant="soft" size="md" onClick={onCancel}>
+              {t('pro.getPromo.leaveYes')}
+            </Button>
+            <Button ref={keepButton} size="md" onClick={keepWatching}>
+              {t('pro.getPromo.leaveNo')}
+            </Button>
           </div>
-        </div>
+        </Dialog>
       )}
-    </div>
+    </Dialog>
   )
 }

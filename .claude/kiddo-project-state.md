@@ -41,6 +41,7 @@ Prettier. Vercel deploys `main` automatically (kiddo-uz.vercel.app).
 
 Phase 0 (e93937e): 340 unit, 34 e2e; initial JS ≈ 237 KB gzip; R3F 234 KB gzip (lazy).
 Phase 1: 350 unit, 34 e2e; initial JS ≈ 240 KB gzip.
+Phase 2: 368 unit, 34 e2e.
 
 ## UI foundation (Phase 1)
 
@@ -57,6 +58,19 @@ press-lg|press-primary|press-coin`, `ease-pop|soft`, `animate-pop-in|fade-in`;
   `mascot/greetPlacement.ts` (robot + bubble always inside the screen, never over content).
 - `Mascot` has an `aside` slot; `SegmentedTabs showLabels="always"` = labelled scrolling pills.
 - LearnShell scrolls to top only when the kind of screen changes (title + steps).
+
+## Design system (Phase 2) – use these, don't hand-roll
+
+`src/components/ui`: `Dialog` / `BottomSheet` (portal, focus trap + restore, Escape and
+Tab only for the top dialog via `dialogStack.ts`, backdrop closes on a full outside tap
+only if `dismissible`, scroll lock, placements `center|sheet|full`, `media` slot above
+the title, `onKeyDown`, `role="alertdialog"` for questions); `toast()` + `Toaster`
+(moves to the top while a dialog is open); `ProgressBar`, `StepDots`; `EmptyState`;
+`ProBadge` + `useProLabel` (control label says "(PRO)", chip is aria-hidden);
+`RewardBurst` (one short burst, reduced-motion aware); `Img3D`. Icons: one stroke family in
+`components/icons` (Chart, Child, Clipboard, Gear, Shirt, Paw, Album, Bulb, Crown, …) –
+no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens added:
+`oops-shadow`, `night`. All 10 former hand-made dialogs use Dialog.
 
 ## Key decisions
 
@@ -98,7 +112,7 @@ prod) · B7 promo policy.
 
 - [x] 0 Discovery & architecture (2026-10-22)
 - [x] 1 Foundation: error screens, responsive fixes from the audit, tokens (2026-10-22)
-- [ ] 2 Design system primitives (Dialog, BottomSheet, Toast, ProgressBar, EmptyState, ProLock, RewardBurst)
+- [x] 2 Design system primitives + migration of all dialogs, PRO chips, step dots, tab icons (2026-10-22)
 - [ ] 3 Domain foundation (rewards ledger, progress facade, entitlements) + Supabase steps 1–2
 - [ ] 4 Kiddo City, Adventure Map, Daily Quest, rewards UI
 - [ ] 5 Smart Math, Tracing, Adaptive, Emotions, Creative Studio
@@ -111,8 +125,12 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 2 – design system primitives: Dialog (migrate the 10 hand-made dialogs: BuyDialog,
-TaskHint, HelpButton, PetsPanel, ParentGate, CoinPenaltyPanel, UnlockCelebration,
-ProCelebration, PromoReveal, AdPlayer), BottomSheet, Toast, ProgressBar/StepDots (from
-ExamPage/LearnShell), EmptyState, ProLock (from ListenButton/SpeakButton/bubble/TaleView),
-RewardBurst, Img3D → components/ui; one icon family instead of emoji icons in tabs.
+Phase 3 – domain foundation. Blocked part: Supabase rollout steps 1–2 need the owner's
+verification (docs/architecture/supabase-verification.md). Unblocked part can start:
+`src/domain/rewards` (ledger + `grantReward` with idempotency; migrate the 5 coin paths:
+progressStore.completeTask, learnStore.finishSession, pro/purchase gift, CoinPenaltyPanel,
+admin), `src/domain/progress` (mastery facade over progressStore + learnStore; clean
+learnStore on child removal), `src/domain/entitlements` (features, `useEntitlement`,
+replace the remaining direct `useIsPro()` reads), `src/domain/quests` types.
+Leftovers from Phase 2 (low): `toast()`/`EmptyState` not yet used by screens; RewardPage
+stars pop twice (burst + per-star); body scroll-lock restores the overflow saved at open.
