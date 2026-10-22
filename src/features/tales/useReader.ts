@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useLearnVoice } from '@/features/learn/voice'
-import { planSpeech } from '@/services/audio/voiceLibrary'
+import type { SpeakOutcome } from '@/services/audio/audioManager'
 
 export type ReaderStatus = 'idle' | 'reading' | 'paused'
 
@@ -18,7 +18,11 @@ interface ReaderState {
  * talks while it is read. Pause keeps the line, so Continue starts again from
  * that line; Replay starts the scene over.
  */
-export function useReader(lines: readonly string[], sceneKey: string, onMissing: () => void) {
+export function useReader(
+  lines: readonly string[],
+  sceneKey: string,
+  onProblem: (outcome: SpeakOutcome | 'off') => void,
+) {
   const voice = useLearnVoice()
   const { react } = useMascot()
   const [stored, setStored] = useState<ReaderState>({ key: sceneKey, status: 'idle', line: 0 })
@@ -42,21 +46,23 @@ export function useReader(lines: readonly string[], sceneKey: string, onMissing:
       for (let index = from; index < lines.length; index += 1) {
         setStored({ key: sceneKey, status: 'reading', line: index })
         react('instruct', { text: lines[index]! }, { speak: false })
-        // only recordings are played; a line not recorded yet is said honestly, not skipped silently
-        const parts = await planSpeech(voice.language, lines[index]!)
+        // only recordings are played; a line that cannot be heard is said honestly, not skipped
+        const outcome = await voice.speak([lines[index]!], { force: true })
         if (mine !== run.current) return
-        const recorded = parts.every((part) => part.kind === 'clip')
-        const spoken = recorded && (await voice.speak([lines[index]!], { force: true }))
-        if (mine !== run.current) return
-        if (!spoken) {
+        if (outcome === 'cancelled') {
+          // another voice (the mascot's reaction to a task) took over: keep the place for Continue
+          setStored({ key: sceneKey, status: 'paused', line: index })
+          return
+        }
+        if (outcome !== 'done') {
           setStored({ key: sceneKey, status: 'idle', line: 0 })
-          onMissing()
+          onProblem(outcome)
           return
         }
       }
       setStored({ key: sceneKey, status: 'idle', line: 0 })
     },
-    [lines, onMissing, react, sceneKey, voice],
+    [lines, onProblem, react, sceneKey, voice],
   )
 
   const pause = useCallback(() => {

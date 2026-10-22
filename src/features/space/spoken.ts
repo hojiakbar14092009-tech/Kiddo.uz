@@ -33,6 +33,8 @@ function spokenFor(language: Language): string[] {
     say.orderHelp,
     ...say.kindsCards,
     say.lessonDone,
+    pack.ui.lessonDone,
+    pack.ui.lessonDoneText,
   )
   return [...new Set(lines)]
 }

@@ -267,7 +267,7 @@ function GardenGame({
   }
   if (learnDone) {
     return (
-      <LearnShell title={t('learn.sections.garden')}>
+      <LearnShell title={t('learn.sections.garden')} speak={[ui.learnDone]}>
         <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-[36px] bg-surface p-6 text-center shadow-[0_8px_0_var(--color-line)]">
           <Img3D name="glowing-star" className="size-28" eager />
           <p className="font-display text-2xl font-bold" data-testid="garden-learn-done">
@@ -294,6 +294,7 @@ function GardenGame({
   return (
     <LearnShell
       title={t('learn.sections.garden')}
+      speak={[prompt]}
       step={{ current: index, total: tasks.length }}
       help={{
         text: helpText(nextLevel),
@@ -401,7 +402,7 @@ function ModePicker({ onPick }: { onPick: (mode: LearnMode) => void }) {
     say('greet', { text: ui.howToPlay, emoji: '🌷' })
   }, [say, ui.howToPlay])
   return (
-    <LearnShell title={t('learn.sections.garden')}>
+    <LearnShell title={t('learn.sections.garden')} speak={[ui.howToPlay]}>
       <h2 className="text-center font-display text-2xl font-bold">{ui.howToPlay}</h2>
       <div className="mx-auto grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
         {(

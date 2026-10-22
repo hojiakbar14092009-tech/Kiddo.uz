@@ -102,7 +102,7 @@ function Menu({
   const anyTaught = stages.some((stage) => taught.includes(stage.id))
 
   return (
-    <LearnShell title={t('learn.sections.math')}>
+    <LearnShell title={t('learn.sections.math')} speak={[copy.chooseStage]}>
       <ol className="mx-auto grid w-full max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stages.map((stage, index) => {
           const done = taught.includes(stage.id)
@@ -296,7 +296,7 @@ function Run({
     const stages = STAGES[level]
     const nextStage = stages[stages.findIndex((s) => s.id === stage) + 1]
     return (
-      <LearnShell title={title}>
+      <LearnShell title={title} speak={[copy.stageDone, copy.stageDoneText]}>
         <StageDone
           result={result}
           title={copy.stageDone}
@@ -325,7 +325,11 @@ function Run({
   if (!q && stage) {
     const demo = DEMO[stage]
     return (
-      <LearnShell title={title} step={{ current: 0, total: questions.length + 1 }}>
+      <LearnShell
+        title={title}
+        speak={[questionText]}
+        step={{ current: 0, total: questions.length + 1 }}
+      >
         <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5 rounded-[36px] bg-surface p-5 text-center shadow-[0_8px_0_var(--color-line)] sm:p-8">
           <h2 className="font-display text-2xl font-extrabold sm:text-3xl">
             {copy.explain[stage]}
@@ -360,7 +364,7 @@ function Run({
   if (!q) {
     // nothing taught yet (a check opened too early): back to the stages
     return (
-      <LearnShell title={title}>
+      <LearnShell title={title} speak={[copy.testHint]}>
         <p className="text-center text-xl">{copy.testHint}</p>
         <div className="flex justify-center">
           <Button variant="soft" size="md" onClick={onMenu}>
@@ -395,7 +399,7 @@ function Run({
         total: mode === 'learn' ? questions.length + 1 : questions.length,
       }}
       help={help}
-      onVoiceOn={() => say('instruct', { text: copy.ask, emoji: '🤔' }, questionText)}
+      speak={[questionText]}
     >
       <section
         key={q.id}

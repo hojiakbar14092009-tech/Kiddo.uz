@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
 import type { LearnMode } from '@/features/learn/session'
 import type { useLearnSession } from '@/features/learn/useLearnSession'
+import { useSpeakable } from '@/features/learn/speakable'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import type { AgeLevel } from './content'
 import type { SpaceQuestion } from './questions'
@@ -35,17 +36,14 @@ export function QuestionBoard({
   onSolved: () => void
 }) {
   const text = useSpaceText()
-  const { say, voice } = useLearnMascot()
-  const speak = voice.speak
+  const { say } = useLearnMascot()
   const [statuses, setStatuses] = useState<Partial<Record<string, ChoiceStatus>>>({})
   const [solved, setSolved] = useState(false)
   const misses = useRef(0)
   const timer = useRef<number | null>(null)
 
-  // the question is written big on screen; it is read out only if the child turned the voice on
-  useEffect(() => {
-    void speak([question.prompt])
-  }, [question.prompt, speak])
+  // the question is written big on screen; the speaker button reads exactly this one
+  useSpeakable([question.prompt])
 
   useEffect(
     () => () => {

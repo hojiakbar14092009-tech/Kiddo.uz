@@ -15,6 +15,11 @@ interface MascotProps {
   bubbleSide?: 'left' | 'right'
   /** When the screen is speaking (PRO), the robot moves its mouth. */
   speaking?: boolean
+  /**
+   * The mouth moves only while sound really plays (`speaking`): an instruction
+   * shown in the bubble alone does not make the robot look as if it talks.
+   */
+  talkOnlyWhileSpeaking?: boolean
   /** Overrides the child’s clothes, e.g. to try an item on in the shop. */
   wearing?: Wearing
   /** Marks the robot’s spot (`data-roam`), so a roaming robot can start from it. */
@@ -29,10 +34,14 @@ interface MascotProps {
  * or subtitle (PRO). Mood and message come from the shared mascot store,
  * so any part of the screen can make it react through `useMascot()`.
  */
+/** Moods the robot leaves to talk while speech plays (a cheer or an “oops” stays as it is). */
+const TALKS_IN = new Set(['idle', 'wave', 'talk', 'sleepy'])
+
 export function Mascot({
   robotClassName = 'w-24 sm:w-36',
   bubbleSide = 'right',
   speaking = false,
+  talkOnlyWhileSpeaking = false,
   wearing,
   robotRoam,
   pet: petOverride,
@@ -45,6 +54,12 @@ export function Mascot({
   const mood = useMascotStore((state) => state.mood)
   const message = useMascotStore((state) => state.message)
   const reactionKey = useMascotStore((state) => state.reactionKey)
+  const shownMood =
+    speaking && TALKS_IN.has(mood)
+      ? 'talk'
+      : talkOnlyWhileSpeaking && !speaking && mood === 'talk'
+        ? 'idle'
+        : mood
 
   return (
     <div
@@ -54,11 +69,16 @@ export function Mascot({
         className,
       )}
     >
-      <div data-roam={robotRoam} className={clsx('relative shrink-0', robotClassName)}>
+      <div
+        data-roam={robotRoam}
+        data-mood={shownMood}
+        data-testid="mascot"
+        className={clsx('relative shrink-0', robotClassName)}
+      >
         <MascotFigure
           model={model}
           wearing={wearing ?? ownWearing}
-          mood={mood === 'idle' && speaking ? 'talk' : mood}
+          mood={shownMood}
           reactionKey={reactionKey}
           className="h-auto w-full"
         />

@@ -463,9 +463,12 @@ export const uz = {
     help: 'Yordam',
     helpTitle: 'Yordam',
     helpOk: 'Tushundim',
-    voiceOn: 'Ovoz yoqilgan',
-    voiceOff: 'Ovozni yoqish',
-    voiceLocked: 'Ovozli o‘qish PRO versiyada. Matn bilan davom etamiz!',
+    voiceLocked:
+      'Ovozli o‘qish – PRO imkoniyati. Uni ota-onang «Ota-ona bo‘limi»da yoqishi mumkin. Hozircha matn bilan davom etamiz!',
+    voiceAgain: 'Qaytadan o‘qish',
+    voiceMuted: 'Ovoz o‘chirilgan. Ota-onang «Ota-ona bo‘limi»da ovozni balandroq qilishi mumkin.',
+    voiceError: 'Hozir ovozni yoqib bo‘lmadi. Savol ekranda yozilgan – birga o‘qiymiz!',
+    voiceNothing: 'Bu yerda o‘qiladigan savol yo‘q.',
     listen: 'Tinglash',
     result: {
       learnTitle: 'Mashg‘ulot tugadi!',

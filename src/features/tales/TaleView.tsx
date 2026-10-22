@@ -9,6 +9,7 @@ import type { Language } from '@/content/languages'
 import { LearnShell } from '@/features/learn/LearnShell'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { useLearnVoice } from '@/features/learn/voice'
+import type { SpeakOutcome } from '@/services/audio/audioManager'
 import { useMascot } from '@/features/mascot/useMascot'
 import { canRender3D } from '@/features/mascot/webgl'
 import { useChildKey } from '@/store/progressStore'
@@ -135,6 +136,7 @@ function ReadControls({
 type Phase = 'story' | 'check'
 
 export function TaleView({ tale, language }: { tale: TaleSpec; language: Language }) {
+  const { t } = useTranslation()
   const ui = TALES_UI[language]
   const text = taleText(language, tale.id)
   const { react } = useMascot()
@@ -152,11 +154,16 @@ export function TaleView({ tale, language }: { tale: TaleSpec; language: Languag
   const lines = sceneSpeech(sceneText)
   const sceneKey = `${tale.id}-${sceneIndex}-${round}`
   const noRecording = ui.noRecording
-  const onMissing = useCallback(
-    () => react('instruct', { text: noRecording, emoji: '🎙️' }, { speak: false }),
-    [react, noRecording],
+  const mutedNote = t('learn.voiceMuted')
+  const errorNote = t('learn.voiceError')
+  const onProblem = useCallback(
+    (outcome: SpeakOutcome | 'off') => {
+      const note = outcome === 'muted' ? mutedNote : outcome === 'missing' ? noRecording : errorNote
+      react('instruct', { text: note, emoji: outcome === 'muted' ? '🔇' : '🎙️' }, { speak: false })
+    },
+    [errorNote, mutedNote, noRecording, react],
   )
-  const reader = useReader(lines, sceneKey, onMissing)
+  const reader = useReader(lines, sceneKey, onProblem)
   const last = sceneIndex === tale.scenes.length - 1
   const taskPending = Boolean(scene.task) && !solved.has(sceneIndex)
 
@@ -190,7 +197,8 @@ export function TaleView({ tale, language }: { tale: TaleSpec; language: Languag
           ? { current: sceneIndex, total: tale.scenes.length }
           : { current: checkStep.current, total: checkStep.total }
       }
-      voice={false}
+      // the story has its own reader (read / pause / continue); the check uses the shared speaker
+      voice={phase === 'check'}
     >
       {phase === 'check' ? (
         <TaleCheck

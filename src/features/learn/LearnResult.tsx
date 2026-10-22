@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { CoinIcon, HomeIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { Img3D } from './Img3D'
+import { useSpeakable } from './speakable'
 import type { FinishedSession } from './useLearnSession'
 import { useLearnMascot } from './useLearnMascot'
 
@@ -23,6 +24,14 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
     ? t('learn.result.great')
     : `${t('learn.result.great')} ${t('learn.result.practice')}`
 
+  const title = result.mode === 'learn' ? t('learn.result.learnTitle') : t('learn.result.title')
+  const score = t('learn.result.independent', {
+    correct: summary.independent,
+    total: summary.total,
+  })
+  // the speaker button reads the result: the title, the score and the kind word
+  useSpeakable([title, score, kind])
+
   useEffect(() => {
     say(allOwn ? 'celebrate' : 'greet', { text: kind, emoji: allOwn ? '🏆' : '💪' })
   }, [allOwn, kind, say])
@@ -40,10 +49,10 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
         <Img3D name={allOwn ? 'trophy' : 'glowing-star'} className="size-28" eager />
       </motion.div>
       <h2 id="learn-result-title" className="font-display text-3xl font-extrabold">
-        {result.mode === 'learn' ? t('learn.result.learnTitle') : t('learn.result.title')}
+        {title}
       </h2>
       <p className="font-display text-2xl font-bold text-primary-ink" data-testid="learn-score">
-        {t('learn.result.independent', { correct: summary.independent, total: summary.total })}
+        {score}
       </p>
       {summary.helped > 0 && (
         <p className="text-lg text-ink-soft">

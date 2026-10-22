@@ -50,7 +50,7 @@ function Menu({ language, onPick }: { language: Language; onPick: (mode: LearnMo
   useEffect(() => greet(), [greet, language])
 
   return (
-    <LearnShell title={t('learn.sections.help')} onVoiceOn={greet}>
+    <LearnShell title={t('learn.sections.help')} speak={[copy.greet]}>
       <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-5 rounded-[36px] bg-surface p-6 text-center shadow-[0_8px_0_var(--color-line)]">
         <Img3D name="paintbrush" className="size-24 sm:size-28" eager />
         <h2 className="font-display text-2xl font-extrabold sm:text-3xl">{copy.choose}</h2>

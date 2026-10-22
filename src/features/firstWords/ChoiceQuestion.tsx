@@ -112,7 +112,7 @@ export function ChoiceQuestion({
     <LearnShell
       title={title}
       step={step}
-      onVoiceOn={instruct}
+      speak={[prompt]}
       help={{
         text: helpText,
         glow: stuck,

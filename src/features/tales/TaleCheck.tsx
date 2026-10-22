@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { SpeakerIcon } from '@/components/icons'
 import type { Language } from '@/content/languages'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
 import { Img3D } from '@/features/learn/Img3D'
 import { LearnResult } from '@/features/learn/LearnResult'
 import { useLearnChild, useLearnStore } from '@/features/learn/learnStore'
 import { orderOf } from '@/features/learn/review'
+import { useSpeakable } from '@/features/learn/speakable'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import { useLearnSession, type FinishedSession } from '@/features/learn/useLearnSession'
 import { useMascot } from '@/features/mascot/useMascot'
@@ -29,19 +28,20 @@ export function TaleCheck({
   onStep: (current: number, total: number) => void
   onAgain: () => void
 }) {
-  const { t } = useTranslation()
   const learn = useLearnChild()
   const childKey = useChildKey()
   const setLastOrder = useLearnStore((state) => state.setLastOrder)
   const [questions] = useState(() => pickChecks(tale, language, learn))
   const session = useLearnSession({ section: 'tales', language, stage: tale.id, mode: 'test' })
-  const { say, voice } = useLearnMascot()
+  const { say } = useLearnMascot()
   const { react } = useMascot()
   const [index, setIndex] = useState(0)
   const [statuses, setStatuses] = useState<Record<string, ChoiceStatus>>({})
   const [result, setResult] = useState<FinishedSession | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const question = questions[index]
+  // the shared speaker button reads exactly the question on screen
+  useSpeakable(result ? null : [question?.prompt])
 
   useEffect(() => {
     setLastOrder(
@@ -91,16 +91,6 @@ export function TaleCheck({
         <p className="text-center font-display text-2xl font-bold sm:text-3xl" aria-live="polite">
           {question.prompt}
         </p>
-        {voice.isPro && (
-          <button
-            type="button"
-            onClick={() => void voice.speak([question.prompt], { force: true })}
-            aria-label={t('learn.listen')}
-            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface shadow-[0_4px_0_var(--color-line)]"
-          >
-            <SpeakerIcon size={24} />
-          </button>
-        )}
       </div>
       <ChoiceGrid
         key={question.id}

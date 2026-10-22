@@ -99,7 +99,7 @@ export function FixView({
     <LearnShell
       title={title}
       step={step}
-      onVoiceOn={instruct}
+      speak={[done ? explanation : prompt]}
       help={{
         text: helpText,
         glow: stuck && !done,

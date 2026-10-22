@@ -24,6 +24,8 @@ type View =
 /** The Koinot section: lessons by age, a short check and the solar system up close. */
 export function SpacePage() {
   const level = useAgeLevel() as AgeLevel
+  // the questions are written in one language: a new language starts the screen again in it
+  const language = useSpaceLanguage()
   const [view, setView] = useState<View>({ name: 'menu' })
   // a fresh run every time (new questions, a new session)
   const [run, setRun] = useState(0)
@@ -39,7 +41,7 @@ export function SpacePage() {
     if (lesson) {
       return (
         <SpaceLesson
-          key={run}
+          key={`${run}-${language}`}
           lesson={lesson}
           onExit={toMenu}
           onTest={() => open({ name: 'test' })}
@@ -49,7 +51,12 @@ export function SpacePage() {
   }
   if (view.name === 'test') {
     return (
-      <SpaceTest key={run} level={level} onAgain={() => open({ name: 'test' })} onExit={toMenu} />
+      <SpaceTest
+        key={`${run}-${language}`}
+        level={level}
+        onAgain={() => open({ name: 'test' })}
+        onExit={toMenu}
+      />
     )
   }
   if (view.name === 'object') return <ObjectScreen id={view.id} onBack={toMenu} />
@@ -76,7 +83,11 @@ function SpaceMenu({ level, onOpen }: { level: AgeLevel; onOpen: (view: View) =>
   }, [say, text.say.hello])
 
   return (
-    <LearnShell title={t('learn.sections.space')} themeClassName="learn-space">
+    <LearnShell
+      title={t('learn.sections.space')}
+      themeClassName="learn-space"
+      speak={[text.say.hello]}
+    >
       <section className="space-panel space-hero">
         <SpacePicture id="saturn" eager className="space-hero-planet" />
         <div className="min-w-0">

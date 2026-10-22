@@ -19,6 +19,7 @@ function linesFor(language: Language): string[] {
     copy.retry,
     copy.stageDone,
     copy.stageDoneText,
+    copy.testHint,
   ]
   for (const stage of ALL_STAGES) {
     lines.push(copy.explain[stage])

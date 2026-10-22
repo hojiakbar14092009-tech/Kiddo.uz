@@ -6,7 +6,8 @@ import { TopBar } from '@/components/layout/TopBar'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascotStore } from '@/features/mascot/mascotStore'
 import { HelpButton } from './HelpButton'
-import { VoiceToggle } from './VoiceToggle'
+import { SpeakButton } from './SpeakButton'
+import { SPEAK_PRIORITY, useSpeakable } from './speakable'
 import { useOnline } from './useOnline'
 import { useLearnVoice } from './voice'
 
@@ -22,9 +23,14 @@ interface LearnShellProps {
   /** Zero-based step and number of steps (shown as dots), if the screen has steps. */
   step?: { current: number; total: number }
   help?: ShellHelp
-  /** Show the voice switch (PRO, off by default). */
+  /** Show the speaker button (reads aloud on PRO). */
   voice?: boolean
-  onVoiceOn?: () => void
+  /**
+   * What the speaker button reads on this screen: the question or
+   * instruction shown now, in the current language. A question board inside
+   * the page can register its own text with `useSpeakable` instead.
+   */
+  speak?: readonly (string | null | undefined | false)[] | null
   /** Hide the mascot row (e.g. on a full-screen scene that has its own narrator). */
   mascot?: boolean
   /** Extra classes on the page; a section with its own look (Koinot) adds its theme class. */
@@ -44,7 +50,7 @@ export function LearnShell({
   step,
   help,
   voice = true,
-  onVoiceOn,
+  speak = null,
   mascot = true,
   className,
   themeClassName,
@@ -54,6 +60,7 @@ export function LearnShell({
   const learnVoice = useLearnVoice()
   const resetMascot = useMascotStore((state) => state.reset)
   const online = useOnline()
+  useSpeakable(speak, SPEAK_PRIORITY.page)
 
   // leaving the screen: the bubble clears and any voice stops
   useEffect(
@@ -103,12 +110,17 @@ export function LearnShell({
         {(mascot || help || voice) && (
           <div className="flex items-center gap-3">
             {mascot ? (
-              <Mascot robotClassName="w-16 sm:w-28" className="min-w-0 flex-1" />
+              <Mascot
+                robotClassName="w-16 sm:w-28"
+                className="min-w-0 flex-1"
+                speaking={learnVoice.speaking}
+                talkOnlyWhileSpeaking
+              />
             ) : (
               <div className="flex-1" />
             )}
             <div className="flex shrink-0 flex-col items-center gap-2 sm:flex-row sm:gap-3">
-              {voice && <VoiceToggle onTurnedOn={onVoiceOn} />}
+              {voice && <SpeakButton fallback={[title]} />}
               {help && (
                 <HelpButton text={help.text} glow={help.glow} onOpen={help.onOpen}>
                   {help.visual}

@@ -54,7 +54,7 @@ export function FindView({
     <LearnShell
       title={title}
       step={step}
-      onVoiceOn={ask}
+      speak={[q.item.ask]}
       help={{
         text: copy.findHelp,
         glow: stuck,

@@ -79,7 +79,7 @@ export function BuildWord({
     <LearnShell
       title={title}
       step={step}
-      onVoiceOn={instruct}
+      speak={[copy.build]}
       help={{
         text: copy.buildHelp,
         glow: mistakes > 0 && !done,
@@ -214,7 +214,11 @@ export function BuildExample({
 
   const done = shown >= word.letters.length
   return (
-    <LearnShell title={title} onVoiceOn={intro} help={{ text: copy.exampleTitle(display) }}>
+    <LearnShell
+      title={title}
+      speak={[copy.exampleTitle(display)]}
+      help={{ text: copy.exampleTitle(display) }}
+    >
       <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 sm:gap-6">
         <Img3D
           name={word.picture}

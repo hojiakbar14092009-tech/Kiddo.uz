@@ -134,3 +134,23 @@ export function getIsPro(): boolean {
     isProActive(useSubscriptionStore.getState()) && useFamilyStore.getState().activeChildId !== null
   )
 }
+
+/** Paid capabilities. Every PRO-only feature asks here, never `plan === …` on its own. */
+export type ProFeature = 'audio'
+
+/** May the one playing now use this feature? Checked right before it is used. */
+export function canUse(feature: ProFeature): boolean {
+  switch (feature) {
+    case 'audio':
+      return getIsPro()
+  }
+}
+
+/** The same answer as `canUse`, for drawing the screen (it updates when PRO changes). */
+export function useCanUse(feature: ProFeature): boolean {
+  const pro = useIsPro()
+  switch (feature) {
+    case 'audio':
+      return pro
+  }
+}

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronRightIcon, CoinIcon, SpeakerIcon } from '@/components/icons'
+import { ChevronRightIcon, CoinIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { LearnShell } from '@/features/learn/LearnShell'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { useLearnSession, type FinishedSession } from '@/features/learn/useLearnSession'
+import { useSpeakable } from '@/features/learn/speakable'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import { useChildKey } from '@/store/progressStore'
 import { isPlanet, KIND, type Lesson, type SpaceId } from './content'
@@ -23,8 +24,9 @@ type Phase =
 /** The object card: a 3D view, the name and one or two facts. */
 export function ObjectCard({ id, lines }: { id: SpaceId; lines: readonly string[] }) {
   const text = useSpaceText()
-  const { voice } = useLearnMascot()
   const name = text.objects[id].name
+  // the speaker button reads the card shown now: its name and facts
+  useSpeakable([name, ...lines])
   return (
     <article className="space-card">
       <PlanetView id={id} className="w-full max-w-[min(420px,80vw)]" />
@@ -38,16 +40,6 @@ export function ObjectCard({ id, lines }: { id: SpaceId; lines: readonly string[
             </li>
           ))}
         </ul>
-        {voice.isPro && (
-          <Button
-            variant="soft"
-            size="md"
-            icon={<SpeakerIcon size={24} />}
-            onClick={() => void voice.speak([name, ...lines], { force: true })}
-          >
-            {text.ui.listen}
-          </Button>
-        )}
       </div>
     </article>
   )
@@ -138,6 +130,7 @@ export function SpaceLesson({
       themeClassName="learn-space"
       step={phase.name === 'done' ? undefined : { current, total }}
       help={help}
+      speak={phase.name === 'done' ? [text.ui.lessonDone, text.ui.lessonDoneText] : null}
     >
       {phase.name === 'card' && (
         <div className="flex flex-col items-center gap-5">

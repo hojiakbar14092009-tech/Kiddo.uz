@@ -36,11 +36,21 @@ vi.mock('howler', () => {
       Howl.instances.push(this)
     }
     play() {
+      const onplay = this.options.onplay
+      if (typeof onplay === 'function') onplay(1)
       const onend = this.options.onend
       if (typeof onend === 'function') queueMicrotask(() => onend())
       return 1
     }
     volume() {
+      return this
+    }
+    unload() {
+      return undefined
+    }
+    stop() {
+      const onstop = this.options.onstop
+      if (typeof onstop === 'function') onstop(1)
       return this
     }
   }

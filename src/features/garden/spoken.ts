@@ -14,9 +14,16 @@ function collect(language: Language): string[] {
   for (const level of [4, 5, 6] as const) {
     taskPool(level).forEach((task) => lines.add(taskPrompt(task, language)))
   }
-  ;[ui.tapOne, ui.tapEach, ui.looksLike, ui.example, ui.wiggling, ui.notThis, ui.learnDone].forEach(
-    (line) => lines.add(line),
-  )
+  ;[
+    ui.tapOne,
+    ui.tapEach,
+    ui.looksLike,
+    ui.example,
+    ui.wiggling,
+    ui.notThis,
+    ui.learnDone,
+    ui.howToPlay,
+  ].forEach((line) => lines.add(line))
   return [...lines]
 }
 

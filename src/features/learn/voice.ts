@@ -1,20 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { Language } from '@/content/languages'
-import { audioManager } from '@/services/audio/audioManager'
-import { useFamilyStore } from '@/store/familyStore'
+import { audioManager, type SpeakOutcome } from '@/services/audio/audioManager'
+import { useSpeechStatus } from '@/services/audio/useSpeechStatus'
 import { useSettingsStore } from '@/store/settingsStore'
-import { getIsPro, useIsPro } from '@/store/subscriptionStore'
+import { canUse, useCanUse } from '@/store/subscriptionStore'
 
 /*
  * Voice in the new sections:
- * - only on an active PRO (checked again right before every sound),
- * - never on its own: it starts when the child turns the voice on in a section,
+ * - only with the audio feature (PRO), checked again right before every sound,
+ * - never on its own: the child presses the speaker button to hear the
+ *   current question; after that first press the mascot also says its short
+ *   reactions to the child's answers (until the page is reloaded),
  * - only recorded sentences in the chosen language (no device voice standing
  *   in for a language it may not speak), the text always stays on screen,
- * - one voice at a time, and it stops when the page, profile or language changes.
+ * - one voice at a time (audioManager), and it stops when the question, the
+ *   page, the profile or the language changes.
  */
 
-/** The child switched the voice on in the new sections (PRO only; off by default). */
+/** The child has pressed the speaker in this visit, so reactions may be spoken too. */
 let voiceOn = false
 const listeners = new Set<(on: boolean) => void>()
 
@@ -27,9 +30,10 @@ export function isLearnVoiceOn(): boolean {
   return voiceOn
 }
 
-export async function speakLines(lines: readonly string[], language: Language): Promise<boolean> {
-  if (!getIsPro()) return false
-  return audioManager.speak(
+/** Reads the lines from recordings, in this language. */
+export function speakLines(lines: readonly string[], language: Language): Promise<SpeakOutcome> {
+  if (!canUse('audio')) return Promise.resolve('locked')
+  return audioManager.say(
     lines.filter(Boolean).map((text) => ({ text })),
     { language },
     { requirePro: true, clipsOnly: true },
@@ -37,13 +41,11 @@ export async function speakLines(lines: readonly string[], language: Language): 
 }
 
 export function useLearnVoice() {
-  const isPro = useIsPro()
+  const isPro = useCanUse('audio')
   const language = useSettingsStore((state) => state.language) ?? 'uz'
-  const activeChild = useFamilyStore((state) => state.activeChildId)
   const volume = useSettingsStore((state) => state.volume)
+  const status = useSpeechStatus()
   const [on, setOn] = useState(voiceOn)
-  const [speaking, setSpeaking] = useState(false)
-  const run = useRef(0)
 
   useEffect(() => {
     const listener = (value: boolean) => setOn(value)
@@ -53,32 +55,24 @@ export function useLearnVoice() {
     }
   }, [])
 
-  // a new page, profile or language: whatever was being said stops
-  useEffect(
-    () => () => {
-      run.current += 1
-      audioManager.stopSpeech()
-    },
-    [language, activeChild],
-  )
+  const stop = useCallback(() => audioManager.stopSpeech(), [])
 
-  const stop = useCallback(() => {
-    run.current += 1
-    audioManager.stopSpeech()
-    setSpeaking(false)
-  }, [])
-
-  /** Says the lines if the voice is on (or `force` for a button the child pressed). */
+  /**
+   * Says the lines if the child has turned the voice on (or `force` for a
+   * button the child just pressed), and tells how it went.
+   */
   const speak = useCallback(
-    async (lines: readonly string[], { force = false }: { force?: boolean } = {}) => {
-      if (!getIsPro() || (!voiceOn && !force)) return false
-      const mine = ++run.current
-      setSpeaking(true)
-      const spoken = await speakLines(lines, language)
-      if (mine === run.current) setSpeaking(false)
-      return spoken
+    async (
+      lines: readonly string[],
+      { force = false }: { force?: boolean } = {},
+    ): Promise<SpeakOutcome | 'off'> => {
+      if (!canUse('audio')) return 'locked'
+      if (!voiceOn && !force) return 'off'
+      // the language at the moment of speaking, never an older one
+      const current = useSettingsStore.getState().language ?? 'uz'
+      return speakLines(lines, current)
     },
-    [language],
+    [],
   )
 
   return {
@@ -89,7 +83,8 @@ export function useLearnVoice() {
     setOn: setLearnVoiceOn,
     speak,
     stop,
-    speaking,
+    speaking: status === 'speaking',
+    status,
     language,
   }
 }

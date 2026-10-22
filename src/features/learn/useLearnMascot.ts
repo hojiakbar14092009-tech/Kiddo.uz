@@ -4,9 +4,14 @@ import { useMascot } from '@/features/mascot/useMascot'
 import type { MascotEvent, MascotMessage } from '@/features/mascot/types'
 import { useLearnVoice } from './voice'
 
+/** Reactions to something the child just did: the only lines the mascot says by itself. */
+const SPOKEN_EVENTS: ReadonlySet<MascotEvent> = new Set(['correct', 'wrong', 'celebrate'])
+
 /**
  * The mascot in the new sections: its bubble always shows the text (Free and
- * PRO); it speaks only on PRO with the voice turned on, and only from recordings.
+ * PRO). It speaks only on PRO, only from recordings, and only its reactions
+ * to an answer once the child has used the speaker button; greetings and
+ * instructions are never read out on their own (the speaker button reads them).
  */
 export function useLearnMascot() {
   const { t } = useTranslation()
@@ -24,7 +29,7 @@ export function useLearnMascot() {
             : { text: '' })
       react(event, shown, { speak: false })
       const line = spoken ?? shown.spoken ?? shown.text
-      if (line) void voice.speak([line])
+      if (line && SPOKEN_EVENTS.has(event)) void voice.speak([line])
     },
     [react, t, voice],
   )

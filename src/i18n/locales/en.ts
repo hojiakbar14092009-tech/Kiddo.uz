@@ -464,9 +464,13 @@ export const en: Translation = {
     help: 'Help',
     helpTitle: 'Help',
     helpOk: 'Got it',
-    voiceOn: 'Voice on',
-    voiceOff: 'Turn on voice',
-    voiceLocked: 'Reading aloud is part of PRO. Let’s go on with the text!',
+    voiceLocked:
+      'Reading aloud is a PRO feature. A parent can turn it on in the Parent area. Let’s go on with the text for now!',
+    voiceAgain: 'Read it again',
+    voiceMuted: 'The sound is off. A parent can turn it up in the Parent area.',
+    voiceError:
+      'The sound couldn’t start just now. The question is written on the screen – let’s read it together!',
+    voiceNothing: 'There is nothing to read aloud here.',
     listen: 'Listen',
     result: {
       learnTitle: 'Practice done!',

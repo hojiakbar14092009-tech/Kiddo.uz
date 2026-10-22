@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRightIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
 import { shuffle } from '@/features/learn/random'
 import type { useLearnSession } from '@/features/learn/useLearnSession'
+import { useSpeakable } from '@/features/learn/speakable'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import type { Lesson, PlanetId } from './content'
 import { orderSequence } from './questions'
@@ -30,8 +31,7 @@ export function OrderGame({
 }) {
   const { t } = useTranslation()
   const text = useSpaceText()
-  const { say, voice } = useLearnMascot()
-  const speak = voice.speak
+  const { say } = useLearnMascot()
   const sequence = useMemo(() => orderSequence(lesson), [lesson])
   const [cards] = useState(() => {
     let mixed = shuffle(sequence)
@@ -50,9 +50,7 @@ export function OrderGame({
   const done = placed.length === sequence.length
   const missed = useRef(false)
 
-  useEffect(() => {
-    void speak([prompt])
-  }, [prompt, speak])
+  useSpeakable([prompt])
 
   const choose = (id: string) => {
     if (done || placed.includes(id as PlanetId)) return
