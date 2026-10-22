@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useRewardStore } from '@/domain/rewards'
+import { useUniverseStore } from '@/domain/universe'
 import { STICKERS } from '@/features/stickers/stickers'
 import { EMPTY_PROGRESS, GUEST_KEY, migrateProgress, useProgressStore } from './progressStore'
 
@@ -15,6 +16,7 @@ describe('progressStore', () => {
   beforeEach(() => {
     useProgressStore.setState({ byChild: {} })
     useRewardStore.setState({ byChild: {} })
+    useUniverseStore.setState({ byChild: {} })
   })
 
   it('gives 5 coins plus the daily bonus for a perfect first task', () => {

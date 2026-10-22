@@ -22,15 +22,19 @@ export interface DailyPlanState {
 /**
  * Each planned game counts once per day, whatever order the child plays in.
  * The first unfinished game is “next”; nothing is ever locked.
+ * `alsoDone` lists other activities finished today (e.g. learning sections),
+ * so a plan that contains one counts it as done.
  */
 export function dailyPlanState(
   results: readonly TaskResult[],
   day: string,
   level: AgeLevel = GUEST_LEVEL,
+  alsoDone: Iterable<string> = [],
 ): DailyPlanState {
-  const playedToday = new Set(
+  const playedToday = new Set<string>(
     results.filter((result) => result.day === day).map((result) => result.type),
   )
+  for (const activity of alsoDone) playedToday.add(activity)
   let nextAssigned = false
   const steps = DAILY_PLANS[level].map((game): PlanStep => {
     if (playedToday.has(game)) return { game, status: 'done' }

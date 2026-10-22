@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import type { GameType } from '@/features/tasks/games'
 import { clearChildRewards } from '@/domain/rewards/rewardStore'
+import { clearUniverseChild } from '@/domain/universe/store'
 import { useLearnStore } from '@/features/learn/learnStore'
 import {
   ageOn,
@@ -133,7 +134,12 @@ export const useFamilyStore = create<FamilyState>()(
           activeChildId: state.activeChildId === id ? null : state.activeChildId,
         }))
         clearChildRewards(id)
+        clearUniverseChild(id)
         useLearnStore.getState().clearChild(id)
+        // the child's pictures from the studio (loaded on demand, kept out of the main bundle)
+        void import('@/features/studio/gallery')
+          .then(({ studioGallery }) => studioGallery().removeChild(id))
+          .catch(() => undefined)
       },
 
       setActiveChild: (id) => set({ activeChildId: id }),

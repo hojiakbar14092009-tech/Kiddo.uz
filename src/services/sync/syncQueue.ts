@@ -1,6 +1,15 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ChildRow, ChildStateRow, EventRow, LearnRow, ResultRow, RewardRow } from './rows'
+import type {
+  BuildingLevelRow,
+  ChildRow,
+  ChildStateRow,
+  EventRow,
+  LearnRow,
+  ResourceRow,
+  ResultRow,
+  RewardRow,
+} from './rows'
 
 export type SyncOperation =
   | { kind: 'upsertChild'; row: ChildRow }
@@ -9,6 +18,8 @@ export type SyncOperation =
   | { kind: 'upsertResult'; row: ResultRow }
   | { kind: 'upsertEvent'; row: EventRow }
   | { kind: 'recordReward'; row: RewardRow }
+  | { kind: 'recordResource'; row: ResourceRow }
+  | { kind: 'recordBuildingLevel'; row: BuildingLevelRow }
   | { kind: 'upsertLearn'; row: LearnRow }
 
 export interface QueuedOperation {
@@ -88,6 +99,8 @@ function childOf(operation: SyncOperation): string {
     case 'upsertLearn':
       return operation.row.child_id
     case 'recordReward':
+    case 'recordResource':
+    case 'recordBuildingLevel':
       return operation.row.p_child
   }
 }
@@ -121,6 +134,16 @@ function sameTarget(a: SyncOperation, b: SyncOperation): boolean {
   if (a.kind === 'recordReward' && b.kind === 'recordReward') {
     return a.row.p_reason === b.row.p_reason && a.row.p_ref === b.row.p_ref
   }
+  if (a.kind === 'recordResource' && b.kind === 'recordResource') {
+    return (
+      a.row.p_resource === b.row.p_resource &&
+      a.row.p_reason === b.row.p_reason &&
+      a.row.p_ref === b.row.p_ref
+    )
+  }
+  if (a.kind === 'recordBuildingLevel' && b.kind === 'recordBuildingLevel') {
+    return a.row.p_building === b.row.p_building && a.row.p_level === b.row.p_level
+  }
   return true
 }
 
@@ -139,6 +162,12 @@ async function send(client: SyncClient, operation: SyncOperation) {
     case 'recordReward':
       // Idempotent on the server by (child, reason, ref): a retry is harmless.
       return client.rpc('record_reward', operation.row)
+    case 'recordResource':
+      // Idempotent on the server by (child, resource, reason, ref).
+      return client.rpc('record_resource', operation.row)
+    case 'recordBuildingLevel':
+      // Checked on the server against the upgrade's payment, queued after it.
+      return client.rpc('record_building_level', operation.row)
     case 'upsertLearn':
       return client.upsert('child_learn', operation.row, 'child_id')
   }
@@ -233,7 +262,7 @@ export const useSyncStore = create<SyncState>()(
     }),
     {
       name: 'kiddo.sync',
-      version: 2,
+      version: 3,
       partialize: (state) => ({
         queue: state.queue,
         deadLetter: state.deadLetter,
@@ -241,9 +270,12 @@ export const useSyncStore = create<SyncState>()(
       }),
       // v1 could hold client-written payments (the server owns them now), and
       // had no learning data: queue the snapshot once more (upserts are idempotent).
+      // v2 had no universe: queue the snapshot once more so resources earned
+      // before (device mode, before signing in) reach the server ledger.
       migrate: (persisted, version) => {
         const old = (persisted ?? {}) as Partial<SyncState>
-        if (version >= 2) return old as SyncState
+        if (version >= 3) return old as SyncState
+        if (version === 2) return { ...old, snapshotFor: null } as SyncState
         return {
           ...old,
           queue: (old.queue ?? []).filter(

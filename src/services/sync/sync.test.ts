@@ -261,6 +261,14 @@ describe('queue robustness', () => {
     expect(kinds[2]).toMatchObject({ kind: 'upsertLearn', row: { data: { v: 2 } } })
   })
 
+  it('sends the snapshot once more after the universe arrived (v2 → v3)', async () => {
+    const migrate = useSyncStore.persist.getOptions().migrate!
+    const next = (await migrate({ queue: [], deadLetter: [], snapshotFor: 'user-1' }, 2)) as {
+      snapshotFor: string | null
+    }
+    expect(next.snapshotFor).toBeNull()
+  })
+
   it('drops client-written payments from a queue saved by an older version', async () => {
     const migrate = useSyncStore.persist.getOptions().migrate!
     const old = {

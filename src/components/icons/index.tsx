@@ -244,3 +244,106 @@ export function BulbIcon(props: IconProps) {
     </StrokeIcon>
   )
 }
+
+export function UndoIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+    </StrokeIcon>
+  )
+}
+
+export function RedoIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="m15 14 5-5-5-5" />
+      <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+    </StrokeIcon>
+  )
+}
+
+export function BrushIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M19.5 3.5 11 12" />
+      <path d="M11 12l1.5 1.5" />
+      <path d="M9.5 13.5c-2 0-3.5 1.5-3.5 3.5 0 1.5-1 2.5-2.5 3 2.5 1 7 .5 7.5-3 .3-1.5 0-2.5-1.5-3.5Z" />
+    </StrokeIcon>
+  )
+}
+
+export function EraserIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M8.5 20 3.6 15.1a2 2 0 0 1 0-2.8l8.7-8.7a2 2 0 0 1 2.8 0l5.3 5.3a2 2 0 0 1 0 2.8L12 20Z" />
+      <path d="M8 20h12" />
+      <path d="m7.5 8.5 8 8" />
+    </StrokeIcon>
+  )
+}
+
+export function TrashIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M4 7h16" />
+      <path d="M9 7V4.5h6V7" />
+      <path d="M6 7l1 13h10l1-13" />
+      <path d="M10 11v5M14 11v5" />
+    </StrokeIcon>
+  )
+}
+
+export function PlusIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 5v14M5 12h14" />
+    </StrokeIcon>
+  )
+}
+
+export function MinusIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M5 12h14" />
+    </StrokeIcon>
+  )
+}
+
+export function SaveIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M5 4h11l3 3v13H5Z" />
+      <path d="M8 4v5h7V4" />
+      <path d="M8 20v-6h8v6" />
+    </StrokeIcon>
+  )
+}
+
+export function ArrowUpIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 19V6" />
+      <path d="M6 11l6-6 6 6" />
+    </StrokeIcon>
+  )
+}
+
+export function MapIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z" />
+      <path d="M9 4v13.5M15 6.5V20" />
+    </StrokeIcon>
+  )
+}
+
+export function MedalIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M8 3l2.5 6M16 3l-2.5 6" />
+      <circle cx="12" cy="15" r="6" />
+      <path d="M12 12.5v5" />
+    </StrokeIcon>
+  )
+}

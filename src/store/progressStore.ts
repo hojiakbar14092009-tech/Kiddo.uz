@@ -5,7 +5,7 @@ import { findOutfit, type OutfitId, type Wearing } from '@/features/shop/outfits
 import { PET_PRICE, type PetId } from '@/features/pets/pets'
 import { nextSticker } from '@/features/stickers/stickers'
 import type { GameType } from '@/features/tasks/games'
-import { dayKey, starsFor } from '@/features/tasks/rules'
+import { dayKey, ROUNDS_PER_TASK, starsFor } from '@/features/tasks/rules'
 import { GUEST_KEY } from '@/domain/childKey'
 import {
   clearChildRewards,
@@ -14,6 +14,8 @@ import {
   wasRewarded,
 } from '@/domain/rewards/rewardStore'
 import { coinsFor, DAILY_BONUS } from '@/domain/rewards/rules'
+import { clearUniverseChild, emitActivity } from '@/domain/universe/store'
+import { taskActivity } from '@/domain/universe/wiring'
 import { useFamilyStore } from './familyStore'
 import { newId } from '@/lib/id'
 
@@ -69,6 +71,8 @@ export interface TaskOutcome {
   stars: number
   stickerId: string | null
   mistakes: number
+  /** The finished task's result id: what the universe award is kept under (`getAward`). */
+  resultId?: string
 }
 
 export { GUEST_KEY }
@@ -175,6 +179,7 @@ function applyTask(childKey: string, progress: ChildProgress, task: CompletedTas
     stars: result.stars,
     stickerId: result.stickerId,
     mistakes,
+    resultId: result.id,
   }
   return { next, outcome, result }
 }
@@ -208,6 +213,8 @@ export const useProgressStore = create<ProgressState>()(
             })
           }
         }
+        // Stars, crystals and achievements: counted once per result id.
+        emitActivity(taskActivity(childKey, result, ROUNDS_PER_TASK))
         return outcome
       },
 
@@ -265,6 +272,11 @@ export const useProgressStore = create<ProgressState>()(
 
       startGuest: () => {
         clearChildRewards(GUEST_KEY)
+        clearUniverseChild(GUEST_KEY)
+        // The guest's studio pictures too (loaded on demand, kept out of the main bundle).
+        void import('@/features/studio/gallery')
+          .then(({ studioGallery }) => studioGallery().removeChild(GUEST_KEY))
+          .catch(() => undefined)
         set((state) => ({
           byChild: { ...state.byChild, [GUEST_KEY]: freshGuest(state.byChild[GUEST_KEY]) },
         }))
@@ -300,6 +312,7 @@ export const useProgressStore = create<ProgressState>()(
 
       resetChild: (childKey) => {
         clearChildRewards(childKey)
+        clearUniverseChild(childKey)
         set((state) => {
           const byChild = { ...state.byChild }
           delete byChild[childKey]

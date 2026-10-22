@@ -96,6 +96,39 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/garden/GardenPage')).GardenPage,
                 }),
               },
+              // Tracing numbers and shapes, and the Creative Studio (linked from Kiddo City).
+              ...['/trace', '/trace/:set', '/trace/:set/:item'].map((path) => ({
+                path,
+                lazy: async () => ({
+                  Component: (await import('@/features/trace/TracePage')).TracePage,
+                }),
+              })),
+              {
+                path: '/studio',
+                lazy: async () => ({
+                  Component: (await import('@/features/studio/StudioPage')).StudioPage,
+                }),
+              },
+              {
+                path: '/studio/gallery',
+                lazy: async () => ({
+                  Component: (await import('@/features/studio/StudioGalleryPage'))
+                    .StudioGalleryPage,
+                }),
+              },
+              // Kiddo City's map and museum.
+              {
+                path: '/adventure',
+                lazy: async () => ({
+                  Component: (await import('@/features/adventure/AdventurePage')).AdventurePage,
+                }),
+              },
+              {
+                path: '/collection',
+                lazy: async () => ({
+                  Component: (await import('@/features/collection/CollectionPage')).CollectionPage,
+                }),
+              },
               { path: '/rest', element: <RestPage /> },
             ],
           },

@@ -146,7 +146,9 @@ test('the admin puts up an ad; a parent watches it to the end and gets a promo c
   await expect(page.getByText('Promokod faqat 1 marta beriladi', { exact: false })).toBeVisible()
 })
 
-test('the six new learning sections open from home without errors', async ({ page }) => {
+test('the six learning sections open from their Kiddo City buildings without errors', async ({
+  page,
+}) => {
   test.setTimeout(90_000)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
@@ -154,19 +156,33 @@ test('the six new learning sections open from home without errors', async ({ pag
     if (message.type() === 'error') errors.push(message.text())
   })
   await chooseUzbek(page)
-  await expect(page.getByRole('heading', { name: 'Yangi bo‘limlar' })).toBeVisible()
-  for (const name of [
-    'Birinchi so‘zim',
-    'Matematika',
-    'Koinot',
-    'Ertaklar',
-    'Bog‘da top',
-    'Maskotga yordam ber',
-  ]) {
-    await page.getByRole('link', { name, exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Kiddo shahri' })).toBeVisible()
+  // building on the city → the section title inside
+  for (const [building, section] of [
+    ['So‘zlar ustaxonasi', 'Birinchi so‘zim'],
+    ['Matematika shahri', 'Matematika'],
+    ['Rasadxona', 'Koinot'],
+    ['Ertaklar kutubxonasi', 'Ertaklar'],
+    ['Sehrli bog‘', 'Bog‘da top'],
+    ['Robot ustaxonasi', 'Maskotga yordam ber'],
+  ] as const) {
+    await page.getByRole('link', { name: building, exact: true }).click()
     await expect(page).toHaveURL(/\/learn\//)
-    await expect(page.locator('.learn-title').filter({ visible: true }).first()).toContainText(name)
+    await expect(page.locator('.learn-title').filter({ visible: true }).first()).toContainText(
+      section,
+    )
     await page.goto('/home')
   }
   expect(errors).toEqual([])
+})
+
+test('the city opens the Adventure Map and the collection', async ({ page }) => {
+  await chooseUzbek(page)
+  await page.getByRole('link', { name: 'Sarguzashtlar xaritasi', exact: true }).click()
+  await expect(page).toHaveURL(/\/adventure$/)
+  await expect(page.getByText('Sen shu yerdasan')).toBeVisible()
+  await page.goto('/home')
+  await page.getByTestId('resource-bar').click()
+  await expect(page).toHaveURL(/\/collection$/)
+  await expect(page.getByText('Kolleksiya hali bo‘sh')).toBeVisible()
 })

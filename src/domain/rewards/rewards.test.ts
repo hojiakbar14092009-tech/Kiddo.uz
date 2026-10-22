@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { recordProPurchase } from '@/features/pro/purchase'
 import { getLearnChild, useLearnStore } from '@/features/learn/learnStore'
 import { useAppSettingsStore } from '@/store/appSettingsStore'
+import { useUniverseStore } from '@/domain/universe'
 import { useFamilyStore } from '@/store/familyStore'
 import { EMPTY_PROGRESS, GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import {
@@ -46,6 +47,7 @@ async function reload() {
 function reset() {
   useProgressStore.setState({ byChild: {} })
   useRewardStore.setState({ byChild: {} })
+  useUniverseStore.setState({ byChild: {} })
   useLearnStore.setState({ byChild: {} })
   useFamilyStore.setState({ children: [], activeChildId: null })
 }

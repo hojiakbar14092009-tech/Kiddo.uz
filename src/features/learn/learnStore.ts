@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import { grantReward, wasRewarded } from '@/domain/rewards/rewardStore'
 import { sessionCoins } from '@/domain/rewards/rules'
+import { emitActivity } from '@/domain/universe/store'
+import { learnActivity } from '@/domain/universe/wiring'
 import { useChildKey } from '@/store/progressStore'
 import type { AnswerRecord, LearnMode, SessionSummary } from './session'
 
@@ -175,6 +177,8 @@ export const useLearnStore = create<LearnState>()(
             },
           }
         })
+        // Stars, crystals, scrolls and achievements: counted once per session id.
+        emitActivity(learnActivity(childKey, record))
         return entry.coins
       },
 

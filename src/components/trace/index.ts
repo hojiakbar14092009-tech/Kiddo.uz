@@ -1,0 +1,5 @@
+export { TraceCanvas, type TraceCanvasHandle } from './TraceCanvas'
+export { PathTraceBoard, type PathTraceHandle } from './PathTraceBoard'
+export * from './traceScoring'
+export * from './paths'
+export * from './pathScoring'

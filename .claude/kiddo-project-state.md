@@ -42,7 +42,8 @@ Prettier. Vercel deploys `main` automatically (kiddo-uz.vercel.app).
 Phase 0 (e93937e): 340 unit, 34 e2e; initial JS ≈ 237 KB gzip; R3F 234 KB gzip (lazy).
 Phase 1: 350 unit, 34 e2e; initial JS ≈ 240 KB gzip.
 Phase 2: 368 unit, 34 e2e.
-Phase 3: 419 unit, 34 e2e, 62 SQL assertions (`supabase/tests/run.sh`, local Postgres).
+Phase 3: 419 unit, 34 e2e, 62 SQL assertions
+Phase 4+5a: 552 unit, 34 e2e, 119 SQL assertions (`supabase/tests/run.sh`, local Postgres).
 
 ## UI foundation (Phase 1)
 
@@ -94,6 +95,23 @@ no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens
 - Known gap: `child_state.coins` is still client-written; the cap is not a security
   boundary until coins derive from the ledger (rollout step 5).
 
+## Universe (Phase 4 + 5a)
+
+- `src/domain/universe` (store `kiddo.universe`): `grantResource`/`spendResources`,
+  `emitActivity(e) → AwardSummary` (rules.ts pure: stars by quality, crystal for 3 stars,
+  part for number 3-star, scroll for tales; Studio always 1 star, no crystals),
+  `tryClaimDailyQuest` (yesterday's finished quest claimable until today's is claimed),
+  `BUILDINGS`/`upgradeBuilding` (cost in resources), achievements, `useAdventure`,
+  cross-tab rehydrate (`reloadFromOtherTabs`). New features MUST emit through it.
+- UI: `/city` (KiddoCity, UpgradeSheet, DailyQuestCard), `/adventure`, `/collection`,
+  `/trace` (numbers/shapes tracing), `/studio` + `/studio/gallery` (IndexedDB),
+  `components/reward/ActivityReward`, `TitleTopBar`.
+- `0006_universe.sql` (NOT applied): `resource_ledger` + `record_resource` (caps per
+  earned day, device history uploaded oldest-first on first sign-in, ≤1 year back),
+  `record_building_level` checks payment; world/achievements read-only.
+- Known: device ledger keeps 1000 entries (older history can't be uploaded in full);
+  `familyStore.removeChild` gallery delete errors are not retried.
+
 ## Key decisions
 
 - Incremental: new `src/domain/{rewards,progress,entitlements,quests}` wrap existing
@@ -136,19 +154,19 @@ prod) · B7 promo policy.
 - [x] 1 Foundation: error screens, responsive fixes from the audit, tokens (2026-10-22)
 - [x] 2 Design system primitives + migration of all dialogs, PRO chips, step dots, tab icons (2026-10-22)
 - [x] 3 Domain foundation + Supabase security migration 0005 (2026-10-23)
-- [ ] 4 Kiddo City, Adventure Map, Daily Quest, rewards UI
-- [ ] 5 Smart Math, Tracing, Adaptive, Emotions, Creative Studio
+- [x] 4 Kiddo City, Adventure Map, Daily Quest, resources, achievements (2026-10-23)
+- [~] 5 part 1 done: Tracing, Creative Studio. Part 2: Smart Math, Adaptive, Emotions
 - [ ] 6 Worlds: Explorer3D, Dinosaur, Uzbekistan
 - [ ] 7 Pro + audio server-side (claims, private voice bucket), Music & Rhythm
 - [ ] 8 Story Engine · 9 Parent Dashboard · 10 AI Friend · 11 responsive · 12 performance · 13 security
+- [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
 speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 4 – Kiddo City, Adventure Map, Daily Quest, resources (stars, crystals, …),
-medals/badges/achievements, built on `docs/architecture/universe.md` (domain
-`src/domain/universe`, reuses `domain/ledger`). Phases 5–24 follow the master list.
-Owner actions: apply 0005 + Realtime private-only setting (see
-docs/architecture/supabase-verification.md §6), set Vercel `VITE_SUPABASE_*`.
+Phase 5 part 2 – Smart Math (subtraction, missing number, mixed, drag for age 4),
+LearnerProfile/adaptive levels feeding generators, Emotions & Social section; all emit
+through `domain/universe`. Owner actions: apply 0005 + 0006 + Realtime private-only
+(docs/architecture/supabase-verification.md §6), set Vercel `VITE_SUPABASE_*`.

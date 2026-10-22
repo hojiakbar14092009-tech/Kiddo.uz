@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { CoinIcon, HomeIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { AwardLines } from '@/components/reward/AwardLines'
+import { useAward } from '@/components/reward/useAward'
 import { RewardBurst } from '@/components/ui/RewardBurst'
 import { Img3D } from './Img3D'
 import { useSpeakable } from './speakable'
@@ -18,6 +20,7 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
   const { t } = useTranslation()
   const { say } = useLearnMascot()
   const { summary, coins } = result
+  const award = useAward(result.id)
   const allOwn = summary.independent === summary.total
   const kind = allOwn
     ? t('learn.result.great')
@@ -63,6 +66,7 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
       ) : (
         <p className="text-sm text-ink-soft">{t('learn.result.noRepeatCoins')}</p>
       )}
+      <AwardLines award={award} />
       <p className="text-sm text-ink-soft">{t('learn.result.note')}</p>
       <div className="flex flex-wrap justify-center gap-3">
         <Button variant="coin" size="md" onClick={onAgain}>

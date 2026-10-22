@@ -42,7 +42,7 @@ describe('Home', () => {
     finish('trace')
     await renderRoute('/home')
     expect(screen.getByText('Bugungi reja bajarildi!')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Alifbo' })).toHaveAttribute('href', '/alphabet')
+    expect(screen.getByRole('link', { name: 'Alifbo uyi' })).toHaveAttribute('href', '/alphabet')
   })
 
   it('opens the numbers tab from the home card', async () => {

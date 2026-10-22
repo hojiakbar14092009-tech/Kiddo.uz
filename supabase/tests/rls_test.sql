@@ -74,6 +74,54 @@ select pg_temp.expect_error($$select public.record_reward('ca',200,'task','t3')$
 select pg_temp.check((select (public.record_reward('ca',-30,'purchase','buy1')).coins) = -30, 'ledger: spending allowed past cap');
 select pg_temp.check((select (public.record_reward('ca',-5,'penalty','pen1')).coins) = -5, 'ledger: penalty negative');
 select pg_temp.expect_error($$update public.reward_ledger set coins = 999$$, 'permission denied');
+-- resources (0006)
+select pg_temp.expect_error($$insert into public.resource_ledger (child_id,parent_id,resource,amount,reason,ref_id) values ('ca','00000000-0000-0000-0000-00000000000a','star',3,'activity','r')$$, 'permission denied');
+select pg_temp.check((select (public.record_resource('ca','star',3,'activity','run-1')).amount) = 3, 'resources: RPC records');
+select pg_temp.check((select (public.record_resource('ca','star',3,'activity','run-1')).id) = (select id from public.resource_ledger where ref_id='run-1'), 'resources: RPC idempotent');
+select pg_temp.check((select count(*) from public.resource_ledger) = 1, 'resources: one row after retry');
+select pg_temp.expect_error($$select public.record_resource('cb','star',1,'activity','x1')$$, 'not_your_child');
+select pg_temp.expect_error($$select public.record_resource('ca','gem',1,'activity','x2')$$, 'bad_resource');
+select pg_temp.expect_error($$select public.record_resource('ca','star',1,'cheat','x3')$$, 'bad_reason');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',1,'activity','x4')$$, 'bad_reason');
+select pg_temp.expect_error($$select public.record_resource('ca','star',-1,'upgrade','x5')$$, 'bad_reason');
+select pg_temp.expect_error($$select public.record_resource('ca','star',4,'activity','x6')$$, 'out_of_bounds');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',5,'quest','daily|2026-01-01')$$, 'out_of_bounds');
+select pg_temp.expect_error($$select public.record_resource('ca','star',-2,'activity','x8')$$, 'bad_sign');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',1,'upgrade','x9')$$, 'bad_sign');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',10,'admin','x10')$$, 'not_admin');
+select public.record_resource('ca','part',1,'number-3star','math:'||g||'|2026-10-18') from generate_series(1,3) g;
+select pg_temp.expect_error($$select public.record_resource('ca','part',1,'number-3star','math:9|2026-10-18')$$, 'daily_cap');
+select pg_temp.check((select (public.record_resource('ca','crystal',1,'three-stars','math:4')).amount) = 1, 'resources: crystal for three stars');
+select pg_temp.check((select (public.record_resource('ca','crystal',-1,'upgrade','upgrade|math-land|1')).amount) = -1, 'resources: spend within the balance');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',-1,'upgrade','upgrade|math-land|2')$$, 'insufficient');
+select pg_temp.check((select (public.record_resource('ca','part',-3,'upgrade','upgrade|robot-workshop|1')).amount) = -3, 'resources: spending allowed past the daily cap');
+select pg_temp.expect_error($$update public.resource_ledger set amount = 99$$, 'permission denied');
+select pg_temp.expect_error($$delete from public.resource_ledger$$, 'permission denied');
+-- resources: earned time and quest refs (0006)
+select pg_temp.expect_error($$select public.record_resource('ca','star',1,'activity','future-1', now() + interval '1 hour')$$, 'bad_time');
+select public.record_resource('ca','part',1,'number-3star','late:'||g, now() - interval '1 day') from generate_series(1,3) g;
+select pg_temp.check((select count(*) from public.resource_ledger where ref_id like 'late:%') = 3, 'resources: a late upload is capped on its own day, not today');
+select pg_temp.expect_error($$select public.record_resource('ca','part',1,'number-3star','late:9', now() - interval '1 day')$$, 'daily_cap');
+select pg_temp.check((select (public.record_resource('ca','star',1,'activity','old-1', now() - interval '30 days')).earned_at) < now() - interval '29 days', 'resources: a month-old entry keeps its own day');
+select pg_temp.check((select (public.record_resource('ca','star',1,'activity','old-2', now() - interval '900 days')).earned_at) > now() - interval '366 days', 'resources: older than a year counts as a year ago');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',1,'quest','day-1')$$, 'bad_ref');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',1,'quest','daily|2026-02-30')$$, 'bad_ref');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',1,'quest','daily|2999-01-01')$$, 'bad_ref');
+select pg_temp.check((select (public.record_resource('ca','crystal',1,'quest','daily|' || to_char((now() at time zone 'Asia/Tashkent')::date, 'YYYY-MM-DD'))).amount) = 1, 'resources: quest crystal for today');
+-- world_state: read-only, levels only through the RPC and only when paid
+select pg_temp.expect_error($$insert into public.world_state (child_id, buildings) values ('ca', '{"math-land":3}')$$, 'permission denied');
+select pg_temp.expect_error($$select public.record_building_level('ca','observatory',1)$$, 'not_paid');
+select pg_temp.check((select (public.record_building_level('ca','math-land',1)).buildings ->> 'math-land') = '1', 'world_state: paid upgrade recorded');
+select pg_temp.check((select (public.record_building_level('ca','math-land',1)).buildings ->> 'math-land') = '1', 'world_state: RPC idempotent');
+select pg_temp.expect_error($$select public.record_building_level('ca','math-land',3)$$, 'bad_level');
+select pg_temp.expect_error($$select public.record_building_level('ca','math-land',2)$$, 'not_paid');
+select pg_temp.expect_error($$select public.record_building_level('ca','Math Land',1)$$, 'bad_building');
+select pg_temp.expect_error($$select public.record_building_level('cb','math-land',1)$$, 'not_your_child');
+select pg_temp.expect_error($$update public.world_state set buildings = '{"math-land":3}'$$, 'permission denied');
+select pg_temp.check((select buildings ->> 'math-land' from public.world_state) = '1', 'world_state: parent reads own');
+-- achievements: read-only for clients until a validating RPC exists
+select pg_temp.expect_error($$insert into public.achievements (child_id, achievement_id, tier) values ('ca','first-steps','bronze')$$, 'permission denied');
+select pg_temp.check((select count(*) from public.achievements) = 0, 'achievements: parent cannot add one');
 -- child_learn
 insert into public.child_learn (child_id, data) values ('ca', '{"attempts":[]}');
 select pg_temp.expect_error($$insert into public.child_learn (child_id, data) values ('cb', '{}')$$, 'row-level security');
@@ -106,6 +154,10 @@ select pg_temp.expect_error($$insert into public.presence_heartbeats (child_id, 
 select pg_temp.check((select count(*) from public.presence_heartbeats) = 0, 'presence: B cannot see A');
 select pg_temp.check((select count(*) from public.reward_ledger) = 0, 'ledger: B cannot see A');
 select pg_temp.check((select count(*) from public.child_learn) = 0, 'child_learn: B cannot see A');
+select pg_temp.check((select count(*) from public.resource_ledger) = 0, 'resources: B cannot see A');
+select pg_temp.check((select count(*) from public.world_state) = 0, 'world_state: B cannot see A');
+select pg_temp.check((select count(*) from public.achievements) = 0, 'achievements: B cannot see A');
+select pg_temp.expect_error($$select public.record_resource('ca','star',1,'activity','b-1')$$, 'not_your_child');
 commit;
 
 -- ===== legacy redeem_promo brute force (critic probe P2): now not callable at all
@@ -134,6 +186,9 @@ select pg_temp.check((select count(*) from public.presence_heartbeats) = 1, 'pre
 select pg_temp.check((select c.name from public.presence_heartbeats p join public.children c on c.id = p.child_id) = 'Ali', 'presence: admin joins names');
 select pg_temp.check((select (public.record_reward('cb',1000,'admin','grant-1')).coins) = 1000, 'ledger: admin grant');
 select pg_temp.check((select (public.record_reward('cb',100,'pro-gift','gift-admin')).coins) = 100, 'ledger: admin may write pro-gift');
+select pg_temp.check((select (public.record_resource('cb','crystal',50,'admin','grant-1')).amount) = 50, 'resources: admin grant');
+select pg_temp.check((select count(*) from public.world_state) = 1, 'world_state: admin reads all');
+select pg_temp.check((select count(*) from public.resource_ledger where child_id='ca') > 0, 'resources: admin reads all');
 insert into public.payments (id,parent_id,plan,provider,amount) values ('pc','00000000-0000-0000-0000-00000000000b','yearly','admin',0);
 select pg_temp.check((select count(*) from public.payments) = 3, 'payments: admin writes and reads all');
 commit;
@@ -148,6 +203,10 @@ select pg_temp.check((select count(*) from public.ads) = 1, 'anon reads active a
 select pg_temp.check((select count(*) from public.app_settings) >= 0, 'anon still reads app_settings');
 commit;
 select pg_temp.check(not has_function_privilege('anon','public.record_reward(text,integer,text,text)','execute'), 'anon cannot execute record_reward');
+select pg_temp.check(not has_function_privilege('anon','public.record_resource(text,text,integer,text,text,timestamptz)','execute'), 'anon cannot execute record_resource');
+select pg_temp.check(not has_table_privilege('anon','public.resource_ledger','select'), 'anon cannot read resource_ledger');
+select pg_temp.check(not has_table_privilege('anon','public.world_state','select'), 'anon cannot read world_state');
+select pg_temp.check(not has_table_privilege('anon','public.achievements','select'), 'anon cannot read achievements');
 select pg_temp.check(not has_function_privilege('authenticated','public.redeem_promo(text)','execute'), 'authenticated cannot execute legacy redeem_promo');
 select pg_temp.check(has_function_privilege('anon','public.is_admin()','execute'), 'anon can still evaluate is_admin');
 select pg_temp.check((select bool_and(active) from public.promo_codes where code in ('KIDDO07','BOLAJON30')), 'launch codes stay active');
@@ -163,6 +222,9 @@ rollback;
 -- ===== cascade delete still works with append-only ledger
 delete from public.children where id = 'ca';
 select pg_temp.check((select count(*) from public.reward_ledger where child_id='ca') = 0, 'ledger: child delete cascades');
+select pg_temp.check((select count(*) from public.resource_ledger where child_id='ca') = 0, 'resources: child delete cascades');
+select pg_temp.check((select count(*) from public.world_state where child_id='ca') = 0, 'world_state: child delete cascades');
+select pg_temp.check((select count(*) from public.achievements where child_id='ca') = 0, 'achievements: child delete cascades');
 
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (

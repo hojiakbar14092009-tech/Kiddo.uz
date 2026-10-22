@@ -24,7 +24,9 @@ import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
 import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
-import { LearnHome } from '@/features/learn/LearnHome'
+import { LearnReviewCard } from '@/features/learn/LearnHome'
+import { DailyQuestCard } from '@/features/city/DailyQuestCard'
+import { KiddoCity } from '@/features/city/KiddoCity'
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -116,29 +118,17 @@ export function HomePage() {
 
       <JourneyPath plan={plan} />
 
-      {plan.complete && (
-        <div
-          role="status"
-          className="flex max-w-xl items-center gap-4 rounded-[28px] bg-lilac-soft px-5 py-4"
-        >
-          <span aria-hidden="true" className="text-5xl">
-            🌙
-          </span>
-          <div className="flex flex-col">
-            <span className="font-display text-xl font-extrabold">{t('home.restTitle')}</span>
-            <span className="text-lg text-ink-soft">{t('home.restText')}</span>
-          </div>
-        </div>
-      )}
+      <DailyQuestCard />
 
-      <LearnHome />
+      <LearnReviewCard />
+
+      <KiddoCity />
 
       <section aria-labelledby="more-title" className="flex w-full flex-col items-center gap-4">
         <h2 id="more-title" className="font-display text-2xl font-extrabold sm:text-3xl">
           {t('home.more')}
         </h2>
-        <ul className="grid w-full max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
-          <ActivityCard to="/alphabet" label={t('home.alphabet')} icon="alphabet" tone="sky" />
+        <ul className="grid w-full max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
           <ActivityCard
             to="/alphabet?tab=numbers"
             label={t('home.numbers')}
@@ -151,7 +141,6 @@ export function HomePage() {
             icon="memory"
             tone="lilac"
           />
-          <ActivityCard to="/shop" label={t('shop.open')} icon="shop" tone="girl" />
           {lockedGames.map((game) => (
             <LockedCard
               key={game}

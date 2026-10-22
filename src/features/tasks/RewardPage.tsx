@@ -5,6 +5,8 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronRightIcon, CoinIcon, HomeIcon, StarIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
+import { AwardLines } from '@/components/reward/AwardLines'
+import { useAward } from '@/components/reward/useAward'
 import { Button } from '@/components/ui/Button'
 import { RewardBurst } from '@/components/ui/RewardBurst'
 import { Mascot } from '@/features/mascot/Mascot'
@@ -30,6 +32,7 @@ function RewardContent({ taskType, outcome }: RewardState) {
   const reduceMotion = useReducedMotion() ?? false
   const { react, reset } = useMascot()
   const perfect = outcome.mistakes === 0
+  const award = useAward(outcome.resultId)
   const sticker = outcome.stickerId ? findSticker(outcome.stickerId) : undefined
   const title = perfect ? t('reward.perfectTitle') : t('reward.goodTitle')
   const text = perfect ? t('reward.perfectText') : t('reward.goodText')
@@ -105,6 +108,8 @@ function RewardContent({ taskType, outcome }: RewardState) {
           </motion.div>
         )}
       </div>
+
+      <AwardLines award={award} />
 
       <div className="mt-2 flex flex-wrap justify-center gap-4">
         <Button variant="soft" icon={<HomeIcon size={26} />} onClick={() => navigate('/home')}>

@@ -1,9 +1,11 @@
 import { subscribeRewards } from '@/domain/rewards'
+import { subscribeUniverse, useUniverseStore } from '@/domain/universe/store'
+import type { ResourceEntry } from '@/domain/universe/types'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { useActivityStore } from '@/store/activityStore'
 import { useFamilyStore } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
-import { eventRow, learnRow, rewardRow } from './rows'
+import { buildingLevelRow, eventRow, learnRow, resourceRow, rewardRow } from './rows'
 import { useSyncStore, type SyncOperation } from './syncQueue'
 import { childChanges, progressChanges, snapshot } from './trackChanges'
 
@@ -22,6 +24,38 @@ function learnOperations(childIds: Iterable<string>): SyncOperation[] {
     const data = byChild[childId]
     if (data && family.has(childId))
       operations.push({ kind: 'upsertLearn', row: learnRow(childId, data) })
+  }
+  return operations
+}
+
+/** Resource entries the server may take from a parent's device ('admin' is not theirs). */
+function syncable(entry: ResourceEntry): boolean {
+  return entry.reason !== 'admin' && entry.amount !== 0
+}
+
+/**
+ * Everything the universe holds for these children, for the first snapshot of
+ * an account: the kept ledger history oldest first (grants before the spends
+ * that need them; the server caps each on the day it was earned), then the
+ * building levels, which the server checks against those spends.
+ */
+function universeOperations(childIds: Iterable<string>): SyncOperation[] {
+  const { byChild } = useUniverseStore.getState()
+  const operations: SyncOperation[] = []
+  for (const childId of childIds) {
+    const child = byChild[childId]
+    if (!child) continue
+    for (const entry of [...child.ledger.entries].reverse()) {
+      if (syncable(entry)) operations.push({ kind: 'recordResource', row: resourceRow(entry) })
+    }
+    for (const [building, level] of Object.entries(child.buildings)) {
+      for (let step = 1; step <= level; step++) {
+        operations.push({
+          kind: 'recordBuildingLevel',
+          row: buildingLevelRow(childId, building, step),
+        })
+      }
+    }
   }
   return operations
 }
@@ -47,9 +81,11 @@ export function trackCloudChanges(
   const sync = useSyncStore.getState()
   if (sync.snapshotFor !== userId) {
     const { children } = useFamilyStore.getState()
+    const ids = children.map((child) => child.id)
     enqueueAll([
       ...snapshot(children, useProgressStore.getState().byChild),
-      ...learnOperations(children.map((child) => child.id)),
+      ...learnOperations(ids),
+      ...universeOperations(ids),
     ])
     sync.setSnapshotFor(userId)
   }
@@ -77,6 +113,20 @@ export function trackCloudChanges(
     if (!familyIds().has(entry.childKey)) return
     enqueueAll([{ kind: 'recordReward', row: rewardRow(entry) }])
   })
+  // Every resource change (stars, crystals, …) goes to the server's resource
+  // ledger the same way; 'admin' grants are not the parent's to write.
+  // The queue is sent in order, so a spend always follows the grants it needs
+  // and a building level follows its payment.
+  const stopUniverse = subscribeUniverse((event) => {
+    if (!familyIds().has(event.childKey)) return
+    if (event.type === 'resource.changed') {
+      const entry = event.entry as ResourceEntry
+      if (syncable(entry)) enqueueAll([{ kind: 'recordResource', row: resourceRow(entry) }])
+    } else if (event.type === 'building.upgraded') {
+      const row = buildingLevelRow(event.childKey, String(event.id), Number(event.level))
+      enqueueAll([{ kind: 'recordBuildingLevel', row }])
+    }
+  })
   // Learning data: remember which children changed, send each once per quiet spell.
   const dirty = new Set<string>()
   let learnTimer: ReturnType<typeof setTimeout> | undefined
@@ -98,6 +148,7 @@ export function trackCloudChanges(
     stopProgress()
     stopActivity()
     stopRewards()
+    stopUniverse()
     stopLearn()
     // Not queued on stop: stopping usually means signing out, and nothing may
     // be queued for an account after that. The next snapshot or change sends it.

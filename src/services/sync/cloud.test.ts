@@ -4,6 +4,7 @@ import { birthDateForAge } from '@/features/age/ageLevel'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { dayKey } from '@/features/tasks/rules'
 import { grantReward, useRewardStore } from '@/domain/rewards'
+import { emitActivity, grantResource, upgradeBuilding, useUniverseStore } from '@/domain/universe'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
 import { usePaymentStore } from '@/store/paymentStore'
@@ -54,6 +55,7 @@ beforeEach(() => {
   useProgressStore.setState({ byChild: {} })
   useLearnStore.setState({ byChild: {} })
   useRewardStore.setState({ byChild: {} })
+  useUniverseStore.setState({ byChild: {} })
   usePaymentStore.setState({ payments: [] })
   useSyncStore.setState({ queue: [], deadLetter: [], paused: null, snapshotFor: USER })
   useSubscriptionStore.getState().cancel()
@@ -99,6 +101,44 @@ describe('cloud change tracking', () => {
     stop()
   })
 
+  it('queues each resource entry once for the server, never guests or admin grants', () => {
+    const ali = addChild()
+    const stop = trackCloudChanges(USER, () => undefined)
+    useSyncStore.setState({ queue: [] })
+
+    const run = {
+      id: 'run-1',
+      childKey: ali.id,
+      activity: 'math:4',
+      strand: 'number' as const,
+      correct: 5,
+      total: 5,
+      independent: 5,
+    }
+    emitActivity(run)
+    emitActivity(run) // counted before: nothing new
+    emitActivity({ ...run, childKey: 'guest' })
+    grantResource({ childKey: ali.id, resource: 'crystal', amount: 5, reason: 'admin', refId: 'a' })
+
+    const rows = useSyncStore
+      .getState()
+      .queue.filter((item) => item.operation.kind === 'recordResource')
+      .map((item) => item.operation.kind === 'recordResource' && item.operation.row)
+    expect(rows).toEqual([
+      {
+        p_child: ali.id,
+        p_resource: 'star',
+        p_amount: 3,
+        p_reason: 'activity',
+        p_ref: 'run-1',
+        p_at: expect.any(String),
+      },
+      expect.objectContaining({ p_resource: 'crystal', p_amount: 1, p_reason: 'three-stars' }),
+      expect.objectContaining({ p_resource: 'part', p_amount: 1, p_reason: 'number-3star' }),
+    ])
+    stop()
+  })
+
   it('sends learning data once per quiet spell, as the latest copy', () => {
     vi.useFakeTimers()
     const ali = addChild()
@@ -124,6 +164,43 @@ describe('cloud change tracking', () => {
     learn.recordAttempt(ali.id, answer('q4'))
     vi.advanceTimersByTime(1_000)
     expect(kinds().filter((kind) => kind === 'upsertLearn')).toHaveLength(1)
+    stop()
+  })
+
+  it('sends resources earned before signing in, oldest first, then the paid building levels', () => {
+    const ali = addChild()
+    const run = {
+      childKey: ali.id,
+      activity: 'math:4',
+      strand: 'number' as const,
+      correct: 5,
+      total: 5,
+      independent: 5,
+      at: '2026-10-18T09:00:00.000Z',
+    }
+    emitActivity({ ...run, id: 'early' })
+    expect(upgradeBuilding(ali.id, 'math-land')).toBe('ok')
+    useSyncStore.setState({ queue: [], snapshotFor: null })
+    const stop = trackCloudChanges(USER, () => undefined)
+    const ops = useSyncStore
+      .getState()
+      .queue.map((item) => item.operation)
+      .filter((op) => op.kind === 'recordResource' || op.kind === 'recordBuildingLevel')
+    expect(
+      ops.map((op) =>
+        op.kind === 'recordResource'
+          ? `${op.row.p_resource}${op.row.p_amount}`
+          : `level:${op.row.p_building}:${op.row.p_level}`,
+      ),
+    ).toEqual(['star3', 'crystal1', 'part1', 'crystal-1', 'level:math-land:1'])
+    // Earned later, upgraded later: still spend after grant, level after payment.
+    emitActivity({ ...run, id: 'late', activity: 'math:5' })
+    expect(upgradeBuilding(ali.id, 'garden')).toBe('ok')
+    const tail = useSyncStore
+      .getState()
+      .queue.slice(-2)
+      .map((item) => item.operation.kind)
+    expect(tail).toEqual(['recordResource', 'recordBuildingLevel'])
     stop()
   })
 
