@@ -1,3 +1,4 @@
+import type { Evidence } from '@/domain/learningMemory'
 import { childAge, type ChildProfile } from '@/store/familyStore'
 import type { ChildProgress, TaskResult } from '@/store/progressStore'
 import type { ActivityEvent } from '@/store/activityStore'
@@ -92,6 +93,26 @@ export function learnRow(childId: string, data: LearnChild) {
   return { child_id: childId, data }
 }
 
+/**
+ * Arguments of `record_learning_evidence` (0008): one finished question. The
+ * server applies the learning-memory rules; no score or status is sent.
+ */
+export function evidenceRow(childId: string, e: Evidence) {
+  return {
+    p_child: childId,
+    p_id: e.id,
+    p_skill: e.skill,
+    p_item: e.item,
+    p_level: e.level ?? null,
+    p_at: e.at,
+    p_first_try: e.firstTry,
+    p_helped_before: e.helpedBefore,
+    p_errors: e.errors,
+    p_max_hint: e.maxHint,
+    p_review: e.review,
+  }
+}
+
 export type ChildRow = ReturnType<typeof childRow>
 export type ChildStateRow = ReturnType<typeof childStateRow>
 export type ResultRow = ReturnType<typeof resultRow>
@@ -100,3 +121,4 @@ export type RewardRow = ReturnType<typeof rewardRow>
 export type ResourceRow = ReturnType<typeof resourceRow>
 export type BuildingLevelRow = ReturnType<typeof buildingLevelRow>
 export type LearnRow = ReturnType<typeof learnRow>
+export type EvidenceRow = ReturnType<typeof evidenceRow>

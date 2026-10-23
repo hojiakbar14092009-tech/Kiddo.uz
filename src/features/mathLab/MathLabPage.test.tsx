@@ -201,7 +201,7 @@ describe('Math Lab page', () => {
     await fillBasket(user, target)
     expect(screen.getByTestId('lab-basket')).toHaveAttribute('data-count', String(target + 1))
     await user.click(screen.getByTestId('lab-done'))
-    expect(screen.getByTestId('lab-help')).toHaveTextContent('Savatda ko‘proq bo‘lib qoldi.')
+    expect(screen.getByTestId('lab-help')).toHaveTextContent('Savatda ko‘p bo‘lib qoldi.')
     await user.click(screen.getByRole('button', { name: 'Savatdan olish' }))
     expect(screen.getByTestId('lab-basket')).toHaveAccessibleName(`Savat, ichida ${target} ta`)
     const before = question()

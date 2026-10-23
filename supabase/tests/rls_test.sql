@@ -348,6 +348,114 @@ select pg_temp.expect_error($$insert into public.tts_cache (language, text_hash,
 commit;
 select pg_temp.check((select prosecdef from pg_proc where oid = 'public.is_pro_active(uuid)'::regprocedure), 'is_pro_active is security definer');
 
+-- ===== learning memory + AI tutor (0008)
+insert into public.children (id,parent_id,name,age,gender,mascot) values
+ ('m1','00000000-0000-0000-0000-00000000000a','Ali',5,'boy','boy'),
+ ('m2','00000000-0000-0000-0000-00000000000b','Lola',5,'girl','girl');
+create function pg_temp.ev(p_child text, p_id text, p_item text, p_hours numeric, p_first boolean,
+  p_review boolean default false, p_helped boolean default false, p_hint integer default 1)
+returns public.learning_memory language sql as $$
+  select public.record_learning_evidence(p_child, p_id, 'math:add:within20', p_item, 4,
+    date_trunc('hour', now()) - interval '3 days' + make_interval(secs => (p_hours * 3600)::double precision),
+    p_first, p_helped, case when p_first then '{}'::text[] else array['off-by-one'] end,
+    case when p_first then 0 else p_hint end, p_review)
+$$;
+grant execute on all functions in schema pg_temp to authenticated, anon, service_role;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+-- A: one accidental mistake is an observation only
+select pg_temp.check((select status from pg_temp.ev('m1','r1|q1','add:8+7',0,false)) = 'observed', 'memory: one mistake is only observed');
+select pg_temp.check((select evidence_count from pg_temp.ev('m1','r1|q1','add:8+7',0,false)) = 1, 'memory: the same evidence id counts once');
+-- B: the same mistake on another item is confirmed, review tomorrow
+select pg_temp.check((select status = 'confirmed' and next_review_at = date_trunc('hour', now()) - interval '3 days' + interval '1 day 30 minutes'
+  from pg_temp.ev('m1','r2|q2','add:9+6',0.5,false)), 'memory: two different items confirm it, review the next day');
+select pg_temp.check((select items from public.learning_misconceptions where child_id='m1' and code='off-by-one') = array['add:8+7','add:9+6'], 'memory: misconception keeps the items');
+-- C: independent practice: improving
+select pg_temp.check((select status from pg_temp.ev('m1','r3|q3','add:7+6',1,true)) = 'improving', 'memory: later success turns it to improving');
+select pg_temp.check((select status from pg_temp.ev('m1','r4|q4','add:8+5',2,true)) = 'improving', 'memory: two successes stay improving');
+select pg_temp.check((select status from pg_temp.ev('m1','r5|q5','add:6+7',3,true)) = 'improving', 'memory: a streak without a spaced review is not resolved');
+-- D: the review the next day resolves it (retention), same rules as memory.ts
+select pg_temp.check((select status = 'resolved' and next_review_at is null and review_count = 1 and mastery = 0.88
+  from pg_temp.ev('m1','r6|q6','add:9+4',26,true,true)), 'memory: a spaced review answered alone resolves it (mastery 0.88 as in memory.ts)');
+select pg_temp.check((select resolved_at is not null from public.learning_misconceptions where child_id='m1' and code='off-by-one'), 'memory: resolved_at is kept');
+-- a slip after resolving starts again as one observation
+select pg_temp.check((select status from pg_temp.ev('m1','r7|q7','add:6+9',40,false)) = 'observed', 'memory: a slip after resolving makes the skill observed');
+select pg_temp.check((select count = 1 and status = 'observed' and items = array['add:6+9'] from public.learning_misconceptions
+  where child_id='m1' and code='off-by-one'), 'memory: a slip after resolving is a single observation again');
+-- the browser cannot write memory or consent directly
+select pg_temp.expect_error($$update public.learning_memory set mastery = 1 where child_id='m1'$$, 'permission denied');
+select pg_temp.expect_error($$insert into public.learning_memory (child_id,parent_id,skill_key,first_at,last_practiced_at,mastery) values ('m1','00000000-0000-0000-0000-00000000000a','math:sub:within10',now(),now(),1)$$, 'permission denied');
+select pg_temp.expect_error($$update public.learning_misconceptions set status = 'resolved'$$, 'permission denied');
+select pg_temp.expect_error($$delete from public.learning_memory$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.learning_evidence$$, 'permission denied');
+-- forged child id and bad shapes
+select pg_temp.expect_error($$select pg_temp.ev('m2','x|1','add:1+1',0,false)$$, 'not_your_child');
+select pg_temp.expect_error($$select pg_temp.ev('nobody','x|1','add:1+1',0,false)$$, 'no_child');
+select pg_temp.expect_error($$select public.record_learning_evidence('m1','x|2','math:add:within20','My name is Ali',4,now(),false,false,'{}',1,false)$$, 'bad_item');
+select pg_temp.expect_error($$select public.record_learning_evidence('m1','x|3','phone:+998901234567','add:1+1',4,now(),false,false,'{}',1,false)$$, 'bad_skill');
+select pg_temp.expect_error($$select public.record_learning_evidence('m1','x|4','math:add:within20','add:1+1',4,now(),false,false,'{}',7,false)$$, 'bad_hint');
+select pg_temp.expect_error($$select public.record_learning_evidence('m1','x|5','math:add:within20','add:1+1',4,null,false,false,'{}',1,false)$$, 'bad_time');
+select pg_temp.check((select last_practiced_at <= now() from public.record_learning_evidence('m1','x|6','math:sub:within10','sub:5-1',4,now() + interval '1 hour',true,false,'{}',0,false)), 'memory: a device clock ahead of the server is clamped, not refused');
+-- two different items in ONE session stay an observation (hurried taps)
+select public.record_learning_evidence('m1','same|1','math:missing:add','missing:a+?=s:3:5',3,now() - interval '1 hour',false,false,array['off-by-one'],1,false);
+select pg_temp.check((select status from public.record_learning_evidence('m1','same|2','math:missing:add','missing:a+?=s:2:6',3,now() - interval '50 minutes',false,false,array['off-by-one'],1,false)) = 'observed', 'memory: one session never confirms a misconception');
+select pg_temp.check((select count(*) from public.learning_memory) = 3 and (select count(distinct child_id) from public.learning_memory) = 1, 'memory: parent reads own child only');
+-- consent: only through the RPC, only for own children
+select pg_temp.check((select granted from public.set_ai_consent('m1', true, '1')), 'consent: parent switches the tutor on for own child');
+select pg_temp.expect_error($$select public.set_ai_consent('m2', true, '1')$$, 'not_your_child');
+select pg_temp.expect_error($$select public.set_ai_consent('m1', true, 'v1; drop')$$, 'bad_version');
+select pg_temp.expect_error($$insert into public.ai_consent (child_id,parent_id,granted,policy_version) values ('m2','00000000-0000-0000-0000-00000000000a',true,'1')$$, 'permission denied');
+select pg_temp.expect_error($$update public.ai_consent set granted = true$$, 'permission denied');
+select pg_temp.check((select count(*) from public.ai_consent) = 1, 'consent: parent reads own consent');
+select pg_temp.expect_error($$select public.ai_consent_ok('00000000-0000-0000-0000-00000000000a','m1','1')$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.ai_cache$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.ai_usage$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.ai_provider_state$$, 'permission denied');
+select pg_temp.expect_error($$select public.ai_housekeeping()$$, 'permission denied');
+commit;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from public.learning_memory) = 0, 'memory: another family sees nothing (select)');
+select pg_temp.check((select count(*) from public.learning_misconceptions) = 0, 'memory: another family sees no misconceptions');
+select pg_temp.check((select count(*) from public.ai_consent) = 0, 'consent: another family sees nothing');
+select pg_temp.expect_error($$select pg_temp.ev('m1','b|1','add:1+1',0,false)$$, 'not_your_child');
+select pg_temp.expect_error($$update public.learning_memory set mastery = 0 where child_id='m1'$$, 'permission denied');
+select pg_temp.check((select status from pg_temp.ev('m2','b|2','add:3+4',0,true)) = 'new', 'memory: B records for own child');
+commit;
+
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.expect_error($$select public.record_learning_evidence('m1','z|1','math:add:within20','add:1+1',4,now(),true,false,'{}',0,false)$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.learning_memory$$, 'permission denied');
+commit;
+
+begin;
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
+select pg_temp.check(public.ai_consent_ok('00000000-0000-0000-0000-00000000000a','m1','1'), 'consent: the tutor function sees A''s consent for m1');
+select pg_temp.check(not public.ai_consent_ok('00000000-0000-0000-0000-00000000000a','m1','2'), 'consent: a new policy version needs consent again');
+select pg_temp.check(not public.ai_consent_ok('00000000-0000-0000-0000-00000000000b','m1','1'), 'consent: not for another parent');
+select pg_temp.check(not public.ai_consent_ok('00000000-0000-0000-0000-00000000000b','m2','1'), 'consent: not without a consent row');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000a','ai',2,60) and public.audio_rate_ok('00000000-0000-0000-0000-00000000000a','ai',2,60), 'ai rate: allowed under the limit');
+select pg_temp.check(not public.audio_rate_ok('00000000-0000-0000-0000-00000000000a','ai',2,60), 'ai rate: refused at the limit');
+select pg_temp.check(public.audio_daily_count('ai') = 2, 'ai rate: daily count of ai requests');
+insert into public.ai_provider_state (provider, cooldown_until) values ('gemini-free', now() + interval '15 minutes');
+insert into public.ai_cache (key_hash, language, reply, created_at) values (repeat('a',64),'uz','{"message":"Qani"}', now() - interval '31 days');
+insert into public.ai_usage (provider, model, outcome, latency_bucket, policy_version) values ('gemini-free','gemini-3.8-flash','ok','lt1s','1');
+select pg_temp.expect_error($$insert into public.ai_usage (provider, model, outcome, latency_bucket, policy_version) values ('x','y','paid','lt1s','1')$$, 'ai_usage_outcome_check');
+select pg_temp.expect_error($$insert into public.ai_cache (key_hash, language, reply) values ('not-a-hash','uz','{}')$$, 'ai_cache_key_hash_check');
+select pg_temp.check(public.ai_housekeeping() = 1, 'housekeeping: removes the expired rows only');
+select pg_temp.check((select count(*) from public.ai_cache) = 0 and (select count(*) from public.ai_usage) = 1, 'housekeeping: expired cache rows go, recent telemetry stays');
+commit;
+select pg_temp.check((select prosecdef from pg_proc where oid = 'public.record_learning_evidence(text,text,text,text,integer,timestamptz,boolean,boolean,text[],integer,boolean)'::regprocedure), 'record_learning_evidence is security definer');
+delete from public.children where id = 'm1';
+select pg_temp.check((select count(*) from public.learning_memory where child_id='m1') = 0 and (select count(*) from public.learning_misconceptions where child_id='m1') = 0 and (select count(*) from public.ai_consent where child_id='m1') = 0, 'memory: child delete cascades');
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

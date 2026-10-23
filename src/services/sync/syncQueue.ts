@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import type {
   BuildingLevelRow,
   ChildRow,
+  EvidenceRow,
   ChildStateRow,
   EventRow,
   LearnRow,
@@ -21,6 +22,7 @@ export type SyncOperation =
   | { kind: 'recordResource'; row: ResourceRow }
   | { kind: 'recordBuildingLevel'; row: BuildingLevelRow }
   | { kind: 'upsertLearn'; row: LearnRow }
+  | { kind: 'recordLearningEvidence'; row: EvidenceRow }
 
 export interface QueuedOperation {
   id: string
@@ -101,6 +103,7 @@ function childOf(operation: SyncOperation): string {
     case 'recordReward':
     case 'recordResource':
     case 'recordBuildingLevel':
+    case 'recordLearningEvidence':
       return operation.row.p_child
   }
 }
@@ -141,6 +144,9 @@ function sameTarget(a: SyncOperation, b: SyncOperation): boolean {
       a.row.p_ref === b.row.p_ref
     )
   }
+  if (a.kind === 'recordLearningEvidence' && b.kind === 'recordLearningEvidence') {
+    return a.row.p_id === b.row.p_id
+  }
   if (a.kind === 'recordBuildingLevel' && b.kind === 'recordBuildingLevel') {
     return a.row.p_building === b.row.p_building && a.row.p_level === b.row.p_level
   }
@@ -170,6 +176,9 @@ async function send(client: SyncClient, operation: SyncOperation) {
       return client.rpc('record_building_level', operation.row)
     case 'upsertLearn':
       return client.upsert('child_learn', operation.row, 'child_id')
+    case 'recordLearningEvidence':
+      // Idempotent on the server by (child, evidence id); it runs the memory rules itself.
+      return client.rpc('record_learning_evidence', operation.row)
   }
 }
 

@@ -49,6 +49,7 @@ Phase 6: 667 unit, 70 e2e
 Phase 7: 743 unit, 70 e2e, 189 SQL assertions (`supabase/tests/run.sh`, local Postgres).
 Phase 8: 790 unit, 80 e2e.
 Phase 9: 862 unit, 84 e2e.
+Phase 10: 931 unit, 86 e2e, 246 SQL assertions.
 
 ## UI foundation (Phase 1)
 
@@ -225,7 +226,8 @@ list, RLS queries, network check) before Phase 3 starts.
 
 B1 Supabase on Vercel prod (see above) · B2 payment provider credentials ·
 B3 service-role/Edge secrets · B4 TTS provider (real Uzbek voice) · B5 AI provider +
-consent/data location · B6 product decisions (free voice set, offline grace, demo mode in
+consent/data location (Gemini terms: 18+ only, not for apps likely used by under-18s; free-tier
+data may be human-reviewed → AI_PROVIDER stays unset; see docs/architecture/ai-tutor.md) · B6 product decisions (free voice set, offline grace, demo mode in
 prod) · B7 promo policy.
 
 ## Phases
@@ -240,16 +242,25 @@ prod) · B7 promo policy.
 - [x] 7 Pro + audio security: private voice bucket, voice-url/tts Edge Functions, server PRO check (2026-10-23)
 - [x] 8 Story Engine: /stories, 6 branching stories, PRO narration, scroll per story (2026-10-23)
 - [x] 9 Parent Dashboard: skills, last 7 days, practise/strengths, history, healthy play, export (2026-10-23)
-- [ ] 10 AI Friend · 11 responsive · 12 performance · 13 security
+- [x] 10 AI tutor + learning memory: hint ladder in Math Lab, spaced review, memory (device + 0008 server rules), `tutor` Edge Function (Gemini free adapter, OFF: terms forbid under-18 apps → B5), parent memory panel + AI helper switch (2026-10-24)
+- [ ] 11 responsive · 12 performance · 13 security
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
 speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
+## Phase 10 map
+
+`domain/learningMemory` (pure rules memory.ts + store; evidence via `recordEvidence` only;
+SQL twin `record_learning_evidence`, parity scenario mastery 0.88) · `domain/tutor` (ladder,
+context builder, aiClient: availability no-server/no-account/not-pro/off/resting/ready, consent
+mirror `kiddo.ai-tutor`) · `features/tutor` (TutorPanel, useTutorReply) · Math Lab: ladder
+clue → picture → card removed → solution, `data-review` question from due memory · server
+`_shared/ai/*` + `tutor/` · parent `MemoryPanel`, `AiTutorPanel`. Other activities only emit
+`mistake.made` (tutor not yet wired there).
+
 ## Next
 
-Phase 10 – AI Friend: provider abstraction (server-side keys only), child-safety filter,
-parent consent, honest "not available" when no provider – never fake AI. Owner actions: apply 0005–0007, deploy
-voice-url/tts + secrets, upload voice, then `VITE_VOICE_PRIVATE=true`; Realtime
-private-only; Vercel `VITE_SUPABASE_*` (supabase-verification.md §6–7); B4 TTS
-provider; B5 consent + data location.
+Phase 11 – responsive audit. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
+secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
+Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

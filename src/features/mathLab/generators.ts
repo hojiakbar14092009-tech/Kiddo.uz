@@ -128,6 +128,8 @@ export interface LabQuestion {
   help: { visual: HelpVisual; text: HelpText }
   /** Why a wrong option is wrong (option id → error type), for the record. */
   errors: Record<string, string>
+  /** A spaced review of a skill the learning memory says is due (Phase 10). */
+  review?: boolean
 }
 
 // ------------------------------------------------------------------ helpers
@@ -770,11 +772,45 @@ export function makeQuestion(
 }
 
 /**
+ * A question of `skill` at `level` that is not one of `avoid` (the items the
+ * child got wrong and the questions already in the session): a related item,
+ * never the same one again. Null when the skill has no such item left (then
+ * the session simply has no review).
+ */
+export function reviewQuestion(
+  skill: string,
+  level: ChallengeLevel,
+  avoid: ReadonlySet<string>,
+  rng: Rng = Math.random,
+): LabQuestion | null {
+  const plan = LEVEL_PLAN[level]
+  for (let attempt = 0; attempt < plan.length * 12; attempt += 1) {
+    const q = makeQuestion(level, attempt % plan.length, rng, avoid)
+    if (q.skill === skill && !avoid.has(q.id)) return { ...q, review: true }
+  }
+  return null
+}
+
+/** A due review for the session (from the learning memory). */
+export interface ReviewPlan {
+  skill: string
+  /** The level the skill was practised at; a review never goes above today's level. */
+  level: ChallengeLevel
+  /** Items already seen wrong. */
+  avoid: readonly string[]
+}
+
+/**
  * The questions of one session at a level: every kind of the level once, the
  * drag task first for levels 1–2 (hands first), the rest in a random order,
- * no question twice.
+ * no question twice. A due review takes the place of one question (the
+ * second for levels 1–2, else the first), so a session never gets longer.
  */
-export function planSession(level: ChallengeLevel, rng: Rng = Math.random): LabQuestion[] {
+export function planSession(
+  level: ChallengeLevel,
+  rng: Rng = Math.random,
+  review?: ReviewPlan | null,
+): LabQuestion[] {
   const count = sessionLength(level)
   const used = new Set<string>()
   const out: LabQuestion[] = []
@@ -783,11 +819,12 @@ export function planSession(level: ChallengeLevel, rng: Rng = Math.random): LabQ
     used.add(q.id)
     out.push(q)
   }
-  if (level <= 2) {
-    const [first, ...rest] = out
-    return [first!, ...shuffle(rest, rng)]
-  }
-  return shuffle(out, rng)
+  const ordered = level <= 2 ? [out[0]!, ...shuffle(out.slice(1), rng)] : shuffle(out, rng)
+  if (!review || review.level > level) return ordered
+  const q = reviewQuestion(review.skill, review.level, new Set([...review.avoid, ...used]), rng)
+  if (!q) return ordered
+  const at = level <= 2 ? 1 : 0
+  return ordered.map((item, index) => (index === at ? q : item))
 }
 
 /** Is this option (or for 'drag', this many in the basket) the right answer? */

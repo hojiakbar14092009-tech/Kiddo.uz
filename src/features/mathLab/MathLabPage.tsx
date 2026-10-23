@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BulbIcon, HomeIcon } from '@/components/icons'
+import { HomeIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
 import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
@@ -12,6 +12,15 @@ import { Button } from '@/components/ui/Button'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { StepDots } from '@/components/ui/Progress'
 import { useChallengeLevel, type ChallengeLevel } from '@/domain/learner'
+import {
+  dueReviews,
+  getChildMemory,
+  getSkillMemory,
+  isActive,
+  recordEvidence,
+  type HintLevel,
+} from '@/domain/learningMemory'
+import { aiWorthAsking, buildTutorRequest, nextHint } from '@/domain/tutor'
 import { emitActivity, type AwardSummary } from '@/domain/universe'
 import { emitUniverse } from '@/domain/universe/store'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
@@ -24,14 +33,18 @@ import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import { useLearnVoice } from '@/features/learn/voice'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascotStore } from '@/features/mascot/mascotStore'
+import { TutorPanel } from '@/features/tutor/TutorPanel'
+import { useTutorReply } from '@/features/tutor/useTutorReply'
+import { tDynamic } from '@/lib/tDynamic'
 import { newId } from '@/lib/id'
 import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { BasketTask } from './BasketTask'
-import { errorOf, isRight, planSession } from './generators'
+import { errorOf, isRight, planSession, type LabQuestion, type ReviewPlan } from './generators'
 import { HelpPicture, OptionFace, SceneView } from './parts'
 import { labActivity, labSummary, type LabSummary } from './result'
 import { helpText, optionLabel, promptText } from './text'
+import { cardToRemove, isSymbolic, labSkillKey, solutionText, tutorItem } from './tutor'
 
 /** Levels from which the level number is shown; younger screens stay pictorial. */
 const SHOW_LEVEL_FROM = 3
@@ -226,21 +239,47 @@ interface Finished {
   award: Pick<AwardSummary, 'stars' | 'crystals' | 'parts'>
 }
 
+/**
+ * The due spaced review for this session, if any: a skill the learning memory
+ * says needs another look, practised at a level not above today's.
+ */
+function reviewFor(childKey: string, level: ChallengeLevel): ReviewPlan | null {
+  const due = dueReviews(getChildMemory(childKey).skills, new Date().toISOString(), 5)
+  for (const memory of due) {
+    if (!memory.skill.startsWith('math:') || !memory.level || memory.level > level) continue
+    const avoid = Object.values(memory.misconceptions).flatMap((m) => m.items)
+    return { skill: memory.skill.slice(5), level: memory.level as ChallengeLevel, avoid }
+  }
+  return null
+}
+
+/** Is this error one the learning memory already knows for this skill (confirmed or improving)? */
+function remembered(childKey: string, q: LabQuestion, code: string | null): boolean {
+  if (!code) return false
+  const m = getSkillMemory(childKey, labSkillKey(q))?.misconceptions[code]
+  return Boolean(m && isActive(m))
+}
+
 function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => void }) {
   const { t } = useTranslation()
   const language = useLanguage()
   const childKey = useChildKey()
   const { say, reset } = useLearnMascot()
-  const [questions] = useState(() => planSession(level))
+  const [questions] = useState(() => planSession(level, Math.random, reviewFor(childKey, level)))
   const [runId] = useState(newId)
   const sheet = useRef<SessionSheet>(newSheet('test'))
   const [index, setIndex] = useState(0)
   const [statuses, setStatuses] = useState<Record<string, ChoiceStatus>>({})
   const [misses, setMisses] = useState(0)
   const [solved, setSolved] = useState(false)
-  const [showHelp, setShowHelp] = useState(false)
+  const [hint, setHint] = useState<HintLevel>(0)
   const [note, setNote] = useState<string | null>(null)
   const [finished, setFinished] = useState<Finished | null>(null)
+  const tutor = useTutorReply()
+  // session memory of the current question (layer 1: never stored)
+  const errors = useRef<string[]>([])
+  const maxHint = useRef<HintLevel>(0)
+  const lastAnswer = useRef<{ value: string; code: string | null } | null>(null)
   const emitted = useRef(false)
   const helpPanel = useRef<HTMLElement>(null)
   const reduceMotion = useReducedMotion() ?? false
@@ -252,22 +291,31 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
 
   // after a mistake the help comes into view (it may be below the answers on a small phone)
   useEffect(() => {
-    if (showHelp) {
+    if (hint > 0) {
       helpPanel.current?.scrollIntoView?.({
         block: 'nearest',
         behavior: reduceMotion ? 'auto' : 'smooth',
       })
     }
-  }, [showHelp, misses, reduceMotion])
+  }, [hint, reduceMotion])
 
   // a session (and its result) starts at the top, not where the last screen was scrolled to
   useEffect(() => {
     window.scrollTo({ top: 0 })
   }, [finished])
 
-  // a new question: the bubble from the last answer goes away
+  // `say` changes on every render (it closes over the voice): read it through a
+  // ref, so the effect below runs only when the question changes
+  const sayRef = useRef(say)
+  sayRef.current = say
+  const reviewLine = t('tutor.review')
+
+  // a new question: the bubble from the last answer goes away; a review says so kindly
   useEffect(() => {
     reset()
+    if (questions[index]?.review) sayRef.current('instruct', { text: reviewLine, emoji: '🌱' })
+    // only on a new question: the line and the questions never change within one
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, reset])
 
   /**
@@ -292,24 +340,122 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
     return { summary, award }
   }, [childKey, level, questions.length, runId])
 
+  /** The finished question goes to the learning memory (layer 2) as evidence. */
+  const remember = useCallback(
+    (question: LabQuestion, firstTry: boolean) => {
+      try {
+        recordEvidence(childKey, {
+          id: `${runId}|${index}`,
+          skill: labSkillKey(question),
+          item: question.id,
+          level: question.level,
+          at: new Date().toISOString(),
+          firstTry,
+          helpedBefore: Boolean(sheet.current.helpedBefore[question.id]),
+          // each code once, at most 8 (a basket can be tried again and again)
+          errors: [...new Set(errors.current)].slice(-8),
+          maxHint: maxHint.current,
+          review: Boolean(question.review),
+        })
+      } catch {
+        // memory is an aid: a failure never stops the game
+      }
+    },
+    [childKey, index, runId],
+  )
+
   const advance = useCallback(() => {
     setIndex(index + 1)
     setStatuses({})
     setMisses(0)
     setSolved(false)
-    setShowHelp(false)
+    setHint(0)
     setNote(null)
-  }, [index])
+    tutor.clear()
+    errors.current = []
+    maxHint.current = 0
+    lastAnswer.current = null
+  }, [index, tutor])
+
+  /** Kiddo's own words for a hint step (always there, with or without an AI). */
+  const localHint = (
+    question: LabQuestion,
+    step: HintLevel,
+    code: string | null,
+    removed: boolean,
+  ) => {
+    const target = question.scene.type === 'basket' ? question.scene.target : 0
+    if (step <= 1) {
+      const clue = tDynamic(t, `tutor.clue.${code ?? 'default'}`, {
+        defaultValue: t('tutor.clue.default'),
+      })
+      return remembered(childKey, question, code) ? `${t('tutor.remembered')} ${clue}` : clue
+    }
+    if (step === 2) return helpText(t, question)
+    if (step === 3) {
+      if (question.kind === 'drag') return t('tutor.partialDrag', { target })
+      return removed ? t('tutor.partial') : helpText(t, question)
+    }
+    if (question.kind === 'drag') return t('tutor.solutionDrag', { target })
+    return t('tutor.solution', { solution: solutionText(t, language, question) })
+  }
+
+  /** Shows a step of the hint ladder: cards, words, the mascot, and maybe an AI reply. */
+  const showHint = (
+    question: LabQuestion,
+    step: HintLevel,
+    current: Record<string, ChoiceStatus>,
+  ) => {
+    if (step === 0) return
+    setHint(step)
+    if (step > maxHint.current) maxHint.current = step
+    let next = current
+    let removed = false
+    if (step >= 3 && question.kind !== 'drag') {
+      const card = cardToRemove(question, current)
+      if (card) {
+        next = { ...next, [card]: 'removed' }
+        removed = true
+      } else {
+        removed = Object.values(current).includes('removed')
+      }
+    }
+    if (step >= 4 && question.kind !== 'drag') next = { ...next, [question.answer]: 'hint' }
+    setStatuses(next)
+    const code = lastAnswer.current?.code ?? null
+    const local = localHint(question, step, code, removed)
+    say('wrong', { text: step === 1 ? local : t('mathLab.feedback.wrong'), emoji: '💡' })
+    tutor.show(
+      step,
+      local,
+      aiWorthAsking(step, isSymbolic(question))
+        ? () =>
+            buildTutorRequest({
+              childId: childKey,
+              language,
+              level: question.level,
+              persona: 'kidobot',
+              intent: step === 4 ? 'explain' : 'hint',
+              hintLevel: step as 1 | 2 | 3 | 4,
+              item: tutorItem(question, lastAnswer.current?.value, code ?? undefined),
+              memory: getSkillMemory(childKey, labSkillKey(question)),
+            })
+        : null,
+    )
+  }
 
   const answer = (value: string) => {
     if (!q || solved) return
     const correct = isRight(q, value)
-    sheet.current = recordAnswer(sheet.current, q, value, correct, errorOf(q, value))
+    const code = errorOf(q, value)
+    sheet.current = recordAnswer(sheet.current, q, value, correct, code)
     if (correct) {
       setStatuses((s) => ({ ...s, [value]: 'correct' }))
       setSolved(true)
       setNote(null)
+      tutor.clear()
       say('correct')
+      remember(q, misses === 0)
       if (index + 1 >= questions.length) {
         const done = record()
         timer.current = window.setTimeout(() => done && setFinished(done), NEXT_DELAY_MS)
@@ -320,21 +466,25 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
     }
     const count = misses + 1
     setMisses(count)
-    setShowHelp(true)
-    setStatuses((s) => ({
-      ...s,
-      [value]: 'wrong',
-      // after two misses the right card glows (never a punishment, just a way on)
-      ...(count >= 2 && q.kind !== 'drag' ? { [q.answer]: 'hint' as const } : {}),
-    }))
-    if (q.kind === 'drag') {
+    if (code) errors.current = [...errors.current, code]
+    lastAnswer.current = { value, code }
+    // each mistake climbs one step of the ladder (never down, never straight to the answer)
+    const step = nextHint(hint)
+    // the basket's "too many / too few" line: the first clue already says it
+    if (q.kind === 'drag' && step >= 2) {
       setNote(
         t(
           Number(value) > Number(q.answer) ? 'mathLab.feedback.tooMany' : 'mathLab.feedback.tooFew',
         ),
       )
     }
-    say('wrong', { text: t('mathLab.feedback.wrong'), emoji: '💡' })
+    showHint(q, step, { ...statuses, [value]: 'wrong' })
+  }
+
+  /** The child asks for more help: one step up the ladder. */
+  const moreHelp = () => {
+    if (!q || solved) return
+    showHint(q, nextHint(hint), statuses)
   }
 
   const help = useMemo(
@@ -346,6 +496,8 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
           glow={misses > 0 && !solved}
           onOpen={() => {
             sheet.current = markHelp(sheet.current, q.id)
+            // the bulb shows the picture help: step 2 of the ladder
+            if (maxHint.current < 2) maxHint.current = 2
           }}
         >
           <HelpPicture visual={q.help.visual} object={q.object} />
@@ -380,6 +532,7 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
         data-level={q.level}
         data-answer={q.answer}
         data-step={index}
+        data-review={q.review ? 'true' : undefined}
         className={clsx(
           'mx-auto flex w-full max-w-4xl flex-col items-center gap-4 sm:gap-6',
           // a phone held sideways: the question beside the answers (the basket needs the width)
@@ -426,19 +579,18 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
         )}
       </section>
 
-      {showHelp && !solved && (
-        <aside
-          ref={helpPanel}
-          data-testid="lab-help"
-          className="mx-auto flex w-full max-w-3xl flex-col items-center gap-3 rounded-card bg-coin-soft p-4 text-center short:p-2"
+      {hint > 0 && !solved && tutor.view && (
+        <TutorPanel
+          panelRef={helpPanel}
+          level={tutor.view.level}
+          message={tutor.view.message}
+          source={tutor.view.source}
+          thinking={tutor.thinking}
+          note={note}
+          onMore={moreHelp}
         >
-          {note && <p className="font-display text-xl font-extrabold short:text-base">{note}</p>}
-          <p className="flex items-center gap-2 text-lg font-bold short:text-base">
-            <BulbIcon size={26} className="shrink-0 text-coin-shadow" />
-            {helpText(t, q)}
-          </p>
-          <HelpPicture visual={q.help.visual} object={q.object} />
-        </aside>
+          {hint >= 2 && <HelpPicture visual={q.help.visual} object={q.object} />}
+        </TutorPanel>
       )}
     </LabFrame>
   )

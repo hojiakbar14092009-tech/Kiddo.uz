@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_ANON_KEY?: string
   /** 'true': voice clips come from the private bucket as signed URLs and are left out of dist (docs/architecture/audio-security.md). */
   readonly VITE_VOICE_PRIVATE?: string
+  /** 'true' only after owner blocker B5 is resolved and a provider is set on the server. */
+  readonly VITE_AI_TUTOR?: string
 }
 
 interface ImportMeta {

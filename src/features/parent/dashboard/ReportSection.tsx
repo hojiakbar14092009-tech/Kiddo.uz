@@ -20,6 +20,7 @@ import {
 import { useChildInsights } from '../insights/useChildInsights'
 import { ActivityPanel } from './ActivityPanel'
 import { LearnResultsPanel } from './LearnResultsPanel'
+import { MemoryPanel } from '../insights/MemoryPanel'
 import { Panel } from './Panel'
 
 /** Today, the week and the letters that need practice – for one child. */
@@ -91,6 +92,7 @@ export function ReportSection({ child }: { child: ChildProfile }) {
       <MedalsCityRow insights={insights} />
       <SkillsPanel child={child} insights={insights} />
       <PracticePanel child={child} insights={insights} />
+      <MemoryPanel child={child} />
       <PlayedPanel child={child} insights={insights} />
       <HealthPanel child={child} insights={insights} />
 

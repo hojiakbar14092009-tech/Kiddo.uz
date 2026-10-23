@@ -3,7 +3,8 @@ import { motion, useReducedMotion, type TargetAndTransition } from 'framer-motio
 import type { ReactNode } from 'react'
 import { CheckIcon } from '@/components/icons'
 
-export type ChoiceStatus = 'idle' | 'wrong' | 'correct' | 'hint'
+/** `removed`: a wrong card the tutor took away (a partial hint): faded and not pressable. */
+export type ChoiceStatus = 'idle' | 'wrong' | 'correct' | 'hint' | 'removed'
 
 export interface Choice {
   id: string
@@ -17,6 +18,7 @@ const STATUS_CLASSES: Record<ChoiceStatus, string> = {
   hint: 'bg-white shadow-[0_7px_0_var(--color-line)] ring-4 ring-coin',
   correct: 'bg-primary-soft shadow-[0_7px_0_#B5E3D2] ring-4 ring-primary',
   wrong: 'bg-oops-soft text-oops-ink shadow-[0_7px_0_var(--color-oops-shadow)] opacity-70',
+  removed: 'bg-white/60 opacity-25 grayscale shadow-none',
 }
 
 const STATUS_MOTION: Record<ChoiceStatus, TargetAndTransition> = {
@@ -24,6 +26,7 @@ const STATUS_MOTION: Record<ChoiceStatus, TargetAndTransition> = {
   wrong: { x: [0, -12, 11, -7, 5, 0], scale: 1, transition: { duration: 0.5 } },
   correct: { scale: [1, 1.08, 1], x: 0, transition: { duration: 0.45 } },
   hint: { scale: [1, 1.04, 1], x: 0, transition: { duration: 1.2, repeat: Infinity } },
+  removed: { x: 0, scale: 0.94, transition: { duration: 0.3 } },
 }
 
 /** Big answer cards in the style of the existing games (2–4 per question). */
@@ -58,8 +61,11 @@ export function ChoiceGrid({
             key={choice.id}
             type="button"
             aria-label={choice.label}
-            aria-disabled={status === 'wrong' || disabled}
-            onClick={() => !disabled && status !== 'wrong' && onChoose(choice.id)}
+            data-status={status}
+            aria-disabled={status === 'wrong' || status === 'removed' || disabled}
+            onClick={() =>
+              !disabled && status !== 'wrong' && status !== 'removed' && onChoose(choice.id)
+            }
             animate={reduceMotion ? undefined : STATUS_MOTION[status]}
             className={clsx(
               'relative flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-[32px] p-3 text-ink transition-colors',

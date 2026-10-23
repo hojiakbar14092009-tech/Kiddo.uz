@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import type { GameType } from '@/features/tasks/games'
 import { clearChildRewards } from '@/domain/rewards/rewardStore'
+import { clearLearningMemory } from '@/domain/learningMemory/store'
 import { clearUniverseChild } from '@/domain/universe/store'
 import { useLearnStore } from '@/features/learn/learnStore'
 import {
@@ -136,6 +137,7 @@ export const useFamilyStore = create<FamilyState>()(
         }))
         clearChildRewards(id)
         clearUniverseChild(id)
+        clearLearningMemory(id)
         useLearnStore.getState().clearChild(id)
         // the child's pictures from the studio (loaded on demand, kept out of the main bundle)
         void import('@/features/studio/gallery')

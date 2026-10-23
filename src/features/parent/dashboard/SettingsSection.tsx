@@ -5,6 +5,7 @@ import { audioManager } from '@/services/audio/audioManager'
 import { isSupabaseConfigured } from '@/services/supabase/client'
 import { useParentStore } from '@/store/parentStore'
 import { useLanguage, useSettingsStore } from '@/store/settingsStore'
+import { AiTutorPanel } from './AiTutorPanel'
 import { ChoiceChips } from './ChoiceChips'
 import { Panel } from './Panel'
 
@@ -54,6 +55,8 @@ export function SettingsSection() {
           onChange={setLanguage}
         />
       </Panel>
+
+      <AiTutorPanel />
 
       <Panel title={t('parent.settings.account')} className="lg:col-span-2">
         <p>

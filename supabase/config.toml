@@ -1,5 +1,5 @@
 # Supabase CLI settings. Only what this repo needs: the Edge Functions of
-# Phase 7 (docs/architecture/audio-security.md). Everything else keeps the
+# Phases 7 and 10 (docs/architecture/audio-security.md, ai-tutor.md). Everything else keeps the
 # CLI defaults. `project_id` is the CLI's local name for the stack (required
 # by the config loader), not the remote project ref (`supabase link` sets that).
 project_id = "kiddo-uz"
@@ -10,4 +10,7 @@ project_id = "kiddo-uz"
 verify_jwt = true
 
 [functions.tts]
+verify_jwt = true
+
+[functions.tutor]
 verify_jwt = true

@@ -1,3 +1,4 @@
+import { subscribeEvidence } from '@/domain/learningMemory'
 import { subscribeRewards } from '@/domain/rewards'
 import { subscribeUniverse, useUniverseStore } from '@/domain/universe/store'
 import type { ResourceEntry } from '@/domain/universe/types'
@@ -5,7 +6,7 @@ import { useLearnStore } from '@/features/learn/learnStore'
 import { useActivityStore } from '@/store/activityStore'
 import { useFamilyStore } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
-import { buildingLevelRow, eventRow, learnRow, resourceRow, rewardRow } from './rows'
+import { buildingLevelRow, eventRow, evidenceRow, learnRow, resourceRow, rewardRow } from './rows'
 import { useSyncStore, type SyncOperation } from './syncQueue'
 import { childChanges, progressChanges, snapshot } from './trackChanges'
 
@@ -127,6 +128,11 @@ export function trackCloudChanges(
       enqueueAll([{ kind: 'recordBuildingLevel', row }])
     }
   })
+  // Learning memory: each finished question, as evidence; the server runs the rules.
+  const stopEvidence = subscribeEvidence((childKey, evidence) => {
+    if (!familyIds().has(childKey)) return
+    enqueueAll([{ kind: 'recordLearningEvidence', row: evidenceRow(childKey, evidence) }])
+  })
   // Learning data: remember which children changed, send each once per quiet spell.
   const dirty = new Set<string>()
   let learnTimer: ReturnType<typeof setTimeout> | undefined
@@ -149,6 +155,7 @@ export function trackCloudChanges(
     stopActivity()
     stopRewards()
     stopUniverse()
+    stopEvidence()
     stopLearn()
     // Not queued on stop: stopping usually means signing out, and nothing may
     // be queued for an account after that. The next snapshot or change sends it.

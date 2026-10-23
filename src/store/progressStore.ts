@@ -14,6 +14,7 @@ import {
   wasRewarded,
 } from '@/domain/rewards/rewardStore'
 import { coinsFor, DAILY_BONUS } from '@/domain/rewards/rules'
+import { clearLearningMemory } from '@/domain/learningMemory/store'
 import { clearUniverseChild, emitActivity } from '@/domain/universe/store'
 import { taskActivity } from '@/domain/universe/wiring'
 import { useFamilyStore } from './familyStore'
@@ -273,6 +274,7 @@ export const useProgressStore = create<ProgressState>()(
       startGuest: () => {
         clearChildRewards(GUEST_KEY)
         clearUniverseChild(GUEST_KEY)
+        clearLearningMemory(GUEST_KEY)
         // The guest's studio pictures too (loaded on demand, kept out of the main bundle).
         void import('@/features/studio/gallery')
           .then(({ studioGallery }) => studioGallery().removeChild(GUEST_KEY))
@@ -313,6 +315,7 @@ export const useProgressStore = create<ProgressState>()(
       resetChild: (childKey) => {
         clearChildRewards(childKey)
         clearUniverseChild(childKey)
+        clearLearningMemory(childKey)
         set((state) => {
           const byChild = { ...state.byChild }
           delete byChild[childKey]

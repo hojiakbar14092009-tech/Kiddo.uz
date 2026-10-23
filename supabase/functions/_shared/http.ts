@@ -1,16 +1,23 @@
 /*
- * HTTP helpers shared by the `voice-url` and `tts` Edge Functions.
+ * HTTP helpers shared by the `voice-url`, `tts` and `tutor` Edge Functions.
  * Plain TypeScript (no Deno APIs) so vitest can test it under Node.
  * Error shapes: docs/architecture/audio-security.md.
  */
 
 export type ErrorCode =
-  'bad_request' | 'not_signed_in' | 'not_pro' | 'rate_limited' | 'unavailable' | 'server_error'
+  | 'bad_request'
+  | 'not_signed_in'
+  | 'not_pro'
+  | 'no_consent'
+  | 'rate_limited'
+  | 'unavailable'
+  | 'server_error'
 
 export const ERROR_STATUS: Record<ErrorCode, number> = {
   bad_request: 400,
   not_signed_in: 401,
   not_pro: 403,
+  no_consent: 403,
   rate_limited: 429,
   unavailable: 503,
   server_error: 500,

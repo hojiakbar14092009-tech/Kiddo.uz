@@ -360,6 +360,22 @@ export const uz = {
         'star-night': 'Yulduzli tun',
         'mahalla-hashar': 'Mahallada hashar',
       },
+      memory: {
+        title: 'Kiddo nimani eslab qoldi',
+        intro:
+          'Bola bir xil xatoni turli misollarda takrorlasa, Kiddo buni eslab qoladi va bir necha kundan keyin shunga o‘xshash mashq beradi. Bitta tasodifiy xato eslab qolinmaydi.',
+        needs: 'Ko‘proq mashq kerak',
+        improved: 'Yaxshilandi',
+        none: 'Hozircha eslab qoladigan narsa yo‘q.',
+        status: {
+          confirmed: 'mashq qilinyapti',
+          improving: 'yaxshilanyapti',
+        },
+        why: {
+          resolved: 'qiyinchilik yengildi',
+          mastered: 'yaxshi o‘zlashtirildi',
+        },
+      },
       skillNames: {
         drag: 'Narsalarni savatga sanab solish',
         count: 'Sanash',
@@ -477,6 +493,28 @@ export const uz = {
       game: 'O‘yin',
       letters: 'Harflar ({{count}}/{{max}})',
       assign: '{{name}}ga berish',
+    },
+    aiTutor: {
+      title: 'AI yordamchi',
+      intro:
+        'Bola xato qilganda Kiddo darrov qisqa maslahat beradi: avval kichik ishora, keyin rasm, so‘ng yechimning bir qismi va oxirida to‘liq tushuntirish.',
+      local:
+        'Bu maslahatlar Kiddo’ning o‘zida bor: internet kerak emas va hech qanday ma’lumot tashqariga chiqmaydi.',
+      status: {
+        'no-server':
+          'Bu ilovada AI yordamchi ulanmagan. Kiddo o‘z maslahatlari bilan yordam beradi.',
+        disabled: 'AI yordamchi hali yoqilmagan. Kiddo o‘z maslahatlari bilan yordam beradi.',
+        'no-account': 'AI yordamchi uchun bulutli ota-ona hisobi bilan kirish kerak.',
+        'not-pro': 'AI yordamchi PRO bilan ishlaydi.',
+        off: 'O‘chiq. Kiddo o‘z maslahatlarini beradi.',
+        resting: 'Yoqilgan, lekin hozir dam olyapti. Shu vaqtda Kiddo o‘z maslahatlarini beradi.',
+        ready: 'Yoqilgan.',
+      },
+      toggle: '{{name}} uchun AI yordamchi',
+      sent: 'AI xizmatiga faqat misol (sonlar), xato turi va shu ko‘nikma bo‘yicha qisqa xulosa yuboriladi. Ism, yosh, ovoz, rasm va suhbatlar yuborilmaydi.',
+      provider:
+        'AI xizmati: Google Gemini, bepul daraja. Bepul darajada Google yuborilgan matnni o‘z mahsulotlarini yaxshilash uchun ishlatishi va uni xodimlar o‘qishi mumkin.',
+      saveFailed: 'Saqlab bo‘lmadi. Internetni tekshirib, qaytadan urinib ko‘ring.',
     },
     settings: {
       sound: 'Ovoz',
@@ -837,6 +875,35 @@ export const uz = {
       levelUp: 'Zo‘r! Keyingi safar seni yangi topshiriqlar kutmoqda.',
       home: 'Shaharga qaytish',
     },
+  },
+  tutor: {
+    title: 'Kiddo maslahati',
+    clue: {
+      'off-by-one': 'Juda yaqin! Yana bir marta sekin sanab ko‘r.',
+      'off-by-more': 'Hali emas. Bittadan qaytadan sanab chiq.',
+      'wrong-operation': 'Belgiga qara: qo‘shamizmi yoki ayiramizmi?',
+      'kept-number': 'Bu son topshiriqning o‘zida bor. U bilan nima bo‘ladi?',
+      'no-change': 'Bu yerda nimadir o‘zgaradi. Yana bir qara.',
+      'wrong-direction': 'Ko‘payadimi yoki kamayadimi? Yana bir o‘ylab ko‘r.',
+      'wrote-total': 'Jami allaqachon yozilgan. Qaysi qismi yetishmayapti?',
+      'stopped-after-first-step': 'Birinchi qadam to‘g‘ri! Yana bitta qadam qoldi.',
+      'too-many': 'Savatda ko‘p bo‘lib qoldi. Bir nechtasini olib qo‘y.',
+      'too-few': 'Savatga yana bir nechta sol.',
+      'sign-reversed': 'Belgining ochiq tomoni katta son tomonga qaraydi. Yana qara.',
+      'not-equal': 'Bu sonlar bir xilmi? Yana bir solishtir.',
+      'chose-fewer': 'Ikkala guruhni sanab ko‘r. Qaysi birida ko‘proq?',
+      default: 'Yana bir bor diqqat bilan qara.',
+    },
+    remembered: 'Buni avval ham birga mashq qilganmiz.',
+    partial: 'Bitta noto‘g‘ri kartani olib qo‘ydim. Qolganlaridan tanla.',
+    partialDrag: 'Har birini solganda sana: 1, 2, 3… {{target}} da to‘xta.',
+    solution: 'Mana yechimi: {{solution}}. Endi to‘g‘ri kartani bos.',
+    solutionDrag: 'Savatda roppa-rosa {{target}} ta bo‘lishi kerak.',
+    more: 'Yana maslahat',
+    thinking: 'O‘ylayapman…',
+    aiLabel: 'AI yordamchi',
+    review: 'Shunga o‘xshash misolni yana bir bor sinab ko‘ramiz.',
+    hintStep: '4 ta maslahatdan {{level}}-si',
   },
   studio: {
     title: 'Ijod ustaxonasi',

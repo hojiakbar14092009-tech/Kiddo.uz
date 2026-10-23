@@ -4,6 +4,7 @@ import { birthDateForAge } from '@/features/age/ageLevel'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { dayKey } from '@/features/tasks/rules'
 import { grantReward, useRewardStore } from '@/domain/rewards'
+import { recordEvidence, useLearningMemoryStore } from '@/domain/learningMemory'
 import { emitActivity, grantResource, upgradeBuilding, useUniverseStore } from '@/domain/universe'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
@@ -56,6 +57,7 @@ beforeEach(() => {
   useLearnStore.setState({ byChild: {} })
   useRewardStore.setState({ byChild: {} })
   useUniverseStore.setState({ byChild: {} })
+  useLearningMemoryStore.setState({ byChild: {} })
   usePaymentStore.setState({ payments: [] })
   useSyncStore.setState({ queue: [], deadLetter: [], paused: null, snapshotFor: USER })
   useSubscriptionStore.getState().cancel()
@@ -136,6 +138,49 @@ describe('cloud change tracking', () => {
       expect.objectContaining({ p_resource: 'crystal', p_amount: 1, p_reason: 'three-stars' }),
       expect.objectContaining({ p_resource: 'part', p_amount: 1, p_reason: 'number-3star' }),
     ])
+    stop()
+  })
+
+  it('sends each finished question as evidence once; the server runs the memory rules', () => {
+    const ali = addChild()
+    const stop = trackCloudChanges(USER, () => undefined)
+    useSyncStore.setState({ queue: [] })
+    const evidence = {
+      id: 'run-1|0',
+      skill: 'math:add:within10',
+      item: 'add:3+4',
+      level: 3,
+      at: '2026-10-20T10:00:00.000Z',
+      firstTry: false,
+      helpedBefore: false,
+      errors: ['off-by-one'],
+      maxHint: 1 as const,
+      review: false,
+    }
+    recordEvidence(ali.id, evidence)
+    recordEvidence(ali.id, evidence) // counted before: nothing new
+    recordEvidence('guest', { ...evidence, id: 'run-2|0' })
+    const rows = useSyncStore
+      .getState()
+      .queue.filter((item) => item.operation.kind === 'recordLearningEvidence')
+      .map((item) => item.operation.kind === 'recordLearningEvidence' && item.operation.row)
+    expect(rows).toEqual([
+      {
+        p_child: ali.id,
+        p_id: 'run-1|0',
+        p_skill: 'math:add:within10',
+        p_item: 'add:3+4',
+        p_level: 3,
+        p_at: '2026-10-20T10:00:00.000Z',
+        p_first_try: false,
+        p_helped_before: false,
+        p_errors: ['off-by-one'],
+        p_max_hint: 1,
+        p_review: false,
+      },
+    ])
+    // no score and no status ever go from the browser
+    expect(JSON.stringify(rows)).not.toMatch(/mastery|status|resolved/)
     stop()
   })
 
