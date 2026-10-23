@@ -146,7 +146,7 @@ test('the admin puts up an ad; a parent watches it to the end and gets a promo c
   await expect(page.getByText('Promokod faqat 1 marta beriladi', { exact: false })).toBeVisible()
 })
 
-test('the six learning sections open from their Kiddo City buildings without errors', async ({
+test('the learning sections open from their Kiddo City buildings without errors', async ({
   page,
 }) => {
   test.setTimeout(90_000)
@@ -160,7 +160,6 @@ test('the six learning sections open from their Kiddo City buildings without err
   // building on the city → the section title inside
   for (const [building, section] of [
     ['So‘zlar ustaxonasi', 'Birinchi so‘zim'],
-    ['Matematika shahri', 'Matematika'],
     ['Rasadxona', 'Koinot'],
     ['Ertaklar kutubxonasi', 'Ertaklar'],
     ['Sehrli bog‘', 'Bog‘da top'],
@@ -173,6 +172,10 @@ test('the six learning sections open from their Kiddo City buildings without err
     )
     await page.goto('/home')
   }
+  // Math Land opens the adaptive Math Lab, which links to the step-by-step lessons.
+  await page.getByRole('link', { name: 'Matematika shahri', exact: true }).click()
+  await expect(page).toHaveURL(/\/math-lab$/)
+  await expect(page.getByRole('heading', { name: 'Matematika laboratoriyasi' })).toBeVisible()
   expect(errors).toEqual([])
 })
 

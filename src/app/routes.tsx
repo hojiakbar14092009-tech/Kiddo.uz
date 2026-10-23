@@ -96,6 +96,13 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/garden/GardenPage')).GardenPage,
                 }),
               },
+              // Adaptive maths practice (Math Land in Kiddo City; /learn/math stays the lessons).
+              {
+                path: '/math-lab',
+                lazy: async () => ({
+                  Component: (await import('@/features/mathLab/MathLabPage')).MathLabPage,
+                }),
+              },
               // Tracing numbers and shapes, and the Creative Studio (linked from Kiddo City).
               ...['/trace', '/trace/:set', '/trace/:set/:item'].map((path) => ({
                 path,
@@ -116,6 +123,13 @@ export const routes: RouteObject[] = [
                     .StudioGalleryPage,
                 }),
               },
+              // Emotions & Social Skills (the Friendship House in Kiddo City).
+              ...['/feelings', '/feelings/:kind'].map((path) => ({
+                path,
+                lazy: async () => ({
+                  Component: (await import('@/features/feelings/FeelingsPage')).FeelingsPage,
+                }),
+              })),
               // Kiddo City's map and museum.
               {
                 path: '/adventure',

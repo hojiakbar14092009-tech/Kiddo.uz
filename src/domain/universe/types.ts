@@ -54,6 +54,11 @@ export interface ActivityCompleted {
   independent: number
   /** ISO time; defaults to now. Decides the day for daily caps. */
   at?: string
+  /**
+   * Challenge level (1–5) the run was played at. Only adaptive activities set
+   * it, and only a run at the child's current level moves the LearnerProfile.
+   */
+  level?: number
 }
 
 /** What one finished activity (or a claimed quest) earned. Zeros when it was counted before. */

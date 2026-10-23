@@ -48,7 +48,8 @@ function building(id: string, icon3d: string, route: string, workshop = false): 
 }
 
 export const BUILDINGS: readonly BuildingDef[] = [
-  building('math-land', 'school', '/learn/math'),
+  // Math Land opens the adaptive Math Lab, which links to the step-by-step lessons
+  building('math-land', 'school', '/math-lab'),
   building('reading-house', 'house', '/alphabet'),
   building('word-workshop', 'pencil', '/learn/words', true),
   building('writing-school', 'notebook', '/trace'),
@@ -57,6 +58,8 @@ export const BUILDINGS: readonly BuildingDef[] = [
   building('garden', 'garden-house', '/learn/garden'),
   building('robot-workshop', 'clock', '/learn/help', true),
   building('art-studio', 'paintbrush', '/studio'),
+  // Emotions & Social Skills: open at level 0 like every building, first upgrade 1 crystal
+  building('friendship-house', 'teddy', '/feelings'),
   building('shop', 'gift', '/shop'),
   building('museum', 'castle', '/collection'),
 ]

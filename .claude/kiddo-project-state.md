@@ -43,7 +43,8 @@ Phase 0 (e93937e): 340 unit, 34 e2e; initial JS ≈ 237 KB gzip; R3F 234 KB gzip
 Phase 1: 350 unit, 34 e2e; initial JS ≈ 240 KB gzip.
 Phase 2: 368 unit, 34 e2e.
 Phase 3: 419 unit, 34 e2e, 62 SQL assertions
-Phase 4+5a: 552 unit, 34 e2e, 119 SQL assertions (`supabase/tests/run.sh`, local Postgres).
+Phase 4+5a: 552 unit, 34 e2e, 119 SQL assertions
+Phase 5: 606 unit, 58 e2e (`supabase/tests/run.sh`, local Postgres).
 
 ## UI foundation (Phase 1)
 
@@ -112,6 +113,17 @@ no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens
 - Known: device ledger keeps 1000 entries (older history can't be uploaded in full);
   `familyStore.removeChild` gallery delete errors are not retried.
 
+## Adaptive (Phase 5)
+
+- `src/domain/learner`: strand level 1–5 in universe child `strands`; start by age
+  (4→1, 5→2, 6→3, guest→2, re-seeded until 2 runs); moves after 2 strong/weak runs.
+  Only `emitActivity` events with `level` == current level move it (Math Lab, Feelings).
+  `useChallengeLevel(strand)`. Device-only until Phase 14.
+- `/math-lab` (Math Land building): levels 1–5, basket tap/drag, emits `mistake.made`
+  events (not stored yet → Mistake Garden must store). `/feelings` (Friendship House):
+  faces, scenes, kindness choices with pictures, calm corner (no reward).
+- i18next TS2589 limit close: don't use `ReturnType<typeof useTranslation>['t']`.
+
 ## Key decisions
 
 - Incremental: new `src/domain/{rewards,progress,entitlements,quests}` wrap existing
@@ -155,7 +167,7 @@ prod) · B7 promo policy.
 - [x] 2 Design system primitives + migration of all dialogs, PRO chips, step dots, tab icons (2026-10-22)
 - [x] 3 Domain foundation + Supabase security migration 0005 (2026-10-23)
 - [x] 4 Kiddo City, Adventure Map, Daily Quest, resources, achievements (2026-10-23)
-- [~] 5 part 1 done: Tracing, Creative Studio. Part 2: Smart Math, Adaptive, Emotions
+- [x] 5 Tracing, Creative Studio, Smart Math (/math-lab), adaptive LearnerProfile, Emotions & Social (/feelings) (2026-10-23)
 - [ ] 6 Worlds: Explorer3D, Dinosaur, Uzbekistan
 - [ ] 7 Pro + audio server-side (claims, private voice bucket), Music & Rhythm
 - [ ] 8 Story Engine · 9 Parent Dashboard · 10 AI Friend · 11 responsive · 12 performance · 13 security
@@ -166,7 +178,8 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 5 part 2 – Smart Math (subtraction, missing number, mixed, drag for age 4),
-LearnerProfile/adaptive levels feeding generators, Emotions & Social section; all emit
-through `domain/universe`. Owner actions: apply 0005 + 0006 + Realtime private-only
-(docs/architecture/supabase-verification.md §6), set Vercel `VITE_SUPABASE_*`.
+Phase 6 – Worlds: reusable lazy Explorer3D, Space/Dinosaur/Uzbekistan premium worlds,
+wired to universe (scrolls/keys/stars, adventure map). Owner actions: apply 0005 + 0006
+
+- Realtime private-only (docs/architecture/supabase-verification.md §6), set Vercel
+  `VITE_SUPABASE_*`.

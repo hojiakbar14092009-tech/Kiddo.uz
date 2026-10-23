@@ -13,6 +13,7 @@ import {
   newTiers,
   type UniverseStats,
 } from './achievements'
+import { applyRun, childAgeFor, levelOf, type LearnerStrands } from '@/domain/learner/profile'
 import { activityEffects } from './rules'
 import {
   isResourceId,
@@ -68,6 +69,8 @@ export interface UniverseChild {
   buildings: Record<string, number>
   /** Days whose daily quest was claimed, newest first. */
   questsClaimed: string[]
+  /** LearnerProfile: challenge level per strand (domain/learner). */
+  strands?: LearnerStrands
 }
 
 export const EMPTY_BALANCES: Record<ResourceId, number> = Object.freeze(
@@ -371,6 +374,18 @@ export function localDay(date: Date = new Date()): string {
  * stars (improvement only), crystals, parts, scrolls, and any achievement
  * tiers reached. Returns the award, or zeros when this id was counted before.
  */
+/** Moves the strand only for an adaptive run played at the child's current level. */
+function adaptStrands(
+  strands: LearnerStrands | undefined,
+  e: ActivityCompleted,
+  childKey: string,
+): LearnerStrands | undefined {
+  if (e.level === undefined) return strands
+  const age = childAgeFor(childKey)
+  if (e.level !== levelOf(strands, e.strand, age)) return strands
+  return { ...strands, [e.strand]: applyRun(strands?.[e.strand], e, age) }
+}
+
 export function emitActivity(e: ActivityCompleted): AwardSummary {
   const { childKey, id, activity } = e
   if (!childKey || !id || !activity) return zeroAward()
@@ -394,6 +409,7 @@ export function emitActivity(e: ActivityCompleted): AwardSummary {
     processed: [id, ...child.processed].slice(0, MAX_PROCESSED),
     best: { ...child.best, [activity]: Math.max(child.best[activity] ?? 0, effects.stars) },
     stats: countRun(child.stats, e.strand, day),
+    strands: adaptStrands(child.strands, e, childKey),
   }))
 
   const award: AwardSummary = { ...zeroAward(), stars: effects.stars }

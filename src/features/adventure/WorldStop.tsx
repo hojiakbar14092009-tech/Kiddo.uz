@@ -10,18 +10,6 @@ import { tDynamic } from '@/lib/tDynamic'
 
 const MAX_STARS = 3
 
-/** A world's state in words: where the child is, open, coming soon, or how many stars more. */
-function worldState(
-  t: ReturnType<typeof useTranslation>['t'],
-  world: AdventureWorld,
-  stars: number,
-): string {
-  if (world.comingSoon) return t('adventure.comingSoon')
-  if (world.current) return t('adventure.youAreHere')
-  if (world.unlocked) return t('adventure.open')
-  return t('adventure.starsMore', { count: Math.max(0, world.starsNeeded - stars) })
-}
-
 /**
  * One stop of the Adventure Map: its activities as links with the child's
  * best stars (also in a world the map has not opened yet: opening a world
@@ -42,7 +30,15 @@ export function WorldStop({
 }) {
   const { t } = useTranslation()
   const name = tDynamic(t, world.nameKey)
-  const state = worldState(t, world, stars)
+  // the world's state in words: where the child is, open, coming soon, or how many stars more
+  // (inline: a helper typed `ReturnType<typeof useTranslation>['t']` is too deep for tsc, TS2589)
+  const state = world.comingSoon
+    ? t('adventure.comingSoon')
+    : world.current
+      ? t('adventure.youAreHere')
+      : world.unlocked
+        ? t('adventure.open')
+        : t('adventure.starsMore', { count: Math.max(0, world.starsNeeded - stars) })
   // a world the map has opened (its picture in colour); its activities are open either way
   const playable = world.unlocked && !world.comingSoon
   const titleId = `world-${world.id}`

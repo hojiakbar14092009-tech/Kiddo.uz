@@ -12,14 +12,17 @@ export async function renderRoute(path: string, userOptions?: Options) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
   const user = userEvent.setup(userOptions)
   const view = render(<RouterProvider router={router} />)
-  await waitFor(() => {
-    const loading =
-      !router.state.initialized ||
-      router.state.navigation.state !== 'idle' ||
-      view.container.querySelector('[data-loading-screen]') !== null
-    if (loading) {
-      throw new Error('The router is still loading a screen')
-    }
-  })
+  await waitFor(
+    () => {
+      const loading =
+        !router.state.initialized ||
+        router.state.navigation.state !== 'idle' ||
+        view.container.querySelector('[data-loading-screen]') !== null
+      if (loading) {
+        throw new Error('The router is still loading a screen')
+      }
+    },
+    { timeout: 10_000 },
+  ) // the first lazy import of a route can be slow on a busy machine
   return { ...view, router, user }
 }

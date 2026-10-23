@@ -61,7 +61,14 @@ strands: number, letters/reading, language, science, space, logic, social-emotio
 two independent successes in a row at a level → up; two misses → down (never below
 level 1, no punishment, the change is not announced as failure). Age never locks a
 feature; it only chooses the starting level. Generators (math, words, space, garden…)
-take a `level` instead of `ageLevel`. Presentation scales: level 1–2 large visual
+take a `level` instead of `ageLevel`.
+
+Implemented in `src/domain/learner` (Phase 5): the profile lives in the universe
+child (`strands`), updated by `emitActivity` only for runs that carry `level` equal
+to the current level (adaptive activities: Math Lab, Feelings), so tracing or older
+sections never move it. Before a strand's second run the age still decides (a
+corrected birthday re-seeds). Guests start at 2. Device-only for now; the
+`learner_profile` table and sync come with Phase 14. Presentation scales: level 1–2 large visual
 UI, 3–4 missions/collections, 5 strategy/evidence/simulation.
 
 ## 5. Quests

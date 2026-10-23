@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +11,9 @@ import { useSpeaker } from '@/services/audio/useSpeaker'
 import { levelOfChild, useActiveChild, useFamilyStore } from '@/store/familyStore'
 import { AGE_LEVELS, unlocksAt, type Unlock } from './ageLevel'
 
-function unlockLabel(unlock: Unlock, t: ReturnType<typeof useTranslation>['t']) {
+// `TFunction`, not `ReturnType<typeof useTranslation>['t']`: the latter is too deep for tsc
+// once the translations grow (TS2589).
+function unlockLabel(unlock: Unlock, t: TFunction) {
   if (unlock === 'numbers') return t('age.numbers')
   if (unlock === 'exam') return t('age.exam')
   return t(GAME_META[unlock].titleKey)

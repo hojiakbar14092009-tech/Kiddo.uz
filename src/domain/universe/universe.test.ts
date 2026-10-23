@@ -262,6 +262,7 @@ describe('world', () => {
       'garden',
       'robot-workshop',
       'art-studio',
+      'friendship-house',
       'shop',
       'museum',
     ])
@@ -302,7 +303,7 @@ describe('world', () => {
     useFamilyStore.setState({ activeChildId: KID })
     const { result } = renderHook(() => useWorld())
     const math = result.current.buildings.find((b) => b.id === 'math-land')!
-    expect(math).toMatchObject({ level: 0, maxLevel: 3, route: '/learn/math' })
+    expect(math).toMatchObject({ level: 0, maxLevel: 3, route: '/math-lab' })
     expect(math.next).toEqual({ cost: { crystal: 1 }, missing: { crystal: 1 } })
     act(() => {
       grantResource({ childKey: KID, resource: 'crystal', amount: 1, reason: 'a', refId: 'g' })
@@ -440,12 +441,19 @@ describe('adventure', () => {
   })
 
   it('shows the best stars per activity and marks future worlds', () => {
-    const map = adventureState(0, { 'words:4': 2, 'words:6': 3, 'find-letter:uz': 1, 'math:4': 2 })
+    const map = adventureState(0, {
+      'words:4': 2,
+      'words:6': 3,
+      'find-letter:uz': 1,
+      'math:4': 2,
+      'feelings:faces:basic': 2,
+    })
     const forest = map[0]!
     expect(forest.activities.map((a) => [a.activity, a.route, a.bestStars])).toEqual([
       ['alphabet', '/alphabet', 1],
       ['words', '/learn/words', 3],
       ['garden', '/learn/garden', 0],
+      ['feelings', '/feelings', 2],
     ])
     expect(map.find((w) => w.id === 'dinosaur')).toMatchObject({ comingSoon: true })
     // Learning routes are open even in a world not unlocked yet; only future routes are not.

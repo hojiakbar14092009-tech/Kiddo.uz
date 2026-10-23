@@ -50,10 +50,11 @@ describe('Kiddo City', () => {
     expect(screen.getAllByTestId(/^building-/)).toHaveLength(BUILDINGS.length + 1)
     expect(screen.getByRole('link', { name: 'Matematika shahri' })).toHaveAttribute(
       'href',
-      '/learn/math',
+      '/math-lab',
     )
     expect(screen.getByRole('link', { name: 'Ijod ustaxonasi' })).toHaveAttribute('href', '/studio')
     expect(screen.getByRole('link', { name: 'Yozuv maktabi' })).toHaveAttribute('href', '/trace')
+    expect(screen.getByRole('link', { name: 'Do‘stlik uyi' })).toHaveAttribute('href', '/feelings')
     expect(screen.getByRole('link', { name: 'Sarguzashtlar xaritasi' })).toHaveAttribute(
       'href',
       '/adventure',
@@ -86,7 +87,7 @@ describe('Kiddo City', () => {
     // entering is always offered, the upgrade never blocks it
     expect(within(sheet).getByRole('link', { name: 'Binoga kirish' })).toHaveAttribute(
       'href',
-      '/learn/math',
+      '/math-lab',
     )
     await user.click(within(sheet).getByRole('button', { name: 'Kattalashtirish' }))
 

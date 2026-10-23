@@ -1,3 +1,4 @@
+import { setAgeResolver } from '@/domain/learner/profile'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
@@ -254,3 +255,9 @@ export function useAgeLevel(): AgeLevel {
 export function childAge(child: ChildProfile, day: string = today()): number {
   return ageOn(child.birthDate, day)
 }
+
+// The learner profile starts each strand from the child's age (domain/learner).
+setAgeResolver((childKey) => {
+  const child = useFamilyStore.getState().children.find((c) => c.id === childKey)
+  return child ? childAge(child) : null
+})
