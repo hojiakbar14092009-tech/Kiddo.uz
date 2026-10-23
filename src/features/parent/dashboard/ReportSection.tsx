@@ -7,7 +7,17 @@ import { dayKey } from '@/features/tasks/rules'
 import type { ChildProfile } from '@/store/familyStore'
 import { useProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
-import { confusionPairs, daySummary, strugglingLetters, weeklyCoins } from '../report'
+import { confusionPairs, daySummary, strugglingLetters } from '../report'
+import {
+  DataPanel,
+  HealthPanel,
+  MedalsCityRow,
+  PlayedPanel,
+  PracticePanel,
+  SkillsPanel,
+  WeekPanel,
+} from '../insights/InsightsPanels'
+import { useChildInsights } from '../insights/useChildInsights'
 import { ActivityPanel } from './ActivityPanel'
 import { LearnResultsPanel } from './LearnResultsPanel'
 import { Panel } from './Panel'
@@ -18,13 +28,10 @@ export function ReportSection({ child }: { child: ChildProfile }) {
   const progress = useProgress(child.id)
   const language = useLanguage()
   const today = daySummary(progress, dayKey())
-  const week = weeklyCoins(progress)
-  const weekMax = Math.max(1, ...week.map((entry) => entry.coins))
+  const insights = useChildInsights(child)
   const pairs = confusionPairs(progress)
   const struggling = strugglingLetters(progress, language)
   const time = new Intl.DateTimeFormat(i18n.language, { hour: '2-digit', minute: '2-digit' })
-  // Own names: not every browser ships Uzbek date names.
-  const weekdays = t('parent.report.weekdays').split(',')
   const letterName = (lang: typeof language, id: string) => findLetter(lang, id)?.upper ?? id
 
   const stats = [
@@ -41,7 +48,7 @@ export function ReportSection({ child }: { child: ChildProfile }) {
   ]
 
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid gap-5 lg:grid-flow-row-dense lg:grid-cols-2">
       <Panel title={t('parent.report.today')} className="lg:col-span-2">
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((stat) => (
@@ -80,32 +87,12 @@ export function ReportSection({ child }: { child: ChildProfile }) {
         )}
       </Panel>
 
-      <Panel title={t('parent.report.week')}>
-        <ol className="flex h-44 items-end gap-2" aria-label={t('parent.report.weekLabel')}>
-          {week.map((entry) => {
-            const date = new Date(`${entry.day}T12:00:00`)
-            return (
-              <li
-                key={entry.day}
-                className="flex h-full flex-1 flex-col items-center justify-end gap-1"
-              >
-                <span className="sr-only">{`${weekdays[date.getDay()]}: ${entry.coins}`}</span>
-                <span aria-hidden="true" className="text-sm font-semibold tabular-nums">
-                  {entry.coins}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="w-full rounded-t-xl bg-coin"
-                  style={{ height: `${Math.max(4, (entry.coins / weekMax) * 100)}%` }}
-                />
-                <span aria-hidden="true" className="text-sm text-ink-soft">
-                  {weekdays[date.getDay()]}
-                </span>
-              </li>
-            )
-          })}
-        </ol>
-      </Panel>
+      <WeekPanel insights={insights} />
+      <MedalsCityRow insights={insights} />
+      <SkillsPanel child={child} insights={insights} />
+      <PracticePanel child={child} insights={insights} />
+      <PlayedPanel child={child} insights={insights} />
+      <HealthPanel child={child} insights={insights} />
 
       <Panel title={t('parent.report.mistakesTitle')}>
         {pairs.length === 0 && struggling.length === 0 ? (
@@ -152,6 +139,7 @@ export function ReportSection({ child }: { child: ChildProfile }) {
       </Panel>
       <LearnResultsPanel child={child} />
       <ActivityPanel child={child} />
+      <DataPanel child={child} />
     </div>
   )
 }

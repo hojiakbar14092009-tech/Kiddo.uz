@@ -48,6 +48,7 @@ Phase 5: 606 unit, 58 e2e
 Phase 6: 667 unit, 70 e2e
 Phase 7: 743 unit, 70 e2e, 189 SQL assertions (`supabase/tests/run.sh`, local Postgres).
 Phase 8: 790 unit, 80 e2e.
+Phase 9: 862 unit, 84 e2e.
 
 ## UI foundation (Phase 1)
 
@@ -181,6 +182,16 @@ no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens
   for Uzbek (`pro.celebrateText`). Replaced by a real Uzbek voice with B4
   (`docs/architecture/audio-security.md` → "Recorded clips").
 
+## Parent Dashboard (Phase 9)
+
+- `src/features/parent/insights/*` in the Report tab: last 7 days (minutes, activities,
+  coins; table alternative), medals/city, skills (level word only for adaptive strands with
+  ≥2 runs; accuracy from one source, memory/trace/studio excluded), practise ideas vs
+  strengths (≥15 answers, ≥3 runs, never both), played list, healthy play, data & privacy,
+  export JSON (one child, no images). "Open" switches the active child first.
+- Universe child logs `recent` (runs) and `mistakes` (max 200 each, device only, not for
+  guests, cleared with the child) – Phase 16 Mistake Garden reads `mistakes`.
+
 ## Key decisions
 
 - Incremental: new `src/domain/{rewards,progress,entitlements,quests}` wrap existing
@@ -228,7 +239,8 @@ prod) · B7 promo policy.
 - [x] 6 Explorer3D, Dinosaur world (/worlds/dino), My Uzbekistan (/worlds/uzbekistan) (2026-10-23)
 - [x] 7 Pro + audio security: private voice bucket, voice-url/tts Edge Functions, server PRO check (2026-10-23)
 - [x] 8 Story Engine: /stories, 6 branching stories, PRO narration, scroll per story (2026-10-23)
-- [ ] 9 Parent Dashboard · 10 AI Friend · 11 responsive · 12 performance · 13 security
+- [x] 9 Parent Dashboard: skills, last 7 days, practise/strengths, history, healthy play, export (2026-10-23)
+- [ ] 10 AI Friend · 11 responsive · 12 performance · 13 security
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
@@ -236,7 +248,8 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 9 – Parent Dashboard. Owner actions: apply 0005–0007, deploy
+Phase 10 – AI Friend: provider abstraction (server-side keys only), child-safety filter,
+parent consent, honest "not available" when no provider – never fake AI. Owner actions: apply 0005–0007, deploy
 voice-url/tts + secrets, upload voice, then `VITE_VOICE_PRIVATE=true`; Realtime
 private-only; Vercel `VITE_SUPABASE_*` (supabase-verification.md §6–7); B4 TTS
 provider; B5 consent + data location.

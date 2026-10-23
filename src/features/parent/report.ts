@@ -27,7 +27,10 @@ export interface DayCoins {
 }
 
 /** Coins earned on each of the last seven days, oldest first, today last. */
-export function weeklyCoins(progress: ChildProgress, today: Date = new Date()): DayCoins[] {
+export function weeklyCoins(
+  progress: Pick<ChildProgress, 'results'>,
+  today: Date = new Date(),
+): DayCoins[] {
   const days = Array.from({ length: 7 }, (_, index) => {
     const date = new Date(today)
     date.setDate(today.getDate() - (6 - index))

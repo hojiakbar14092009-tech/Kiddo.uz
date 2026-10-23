@@ -34,6 +34,7 @@ export {
   getAward,
   getResources,
   grantResource,
+  recentMistakes,
   reloadFromOtherTabs,
   resourceHistory,
   spendResources,
@@ -89,3 +90,11 @@ export {
   type WorldDef,
 } from './adventure'
 export { learnActivity, taskActivity } from './wiring'
+export {
+  appendMistake,
+  appendRecentRun,
+  MAX_MISTAKES,
+  MAX_RECENT_RUNS,
+  type MistakeRecord,
+  type RecentRun,
+} from './history'

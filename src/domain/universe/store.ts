@@ -14,10 +14,13 @@ import {
   type UniverseStats,
 } from './achievements'
 import { applyRun, childAgeFor, levelOf, type LearnerStrands } from '@/domain/learner/profile'
+import { appendMistake, appendRecentRun, type MistakeRecord, type RecentRun } from './history'
 import { activityEffects } from './rules'
 import {
   isResourceId,
   RESOURCE_IDS,
+  STRANDS,
+  type Strand,
   type ActivityCompleted,
   type AwardSummary,
   type ResourceEntry,
@@ -74,6 +77,10 @@ export interface UniverseChild {
   strands?: LearnerStrands
   /** `oncePerDay` activities already counted on `day` (resets on a new day). */
   countedToday?: { day: string; activities: string[] }
+  /** Finished runs, newest first (capped; history.ts). For the parent dashboard. */
+  recent?: RecentRun[]
+  /** Skills answered wrong first, newest first (capped; `mistake.made` events). */
+  mistakes?: MistakeRecord[]
 }
 
 export const EMPTY_BALANCES: Record<ResourceId, number> = Object.freeze(
@@ -214,6 +221,8 @@ export function subscribeUniverse(listener: Listener): () => void {
 }
 
 export function emitUniverse(event: UniverseEvent) {
+  // a mistake is kept (capped) for the parent dashboard and the Mistake Garden
+  if (event.type === 'mistake.made') recordMistake(event)
   for (const listener of listeners) {
     try {
       listener(event)
@@ -221,6 +230,28 @@ export function emitUniverse(event: UniverseEvent) {
       // A failing listener (e.g. sync) never undoes or blocks a change.
     }
   }
+}
+
+function isStrand(value: unknown): value is Strand {
+  return typeof value === 'string' && (STRANDS as readonly string[]).includes(value)
+}
+
+/** Stores one `mistake.made` event { childKey, skill, strand, activityId? } (a guest is never saved). */
+function recordMistake(event: UniverseEvent) {
+  const { childKey, skill, strand, activityId } = event
+  if (!childKey || typeof skill !== 'string' || !skill || !isStrand(strand)) return
+  const record: MistakeRecord = {
+    skill,
+    strand,
+    at: typeof event.at === 'string' ? event.at : new Date().toISOString(),
+    ...(typeof activityId === 'string' && activityId ? { activityId } : {}),
+  }
+  update(childKey, (child) => ({ ...child, mistakes: appendMistake(child.mistakes, record) }))
+}
+
+/** Recent mistakes of a child, newest first. */
+export function recentMistakes(childKey: string): readonly MistakeRecord[] {
+  return universeChild(childKey).mistakes ?? []
 }
 
 // ---------------------------------------------------------------- resources
@@ -420,6 +451,15 @@ export function emitActivity(e: ActivityCompleted): AwardSummary {
     ...(e.oncePerDay && !repeat
       ? { countedToday: { day, activities: [...today, activity].slice(-MAX_DAILY_ACTIVITIES) } }
       : {}),
+    recent: appendRecentRun(child.recent, {
+      id,
+      activity,
+      strand: e.strand,
+      at: Number.isNaN(when.getTime()) ? new Date().toISOString() : when.toISOString(),
+      stars: effects.stars,
+      independent: Math.max(0, Math.floor(Number(e.independent) || 0)),
+      total: Math.max(0, Math.floor(Number(e.total) || 0)),
+    }),
   }))
 
   const award: AwardSummary = { ...zeroAward(), stars: effects.stars }

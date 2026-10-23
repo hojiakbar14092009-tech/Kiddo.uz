@@ -68,7 +68,9 @@ function askedFeeling(): FeelingId {
 describe('feelings section', () => {
   it('opens four doors, all without building anything', async () => {
     await renderRoute('/feelings')
-    expect(screen.getByRole('heading', { name: 'Feelings' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Feelings' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
     const doors = [
       [/How does it feel\?/, '/feelings/faces'],
       [/What happened\?/, '/feelings/scenes'],

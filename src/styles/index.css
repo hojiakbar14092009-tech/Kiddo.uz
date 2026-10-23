@@ -61,6 +61,8 @@
   --color-lilac-soft: #eee6fb;
   /* full-screen media (the ad player) */
   --color-night: #120d1d;
+  /* Charts (parent dashboard): categorical slot 1, validated with the dataviz palette script on white. */
+  --color-viz-1: #2a78d6;
 
   /*
    * Shape and depth. Kiddo's "pressable toy" look is a solid shadow under a
