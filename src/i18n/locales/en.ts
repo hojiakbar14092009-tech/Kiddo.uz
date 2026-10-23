@@ -325,7 +325,7 @@ export const en: Translation = {
       volume: 'Volume',
       testSound: 'Play a test sound',
       voiceNote:
-        'Uzbek voice lines are made with an open speech model: a Kazakh-model voice reads the Uzbek text, so the accent is not always fully Uzbek. The text is always shown on screen.',
+        'The Uzbek voice is a temporary synthetic voice, not a native Uzbek voice: an open Kazakh speech model reads the Uzbek text, so the accent is not always Uzbek. It will be replaced when a real Uzbek voice is ready. The text is always shown on screen.',
       language: 'Language',
       languageHint: 'App and learning language',
       account: 'Account',
@@ -340,7 +340,9 @@ export const en: Translation = {
     showcaseCta: 'Choose PRO',
     giftCoins: 'A gift: you got {{count}} coins!',
     celebrateTitle: 'PRO is on!',
-    celebrateText: 'Now the robot talks: letters, words and tasks with a real voice.',
+    celebrateText: 'Now the robot talks: letters, words and tasks are read aloud.',
+    uzVoiceNote:
+      'Russian and English are read by natural voices. The Uzbek voice is for now a temporary synthetic voice, not a native Uzbek voice, until a real Uzbek voice is ready.',
     celebrateOk: 'Yay, let’s go!',
     celebrateSay: 'Hooray, thank you! Now I can talk! Let’s learn together!',
     status: 'Subscription',
@@ -525,6 +527,7 @@ export const en: Translation = {
   activityReward: {
     stars: 'Stars: +{{count}}',
     crystals: 'Crystals: +{{count}}',
+    scrolls: 'Scrolls: +{{count}}',
     praise: 'Well done!',
   },
   feelings: {
@@ -789,6 +792,7 @@ export const en: Translation = {
       uzbekistan: 'Uzbekistan',
     },
     activities: {
+      stories: 'Stories',
       alphabet: 'Alphabet',
       words: 'My first word',
       garden: 'Garden hunt',

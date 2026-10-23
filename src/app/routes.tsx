@@ -78,6 +78,13 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/tales/TalesPage')).TalesPage,
                 }),
               },
+              // The Story Engine: longer picture stories with choices (Story Library in Kiddo City).
+              ...['/stories', '/stories/:storyId'].map((path) => ({
+                path,
+                lazy: async () => ({
+                  Component: (await import('@/features/stories/StoriesPage')).StoriesPage,
+                }),
+              })),
               {
                 path: '/learn/space/*',
                 lazy: async () => ({

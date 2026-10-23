@@ -54,7 +54,8 @@ export const BUILDINGS: readonly BuildingDef[] = [
   building('word-workshop', 'pencil', '/learn/words', true),
   building('writing-school', 'notebook', '/trace'),
   building('observatory', 'telescope', '/learn/space'),
-  building('story-library', 'book', '/learn/tales'),
+  // the Story Engine's library; it links on to the classic tales
+  building('story-library', 'book', '/stories'),
   building('garden', 'garden-house', '/learn/garden'),
   building('robot-workshop', 'clock', '/learn/help', true),
   building('art-studio', 'paintbrush', '/studio'),

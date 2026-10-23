@@ -47,6 +47,7 @@ Phase 4+5a: 552 unit, 34 e2e, 119 SQL assertions
 Phase 5: 606 unit, 58 e2e
 Phase 6: 667 unit, 70 e2e
 Phase 7: 743 unit, 70 e2e, 189 SQL assertions (`supabase/tests/run.sh`, local Postgres).
+Phase 8: 790 unit, 80 e2e.
 
 ## UI foundation (Phase 1)
 
@@ -150,6 +151,36 @@ no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens
   else 503; no device voice → `missing`, never `done`. Scripts: voices/upload-private.mjs,
   cleanup-tts.mjs. Deno installed via npm for `deno check`.
 
+## Story Engine (Phase 8)
+
+- `src/features/stories`: `/stories` (library, link to the classic `/learn/tales`) and
+  `/stories/:storyId` (reader). Pure engine `engine.ts` (`StorySpec`/pages/choices/endings,
+  reader state, `pickQuestions(level)`: L1–2 who/what, L3 + sequence, L4–5 why/feelings/predict,
+  `validateStory`: links, loops, dead/unreachable pages, every path ends, questions only about
+  pages on every path, texts in uz/ru/en, Uzbek ‘ ’ apostrophes, scripts, reading time 2–5 min).
+- 6 original stories (`content.ts`, text per language in `text.uz|ru|en.ts`): lost-lamb and
+  grandma-garden free; navruz-sumalak, bazaar-kindness, star-night, mahalla-hashar PRO
+  (`premiumStories`, direct URLs show a locked note without text). Pictures: public/3d assets
+  drawn flat (`StoryPicture`, tales' backdrops + mountains/mahalla/bazaar/evening/steppe);
+  feeling answers reuse `FeelingFace`.
+- "Read to me" (PRO, `useNarration`): `speakLines` (clipsOnly), stops on page change/leave,
+  missing clip → honest note; optional auto page turn only after narration played. Story
+  sentences are in `LEARN_SPOKEN` and recorded (Piper, as the other sections).
+- Universe: `emitActivity('story:<id>', strand language, level)`; rules `isStory`/`paysScroll`:
+  first finish pays 1 scroll (reason 'tale', ref `story:<id>`; 0006 unchanged). Kiddo City
+  story-library → `/stories`; Adventure forest has `stories` (matches `story:*`).
+  Stories send `oncePerDay`: only the day's first reading of a story counts for achievements
+  (`stats`) and moves the language level (`UniverseChild.countedToday`);
+  `pickQuestions(level, reading)` rotates the literal questions and the level-1 wrong
+  answer per reading.
+- **Owner decision H1 (2026-10-23): Uzbek voice.** The Uzbek clips stay as recorded (Piper
+  kk_KZ ISSAI model reading transliterated Uzbek, `scripts/voices/uzbek.py`), but are
+  disclosed openly as a temporary synthetic voice, not a native Uzbek voice: next to "Read to
+  me" when the language is Uzbek (`stories.syntheticVoice` in `ui.ts`), on the PRO screen
+  (`pro.uzVoiceNote`), in parent settings (`parent.settings.voiceNote`); no "real voice" claim
+  for Uzbek (`pro.celebrateText`). Replaced by a real Uzbek voice with B4
+  (`docs/architecture/audio-security.md` → "Recorded clips").
+
 ## Key decisions
 
 - Incremental: new `src/domain/{rewards,progress,entitlements,quests}` wrap existing
@@ -196,7 +227,8 @@ prod) · B7 promo policy.
 - [x] 5 Tracing, Creative Studio, Smart Math (/math-lab), adaptive LearnerProfile, Emotions & Social (/feelings) (2026-10-23)
 - [x] 6 Explorer3D, Dinosaur world (/worlds/dino), My Uzbekistan (/worlds/uzbekistan) (2026-10-23)
 - [x] 7 Pro + audio security: private voice bucket, voice-url/tts Edge Functions, server PRO check (2026-10-23)
-- [ ] 8 Story Engine · 9 Parent Dashboard · 10 AI Friend · 11 responsive · 12 performance · 13 security
+- [x] 8 Story Engine: /stories, 6 branching stories, PRO narration, scroll per story (2026-10-23)
+- [ ] 9 Parent Dashboard · 10 AI Friend · 11 responsive · 12 performance · 13 security
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
@@ -204,8 +236,7 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 8 – Story Engine: data-driven stories (2–5 min), pages + choices, Pro narration via
-the audio system, scrolls/universe wiring. Owner actions: apply 0005–0007, deploy
+Phase 9 – Parent Dashboard. Owner actions: apply 0005–0007, deploy
 voice-url/tts + secrets, upload voice, then `VITE_VOICE_PRIVATE=true`; Realtime
 private-only; Vercel `VITE_SUPABASE_*` (supabase-verification.md §6–7); B4 TTS
 provider; B5 consent + data location.

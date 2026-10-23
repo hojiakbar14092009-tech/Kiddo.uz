@@ -45,6 +45,7 @@ export const UNIVERSE_LIMITS = { maxEntries: 1000, maxKeys: 2000 } as const
 const MAX_PROCESSED = 2000
 const MAX_AWARDS = 200
 const MAX_CLAIMED_DAYS = 60
+const MAX_DAILY_ACTIVITIES = 200
 
 export interface StoredAward {
   id: string
@@ -71,6 +72,8 @@ export interface UniverseChild {
   questsClaimed: string[]
   /** LearnerProfile: challenge level per strand (domain/learner). */
   strands?: LearnerStrands
+  /** `oncePerDay` activities already counted on `day` (resets on a new day). */
+  countedToday?: { day: string; activities: string[] }
 }
 
 export const EMPTY_BALANCES: Record<ResourceId, number> = Object.freeze(
@@ -403,13 +406,20 @@ export function emitActivity(e: ActivityCompleted): AwardSummary {
     partPaidToday: hasKey(before.ledger, keyOf('part', 'number-3star', partRef)),
   })
 
+  // a repeatable activity counts for achievements and adaptation once a day
+  const today = before.countedToday?.day === day ? before.countedToday.activities : []
+  const repeat = e.oncePerDay === true && today.includes(activity)
+
   // Count the run first, so even a failing grant below cannot count it twice.
   update(childKey, (child) => ({
     ...child,
     processed: [id, ...child.processed].slice(0, MAX_PROCESSED),
     best: { ...child.best, [activity]: Math.max(child.best[activity] ?? 0, effects.stars) },
-    stats: countRun(child.stats, e.strand, day),
-    strands: adaptStrands(child.strands, e, childKey),
+    stats: repeat ? child.stats : countRun(child.stats, e.strand, day),
+    strands: repeat ? child.strands : adaptStrands(child.strands, e, childKey),
+    ...(e.oncePerDay && !repeat
+      ? { countedToday: { day, activities: [...today, activity].slice(-MAX_DAILY_ACTIVITIES) } }
+      : {}),
   }))
 
   const award: AwardSummary = { ...zeroAward(), stars: effects.stars }

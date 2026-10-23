@@ -323,7 +323,7 @@ export const uz = {
       volume: 'Balandligi',
       testSound: 'Tekshirib eshitish',
       voiceNote:
-        'O‘zbekcha ovozlar ochiq sintez modeli bilan yozilgan: o‘zbekcha matnni qozoqcha model ovozi o‘qiydi, shuning uchun talaffuz ba’zan to‘liq o‘zbekcha bo‘lmaydi. Matn har doim ekranda ko‘rinadi.',
+        'O‘zbekcha ovoz vaqtinchalik sun’iy (sintez qilingan) ovoz, o‘zbek tilida so‘zlashuvchi odamning ovozi emas: o‘zbekcha matnni ochiq qozoqcha nutq modeli o‘qiydi, shuning uchun talaffuz ba’zan o‘zbekcha bo‘lmaydi. Haqiqiy o‘zbekcha ovoz tayyor bo‘lganda u almashtiriladi. Matn har doim ekranda ko‘rinadi.',
       language: 'Til',
       languageHint: 'Ilova va o‘rganish tili',
       account: 'Hisob',
@@ -338,8 +338,9 @@ export const uz = {
     showcaseCta: 'PRO’ni tanlash',
     giftCoins: 'Sovg‘a: siz {{count}} coinga ega bo‘ldingiz!',
     celebrateTitle: 'PRO ochildi!',
-    celebrateText:
-      'Endi robot gapiradi: harflarni, so‘zlarni va vazifalarni ovoz bilan o‘rganamiz.',
+    celebrateText: 'Endi robot gapiradi: harflar, so‘zlar va vazifalar ovoz chiqarib o‘qiladi.',
+    uzVoiceNote:
+      'Ruscha va inglizchani tabiiy ovozlar o‘qiydi. O‘zbekcha ovoz esa hozircha vaqtinchalik sun’iy ovoz, o‘zbek tilida so‘zlashuvchi odamning ovozi emas – haqiqiy o‘zbekcha ovoz tayyor bo‘lguncha.',
     celebrateOk: 'Zo‘r, boshladik!',
     celebrateSay: 'Voy, rahmat! Endi men gapira olaman! Keling, birga o‘rganamiz!',
     status: 'Obuna holati',
@@ -522,6 +523,7 @@ export const uz = {
   activityReward: {
     stars: '+{{count}} yulduz',
     crystals: '+{{count}} kristall',
+    scrolls: '+{{count}} o‘ram',
     praise: 'Barakalla!',
   },
   feelings: {
@@ -786,6 +788,7 @@ export const uz = {
       uzbekistan: 'O‘zbekiston',
     },
     activities: {
+      stories: 'Hikoyalar',
       alphabet: 'Alifbo',
       words: 'Birinchi so‘zim',
       garden: 'Bog‘da top',
@@ -887,7 +890,7 @@ export const uz = {
       star: 'Mashg‘ulotni bajarsang 1–3 ta yulduz. Natijang yaxshilansa, yangi yulduz qo‘shiladi.',
       crystal: 'Biror mashg‘ulotda birinchi marta 3 yulduz olsang va bugungi xazinani ochsang.',
       part: 'Sonlar bilan mashg‘ulotda 3 yulduz olsang (kuniga 3 tagacha).',
-      scroll: 'Har bir yangi ertakni oxirigacha tinglasang.',
+      scroll: 'Har bir yangi ertak yoki hikoyani oxirigacha tinglasang.',
     },
     uses: {
       star: 'Xaritada yangi olamlarni ochadi va medal beradi. Yulduzlar sarflanmaydi.',

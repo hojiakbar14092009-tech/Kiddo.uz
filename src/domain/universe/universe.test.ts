@@ -457,6 +457,7 @@ describe('adventure', () => {
       ['alphabet', '/alphabet', 1],
       ['words', '/learn/words', 3],
       ['garden', '/learn/garden', 0],
+      ['stories', '/stories', 0],
       ['feelings', '/feelings', 2],
     ])
     expect(map.find((w) => w.id === 'dinosaur')).toMatchObject({ comingSoon: false })

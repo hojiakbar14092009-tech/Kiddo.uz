@@ -161,7 +161,6 @@ test('the learning sections open from their Kiddo City buildings without errors'
   for (const [building, section] of [
     ['So‘zlar ustaxonasi', 'Birinchi so‘zim'],
     ['Rasadxona', 'Koinot'],
-    ['Ertaklar kutubxonasi', 'Ertaklar'],
     ['Sehrli bog‘', 'Bog‘da top'],
     ['Robot ustaxonasi', 'Maskotga yordam ber'],
   ] as const) {
@@ -172,6 +171,16 @@ test('the learning sections open from their Kiddo City buildings without errors'
     )
     await page.goto('/home')
   }
+  // The Story Library opens the Story Engine, which links on to the classic tales.
+  await page.getByRole('link', { name: 'Ertaklar kutubxonasi', exact: true }).click()
+  await expect(page).toHaveURL(/\/stories$/)
+  await expect(page.getByRole('heading', { name: 'Hikoyalar' })).toBeAttached()
+  await page.getByTestId('stories-classic-tales').click()
+  await expect(page).toHaveURL(/\/learn\/tales$/)
+  await expect(page.locator('.learn-title').filter({ visible: true }).first()).toContainText(
+    'Ertaklar',
+  )
+  await page.goto('/home')
   // Math Land opens the adaptive Math Lab, which links to the step-by-step lessons.
   await page.getByRole('link', { name: 'Matematika shahri', exact: true }).click()
   await expect(page).toHaveURL(/\/math-lab$/)

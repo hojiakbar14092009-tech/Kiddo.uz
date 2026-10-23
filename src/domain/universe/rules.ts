@@ -14,7 +14,10 @@ import type { ActivityCompleted } from './types'
  *   daily quest, see dailyQuest.ts).
  * - Parts: +1 when a 'number' activity reaches 3 stars, once per activity
  *   and day, at most PARTS_DAILY_CAP per day.
- * - Scrolls: +1 the first time a tale (activity id `tale:…`) is finished.
+ * - Scrolls: +1 the first time a tale (activity id `tale:…`) or a Story
+ *   Engine story (`story:…`) is finished – once per tale or story (the store
+ *   records it with reason 'tale' and ref = the activity id, so the ledger
+ *   and the server refuse a second scroll for the same one).
  * - Seeds and keys: reserved for later phases (always 0 here).
  * - Creative work (activity ids `studio:…`) has no right or wrong: it is
  *   always rated as total 0 → 1 star, so saving more pictures never earns a
@@ -26,6 +29,7 @@ export type StarRating = 1 | 2 | 3
 
 export const PARTS_DAILY_CAP = 3
 export const TALE_PREFIX = 'tale:'
+export const STORY_PREFIX = 'story:'
 
 /** Stars of one run. */
 export function starsForRun(run: Pick<ActivityCompleted, 'independent' | 'total'>): StarRating {
@@ -50,6 +54,16 @@ export function isCreative(activity: string): boolean {
 
 export function isTale(activity: string): boolean {
   return activity.startsWith(TALE_PREFIX)
+}
+
+/** A Story Engine story (`story:<id>`). */
+export function isStory(activity: string): boolean {
+  return activity.startsWith(STORY_PREFIX) && activity.length > STORY_PREFIX.length
+}
+
+/** Finishing it the first time pays a knowledge scroll (scrolls are for stories). */
+export function paysScroll(activity: string): boolean {
+  return isTale(activity) || isStory(activity)
 }
 
 /** The part of an activity id before the first ':' (`math:4` → `math`). */
@@ -89,7 +103,7 @@ export function activityEffects(
     stars === 3 &&
     !context.partPaidToday &&
     context.partsToday < PARTS_DAILY_CAP
-  const firstTale = isTale(event.activity) && context.previousBest === 0
+  const firstTale = paysScroll(event.activity) && context.previousBest === 0
   return {
     stars,
     starGain: starGain(context.previousBest, stars),

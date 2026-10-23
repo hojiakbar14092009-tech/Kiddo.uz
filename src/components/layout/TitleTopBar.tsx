@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +11,7 @@ export function TitleTopBar({
   title,
   back,
   showBack = true,
+  wrap = false,
   extra,
 }: {
   title: ReactNode
@@ -17,6 +19,8 @@ export function TitleTopBar({
   back?: string
   /** Off where "back" would only repeat the home button (e.g. a screen opened from home). */
   showBack?: boolean
+  /** A long title (e.g. a story's) may take two lines instead of being cut off. */
+  wrap?: boolean
   /** A control after the title (e.g. the gallery button). */
   extra?: ReactNode
 }) {
@@ -35,7 +39,14 @@ export function TitleTopBar({
             </IconButton>
           )}
           {/* a phone has no room for it beside coins and languages: read out only there */}
-          <h1 className="min-w-0 truncate max-[479px]:sr-only font-display text-2xl font-extrabold sm:text-3xl short:text-xl">
+          <h1
+            className={clsx(
+              'min-w-0 max-[479px]:sr-only font-display font-extrabold short:text-xl',
+              wrap
+                ? 'line-clamp-2 text-xl leading-tight sm:text-2xl lg:text-3xl'
+                : 'truncate text-2xl sm:text-3xl',
+            )}
+          >
             {title}
           </h1>
           {extra}

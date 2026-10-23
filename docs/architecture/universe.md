@@ -29,15 +29,15 @@ ledger entry is queued to Supabase (`record_reward`-style RPC per resource).
 
 ## 2. Resources – each has a source and a use
 
-| Resource             | Earned by                                                  | Spent on / used for                                          |
-| -------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| Coins                | finishing activities (existing)                            | shop: outfits, pets                                          |
-| Stars ⭐             | quality of an activity (1–3, independent answers)          | measure only: unlock world levels (thresholds), medals       |
-| Crystals 💎          | mastery milestones (a strand level-up), daily quest        | building and upgrading buildings, the rocket                 |
-| Seeds 🌱             | a mistake becomes a seed; rare seeds from exploring (Mars) | planted in the Mistake Garden; grow by practising that skill |
-| Mechanical parts ⚙️  | maths/engineering challenges, Science Lab experiments      | rocket and robot builds                                      |
-| Knowledge scrolls 📜 | finishing stories, Teach Kiddo explanations                | Museum exhibits, What If? experiments                        |
-| Mystery keys 🔑      | Detective clues solved                                     | opening the final solution of a mystery                      |
+| Resource             | Earned by                                                                           | Spent on / used for                                          |
+| -------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Coins                | finishing activities (existing)                                                     | shop: outfits, pets                                          |
+| Stars ⭐             | quality of an activity (1–3, independent answers)                                   | measure only: unlock world levels (thresholds), medals       |
+| Crystals 💎          | mastery milestones (a strand level-up), daily quest                                 | building and upgrading buildings, the rocket                 |
+| Seeds 🌱             | a mistake becomes a seed; rare seeds from exploring (Mars)                          | planted in the Mistake Garden; grow by practising that skill |
+| Mechanical parts ⚙️  | maths/engineering challenges, Science Lab experiments                               | rocket and robot builds                                      |
+| Knowledge scrolls 📜 | finishing a tale or a story (`story:<id>`) the first time, Teach Kiddo explanations | Museum exhibits, What If? experiments                        |
+| Mystery keys 🔑      | Detective clues solved                                                              | opening the final solution of a mystery                      |
 
 No resource can be bought with money. No random drops: every reward is announced
 before the activity ("Finish this to get 1 crystal").

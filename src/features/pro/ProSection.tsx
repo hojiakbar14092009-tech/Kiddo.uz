@@ -129,6 +129,10 @@ export function ProSection() {
             ))}
           </tbody>
         </table>
+        {/* honest about the voice: Uzbek is synthetic for now (docs/architecture/audio-security.md) */}
+        <p className="mt-3 text-sm text-ink-soft" data-testid="pro-uz-voice-note">
+          {t('pro.uzVoiceNote')}
+        </p>
       </Panel>
 
       <Panel title={t('pro.buy')} id="pro-plans">

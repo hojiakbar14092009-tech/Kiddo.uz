@@ -50,8 +50,10 @@ each `^(uz|ru|en)/[0-9a-f]{8}$`)
 
 - 200 `{ "url": "<signed url>", "expiresIn": 300, "cached": true|false }`
 - 503 `{ "error": "unavailable" }` when no provider is configured **or the
-  provider has no real voice for that language** (an Uzbek sentence is never read
-  by a Russian/Kazakh/Turkish voice)
+  provider has no real voice for that language** (this rule is about remote TTS
+  only: the `tts` endpoint never reads an Uzbek sentence with a Russian, Kazakh
+  or Turkish voice; the recorded clips are a separate matter, see "Recorded
+  clips" below)
 - 429 `{ "error": "rate_limited" }` also when the global daily cap is reached
 - 400 / 401 / 403 / 405 / 429 / 500 as above
 
@@ -85,6 +87,27 @@ cache, so it must never carry personal data – in particular **the child's name
 - **Owner blocker B5.** Sending sentences to the provider and keeping their audio
   for 30 days needs the owner's decision on consent text and data location
   (provider region, Supabase region) before `TTS_PROVIDER` is set in production.
+
+### Recorded clips
+
+The recorded clips (`public/audio/voice/<lang>/<key>.mp3`, recorded offline by
+`scripts/voices/generate.py`) are a different source from the remote `tts`
+endpoint above:
+
+- `ru` and `en` are read by native Piper voices (ru_RU irina, en_GB cori).
+- **Uzbek clips are currently synthesised with a Kazakh Piper model via
+  transliteration** (`scripts/voices/uzbek.py` writes the Uzbek text in Kazakh
+  Cyrillic; the kk_KZ ISSAI model reads it). There is no open Uzbek neural voice
+  yet. This is the owner's decision (Phase 8): the clips are kept, and the app
+  says so openly – next to "Read to me" in the stories when the language is
+  Uzbek (`stories.syntheticVoice`), on the PRO screen (`pro.uzVoiceNote`) and in
+  the parent settings (`parent.settings.voiceNote`): the Uzbek voice is a
+  temporary synthetic voice, not a native Uzbek voice. The app never claims "a
+  real voice" for Uzbek.
+- **To be replaced by a real Uzbek voice (owner blocker B4)**: when a native
+  Uzbek voice is available (recorded speaker or a provider with a real Uzbek
+  voice), the `uz` clips are recorded again with `generate.py --force` and the
+  disclosure texts are removed.
 
 ## Client
 

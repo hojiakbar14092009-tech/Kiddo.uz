@@ -60,6 +60,8 @@ export const WORLDS: readonly WorldDef[] = [
       act('alphabet', '/alphabet', ['find-letter', 'find-picture', 'exam']),
       act('words', '/learn/words'),
       act('garden', '/learn/garden'),
+      // the Story Engine: best stars over every story (`story:<id>`)
+      act('stories', '/stories', ['story']),
       // the Friendship House: its label is the section's own title
       { activity: 'feelings', route: '/feelings', labelKey: 'feelings.title' },
     ],

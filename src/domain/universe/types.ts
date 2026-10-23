@@ -59,6 +59,12 @@ export interface ActivityCompleted {
    * it, and only a run at the child's current level moves the LearnerProfile.
    */
   level?: number
+  /**
+   * A repeatable activity (a story read again): only its first run of the
+   * day counts for the achievements and moves the LearnerProfile; later runs
+   * that day still get their stars (only an improvement pays), never twice.
+   */
+  oncePerDay?: boolean
 }
 
 /** What one finished activity (or a claimed quest) earned. Zeros when it was counted before. */
