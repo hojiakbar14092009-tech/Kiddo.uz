@@ -8,7 +8,9 @@ describe('trace page', () => {
 
   it('offers letters, numbers and shapes', async () => {
     await renderRoute('/trace')
-    expect(screen.getByRole('link', { name: /Letters/ })).toHaveAttribute('href', '/tasks/trace')
+    expect(
+      await screen.findByRole('link', { name: /Letters/ }, { timeout: 10_000 }),
+    ).toHaveAttribute('href', '/tasks/trace')
     expect(screen.getByRole('link', { name: /Numbers/ })).toHaveAttribute('href', '/trace/numbers')
     expect(screen.getByRole('link', { name: /Shapes/ })).toHaveAttribute('href', '/trace/shapes')
   })

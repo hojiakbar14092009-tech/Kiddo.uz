@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_PAYMENTS_MOCK?: string
   /** Supabase anon (public) key. Row Level Security protects the data. */
   readonly VITE_SUPABASE_ANON_KEY?: string
+  /** 'true': voice clips come from the private bucket as signed URLs and are left out of dist (docs/architecture/audio-security.md). */
+  readonly VITE_VOICE_PRIVATE?: string
 }
 
 interface ImportMeta {

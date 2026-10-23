@@ -13,7 +13,7 @@ describe('audioManager', () => {
   beforeEach(() => {
     useSettingsStore.setState({ volume: 0.8 })
     useSubscriptionStore.getState().cancel()
-    vi.spyOn(speech, 'say').mockResolvedValue()
+    vi.spyOn(speech, 'say').mockResolvedValue(true)
   })
 
   afterEach(() => vi.restoreAllMocks())
@@ -44,6 +44,17 @@ describe('audioManager', () => {
     expect(speech.say).toHaveBeenCalledWith('Тест без записи.', { language: 'ru', volume: 0.8 })
   })
 
+  it('counts a sentence without a device voice as missing, never done', async () => {
+    useSubscriptionStore.getState().setDemoPro(true)
+    useFamilyStore.setState({ activeChildId: 'ali' })
+    vi.spyOn(speech, 'say').mockResolvedValue(false)
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    expect(await audioManager.say([{ text: 'Тест без записи.' }], { language: 'ru' })).toBe(
+      'missing',
+    )
+    audioManager.stopSpeech()
+  })
+
   it('stays silent at zero volume', async () => {
     useSubscriptionStore.getState().setDemoPro(true)
     useFamilyStore.setState({ activeChildId: 'ali' })
@@ -55,7 +66,7 @@ describe('audioManager', () => {
   it('stays silent for a guest even when the family has PRO', async () => {
     useSubscriptionStore.getState().setDemoPro(true)
     useFamilyStore.setState({ activeChildId: null })
-    const say = vi.spyOn(speech, 'say').mockResolvedValue()
+    const say = vi.spyOn(speech, 'say').mockResolvedValue(true)
     expect(await audioManager.speak([{ text: 'Salom' }], { language: 'uz' })).toBe(false)
     expect(say).not.toHaveBeenCalled()
   })

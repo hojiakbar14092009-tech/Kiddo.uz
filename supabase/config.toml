@@ -1,0 +1,13 @@
+# Supabase CLI settings. Only what this repo needs: the Edge Functions of
+# Phase 7 (docs/architecture/audio-security.md). Everything else keeps the
+# CLI defaults. `project_id` is the CLI's local name for the stack (required
+# by the config loader), not the remote project ref (`supabase link` sets that).
+project_id = "kiddo-uz"
+
+# The gateway rejects a request without a valid Supabase JWT before the
+# function runs (on top of the function's own token, PRO and rate checks).
+[functions.voice-url]
+verify_jwt = true
+
+[functions.tts]
+verify_jwt = true

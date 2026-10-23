@@ -226,6 +226,128 @@ select pg_temp.check((select count(*) from public.resource_ledger where child_id
 select pg_temp.check((select count(*) from public.world_state where child_id='ca') = 0, 'world_state: child delete cascades');
 select pg_temp.check((select count(*) from public.achievements where child_id='ca') = 0, 'achievements: child delete cascades');
 
+-- ===== private voice (0007)
+insert into auth.users values
+ ('00000000-0000-0000-0000-00000000000c','c@x.uz'),
+ ('00000000-0000-0000-0000-00000000000d','d@x.uz');
+insert into public.subscriptions (parent_id, plan, source, expires_at, status) values
+ ('00000000-0000-0000-0000-0000000000ad','monthly','payment', now() - interval '1 hour','active'),
+ ('00000000-0000-0000-0000-00000000000c','lifetime','payment', null,'active'),
+ ('00000000-0000-0000-0000-00000000000d','lifetime','payment', null,'canceled');
+insert into storage.objects (bucket_id, name) values ('voice','uz/000cef41.mp3'), ('voice','tts/uz/' || repeat('a',64) || '.mp3');
+select pg_temp.check((select public = false from storage.buckets where id = 'voice'), 'voice: bucket exists and is private');
+select pg_temp.check((select allowed_mime_types = array['audio/mpeg'] from storage.buckets where id = 'voice'), 'voice: bucket accepts mp3 only');
+select pg_temp.check(not exists (
+  select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+    and (coalesce(qual,'') || coalesce(with_check,'')) like '%voice%'
+), 'voice: no storage.objects policy mentions the voice bucket');
+select pg_temp.check(not exists (
+  select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+    and (qual is null or qual = 'true') and cmd in ('SELECT','ALL')
+), 'voice: no storage.objects policy reads every bucket');
+
+-- clients: a PRO parent, an admin and anon all see nothing in the bucket
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'voice') = 0, 'voice: a PRO parent cannot read the objects');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('voice','uz/deadbeef.mp3')$$, 'row-level security');
+update storage.objects set name = 'x' where bucket_id = 'voice';
+delete from storage.objects where bucket_id = 'voice';
+select pg_temp.expect_error($$select public.is_pro_active('00000000-0000-0000-0000-00000000000b')$$, 'permission denied');
+select pg_temp.expect_error($$select public.audio_rate_ok('00000000-0000-0000-0000-00000000000b','voice',1000,60)$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.tts_cache$$, 'permission denied');
+select pg_temp.expect_error($$insert into public.tts_cache (language,text_hash,path) values ('uz', repeat('b',64), 'tts/uz/' || repeat('b',64) || '.mp3')$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.audio_requests$$, 'permission denied');
+select pg_temp.expect_error($$delete from public.audio_requests$$, 'permission denied');
+select pg_temp.expect_error($$select public.audio_daily_count('tts')$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.tts_cache_expired(30)$$, 'permission denied');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'voice') = 0, 'voice: an admin client cannot read the objects either');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('voice','uz/deadbeef.mp3')$$, 'row-level security');
+commit;
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'voice') = 0, 'voice: anon cannot read the objects');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('voice','uz/deadbeef.mp3')$$, 'row-level security');
+select pg_temp.expect_error($$select public.is_pro_active('00000000-0000-0000-0000-00000000000c')$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.tts_cache$$, 'permission denied');
+commit;
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'voice' and name = 'uz/000cef41.mp3') = 1, 'voice: client update/delete changed nothing');
+select pg_temp.check(not has_function_privilege('anon','public.is_pro_active(uuid)','execute'), 'anon cannot execute is_pro_active');
+select pg_temp.check(not has_function_privilege('authenticated','public.is_pro_active(uuid)','execute'), 'authenticated cannot execute is_pro_active');
+select pg_temp.check(not has_function_privilege('anon','public.audio_rate_ok(uuid,text,integer,integer)','execute'), 'anon cannot execute audio_rate_ok');
+select pg_temp.check(not has_function_privilege('authenticated','public.audio_rate_ok(uuid,text,integer,integer)','execute'), 'authenticated cannot execute audio_rate_ok');
+select pg_temp.check(not has_function_privilege('anon','public.audio_daily_count(text)','execute') and not has_function_privilege('authenticated','public.audio_daily_count(text)','execute'), 'clients cannot execute audio_daily_count');
+select pg_temp.check(not has_function_privilege('anon','public.tts_cache_expired(integer,integer)','execute') and not has_function_privilege('authenticated','public.tts_cache_expired(integer,integer)','execute'), 'clients cannot execute tts_cache_expired');
+select pg_temp.check(has_function_privilege('service_role','public.audio_daily_count(text)','execute') and has_function_privilege('service_role','public.tts_cache_expired(integer,integer)','execute'), 'service role executes audio_daily_count and tts_cache_expired');
+select pg_temp.check(not has_table_privilege('authenticated','public.tts_cache','select') and not has_table_privilege('anon','public.tts_cache','select'), 'clients hold no select grant on tts_cache');
+select pg_temp.check((select c.relrowsecurity from pg_class c where c.oid = 'public.tts_cache'::regclass), 'tts_cache: RLS on');
+select pg_temp.check((select c.relrowsecurity from pg_class c where c.oid = 'public.audio_requests'::regclass), 'audio_requests: RLS on');
+select pg_temp.check(not exists (select 1 from pg_policies where schemaname='public' and tablename in ('tts_cache','audio_requests')), 'tts_cache/audio_requests: no client policies');
+
+-- service role: reads the bucket, PRO check, rate limit, cache
+begin;
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'voice') = 2, 'voice: the service role reads the objects');
+select pg_temp.check(public.is_pro_active('00000000-0000-0000-0000-00000000000b'), 'is_pro_active: promo PRO (expires in the future)');
+select pg_temp.check(public.is_pro_active('00000000-0000-0000-0000-00000000000c'), 'is_pro_active: lifetime (expires_at null)');
+select pg_temp.check(not public.is_pro_active('00000000-0000-0000-0000-00000000000a'), 'is_pro_active: no subscription row');
+select pg_temp.check(not public.is_pro_active('00000000-0000-0000-0000-0000000000ad'), 'is_pro_active: expired');
+select pg_temp.check(not public.is_pro_active('00000000-0000-0000-0000-00000000000d'), 'is_pro_active: canceled lifetime');
+select pg_temp.check(not public.is_pro_active(null), 'is_pro_active: null user');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000b','voice',2,60), 'rate: 1st request allowed');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000b','voice',2,60), 'rate: 2nd request allowed');
+select pg_temp.check(not public.audio_rate_ok('00000000-0000-0000-0000-00000000000b','voice',2,60), 'rate: 3rd request refused');
+select pg_temp.check(not public.audio_rate_ok('00000000-0000-0000-0000-00000000000b','voice',2,60), 'rate: still refused');
+select pg_temp.check((select count(*) from public.audio_requests where user_id='00000000-0000-0000-0000-00000000000b' and kind='voice') = 2, 'rate: refused requests are not recorded');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000b','tts',2,60), 'rate: kinds are counted separately');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','voice',2,60), 'rate: users are counted separately');
+insert into public.audio_requests (user_id, kind, at) values
+ ('00000000-0000-0000-0000-00000000000c','tts', now() - interval '120 seconds'),
+ ('00000000-0000-0000-0000-00000000000c','tts', now() - interval '90 seconds'),
+ ('00000000-0000-0000-0000-00000000000c','tts', now() - interval '2 days');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','tts',2,60), 'rate: requests outside the window do not count');
+select pg_temp.check(not public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','tts',2,600), 'rate: a longer window counts them');
+select pg_temp.check(not exists (select 1 from public.audio_requests where at < now() - interval '1 day'), 'rate: rows older than a day are removed');
+select pg_temp.expect_error($$select public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','video',2,60)$$, 'bad_kind');
+select pg_temp.expect_error($$select public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','voice',0,60)$$, 'bad_limit');
+select pg_temp.expect_error($$select public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','voice',5,100000)$$, 'bad_window');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','auth',1,60), 'rate: kind auth is allowed');
+select pg_temp.check(not public.audio_rate_ok('00000000-0000-0000-0000-00000000000c','auth',1,60), 'rate: kind auth has its own limit');
+select pg_temp.expect_error($$insert into public.audio_requests (user_id, kind) values ('00000000-0000-0000-0000-00000000000c','video')$$, 'audio_requests_kind_check');
+-- daily count: every user's tts rows since 00:00 UTC (yesterday's do not count)
+select pg_temp.check(public.audio_daily_count('tts') = (select count(*) from public.audio_requests where kind = 'tts' and at >= date_trunc('day', now() at time zone 'UTC') at time zone 'UTC'), 'daily: counts today''s tts rows of all users');
+insert into public.audio_requests (user_id, kind, at) values
+ ('00000000-0000-0000-0000-00000000000d','tts', date_trunc('day', now() at time zone 'UTC') at time zone 'UTC' - interval '1 minute');
+select pg_temp.check(public.audio_daily_count('tts') = (select count(*) from public.audio_requests where kind = 'tts') - 1, 'daily: a row from before 00:00 UTC does not count');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-00000000000d','tts',10,60), 'daily: another user''s tts request allowed');
+select pg_temp.check(public.audio_daily_count('tts') = (select count(*) from public.audio_requests where kind = 'tts') - 1, 'daily: an allowed tts request of any user counts');
+select pg_temp.check(public.audio_daily_count('voice') >= 2 and public.audio_daily_count('auth') = 1, 'daily: kinds are counted separately');
+select pg_temp.expect_error($$select public.audio_daily_count('video')$$, 'bad_kind');
+insert into public.tts_cache (language, text_hash, path, voice) values ('uz', repeat('a',64), 'tts/uz/' || repeat('a',64) || '.mp3', 'uz-UZ-MadinaNeural');
+select pg_temp.check((select count(*) from public.tts_cache) = 1, 'tts_cache: the service role writes and reads');
+-- expiry (30-day TTL): only rows older than p_days, oldest first, limited; read-only
+insert into public.tts_cache (language, text_hash, path, voice, created_at) values
+ ('ru', repeat('e',64), 'tts/ru/' || repeat('e',64) || '.mp3', 'v', now() - interval '31 days'),
+ ('en', repeat('f',64), 'tts/en/' || repeat('f',64) || '.mp3', 'v', now() - interval '40 days');
+select pg_temp.check((select array_agg(p) from public.tts_cache_expired(30) p) = array['tts/en/' || repeat('f',64) || '.mp3', 'tts/ru/' || repeat('e',64) || '.mp3'], 'tts_cache_expired: the expired paths, oldest first');
+select pg_temp.check((select count(*) from public.tts_cache_expired(30, 1)) = 1, 'tts_cache_expired: p_limit caps the list');
+select pg_temp.check((select count(*) from public.tts_cache_expired(35)) = 1, 'tts_cache_expired: p_days sets the age');
+select pg_temp.check((select count(*) from public.tts_cache) = 3, 'tts_cache_expired: deletes nothing');
+select pg_temp.expect_error($$select * from public.tts_cache_expired(0)$$, 'bad_days');
+select pg_temp.expect_error($$select * from public.tts_cache_expired(30, 0)$$, 'bad_limit');
+delete from public.tts_cache where language in ('ru', 'en');
+select pg_temp.expect_error($$insert into public.tts_cache (language, text_hash, path) values ('ru', repeat('c',64), 'tts/uz/' || repeat('c',64) || '.mp3')$$, 'tts_cache_check');
+select pg_temp.expect_error($$insert into public.tts_cache (language, text_hash, path) values ('kk', repeat('c',64), 'tts/kk/' || repeat('c',64) || '.mp3')$$, 'tts_cache_language_check');
+commit;
+select pg_temp.check((select prosecdef from pg_proc where oid = 'public.is_pro_active(uuid)'::regprocedure), 'is_pro_active is security definer');
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
 import { reloadForUpdate } from './app/errors/staleBuild'
 import { registerServiceWorker } from './app/registerServiceWorker'
+import { dropPublicVoiceCache } from './services/audio/voicePaths'
 import './i18n'
 import './styles/fonts'
 import './styles/index.css'
@@ -24,3 +25,5 @@ createRoot(rootElement).render(
 )
 
 registerServiceWorker()
+// private voice build: clips cached by an earlier public build are removed
+void dropPublicVoiceCache()

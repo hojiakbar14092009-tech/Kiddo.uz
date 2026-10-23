@@ -81,14 +81,18 @@ export const speech = {
     getSynth()?.cancel()
   },
 
-  /** Speaks the phrases one after another; resolves when all are done or skipped. */
-  async say(phrases: string | readonly string[], options: SpeakOptions): Promise<void> {
+  /**
+   * Speaks the phrases one after another; resolves when all are done. Resolves
+   * `false` without a sound when there is no speech engine or no voice for the
+   * locale, so the caller never counts silence as spoken.
+   */
+  async say(phrases: string | readonly string[], options: SpeakOptions): Promise<boolean> {
     const synth = getSynth()
-    if (!synth) return
+    if (!synth) return false
 
     const locale = options.locale ?? LANGUAGE_INFO[options.language].locale
     const voice = pickVoice(await loadVoices(synth), locale)
-    if (!voice) return
+    if (!voice) return false
 
     synth.cancel()
     const list = typeof phrases === 'string' ? [phrases] : phrases
@@ -109,5 +113,6 @@ export const speech = {
           }),
       ),
     )
+    return true
   },
 }

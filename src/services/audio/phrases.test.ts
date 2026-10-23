@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { phraseKey, splitSentences, tidyPhrase, withoutName } from './phrases'
+import { phraseKey, remoteSafeText, splitSentences, tidyPhrase, withoutName } from './phrases'
 
 describe('voice phrases', () => {
   it('names clips exactly like the recorder (scripts/voices/generate.py)', () => {
@@ -17,5 +17,17 @@ describe('voice phrases', () => {
     expect(withoutName('Salom, Ali!', 'Ali')).toBe('Salom!')
     expect(withoutName('Salom!', 'Ali')).toBeNull()
     expect(tidyPhrase(' olamizmi?')).toBe('olamizmi?')
+  })
+
+  it('gives remote TTS only sentences without the child’s name', () => {
+    expect(remoteSafeText('Bugun nima o‘rganamiz?', 'Ali')).toBe('Bugun nima o‘rganamiz?')
+    expect(remoteSafeText('Salom!', null)).toBe('Salom!')
+    expect(remoteSafeText('Bugun juda yaxshi o‘ynading, Ali!', 'Ali')).toBe(
+      'Bugun juda yaxshi o‘ynading!',
+    )
+    expect(remoteSafeText('Ali!', 'Ali')).toBeNull()
+    expect(remoteSafeText('Salom, Ali!', 'Ali')).toBeNull()
+    expect(remoteSafeText('Salom, ALI, qalaysan?', 'Ali')).toBeNull()
+    expect(remoteSafeText('Ali va Ali do‘st.', ' Ali ')).toBe('va do‘st.')
   })
 })

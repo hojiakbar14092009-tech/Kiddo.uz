@@ -58,3 +58,29 @@ export function withoutName(sentence: string, name: string | null | undefined): 
   if (!trimmed || !sentence.includes(trimmed)) return null
   return tidyPhrase(sentence.split(trimmed).join(''))
 }
+
+/** Lower-case for name matching, so “ALI” or “ali” in a sentence still counts as the name. */
+function folded(text: string): string {
+  return text.normalize('NFC').toLowerCase()
+}
+
+/**
+ * The text of a sentence that may leave the device for remote text-to-speech
+ * (docs/architecture/audio-security.md): the child’s name never does.
+ * - no name in it → the sentence itself;
+ * - the name in it → the sentence without the name (`withoutName`), but only
+ *   if that is still a natural sentence of at least two words;
+ * - otherwise null: the sentence is not sent anywhere.
+ * Matching ignores case, so a name the plain `withoutName` split would miss
+ * (another capitalisation) also keeps the sentence on the device.
+ */
+export function remoteSafeText(sentence: string, name: string | null | undefined): string | null {
+  const trimmed = name?.trim()
+  if (!trimmed) return sentence
+  const needle = folded(trimmed)
+  if (!folded(sentence).includes(needle)) return sentence
+  const variant = withoutName(sentence, trimmed)
+  if (!variant || folded(variant).includes(needle)) return null
+  const words = variant.split(' ').filter((word) => /[\p{L}\p{N}]/u.test(word))
+  return words.length >= 2 ? variant : null
+}

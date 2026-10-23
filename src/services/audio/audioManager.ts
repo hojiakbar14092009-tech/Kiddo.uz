@@ -4,7 +4,9 @@ import { useSettingsStore } from '@/store/settingsStore'
 import { canUse } from '@/store/subscriptionStore'
 import { speech, type SpeakOptions } from './speech'
 import { useFamilyStore } from '@/store/familyStore'
-import { planSpeech, type VoiceClip } from './voiceLibrary'
+import { planSpeech, type SpeechPart, type VoiceClip } from './voiceLibrary'
+import { resolveClips, voiceMode } from './voiceSource'
+import { requestTts } from './remoteTts'
 
 export type UiSound = 'click' | 'success' | 'soft'
 
@@ -46,6 +48,11 @@ export type SpeakOutcome = 'done' | 'locked' | 'muted' | 'missing' | 'error' | '
 const ERROR_MS = 2500
 /** A clip that has not started after this long counts as failed. */
 const LOAD_TIMEOUT_MS = 10_000
+
+/** A URL without its query string or fragment (signed URLs carry a token there). */
+export function withoutQuery(url: string): string {
+  return url.replace(/[?#].*$/s, '')
+}
 
 function currentVolume(): number {
   return useSettingsStore.getState().volume
@@ -117,30 +124,86 @@ class AudioManager {
     const name = family.children.find((child) => child.id === family.activeChildId)?.name
     const generation = this.cancelCurrent()
     this.setStatus('loading')
+    // In private voice mode clips come as signed URLs, checked for PRO on the server.
+    const isPrivate = voiceMode() === 'private'
+    // An English cheer (“Yahoooo!”) in any language uses the English recordings.
+    const clipLanguage = options.locale?.startsWith('en') ? 'en' : options.language
     let played = 0
     let missing = 0
     let failed = 0
     try {
+      const parts: SpeechPart[] = []
       for (const item of items) {
         if (!item.text.trim()) continue
-        // An English cheer (“Yahoooo!”) in any language uses the English recordings.
-        const clipLanguage = options.locale?.startsWith('en') ? 'en' : options.language
-        const parts = await planSpeech(clipLanguage, item.text, name)
-        for (const part of parts) {
-          // A newer phrase or stop() wins: the rest of this one is dropped.
+        parts.push(...(await planSpeech(clipLanguage, item.text, name)))
+      }
+      if (generation !== this.generation) return 'cancelled'
+      // One server call for every clip of this request; each clip still asks
+      // right before it plays (from memory unless its URL is about to expire).
+      let clipsFailed = false
+      if (isPrivate) {
+        const keys = parts.flatMap((part) => (part.kind === 'clip' ? [part.key] : []))
+        if (keys.length > 0) {
+          const batch = await resolveClips(clipLanguage, keys)
           if (generation !== this.generation) return 'cancelled'
-          if (part.kind === 'clip') {
-            const result = await this.playClip(part.url, volume, generation)
-            if (result === 'error') failed += 1
-            else if (result === 'stopped') return 'cancelled'
-            else played += 1
-          } else if (clipsOnly) {
-            missing += 1
-          } else {
-            this.setStatus('speaking')
-            await speech.say(part.text, { ...options, volume })
-            played += 1
+          if (batch.status === 'locked') return this.endLocked(generation)
+          clipsFailed = batch.status === 'error'
+        }
+      }
+      for (const part of parts) {
+        // A newer phrase or stop() wins: the rest of this one is dropped.
+        if (generation !== this.generation) return 'cancelled'
+        if (part.kind === 'clip') {
+          let url: string | null = part.url
+          if (isPrivate) {
+            if (clipsFailed) {
+              failed += 1
+              continue
+            }
+            const resolved = await resolveClips(part.language, [part.key])
+            if (generation !== this.generation) return 'cancelled'
+            if (resolved.status === 'locked') return this.endLocked(generation)
+            if (resolved.status === 'error') {
+              failed += 1
+              continue
+            }
+            url = resolved.urls[part.key] ?? null
           }
+          if (url === null) {
+            // the server has no clip stored for it
+            missing += 1
+            continue
+          }
+          const result = await this.playClip(url, volume, generation, isPrivate)
+          if (result === 'error') failed += 1
+          else if (result === 'stopped') return 'cancelled'
+          else played += 1
+        } else if (clipsOnly) {
+          missing += 1
+        } else {
+          // Only `remoteText` may leave the device: never the child's name
+          // (null = this sentence is not sent to the server voice at all).
+          if (isPrivate && part.remoteText !== null) {
+            const remote = await requestTts(clipLanguage, part.remoteText)
+            if (generation !== this.generation) return 'cancelled'
+            if (remote.status === 'locked') return this.endLocked(generation)
+            if (remote.status === 'error') {
+              failed += 1
+              continue
+            }
+            if (remote.status === 'ok') {
+              const result = await this.playClip(remote.url, volume, generation, true)
+              if (result === 'error') failed += 1
+              else if (result === 'stopped') return 'cancelled'
+              else played += 1
+              continue
+            }
+            // 'missing': no server voice for it, the device voice as before
+          }
+          this.setStatus('speaking')
+          // No device voice for the language: silence, counted as missing (never 'done').
+          if (await speech.say(part.text, { ...options, volume })) played += 1
+          else missing += 1
         }
       }
     } catch (error) {
@@ -189,6 +252,13 @@ class AudioManager {
     return this.generation
   }
 
+  /** The server said the account is not PRO: nothing more is said, the caller shows the lock. */
+  private endLocked(generation: number): SpeakOutcome {
+    if (generation !== this.generation) return 'cancelled'
+    this.setStatus('idle')
+    return 'locked'
+  }
+
   private setStatus(status: SpeechStatus) {
     if (status === this.status) return
     this.status = status
@@ -208,6 +278,7 @@ class AudioManager {
     src: string,
     volume: number,
     generation: number,
+    remote = false,
   ): Promise<'ended' | 'stopped' | 'error'> {
     return new Promise((resolve) => {
       let settled = false
@@ -217,7 +288,8 @@ class AudioManager {
         if (settled) return
         settled = true
         clearTimeout(timeout)
-        if (result === 'error') console.warn('[kiddo audio] clip failed', src, error)
+        // never the query string: a signed URL's token stays out of the logs
+        if (result === 'error') console.warn('[kiddo audio] clip failed', withoutQuery(src), error)
         if (this.current === howl) {
           this.current = null
           this.finishCurrent = null
@@ -228,6 +300,8 @@ class AudioManager {
       }
       const howl: Howl = new Howl({
         src: [src],
+        // a signed URL's query string hides the file type from Howler
+        ...(remote ? { format: ['mp3'] } : {}),
         volume,
         onplay: () => {
           clearTimeout(timeout)

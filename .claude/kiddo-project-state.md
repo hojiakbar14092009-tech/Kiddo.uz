@@ -45,7 +45,8 @@ Phase 2: 368 unit, 34 e2e.
 Phase 3: 419 unit, 34 e2e, 62 SQL assertions
 Phase 4+5a: 552 unit, 34 e2e, 119 SQL assertions
 Phase 5: 606 unit, 58 e2e
-Phase 6: 667 unit, 70 e2e (`supabase/tests/run.sh`, local Postgres).
+Phase 6: 667 unit, 70 e2e
+Phase 7: 743 unit, 70 e2e, 189 SQL assertions (`supabase/tests/run.sh`, local Postgres).
 
 ## UI foundation (Phase 1)
 
@@ -138,6 +139,17 @@ no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens
   may name and picture all six animals (no PRO model/fact reachable; test guards it).
 - Stills: `scripts/render-dinos.mjs`, `scripts/render-uzbekistan.mjs` → public/3d/worlds.
 
+## Audio security (Phase 7) – docs/architecture/audio-security.md
+
+- Modes: `public` (default, device mode: /audio/voice in the build) and `private`
+  (cloud mode + `VITE_VOICE_PRIVATE=true`: clips leave dist; signed URLs from Edge
+  Function `voice-url`, memory-only). `canUse('audio')` still first; server `not_pro` → locked.
+- `0007_audio.sql` (NOT applied): private bucket `voice`, `is_pro_active` (service role),
+  rate limits (auth/voice/tts + daily cap), `tts_cache` with 30-day cleanup script.
+- Remote TTS only generic sentences (child name never sent); uz only with a real uz-* voice
+  else 503; no device voice → `missing`, never `done`. Scripts: voices/upload-private.mjs,
+  cleanup-tts.mjs. Deno installed via npm for `deno check`.
+
 ## Key decisions
 
 - Incremental: new `src/domain/{rewards,progress,entitlements,quests}` wrap existing
@@ -183,7 +195,7 @@ prod) · B7 promo policy.
 - [x] 4 Kiddo City, Adventure Map, Daily Quest, resources, achievements (2026-10-23)
 - [x] 5 Tracing, Creative Studio, Smart Math (/math-lab), adaptive LearnerProfile, Emotions & Social (/feelings) (2026-10-23)
 - [x] 6 Explorer3D, Dinosaur world (/worlds/dino), My Uzbekistan (/worlds/uzbekistan) (2026-10-23)
-- [ ] 7 Pro + audio server-side (claims, private voice bucket), Music & Rhythm
+- [x] 7 Pro + audio security: private voice bucket, voice-url/tts Edge Functions, server PRO check (2026-10-23)
 - [ ] 8 Story Engine · 9 Parent Dashboard · 10 AI Friend · 11 responsive · 12 performance · 13 security
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
@@ -192,7 +204,8 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 7 – Pro + audio security: server-authoritative Pro, private voice clips with
-signed URLs, secure TTS endpoint (no keys in browser; no other-language voice for
-Uzbek); keep the working voice system. Owner actions: apply 0005 + 0006 + Realtime
-private-only (docs/architecture/supabase-verification.md §6), set Vercel `VITE_SUPABASE_*`.
+Phase 8 – Story Engine: data-driven stories (2–5 min), pages + choices, Pro narration via
+the audio system, scrolls/universe wiring. Owner actions: apply 0005–0007, deploy
+voice-url/tts + secrets, upload voice, then `VITE_VOICE_PRIVATE=true`; Realtime
+private-only; Vercel `VITE_SUPABASE_*` (supabase-verification.md §6–7); B4 TTS
+provider; B5 consent + data location.
