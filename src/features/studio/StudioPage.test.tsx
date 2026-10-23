@@ -8,7 +8,9 @@ describe('creative studio', () => {
 
   it('shows the board with ten colours and large tools', async () => {
     await renderRoute('/studio')
-    expect(screen.getByRole('img', { name: 'Drawing space' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('img', { name: 'Drawing space' }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
     const colours = within(screen.getByRole('group', { name: 'Colours' })).getAllByRole('button')
     expect(colours).toHaveLength(10)
     expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled()

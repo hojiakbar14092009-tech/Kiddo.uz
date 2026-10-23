@@ -18,6 +18,8 @@ export interface AdventureActivityDef {
   labelKey: string
   /** Activity bases whose best stars this entry shows (default: [activity]). */
   matches?: readonly string[]
+  /** Also activity ids starting with one of these, e.g. `uzbekistan:map:` (all its tiers). */
+  prefixes?: readonly string[]
 }
 
 export interface WorldDef {
@@ -35,6 +37,17 @@ const label = (activity: string) => `universe.activities.${activity}`
 
 function act(activity: string, route: string, matches?: readonly string[]): AdventureActivityDef {
   return { activity, route, labelKey: label(activity), ...(matches ? { matches } : {}) }
+}
+
+/** A game of the "My Uzbekistan" world: its best over every tier (`uzbekistan:<kind>:<tier>`). */
+function uzGame(kind: 'map' | 'table' | 'patterns'): AdventureActivityDef {
+  return {
+    activity: `uzbekistan-${kind}`,
+    route: `/worlds/uzbekistan/${kind}`,
+    labelKey: `uzbekistan.games.${kind}.title`,
+    matches: [],
+    prefixes: [`uzbekistan:${kind}:`],
+  }
 }
 
 export const WORLDS: readonly WorldDef[] = [
@@ -68,7 +81,6 @@ export const WORLDS: readonly WorldDef[] = [
     nameKey: 'universe.worlds.dinosaur',
     icon3d: 'dinosaur',
     starsNeeded: 14,
-    comingSoon: true,
     activities: [act('dino', '/worlds/dino')],
   },
   {
@@ -90,8 +102,12 @@ export const WORLDS: readonly WorldDef[] = [
     nameKey: 'universe.worlds.uzbekistan',
     icon3d: 'castle',
     starsNeeded: 50,
-    comingSoon: true,
-    activities: [act('uzbekistan', '/worlds/uzbekistan')],
+    activities: [
+      act('uzbekistan', '/worlds/uzbekistan'),
+      uzGame('map'),
+      uzGame('table'),
+      uzGame('patterns'),
+    ],
   },
 ]
 
@@ -128,6 +144,15 @@ export function bestByBase(best: Readonly<Record<string, number>>): Record<strin
   return out
 }
 
+/** Best stars of the activities whose id starts with `prefix`. */
+function bestWithPrefix(best: Readonly<Record<string, number>>, prefix: string): number {
+  let out = 0
+  for (const [activity, stars] of Object.entries(best)) {
+    if (activity.startsWith(prefix)) out = Math.max(out, stars)
+  }
+  return out
+}
+
 /** Pure: the map for a number of stars earned and the child's best stars. */
 export function adventureState(
   stars: number,
@@ -150,7 +175,11 @@ export function adventureState(
       activity: item.activity,
       route: item.route,
       labelKey: item.labelKey,
-      bestStars: Math.max(0, ...(item.matches ?? [item.activity]).map((base) => byBase[base] ?? 0)),
+      bestStars: Math.max(
+        0,
+        ...(item.matches ?? [item.activity]).map((base) => byBase[base] ?? 0),
+        ...(item.prefixes ?? []).map((prefix) => bestWithPrefix(best, prefix)),
+      ),
       open: !world.comingSoon,
     })),
   }))

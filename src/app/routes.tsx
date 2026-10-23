@@ -137,6 +137,27 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/adventure/AdventurePage')).AdventurePage,
                 }),
               },
+              // The Dinosaur world (Adventure Map, Dino Park in Kiddo City); 3D loads inside it.
+              ...['/worlds/dino', '/worlds/dino/:mode', '/worlds/dino/explore/:dinoId'].map(
+                (path) => ({
+                  path,
+                  lazy: async () => ({
+                    Component: (await import('@/features/worlds/dino/DinoPage')).DinoPage,
+                  }),
+                }),
+              ),
+              // "My Uzbekistan": landmarks in 3D, the map, the dasturxon and patterns.
+              ...[
+                '/worlds/uzbekistan',
+                '/worlds/uzbekistan/:section',
+                '/worlds/uzbekistan/:section/:item',
+              ].map((path) => ({
+                path,
+                lazy: async () => ({
+                  Component: (await import('@/features/worlds/uzbekistan/UzbekistanPage'))
+                    .UzbekistanPage,
+                }),
+              })),
               {
                 path: '/collection',
                 lazy: async () => ({

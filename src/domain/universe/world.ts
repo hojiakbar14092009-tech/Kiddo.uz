@@ -60,6 +60,10 @@ export const BUILDINGS: readonly BuildingDef[] = [
   building('art-studio', 'paintbrush', '/studio'),
   // Emotions & Social Skills: open at level 0 like every building, first upgrade 1 crystal
   building('friendship-house', 'teddy', '/feelings'),
+  // The Dinosaur world: explore in 3D, dig up bones, a quiz
+  building('dino-park', 'dinosaur', '/worlds/dino'),
+  // "My Uzbekistan": its picture is the Registon model's still
+  building('uzbekistan-gate', 'worlds/uz-registan', '/worlds/uzbekistan'),
   building('shop', 'gift', '/shop'),
   building('museum', 'castle', '/collection'),
 ]

@@ -11,7 +11,13 @@ import { isProActive, useSubscriptionStore } from '@/store/subscriptionStore'
  */
 
 /** Paid capabilities. */
-export type ProFeature = 'audio' | 'premiumStories' | 'aiFriend' | 'offlinePacks'
+export type ProFeature =
+  | 'audio'
+  | 'premiumStories'
+  | 'aiFriend'
+  | 'offlinePacks'
+  /** The extra explorations of a world (each world keeps a free part). */
+  | 'premiumWorlds'
 
 export type EntitlementReason = 'ok' | 'pro' | 'guest'
 
@@ -27,6 +33,7 @@ const NEEDS_PRO: Record<ProFeature, boolean> = {
   premiumStories: true,
   aiFriend: true,
   offlinePacks: true,
+  premiumWorlds: true,
 }
 
 export function entitlementFor(

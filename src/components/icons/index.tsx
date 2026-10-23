@@ -347,3 +347,14 @@ export function MedalIcon(props: IconProps) {
     </StrokeIcon>
   )
 }
+
+/** Turn a 3D model around (an orbit with an arrow). */
+export function RotateIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <ellipse cx="12" cy="12" rx="9" ry="4" />
+      <path d="M12 3v18" strokeDasharray="2 3" />
+      <path d="m17 14.5 3.5 1.5-1 3.5" />
+    </StrokeIcon>
+  )
+}

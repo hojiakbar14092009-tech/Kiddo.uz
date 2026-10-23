@@ -1,6 +1,7 @@
 let cached: boolean | null = null
+let cachedContext: boolean | null = null
 
-interface DeviceHints {
+export interface DeviceHints {
   hardwareConcurrency?: number
   deviceMemory?: number
 }
@@ -16,11 +17,32 @@ export function canRender3D(): boolean {
   return cached
 }
 
+/**
+ * Whether a WebGL context can be created at all, with no device-strength
+ * check. The 3D Explorer uses this: a weak device still gets the "Turn in 3D"
+ * button (at low quality, never opened by itself), while the mascot keeps
+ * the stricter canRender3D().
+ */
+export function canCreateWebGL(): boolean {
+  if (cachedContext !== null) return cachedContext
+  cachedContext = createContext()
+  return cachedContext
+}
+
+/** Very weak devices (≤ 2 cores or < 2 GB RAM) by their hints. */
+export function isLowEndDevice(hints: DeviceHints): boolean {
+  if ((hints.hardwareConcurrency ?? 4) <= 2) return true
+  return hints.deviceMemory !== undefined && hints.deviceMemory < 2
+}
+
 function detect(): boolean {
   if (typeof window === 'undefined' || typeof document === 'undefined') return false
-  const hints = navigator as Navigator & DeviceHints
-  if ((hints.hardwareConcurrency ?? 4) <= 2) return false
-  if (hints.deviceMemory !== undefined && hints.deviceMemory < 2) return false
+  if (isLowEndDevice(navigator as Navigator & DeviceHints)) return false
+  return canCreateWebGL()
+}
+
+function createContext(): boolean {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return false
   try {
     const canvas = document.createElement('canvas')
     const context = canvas.getContext('webgl2') ?? canvas.getContext('webgl')
@@ -33,4 +55,5 @@ function detect(): boolean {
 /** Test helper: forget the cached answer. */
 export function resetWebGLDetection(): void {
   cached = null
+  cachedContext = null
 }

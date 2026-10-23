@@ -47,10 +47,13 @@ describe('Adventure Map', () => {
       within(ocean).getByRole('link', { name: 'Juftini top. Hali o‘ynalmagan' }),
     ).toHaveAttribute('href', '/tasks/memory')
 
+    // the Dinosaur world is open now: not unlocked on the map yet, but its route plays
     const dinosaur = screen.getByTestId('world-dinosaur')
-    expect(dinosaur).toHaveTextContent('Tez orada')
-    expect(dinosaur).toHaveTextContent('Bu olam hali tayyorlanmoqda.')
-    expect(within(dinosaur).queryByRole('link')).not.toBeInTheDocument()
+    expect(dinosaur).not.toHaveTextContent('Tez orada')
+    expect(within(dinosaur).getByRole('link', { name: /^Dinozavrlar\./ })).toHaveAttribute(
+      'href',
+      '/worlds/dino',
+    )
 
     const space = screen.getByTestId('world-space')
     expect(space).toHaveTextContent('Yana 17 ta yulduz')

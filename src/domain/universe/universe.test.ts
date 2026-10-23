@@ -263,6 +263,8 @@ describe('world', () => {
       'robot-workshop',
       'art-studio',
       'friendship-house',
+      'dino-park',
+      'uzbekistan-gate',
       'shop',
       'museum',
     ])
@@ -360,7 +362,9 @@ describe('achievements', () => {
       ...BUILDINGS.map((b) => b.icon3d),
       ...WORLDS.map((w) => w.icon3d),
     ]
-    const pictures = Object.keys(import.meta.glob('/public/3d/*.webp'))
+    const pictures = Object.keys(
+      import.meta.glob(['/public/3d/*.webp', '/public/3d/worlds/*.webp']),
+    )
     for (const icon of icons) expect(pictures, icon).toContain(`/public/3d/${icon}.webp`)
   })
 })
@@ -435,9 +439,9 @@ describe('adventure', () => {
     expect(unlocked(6)).toEqual(['forest', 'ocean'])
     expect(unlocked(49)).toHaveLength(5)
     expect(unlocked(50)).toHaveLength(6)
-    // 'Coming soon' worlds are drawn but never where the child stands.
-    expect(adventureState(14, {}).find((w) => w.current)?.id).toBe('ocean')
-    expect(adventureState(60, {}).find((w) => w.current)?.id).toBe('science')
+    // the Dinosaur world is open (no longer 'coming soon'): 14 stars stand there
+    expect(adventureState(14, {}).find((w) => w.current)?.id).toBe('dinosaur')
+    expect(adventureState(60, {}).find((w) => w.current)?.id).toBe('uzbekistan')
   })
 
   it('shows the best stars per activity and marks future worlds', () => {
@@ -455,11 +459,13 @@ describe('adventure', () => {
       ['garden', '/learn/garden', 0],
       ['feelings', '/feelings', 2],
     ])
-    expect(map.find((w) => w.id === 'dinosaur')).toMatchObject({ comingSoon: true })
+    expect(map.find((w) => w.id === 'dinosaur')).toMatchObject({ comingSoon: false })
     // Learning routes are open even in a world not unlocked yet; only future routes are not.
     expect(map.find((w) => w.id === 'science')).toMatchObject({ unlocked: false })
     expect(map.find((w) => w.id === 'science')?.activities.every((a) => a.open)).toBe(true)
-    expect(map.find((w) => w.id === 'dinosaur')?.activities.every((a) => !a.open)).toBe(true)
+    expect(map.find((w) => w.id === 'dinosaur')?.activities).toEqual([
+      expect.objectContaining({ activity: 'dino', route: '/worlds/dino', open: true }),
+    ])
     expect(map.find((w) => w.id === 'uzbekistan')?.activities[0]?.route).toBe('/worlds/uzbekistan')
   })
 

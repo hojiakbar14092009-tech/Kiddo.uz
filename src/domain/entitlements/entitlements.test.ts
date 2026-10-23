@@ -5,7 +5,13 @@ import * as legacy from '@/store/subscriptionStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { canUse, getEntitlement, useCanUse, useEntitlement, useProTier, type ProFeature } from '.'
 
-const FEATURES: ProFeature[] = ['audio', 'premiumStories', 'aiFriend', 'offlinePacks']
+const FEATURES: ProFeature[] = [
+  'audio',
+  'premiumStories',
+  'aiFriend',
+  'offlinePacks',
+  'premiumWorlds',
+]
 const DAY = 24 * 60 * 60 * 1000
 
 function signInChild() {

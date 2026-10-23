@@ -44,7 +44,8 @@ Phase 1: 350 unit, 34 e2e; initial JS ≈ 240 KB gzip.
 Phase 2: 368 unit, 34 e2e.
 Phase 3: 419 unit, 34 e2e, 62 SQL assertions
 Phase 4+5a: 552 unit, 34 e2e, 119 SQL assertions
-Phase 5: 606 unit, 58 e2e (`supabase/tests/run.sh`, local Postgres).
+Phase 5: 606 unit, 58 e2e
+Phase 6: 667 unit, 70 e2e (`supabase/tests/run.sh`, local Postgres).
 
 ## UI foundation (Phase 1)
 
@@ -124,6 +125,19 @@ no emoji as UI icons (emoji only as decoration in mascot bubbles). Colour tokens
   faces, scenes, kindness choices with pictures, calm corner (no reward).
 - i18next TS2589 limit close: don't use `ReturnType<typeof useTranslation>['t']`.
 
+## Worlds (Phase 6)
+
+- `src/components/explorer3d`: `Explorer3D({ model: ExplorerModelDef, label, onHotspot })`;
+  still picture first, R3F view lazy, builders lazy (`load()`), demand frameloop, idle
+  spin stops after 1 turn/6 s, WebGL fail → still + hotspot buttons. Low-end devices
+  get quality 'low' and no auto-open (`canCreateWebGL`, `isLowEndDevice`).
+- `/worlds/dino` (dino-park): 6 procedural models (T. rex, Triceratops free), dig + quiz
+  (strand science). `/worlds/uzbekistan` (uzbekistan-gate): 6 landmarks (Registon,
+  tandir free), map, dasturxon (language), patterns (logic, PRO).
+- PRO: `premiumWorlds` gates 3D explore + facts (also direct URLs). Decision: quiz/dig
+  may name and picture all six animals (no PRO model/fact reachable; test guards it).
+- Stills: `scripts/render-dinos.mjs`, `scripts/render-uzbekistan.mjs` → public/3d/worlds.
+
 ## Key decisions
 
 - Incremental: new `src/domain/{rewards,progress,entitlements,quests}` wrap existing
@@ -168,7 +182,7 @@ prod) · B7 promo policy.
 - [x] 3 Domain foundation + Supabase security migration 0005 (2026-10-23)
 - [x] 4 Kiddo City, Adventure Map, Daily Quest, resources, achievements (2026-10-23)
 - [x] 5 Tracing, Creative Studio, Smart Math (/math-lab), adaptive LearnerProfile, Emotions & Social (/feelings) (2026-10-23)
-- [ ] 6 Worlds: Explorer3D, Dinosaur, Uzbekistan
+- [x] 6 Explorer3D, Dinosaur world (/worlds/dino), My Uzbekistan (/worlds/uzbekistan) (2026-10-23)
 - [ ] 7 Pro + audio server-side (claims, private voice bucket), Music & Rhythm
 - [ ] 8 Story Engine · 9 Parent Dashboard · 10 AI Friend · 11 responsive · 12 performance · 13 security
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
@@ -178,8 +192,7 @@ speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
 
 ## Next
 
-Phase 6 – Worlds: reusable lazy Explorer3D, Space/Dinosaur/Uzbekistan premium worlds,
-wired to universe (scrolls/keys/stars, adventure map). Owner actions: apply 0005 + 0006
-
-- Realtime private-only (docs/architecture/supabase-verification.md §6), set Vercel
-  `VITE_SUPABASE_*`.
+Phase 7 – Pro + audio security: server-authoritative Pro, private voice clips with
+signed URLs, secure TTS endpoint (no keys in browser; no other-language voice for
+Uzbek); keep the working voice system. Owner actions: apply 0005 + 0006 + Realtime
+private-only (docs/architecture/supabase-verification.md §6), set Vercel `VITE_SUPABASE_*`.
