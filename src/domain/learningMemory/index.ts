@@ -3,6 +3,7 @@ export {
   dueReviews,
   evidenceScore,
   forgetStale,
+  GARDEN_GROW_STREAK,
   gardenStage,
   hintTrend,
   isActive,

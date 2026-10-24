@@ -1,171 +1,135 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Screen } from '@/components/layout/Screen'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
-import { Button } from '@/components/ui/Button'
-import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
-import { ProgressBar } from '@/components/ui/Progress'
-import { RewardBurst } from '@/components/ui/RewardBurst'
-import { toast } from '@/components/ui/toast'
-import { gardenStage, useChildMemory, type GardenStage } from '@/domain/learningMemory'
-import { PLANT_STAGES, useWorldProgress } from '@/domain/universe/progression'
-import { skillFamily } from '@/features/parent/insights/activityNames'
-import { tDynamic } from '@/lib/tDynamic'
+import { GUEST_KEY } from '@/domain/childKey'
+import { useGarden, type GardenPlant, type GardenSummary } from '@/domain/garden'
+import { Mascot } from '@/features/mascot/Mascot'
+import { useMascot } from '@/features/mascot/useMascot'
 import { useChildKey } from '@/store/progressStore'
+import { GardenScene, PlantGrid, PlantPatch } from './GardenScene'
+import { MarsBed } from './MarsBed'
+import { useMarsActionPending } from './useMarsActionPending'
+import { GrowthPath, PlantSheet } from './PlantSheet'
+import { anyGrew, grownSince, markSeen } from './seenStages'
+import './garden.css'
 
-/** The Mars plant at each stage after planting (0 = just planted). */
-const MARS_LOOK = ['seedling', 'herb', 'tulip', 'blossom'] as const
-const STAGE_WORD = ['seed', 'sprout', 'plant', 'bloom'] as const
-const PRACTICE_LOOK: Record<Exclude<GardenStage, 'none'>, string> = {
-  seed: 'seedling',
-  sprout: 'herb',
-  plant: 'clover',
-  bloom: 'blossom',
-}
-
-/**
- * The Mistake Garden, shown to the child as the Practice Garden: never a
- * list of failures. One bed holds the rare Mars seed of the first journey;
- * it grows with science runs done well (the progression rules decide). Below
- * it, practice sprouts from the learning memory: a skill that was tricky is
- * a sprout, and it blooms as the memory sees the child get past it.
+/*
+ * The Mistake Garden (Phase 16), shown to the child as the Practice Garden:
+ * never a list of mistakes. Every skill the learning memory holds as a real
+ * difficulty is one plant; practice in the existing activities grows it, and
+ * a bloom means "I learned this". The page only shows: the stages come from
+ * the learning memory (domain/garden), the Mars bed from the progression rules.
  */
 export function MistakeGardenPage() {
-  const { t } = useTranslation()
   const childKey = useChildKey()
-  const { isDiscovered, stageOf, plant } = useWorldProgress()
-  const memory = useChildMemory(childKey)
-  const stage = stageOf('mars')
-  const planted = stage >= 0
-  const bloomed = stage >= PLANT_STAGES
+  // a profile switch starts a fresh view: one child's plants never show for another
+  return <Garden key={childKey} childKey={childKey} />
+}
 
-  // one sprout per skill family, the furthest along first
-  const sprouts = useMemo(() => {
-    const order: GardenStage[] = ['bloom', 'plant', 'sprout', 'seed']
-    const byLabel = new Map<string, { family: string; stage: Exclude<GardenStage, 'none'> }>()
-    for (const skill of Object.values(memory.skills)) {
-      const look = gardenStage(skill)
-      if (look === 'none') continue
-      const family = skillFamily(skill.skill.replace(/^math:/, ''))
-      const known = byLabel.get(family)
-      if (!known || order.indexOf(look) > order.indexOf(known.stage)) {
-        byLabel.set(family, { family, stage: look })
-      }
-    }
-    return [...byLabel.values()].sort((a, b) => order.indexOf(a.stage) - order.indexOf(b.stage))
-  }, [memory.skills])
+type MascotLine = 'empty' | 'seeds' | 'growing' | 'bloom' | 'grew'
 
-  const doPlant = () => {
-    if (plant('mars') === 'ok') toast(t('practiceGarden.planted'), 'success')
-  }
+function mascotLine(summary: GardenSummary, grew: boolean): MascotLine {
+  if (grew) return 'grew'
+  if (summary.total === 0) return 'empty'
+  if (summary.seed > 0) return 'seeds'
+  return summary.growing > 0 ? 'growing' : 'bloom'
+}
 
-  const marsPicture = (
-    <span className="flex size-32 items-end justify-center rounded-card bg-primary-soft pb-2 sm:size-36">
-      <Img3D
-        name={planted ? MARS_LOOK[Math.min(stage, PLANT_STAGES)]! : 'garden-house'}
-        className={planted ? 'size-[78%]' : 'size-[70%] opacity-50'}
-        eager
-      />
-    </span>
-  )
+function Garden({ childKey }: { childKey: string }) {
+  const { t } = useTranslation()
+  const { plants, summary } = useGarden(childKey)
+  // what grew since the child last looked (this page lifetime only; see seenStages)
+  const [grown] = useState(() => grownSince(childKey, plants))
+  const [openSkill, setOpenSkill] = useState<string | null>(null)
+  const marsFirst = useMarsActionPending()
+  const { react } = useMascot()
+  const line = mascotLine(summary, anyGrew(grown))
+  const open = plants.find((plant) => plant.skillKey === openSkill) ?? null
+
+  useEffect(() => {
+    markSeen(childKey, plants)
+  }, [childKey, plants])
+
+  useEffect(() => {
+    react(
+      line === 'grew' || line === 'bloom' ? 'correct' : 'instruct',
+      { text: t(`practiceGarden.mascot.${line}`), emoji: line === 'bloom' ? '🌸' : '🌱' },
+      { speak: false },
+    )
+  }, [line, react, t])
 
   return (
     <Screen
       header={<TitleTopBar title={t('practiceGarden.title')} back="/home" />}
-      className="items-center gap-6 px-4 py-6 sm:py-8 short:gap-3 short:py-3"
+      className="items-center gap-5 px-3 py-4 sm:px-6 sm:py-6 short:gap-3 short:py-3"
     >
-      <p className="max-w-xl text-center text-lg text-ink-soft">{t('practiceGarden.intro')}</p>
+      <div className="flex w-full max-w-5xl flex-col items-center gap-2 sm:flex-row sm:gap-4">
+        <Mascot robotClassName="w-16 sm:w-24" className="w-full sm:w-auto sm:flex-1" />
+      </div>
+      <p className="max-w-2xl text-center text-lg text-ink-soft">
+        {t('practiceGarden.learningIntro')}
+      </p>
 
-      <section
-        aria-labelledby="mars-bed"
-        data-testid="mars-bed"
-        data-stage={stage}
-        className="flex w-full max-w-2xl flex-col items-center gap-4 rounded-card bg-surface p-4 text-center shadow-press sm:flex-row sm:text-left"
-      >
-        {bloomed ? <RewardBurst pieces={8}>{marsPicture}</RewardBurst> : marsPicture}
-        <div className="flex min-w-0 flex-1 flex-col items-center gap-2 sm:items-start">
-          <h2 id="mars-bed" className="font-display text-2xl font-extrabold">
-            {t('practiceGarden.marsTitle')}
-          </h2>
-          {!planted && !isDiscovered('mars-seed') && (
-            <>
-              <p className="text-lg text-ink-soft">{t('practiceGarden.noSeed')}</p>
-              <LinkButton to="/spaceport" variant="soft" size="md">
-                {t('practiceGarden.toSpaceport')}
-              </LinkButton>
-            </>
-          )}
-          {!planted && isDiscovered('mars-seed') && (
-            <Button variant="coin" size="md" onClick={doPlant} data-testid="plant-seed">
-              {t('practiceGarden.plant')}
-            </Button>
-          )}
-          {planted && (
-            <>
-              <p className="font-display text-xl font-bold" data-testid="mars-stage">
-                {tDynamic(t, `practiceGarden.stages.${STAGE_WORD[Math.min(stage, PLANT_STAGES)]}`)}
-              </p>
-              <ProgressBar
-                value={stage}
-                max={PLANT_STAGES}
-                label={t('practiceGarden.growth', { stage, total: PLANT_STAGES })}
-                className="w-full max-w-xs"
-              />
-              <p aria-hidden="true" className="text-base font-semibold text-ink-soft tabular-nums">
-                {t('practiceGarden.growth', { stage, total: PLANT_STAGES })}
-              </p>
-              {bloomed ? (
-                <>
-                  <p className="text-lg text-ink-soft">{t('practiceGarden.bloomed')}</p>
-                  <LinkButton to="/science-lab" size="md">
-                    {t('practiceGarden.toLab')}
-                  </LinkButton>
-                </>
-              ) : (
-                <>
-                  <p className="text-lg text-ink-soft">{t('practiceGarden.grow')}</p>
-                  <LinkButton to="/learn/garden" variant="soft" size="md">
-                    {t('practiceGarden.toLesson')}
-                  </LinkButton>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      </section>
+      {marsFirst && <MarsBed />}
 
-      <section aria-labelledby="sprouts" className="flex w-full max-w-2xl flex-col gap-3">
-        <h2 id="sprouts" className="font-display text-2xl font-extrabold">
-          {t('practiceGarden.practiceTitle')}
-        </h2>
-        <p className="text-lg text-ink-soft">{t('practiceGarden.practiceIntro')}</p>
-        {sprouts.length === 0 ? (
-          <p className="text-lg text-ink-soft" data-testid="sprouts-empty">
-            {t('practiceGarden.practiceEmpty')}
-          </p>
+      <GardenScene label={t('practiceGarden.sceneLabel', { count: plants.length })}>
+        {plants.length === 0 ? (
+          <EmptyGarden />
         ) : (
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3" data-testid="sprouts">
-            {sprouts.map((sprout) => (
-              <li
-                key={sprout.family}
-                className="flex flex-col items-center gap-1 rounded-card bg-surface p-3 text-center shadow-press-sm"
-              >
-                <Img3D name={PRACTICE_LOOK[sprout.stage]} className="size-14" />
-                <span className="font-display text-lg leading-tight font-bold">
-                  {tDynamic(t, `parent.insights.skillNames.${sprout.family}`)}
-                </span>
-                <span className="text-sm font-semibold text-ink-soft">
-                  {tDynamic(t, `practiceGarden.practice.${sprout.stage}`)}
-                </span>
+          <PlantGrid>
+            {plants.map((plant) => (
+              <li key={plant.skillKey}>
+                <PlantPatch
+                  plant={plant}
+                  grewFrom={grown.get(plant.skillKey)}
+                  onOpen={(chosen: GardenPlant) => setOpenSkill(chosen.skillKey)}
+                />
               </li>
             ))}
-          </ul>
+          </PlantGrid>
         )}
-        <LinkButton to="/math-lab" variant="soft" size="md" className="self-center">
-          {t('practiceGarden.practiceGo')}
-        </LinkButton>
+      </GardenScene>
+
+      <section
+        aria-labelledby="garden-path"
+        className="flex w-full max-w-xl flex-col items-center gap-3 rounded-panel bg-surface p-4 shadow-press"
+      >
+        <h2 id="garden-path" className="font-display text-xl font-extrabold">
+          {t('practiceGarden.pathTitle')}
+        </h2>
+        <GrowthPath />
       </section>
+
+      {childKey === GUEST_KEY && (
+        <p
+          className="max-w-xl text-center text-base font-semibold text-ink-soft"
+          data-testid="garden-guest"
+        >
+          {t('practiceGarden.guest')}
+        </p>
+      )}
+
+      {!marsFirst && <MarsBed />}
+
+      {open && <PlantSheet plant={open} onClose={() => setOpenSkill(null)} />}
     </Screen>
+  )
+}
+
+function EmptyGarden() {
+  const { t } = useTranslation()
+  return (
+    <div
+      data-testid="garden-empty"
+      className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-card bg-surface/90 px-5 py-6 text-center shadow-press-sm"
+    >
+      <h2 className="font-display text-2xl font-extrabold">{t('practiceGarden.empty.title')}</h2>
+      <p className="text-lg text-ink-soft">{t('practiceGarden.empty.text')}</p>
+      <LinkButton to="/math-lab" variant="soft" size="md">
+        {t('practiceGarden.empty.go')}
+      </LinkButton>
+    </div>
   )
 }

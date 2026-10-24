@@ -327,3 +327,22 @@ describe('the adaptive plan shapes a session', () => {
     expect(questions).toHaveLength(6)
   })
 })
+
+describe('practice chosen in the Mistake Garden', () => {
+  it('a chosen skill is practised at its own level, even above today’s, in both review places', () => {
+    let state = 3
+    const rng = () => {
+      state = (state * 9301 + 49297) % 233280
+      return state / 233280
+    }
+    const chosen = { skill: 'missing:add', level: 3 as const, avoid: [], chosen: true }
+    const session = planSession(2, rng, [chosen, chosen])
+    const chosenItems = session.filter((q) => q.skill === 'missing:add')
+    expect(chosenItems).toHaveLength(2)
+    expect(new Set(chosenItems.map((q) => q.id)).size).toBe(2)
+    // only the first counts as a review (the schedule moves on once per session)
+    expect(chosenItems.map((q) => Boolean(q.review))).toEqual([true, false])
+    // without the choice a review above today's level is never played
+    expect(planSession(2, rng, [{ ...chosen, chosen: false }]).some((q) => q.review)).toBe(false)
+  })
+})

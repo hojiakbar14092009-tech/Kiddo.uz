@@ -386,6 +386,9 @@ select pg_temp.check((select resolved_at is not null from public.learning_miscon
 select pg_temp.check((select status from pg_temp.ev('m1','r7|q7','add:6+9',40,false)) = 'observed', 'memory: a slip after resolving makes the skill observed');
 select pg_temp.check((select count = 1 and status = 'observed' and items = array['add:6+9'] from public.learning_misconceptions
   where child_id='m1' and code='off-by-one'), 'memory: a slip after resolving is a single observation again');
+-- 0013 (Mistake Garden): the child got past it once; that fact stays
+select pg_temp.check((select resolved_at is not null from public.learning_misconceptions
+  where child_id='m1' and code='off-by-one'), 'memory: a slip after resolving keeps resolved_at');
 -- the browser cannot write memory or consent directly
 select pg_temp.expect_error($$update public.learning_memory set mastery = 1 where child_id='m1'$$, 'permission denied');
 select pg_temp.expect_error($$insert into public.learning_memory (child_id,parent_id,skill_key,first_at,last_practiced_at,mastery) values ('m1','00000000-0000-0000-0000-00000000000a','math:sub:within10',now(),now(),1)$$, 'permission denied');
@@ -416,6 +419,17 @@ select pg_temp.expect_error($$select * from public.ai_cache$$, 'permission denie
 select pg_temp.expect_error($$select * from public.ai_usage$$, 'permission denied');
 select pg_temp.expect_error($$select * from public.ai_provider_state$$, 'permission denied');
 select pg_temp.expect_error($$select public.ai_housekeeping()$$, 'permission denied');
+commit;
+
+-- 0013: when that slip goes stale (14 days) the skill is resolved again, not forgotten
+update public.learning_misconceptions set last_at = last_at - interval '20 days', first_at = first_at - interval '20 days'
+  where child_id='m1' and skill_key='math:add:within20' and code='off-by-one';
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select pg_temp.check((select status from pg_temp.ev('m1','r8|q8','add:5+5',41,true)) = 'resolved', 'memory: a stale slip after resolving returns to resolved');
+select pg_temp.check((select status = 'resolved' and resolved_at is not null from public.learning_misconceptions
+  where child_id='m1' and skill_key='math:add:within20' and code='off-by-one'), 'memory: resolved again, not forgotten');
 commit;
 
 begin;

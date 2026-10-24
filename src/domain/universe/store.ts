@@ -14,7 +14,17 @@ import {
   type UniverseStats,
 } from './achievements'
 import { applyRun, childAgeFor, levelOf, type LearnerStrands } from '@/domain/learner/profile'
-import { appendMistake, appendRecentRun, type MistakeRecord, type RecentRun } from './history'
+import { getSkillMemory } from '@/domain/learningMemory/store'
+import { isActive } from '@/domain/learningMemory/memory'
+import {
+  appendMistake,
+  appendRecentRun,
+  memorySkillOf,
+  normalizeMistakes,
+  type MistakeRecord,
+  type OpenNeed,
+  type RecentRun,
+} from './history'
 import type { WorldProgress } from './progression/engine'
 import { activityEffects } from './rules'
 import {
@@ -110,7 +120,9 @@ interface UniverseState {
 export const useUniverseStore = create<UniverseState>()(
   persist(() => ({ byChild: {} as Record<string, UniverseChild> }), {
     name: 'kiddo.universe',
-    version: 1,
+    // 2: the mistake journal is normalized (Phase 16: valid, once per run, ≤ 200)
+    version: 2,
+    migrate: (persisted, version) => migrateUniverse(persisted, version),
     partialize: (state) => {
       const byChild = { ...state.byChild }
       delete byChild[GUEST_KEY]
@@ -118,6 +130,25 @@ export const useUniverseStore = create<UniverseState>()(
     },
   }),
 )
+
+/**
+ * Saved state of an older version, made safe for this one. Never throws: a
+ * child whose saved journal is damaged keeps everything else.
+ */
+export function migrateUniverse(persisted: unknown, version: number): UniverseState {
+  const state = (typeof persisted === 'object' && persisted !== null ? persisted : {}) as {
+    byChild?: Record<string, UniverseChild>
+  }
+  const byChild: Record<string, UniverseChild> = {}
+  for (const [key, child] of Object.entries(state.byChild ?? {})) {
+    if (typeof child !== 'object' || child === null) continue
+    byChild[key] =
+      version < 2 && child.mistakes !== undefined
+        ? { ...child, mistakes: normalizeMistakes(child.mistakes, STRANDS) }
+        : child
+  }
+  return { byChild }
+}
 
 // ---------------------------------------------------------------- other tabs
 
@@ -249,7 +280,19 @@ function recordMistake(event: UniverseEvent) {
     at: typeof event.at === 'string' ? event.at : new Date().toISOString(),
     ...(typeof activityId === 'string' && activityId ? { activityId } : {}),
   }
-  update(childKey, (child) => ({ ...child, mistakes: appendMistake(child.mistakes, record) }))
+  update(childKey, (child) => ({
+    ...child,
+    mistakes: appendMistake(child.mistakes, record, undefined, openNeedOf(childKey)),
+  }))
+}
+
+/** A journal entry whose skill the learning memory still holds as an active misconception. */
+function openNeedOf(childKey: string): OpenNeed {
+  return (record) => {
+    const skill = memorySkillOf(record)
+    const memory = skill ? getSkillMemory(childKey, skill) : undefined
+    return Object.values(memory?.misconceptions ?? {}).some(isActive)
+  }
 }
 
 /** Recent mistakes of a child, newest first. */

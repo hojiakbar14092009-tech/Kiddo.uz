@@ -479,3 +479,11 @@ A unit test (`progression.test.ts`) keeps the rows equal to the app's data.
 
 `0012_age_bands.sql` lets a child's synced age be 3 to 25 (0002: 3 to 12); the
 app's form asks 4 to 18 and the age grows with birthdays. `supabase db push`, then a profile of a 13-year-old syncs.
+
+## 11. Applying 0013 (Mistake Garden: resolved memory)
+
+`0013_learning_resolved_memory.sql` replaces only the body of `record_learning_evidence`
+(signature and grants from 0008 stay): a slip on a resolved misconception keeps
+`resolved_at`, and when that slip goes stale (14 days) the misconception returns to
+`resolved` instead of being forgotten. Same rules as `withError`/`forgetStale` in
+`memory.ts`. `supabase db push`; `supabase/tests/run.sh` covers it.

@@ -183,6 +183,8 @@ export function forgetStale(memory: SkillMemory, now: string): SkillMemory {
   for (const [code, m] of Object.entries(memory.misconceptions)) {
     if (m.status === 'observed' && new Date(m.lastAt).getTime() < limit) {
       changed = true
+      // a slip on something already got past: it was a slip, the skill stays learned
+      if (m.resolvedAt) kept[code] = { ...m, status: 'resolved' }
       continue
     }
     kept[code] = m
@@ -224,6 +226,8 @@ function withError(
     firstAt: m?.firstAt ?? at,
     lastAt: at,
     status: confirmed ? 'confirmed' : 'observed',
+    // the child got past it once: kept (the garden shows a flower, not nothing)
+    ...(previous?.resolvedAt ? { resolvedAt: previous.resolvedAt } : {}),
   } satisfies Misconception
 }
 
@@ -361,11 +365,36 @@ export function skillStatus(memory: SkillMemory): SkillStatus {
 /** Mistake Garden (Phase 16): a confirmed misconception is a seed that grows as the child practises. */
 export type GardenStage = 'none' | 'seed' | 'sprout' | 'plant' | 'bloom'
 
+/** Independent successes in a row that make a sprout a growing plant (bloom needs `resolveStreak` + retention). */
+export const GARDEN_GROW_STREAK = 2
+
+/**
+ * The one stage calculator of the Mistake Garden, from evidence only:
+ * - nothing confirmed (a single slip, or no difficulty at all): no plant;
+ * - confirmed: a seed; once the child practised the skill after the last
+ *   error (even with help), a sprout;
+ * - improving (an independent success): a sprout, a growing plant from
+ *   `GARDEN_GROW_STREAK` independent successes in a row;
+ * - resolved (`resolveStreak` in a row including a retention check a day
+ *   later): a bloom. One lucky answer never makes a flower, and a later
+ *   one-off slip (only observed) does not take the flower away; if the
+ *   difficulty really comes back (confirmed again), the plant is a sprout.
+ */
 export function gardenStage(memory: SkillMemory): GardenStage {
   const status = skillStatus(memory)
-  if (status === 'confirmed') return 'seed'
-  if (status === 'improving') return memory.successStreak >= 2 ? 'plant' : 'sprout'
+  const learnedBefore = Object.values(memory.misconceptions).some((m) => Boolean(m.resolvedAt))
+  if (status === 'confirmed') {
+    const practisedSince =
+      memory.lastErrorAt !== null && memory.lastPracticedAt > memory.lastErrorAt
+    // relearning something the child got past once starts as a sprout, never a bare seed
+    return practisedSince || learnedBefore ? 'sprout' : 'seed'
+  }
+  if (status === 'improving') {
+    return memory.successStreak >= GARDEN_GROW_STREAK ? 'plant' : 'sprout'
+  }
   if (status === 'resolved') return 'bloom'
+  // a single slip after a bloom (only observed): the flower stays
+  if (status === 'observed' && learnedBefore) return 'bloom'
   return 'none'
 }
 

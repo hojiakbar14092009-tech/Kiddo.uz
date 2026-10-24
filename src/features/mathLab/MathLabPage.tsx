@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useReducedMotion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { HomeIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
 import { SHORT_SCREEN } from '@/components/layout/shortScreen'
@@ -59,6 +60,7 @@ const NEXT_DELAY_MS = 1100
  */
 export function MathLabPage() {
   const level = useChallengeLevel('number')
+  const practice = usePracticeSkill()
   const [run, setRun] = useState<{ count: number; level: ChallengeLevel } | null>(null)
 
   if (!run) return <LabStart level={level} onStart={() => setRun({ count: 1, level })} />
@@ -66,9 +68,25 @@ export function MathLabPage() {
     <LabSession
       key={run.count}
       level={run.level}
+      practice={practice}
       onAgain={() => setRun({ count: run.count + 1, level })}
     />
   )
+}
+
+const PRACTICE_RE = /^[a-z0-9-]{1,16}:[a-z0-9-]{1,24}$/
+
+/**
+ * `?practice=add:within10`: the child came from a plant in the Mistake
+ * Garden to practise that skill. It takes the session's review places (two
+ * related items at the level it was hard at, the first one counted as the
+ * review) when the memory has the skill; otherwise the session is the usual
+ * one. Anything else is ignored.
+ */
+function usePracticeSkill(): string | null {
+  const [params] = useSearchParams()
+  const value = params.get('practice')
+  return value && PRACTICE_RE.test(value) ? `math:${value}` : null
 }
 
 // ------------------------------------------------------------------ frame
@@ -243,16 +261,34 @@ function reviewsFor(
   childKey: string,
   level: ChallengeLevel,
   skills: readonly string[],
+  chosen: string | null = null,
 ): ReviewPlan[] {
   const memory = getChildMemory(childKey).skills
   const out: ReviewPlan[] = []
   for (const key of skills) {
     const skill = memory[key]
-    if (!skill || !key.startsWith('math:') || !skill.level || skill.level > level) continue
+    if (!skill || !key.startsWith('math:')) continue
     const avoid = Object.values(skill.misconceptions).flatMap((m) => m.items)
+    if (key === chosen) {
+      // chosen in the garden: at the level it was hard at (or today's when unknown)
+      const at = (
+        skill.level && skill.level >= 1 && skill.level <= 5 ? skill.level : level
+      ) as ChallengeLevel
+      out.push({ skill: key.slice(5), level: at, avoid, chosen: true })
+      continue
+    }
+    if (!skill.level || skill.level > level) continue
     out.push({ skill: key.slice(5), level: skill.level as ChallengeLevel, avoid })
   }
   return out
+}
+
+/**
+ * The garden's chosen skill takes both review places (two related items, so a
+ * session can really grow the plant); otherwise the plan's reviews.
+ */
+function withPractice(practice: string | null, reviews: readonly string[]): string[] {
+  return practice ? [practice, practice] : [...reviews]
 }
 
 /** Is this error one the learning memory already knows for this skill (confirmed or improving)? */
@@ -262,7 +298,16 @@ function remembered(childKey: string, q: LabQuestion, code: string | null): bool
   return Boolean(m && isActive(m))
 }
 
-function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => void }) {
+function LabSession({
+  level,
+  practice,
+  onAgain,
+}: {
+  level: ChallengeLevel
+  /** The learning-memory skill the child chose to practise in the garden (or null). */
+  practice: string | null
+  onAgain: () => void
+}) {
   const { t } = useTranslation()
   const language = useLanguage()
   const childKey = useChildKey()
@@ -272,9 +317,14 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
   const live = useAdaptivePlan('number', 'math')
   const [plan] = useState(live)
   const [questions] = useState(() =>
-    planSession(level, Math.random, reviewsFor(childKey, level, plan.reviews), {
-      options: plan.options,
-    }),
+    planSession(
+      level,
+      Math.random,
+      reviewsFor(childKey, level, withPractice(practice, plan.reviews), practice),
+      {
+        options: plan.options,
+      },
+    ),
   )
   const [runId] = useState(newId)
   const sheet = useRef<SessionSheet>(newSheet('test'))
@@ -518,7 +568,14 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
   )
 
   if (finished) {
-    return <LabResult level={level} finished={finished} onAgain={onAgain} />
+    return (
+      <LabResult
+        level={level}
+        finished={finished}
+        onAgain={onAgain}
+        fromGarden={practice !== null}
+      />
+    )
   }
   if (!q) return null
 
@@ -615,10 +672,13 @@ function LabResult({
   level,
   finished,
   onAgain,
+  fromGarden,
 }: {
   level: ChallengeLevel
   finished: Finished
   onAgain: () => void
+  /** Came from a plant in the Mistake Garden: the way back to see it grow comes first. */
+  fromGarden: boolean
 }) {
   const { t } = useTranslation()
   const { say } = useLearnMascot()
@@ -675,6 +735,11 @@ function LabResult({
           <ActivityReward stars={award.stars} crystals={award.crystals} />
         </div>
         <div className="flex flex-wrap justify-center gap-3 short:col-span-2">
+          {fromGarden && (
+            <LinkButton to="/mistake-garden" size="md" data-testid="lab-to-garden">
+              {t('practiceGarden.backToGarden')}
+            </LinkButton>
+          )}
           <Button variant="coin" size="md" onClick={onAgain} data-testid="lab-again">
             {t('learn.again')}
           </Button>

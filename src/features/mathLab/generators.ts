@@ -807,6 +807,11 @@ export interface ReviewPlan {
   level: ChallengeLevel
   /** Items already seen wrong. */
   avoid: readonly string[]
+  /**
+   * The child chose this skill in the Mistake Garden: practised at its own
+   * level even above today's (the level it was hard at), so the plant can grow.
+   */
+  chosen?: boolean
 }
 
 /** How the adaptive plan shapes a session (domain/adaptive). */
@@ -838,16 +843,21 @@ export function planSession(
   }
   const ordered = level <= 2 ? [out[0]!, ...shuffle(out.slice(1), rng)] : shuffle(out, rng)
   const reviews = (Array.isArray(review) ? review : review ? [review] : [])
-    .filter((item) => item.level <= level)
+    .filter((item) => item.chosen === true || item.level <= level)
     .slice(0, 2)
   let at = level <= 2 ? 1 : 0
+  let chosenPlaced = false
   const result = [...ordered]
   for (const item of reviews) {
     if (at >= result.length) break
     const avoid = new Set([...item.avoid, ...result.map((q) => q.id)])
     const q = reviewQuestion(item.skill, item.level, avoid, rng, shape.options)
     if (!q) continue
-    result[at] = q
+    // a second item of a skill chosen in the garden is extra practice, not another
+    // review: one session moves the review schedule on once at most
+    const again = item.chosen === true && chosenPlaced
+    if (item.chosen === true) chosenPlaced = true
+    result[at] = again ? { ...q, review: false } : q
     // the second review is spread out (never two reviews in a row)
     at += 2
   }

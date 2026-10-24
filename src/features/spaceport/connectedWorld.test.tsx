@@ -104,7 +104,7 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     universe.upgradeBuilding(GUEST_KEY, 'spaceport')
     progression.discoverArtifact(GUEST_KEY, 'mars-seed')
     await renderRoute('/mistake-garden')
-    expect(screen.getByTestId('sprouts-empty')).toBeInTheDocument()
+    expect(screen.getByTestId('garden-empty')).toBeInTheDocument()
     fireEvent.click(screen.getByTestId('plant-seed'))
     expect(screen.getByTestId('mars-bed')).toHaveAttribute('data-stage', '0')
     expect(screen.getByRole('link', { name: 'Bog‘ darsi' })).toHaveAttribute(
@@ -124,7 +124,7 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     expect(progressOf(GUEST_KEY).unlocked['science-lab']).toBeDefined()
   })
 
-  it('a tricky skill from the learning memory is a sprout, never a failure', async () => {
+  it('a tricky skill from the learning memory is a seed to practise, never a failure', async () => {
     const { recordEvidence } = await import('@/domain/learningMemory')
     for (const [n, item] of [
       [1, 'add:3+4'],
@@ -143,9 +143,10 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
       })
     }
     await renderRoute('/mistake-garden')
-    const sprouts = screen.getByTestId('sprouts')
-    expect(within(sprouts).getByText('Qo‘shish')).toBeInTheDocument()
-    expect(within(sprouts).getByText('Endi ekildi')).toBeInTheDocument()
+    const plant = screen.getByTestId('garden-plant')
+    expect(plant).toHaveAttribute('data-stage', 'seed')
+    expect(within(plant).getByText('10 gacha qo‘shish')).toBeInTheDocument()
+    expect(within(plant).getByText('Urug‘')).toBeInTheDocument()
   })
 
   it('the lab is closed until the bloom', async () => {

@@ -140,9 +140,9 @@ Evidence threshold:
 **Spaced revisit** (Math Lab): when a reviewed skill is due and its level is no
 higher than today's level, one question of the session becomes a related item
 of that skill. The items the child got wrong are avoided. The mascot says
-"let's try one like this again". **Mistake Garden** (Phase 16) reads
-`gardenStage`: confirmed is a seed, improving is a sprout or a plant, and
-resolved is a bloom.
+"let's try one like this again". **Mistake Garden** (Phase 16,
+`mistake-garden.md`) reads `gardenStage`: confirmed is a seed (a sprout once
+practised again), improving is a sprout or a plant, and resolved is a bloom.
 
 **Hint ladder** (Math Lab):
 

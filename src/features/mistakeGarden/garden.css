@@ -1,0 +1,262 @@
+/*
+ * The Mistake Garden look (Phase 16). Scoped under .garden-*, so no other
+ * page changes. Motion is CSS only, short and calm: a stage change plays one
+ * growth sequence; the living garden is a slow leaf sway and two butterflies,
+ * paused while the scene is off screen ([data-still]) and replaced by a short
+ * fade with reduced motion. No loop touches layout (transform/opacity only).
+ */
+
+.garden-art {
+  --g-leaf: #55b96c;
+  --g-leaf-light: #8fd88e;
+  --g-leaf-deep: #2f8a57;
+  --g-stem: #3f9e5c;
+  --g-trunk: #9a6a44;
+  --g-cactus: #4fa868;
+  --g-cactus-light: #7fcb8c;
+  --g-soil: #a8744c;
+  --g-soil-top: #c48f62;
+  --g-soil-deep: #7d5133;
+  --g-seed: #8a5a37;
+  --g-petal: #f58fb4;
+  --g-petal-deep: #d9578a;
+  --g-center: #ffd34d;
+  display: block;
+  overflow: visible;
+}
+
+.garden-art[data-hue='1'] {
+  --g-petal: #ffcf4a;
+  --g-petal-deep: #ee9d1b;
+  --g-center: #f07f2a;
+}
+.garden-art[data-hue='2'] {
+  --g-petal: #b79bf0;
+  --g-petal-deep: #8463d6;
+  --g-center: #ffd34d;
+}
+.garden-art[data-hue='3'] {
+  --g-petal: #7cc4f5;
+  --g-petal-deep: #3a90d4;
+  --g-center: #fff1a8;
+}
+
+/* every animated part scales or turns around its own base (the local 0 0) */
+.garden-art .pa-stem,
+.garden-art .pa-leaf,
+.garden-art .pa-head,
+.garden-art .pa-sway,
+.garden-art .pa-seed,
+.garden-art .pa-soil {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+/* ---------------------------------------------------------------- growth */
+
+.garden-art.is-growing .pa-soil {
+  animation: garden-soil-pulse 520ms var(--ease-soft, ease-out) both;
+}
+.garden-art.is-growing .pa-seed {
+  animation: garden-pop 460ms 120ms var(--ease-pop, ease-out) both;
+}
+.garden-art.is-growing .pa-stem {
+  animation: garden-stem-up 640ms 220ms var(--ease-soft, ease-out) both;
+}
+.garden-art.is-growing .pa-leaf {
+  animation: garden-leaf-open 520ms 620ms var(--ease-pop, ease-out) both;
+}
+.garden-art.is-growing .pa-head {
+  animation: garden-bloom 700ms 820ms var(--ease-pop, ease-out) both;
+}
+.garden-art.is-growing .pa-spark {
+  animation: garden-spark 900ms 1050ms ease-out both;
+}
+
+@keyframes garden-soil-pulse {
+  0% {
+    transform: scale(1, 1);
+  }
+  40% {
+    transform: scale(1.06, 0.9);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+@keyframes garden-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes garden-stem-up {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes garden-leaf-open {
+  from {
+    transform: scale(0) rotate(-25deg);
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+  }
+}
+@keyframes garden-bloom {
+  0% {
+    transform: scale(0) rotate(-40deg);
+  }
+  70% {
+    transform: scale(1.12) rotate(4deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+@keyframes garden-spark {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+/* ---------------------------------------------------------------- living garden */
+
+.garden-art .pa-sway {
+  animation: garden-sway 7s ease-in-out infinite;
+}
+.garden-art .pa-glow {
+  animation: garden-glow 4.5s ease-in-out infinite;
+}
+.garden-art.is-growing .pa-sway {
+  animation-delay: 1.6s;
+}
+
+@keyframes garden-sway {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+@keyframes garden-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.garden-butterfly {
+  position: absolute;
+  width: 26px;
+  height: 22px;
+  pointer-events: none;
+  animation: garden-flight 26s ease-in-out infinite;
+}
+.garden-butterfly + .garden-butterfly {
+  animation-duration: 33s;
+  animation-delay: -12s;
+}
+.garden-butterfly .wing {
+  transform-box: fill-box;
+  transform-origin: right center;
+  animation: garden-flap 420ms ease-in-out infinite alternate;
+}
+.garden-butterfly .wing-right {
+  transform-origin: left center;
+}
+
+@keyframes garden-flight {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-6deg);
+  }
+  25% {
+    transform: translate(38vw, 34px) rotate(8deg);
+  }
+  50% {
+    transform: translate(18vw, 90px) rotate(-4deg);
+  }
+  75% {
+    transform: translate(52vw, 20px) rotate(6deg);
+  }
+}
+@keyframes garden-flap {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0.35);
+  }
+}
+
+/* off screen: nothing moves (the sequence resumes where it stopped) */
+[data-still='true'] .garden-art *,
+[data-still='true'] .garden-butterfly,
+[data-still='true'] .garden-butterfly * {
+  animation-play-state: paused !important;
+}
+
+/* ---------------------------------------------------------------- meadow */
+
+.garden-meadow {
+  background-color: #bfe5a8;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgb(255 255 255 / 0.22) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 70% 60%, rgb(47 138 87 / 0.18) 0 1.5px, transparent 2px),
+    linear-gradient(180deg, #cdeebb 0%, #b4dd9b 100%);
+  background-size:
+    46px 46px,
+    38px 38px,
+    100% 100%;
+}
+
+.garden-sky {
+  background:
+    radial-gradient(260px 160px at 86% 18%, rgb(255 226 140 / 0.75), transparent 70%),
+    linear-gradient(180deg, #dff1fb 0%, #f2f8ef 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .garden-art *,
+  .garden-butterfly,
+  .garden-butterfly * {
+    animation: none !important;
+  }
+  .garden-butterfly {
+    display: none;
+  }
+  /* the change is still shown: a short fade instead of the growth sequence */
+  .garden-art.is-growing .pa-plant {
+    animation: garden-fade 220ms ease-out both !important;
+  }
+}
+
+@keyframes garden-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

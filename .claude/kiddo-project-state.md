@@ -56,6 +56,7 @@ weak device scripts 301 → 271 KB, images 617 → 134 KB; budgets in `e2e/perfo
 Phase 13: 302 SQL assertions, 978 unit, 118 e2e (`supabase/tests/run.sh`; local PG: /var/tmp/kiddo-pg, see Security).
 Phase 14: 321 SQL assertions, ~1018 unit, 120 e2e (journey.spec: the whole first journey on phone + tablet).
 Phase 15: 323 SQL assertions, ~1030 unit, 122 e2e (adaptive.spec: a ten-year-old's profile, focus, Math Lab L5).
+Phase 16: 326 SQL assertions, 1061 unit, 128 e2e (garden.spec: seed → practice → grow, bloom, reload, child isolation, ru viewports).
 
 ## UI foundation (Phase 1)
 
@@ -254,7 +255,8 @@ prod) · B7 promo policy.
 - [x] 13 Security: balance from ledger (0009), integrity hardening (0010), security headers/CSP, no device admin in prod, cloud-voice name guard, child-removal cleanup, per-account audio caps (2026-10-24)
 - [x] 14 Connected universe: domain events, progression engine + content data, first journey (maths → rocket → Mars seed → Practice Garden → science runs → bloom → Science Lab), 0011 world_rules (2026-10-24)
 - [x] 15 Adaptive learning: `domain/adaptive` service (age bands, evidence-weighted, latest-run share, hint reliance, focus + retrieval practice), Math Lab uses options/reviews/picture-first, parent Learning focus panel, profiles 4–18 (0012), `adaptation.updated` event (2026-10-24)
-- [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
+- [x] 16 Mistake Garden: garden derived from learning memory (`domain/garden`), refined `gardenStage`, SVG plants (6 families × 4 stages, deterministic per skill), growth animation, plant card + practice → Math Lab `?practice=`, journal compaction (open needs kept, ≤ 200, v2 migration), 0013 resolved memory (2026-10-24)
+- [ ] 17–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
 speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
@@ -354,8 +356,20 @@ clue → picture → card removed → solution, `data-review` question from due 
   picture-first hint on evidence only. Parent `FocusPanel` (current / needs / review soon / mastered / why).
 - Not consumed yet: aids, vocabulary, explanation depth (plan data only); other sections keep their rules.
 
+## Mistake Garden (Phase 16) – docs/architecture/mistake-garden.md
+
+- `domain/garden` (pure `gardenPlants(skills, now)`, `plantLook`, `nextStep`, `practiceRoute`; `useGarden`);
+  stage only from `gardenStage` (memory.ts). No garden store; `seenStages` (page memory) only animates.
+- Page `features/mistakeGarden/*` (GardenScene, PlantArt SVG, PlantSheet, MarsBed, garden.css). Child label stays
+  "Mashq bog‘i"; stage nouns Urug‘/Nihol/O‘simlik/Gul. Mars bed = Phase 14 artifact, separate card.
+- Math Lab `?practice=<skill>`: chosen skill fills both review places at its own level, only the first counts as a
+  review; result screen "Bog‘ga qaytish". Bloom kept after a slip (`resolvedAt`; 0013 SQL twin).
+- Journal: `compactMistakes` (oldest non-open first), `normalizeMistakes`, universe store v2 migrate.
+- Critic: REJECT (2 High: bloom lost after a slip, next-step promise) → fixed → ACCEPT. Known: a relapse on a
+  never-bloomed plant shows a seed; garden `now` read when memory changes; migration compaction without the memory.
+
 ## Next
 
-Phases 16+ per the roadmap. Owner actions: apply 0005–0012, deploy voice-url/tts/tutor +
+Phase 17+: read the roadmap first (scope not yet specified). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.
