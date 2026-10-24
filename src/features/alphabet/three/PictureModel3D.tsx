@@ -1,8 +1,10 @@
 import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
+import { useInView } from '@/components/three/useInView'
+import { prepareRenderer } from '@/components/three/prepareRenderer'
 
 export interface PictureModel3DProps {
   /** File name in /pictures, without “.svg”. */
@@ -179,6 +181,9 @@ export default function PictureModel3D({
   onFail,
 }: PictureModel3DProps) {
   const [model, setModel] = useState<{ file: string; built: Built } | null>(null)
+  // the picture turns by itself while on screen, and draws nothing once scrolled away
+  const frame = useRef<HTMLDivElement>(null)
+  const inView = useInView(frame)
 
   useEffect(() => {
     let alive = true
@@ -197,12 +202,14 @@ export default function PictureModel3D({
   }, [file, onFail])
 
   return (
-    <div role="img" aria-label={label} className="size-full touch-none">
+    <div ref={frame} role="img" aria-label={label} className="size-full touch-none">
       <Canvas
+        frameloop={inView ? 'always' : 'never'}
         camera={{ position: [0, 0.4, 6.2], fov: 38 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
         onCreated={({ gl }) => {
+          prepareRenderer(gl)
           gl.domElement.addEventListener('webglcontextlost', onFail, { once: true })
         }}
       >

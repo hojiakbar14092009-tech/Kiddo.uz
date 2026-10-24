@@ -2,6 +2,8 @@ import { Billboard } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import * as THREE from 'three'
+import { useInView } from '@/components/three/useInView'
+import { prepareRenderer } from '@/components/three/prepareRenderer'
 import { BACKDROPS, type BackdropLook } from '../backdrops'
 import type { Actor, SceneSpec } from '../content'
 
@@ -328,15 +330,18 @@ export default function TaleScene3D({
   onFail,
 }: TaleScene3DProps) {
   const look = BACKDROPS[scene.backdrop]
+  const frame = useRef<HTMLDivElement>(null)
+  const inView = useInView(frame)
   return (
     <SceneErrorBoundary onError={onFail}>
-      <div role="img" aria-label={label} className="size-full">
+      <div ref={frame} role="img" aria-label={label} className="size-full">
         <Canvas
           dpr={[1, 1.75]}
-          frameloop={reducedMotion ? 'demand' : 'always'}
+          frameloop={!inView ? 'never' : reducedMotion ? 'demand' : 'always'}
           camera={{ position: [0, 1.7, 6.4], fov: 42 }}
           gl={{ antialias: true, powerPreference: 'low-power' }}
           onCreated={({ gl }) => {
+            prepareRenderer(gl)
             gl.domElement.addEventListener('webglcontextlost', onFail, { once: true })
           }}
         >

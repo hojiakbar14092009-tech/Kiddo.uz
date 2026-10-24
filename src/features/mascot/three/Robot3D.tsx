@@ -1,7 +1,11 @@
 import { ContactShadows, Environment, Lightformer } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import clsx from 'clsx'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
+import { FrameTicker } from '@/components/three/FrameTicker'
+import { prepareRenderer } from '@/components/three/prepareRenderer'
+import { RENDER_BUDGET } from '@/components/three/renderBudget'
+import { useInView } from '@/components/three/useInView'
 import type { MascotModel } from '@/store/familyStore'
 import type { Wearing } from '@/features/shop/outfits'
 import type { MascotMood } from '../types'
@@ -21,9 +25,15 @@ export interface Robot3DProps {
 }
 
 /**
- * The 3D robot on its own transparent canvas. Rendering pauses while the
- * robot is off screen, to save battery on tablets and phones.
+ * The 3D robot on its own transparent canvas. It is a decoration beside the
+ * lesson, so it draws on demand at the ambient frame rate (RENDER_BUDGET) and
+ * not at all while off screen or in a hidden tab, to save battery on tablets
+ * and phones.
  */
+const BUDGET = RENDER_BUDGET.ambient
+/** Moods whose clip lifts the robot off the ground (animator: happy_jump, celebrate). */
+const LEAVES_GROUND: ReadonlySet<MascotMood> = new Set(['happy', 'celebrate'])
+
 export default function Robot3D({
   model,
   mood,
@@ -36,17 +46,9 @@ export default function Robot3D({
   onFail,
 }: Robot3DProps) {
   const container = useRef<HTMLDivElement>(null)
-  const [onScreen, setOnScreen] = useState(true)
-
-  useEffect(() => {
-    const element = container.current
-    if (!element || typeof IntersectionObserver === 'undefined') return undefined
-    const observer = new IntersectionObserver(([entry]) =>
-      setOnScreen(entry?.isIntersecting ?? true),
-    )
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [])
+  const onScreen = useInView(container)
+  const leaves = LEAVES_GROUND.has(mood) && !reducedMotion
+  const wearingKey = JSON.stringify(wearing ?? null)
 
   return (
     <div
@@ -55,16 +57,18 @@ export default function Robot3D({
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
       <Canvas
-        frameloop={onScreen ? 'always' : 'never'}
-        dpr={[1, 2]}
+        frameloop="demand"
+        dpr={BUDGET.dpr}
         camera={{ position: [0, 1.45, 5.8], fov: 30 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}
         onCreated={({ gl, camera }) => {
+          prepareRenderer(gl)
           camera.lookAt(0, 1.35, 0)
           gl.domElement.addEventListener('webglcontextlost', onFail, { once: true })
         }}
         style={{ position: 'absolute', inset: 0 }}
       >
+        <FrameTicker fps={reducedMotion ? BUDGET.reducedMotionFps : BUDGET.fps} active={onScreen} />
         <hemisphereLight args={['#FFFAF0', '#D8CFE6', 1.1]} />
         <directionalLight position={[3, 5, 4]} intensity={1.7} />
         <directionalLight position={[-4, 3, -3]} intensity={0.8} color="#DDEEFC" />
@@ -83,7 +87,11 @@ export default function Robot3D({
           reducedMotion={reducedMotion}
           wearing={wearing}
         />
+        {/* Drawn once while the robot stands (a shadow pass every frame doubled the work);
+            live while it jumps, and drawn again when it lands or changes clothes. */}
         <ContactShadows
+          key={leaves ? 'jumping' : `standing-${wearingKey}`}
+          frames={leaves ? Infinity : 1}
           position={[0, 0.001, 0]}
           opacity={0.32}
           scale={3}

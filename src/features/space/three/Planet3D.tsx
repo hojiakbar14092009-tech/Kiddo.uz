@@ -1,6 +1,8 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import * as THREE from 'three'
+import { useInView } from '@/components/three/useInView'
+import { prepareRenderer } from '@/components/three/prepareRenderer'
 import type { BodyId } from '../content'
 import { addLights, buildPlanet, type PlanetModel } from './planetModel'
 
@@ -102,6 +104,9 @@ function Scene({ id, turn, reducedMotion }: { id: BodyId; turn: Turn; reducedMot
  */
 export default function Planet3D({ id, label, reducedMotion, onFail }: Planet3DProps) {
   const [turn] = useState(() => new Turn())
+  const frame = useRef<HTMLDivElement>(null)
+  // the planet keeps turning while it is on screen, and draws nothing once scrolled away
+  const inView = useInView(frame)
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) =>
     turn.down(event.pointerId, event.clientX)
@@ -117,6 +122,7 @@ export default function Planet3D({ id, label, reducedMotion, onFail }: Planet3DP
 
   return (
     <div
+      ref={frame}
       role="img"
       aria-label={label}
       tabIndex={0}
@@ -131,11 +137,13 @@ export default function Planet3D({ id, label, reducedMotion, onFail }: Planet3DP
     >
       <Canvas
         flat
+        frameloop={inView ? 'always' : 'never'}
         dpr={[1, 2]}
         camera={{ position: [0, 0, 4], fov: 40 }}
         gl={{ antialias: true, alpha: true }}
         style={{ touchAction: 'pan-y' }}
         onCreated={({ gl }) => {
+          prepareRenderer(gl)
           gl.setClearColor(new THREE.Color(0x000000), 0)
           gl.domElement.style.touchAction = 'pan-y'
           gl.domElement.addEventListener('webglcontextlost', onFail, { once: true })

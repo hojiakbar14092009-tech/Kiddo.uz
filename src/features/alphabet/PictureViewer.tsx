@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Picture } from '@/components/ui/Picture'
 import { PICTURE_FILES } from '@/content/pictures'
 import { canRender3D } from '@/features/mascot/webgl'
+import { useContent3D } from '@/components/three/content3d'
 
 const PictureModel3D = lazy(() => import('./three/PictureModel3D'))
 
@@ -19,8 +20,10 @@ export function PictureViewer({ emoji, word }: { emoji: string; word: string }) 
   const [failed, setFailed] = useState<string | null>(null)
   const onFail = useCallback(() => setFailed(emoji), [emoji])
   const flat = <Picture emoji={emoji} alt={word} className="size-full" />
+  const live = Boolean(file) && failed !== emoji && canRender3D()
+  useContent3D(live)
 
-  if (!file || failed === emoji || !canRender3D()) return flat
+  if (!live || !file) return flat
   return (
     <div className="relative size-full">
       {/* a 3D crash or a model that fails to load falls back to the flat picture */}

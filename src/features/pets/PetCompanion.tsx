@@ -69,7 +69,7 @@ export function PetCompanion({ pet, mood, className }: PetCompanionProps) {
       className={className ?? 'absolute bottom-0 w-[42%]'}
     >
       <span className="block transition-transform" style={{ transform: `scaleX(${facing})` }}>
-        <PetSprite pet={pet} emotion={emotionFor(mood)} className="w-full" />
+        <PetSprite pet={pet} emotion={emotionFor(mood)} warm className="w-full" />
       </span>
     </motion.button>
   )

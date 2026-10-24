@@ -8,11 +8,15 @@ const CHECK_EVERY_MS = 60_000
  * switches to it on its own. Because Kiddo is one page that is rarely reloaded,
  * it looks for a new version every minute and whenever the tab comes back into
  * view – otherwise a tab left open would keep showing the old version.
+ *
+ * It registers after the page's `load` event (not immediately): on a first
+ * visit the worker then downloads the offline copy (about 6.5 MB) once the
+ * child's first screen is in, instead of competing with it.
  */
 export function registerServiceWorker() {
   if (import.meta.env.DEV || !('serviceWorker' in navigator)) return
   registerSW({
-    immediate: true,
+    immediate: false,
     onRegisteredSW(_url, registration) {
       if (!registration) return
       const check = () => {

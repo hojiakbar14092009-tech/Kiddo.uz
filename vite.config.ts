@@ -32,12 +32,39 @@ function dropPublicVoice(): Plugin {
   }
 }
 
+/**
+ * A Russian or English child's interface texts are their own chunk (src/i18n).
+ * This tiny script in <head> reads the stored language and preloads that chunk
+ * at once, in parallel with the app, so the first paint does not wait one more
+ * round trip for it. Built from the bundle, so the hashed file names are right.
+ */
+function preloadStoredLanguage(): Plugin {
+  return {
+    name: 'kiddo:preload-stored-language',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, context) {
+        const files: Record<string, string> = {}
+        for (const chunk of Object.values(context.bundle ?? {})) {
+          if (chunk.type !== 'chunk') continue
+          const match = /src\/i18n\/locales\/(ru|en)\.ts$/.exec(chunk.facadeModuleId ?? '')
+          if (match?.[1]) files[match[1]] = `/${chunk.fileName}`
+        }
+        const script = `(function(){try{var s=JSON.parse(localStorage.getItem('kiddo.settings')||'null');var f=${JSON.stringify(files)}[s&&s.state&&s.state.language];if(f){var l=document.createElement('link');l.rel='modulepreload';l.href=f;document.head.appendChild(l)}}catch(e){}})()`
+        return [{ tag: 'script', children: script, injectTo: 'head-prepend' }]
+      },
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   const voicePrivate = isVoicePrivateBuild(loadEnv(mode, process.cwd(), 'VITE_'))
   return {
     plugins: [
       react(),
       tailwindcss(),
+      preloadStoredLanguage(),
       ...(voicePrivate ? [dropPublicVoice()] : []),
       VitePWA({
         registerType: 'autoUpdate',
@@ -70,7 +97,13 @@ export default defineConfig(({ mode }) => {
           // Everything the child area needs is precached, so it works fully offline.
           // Voice clips (several MB) are cached as they are first played instead
           // (public mode only: private-mode signed URLs are never cached).
-          globPatterns: ['**/*.{js,css,html,svg,png,woff2}', 'audio/ui/*.mp3', '3d/**/*.webp'],
+          // pets: every pose, so a companion can turn sad or surprised offline (≈ 0.6 MB)
+          globPatterns: [
+            '**/*.{js,css,html,svg,png,woff2}',
+            'audio/ui/*.mp3',
+            '3d/**/*.webp',
+            'pets/**/*.webp',
+          ],
           globIgnores: ['**/node_modules/**', ...VOICE_GLOB_IGNORES],
           runtimeCaching: voiceRuntimeCaching(voicePrivate),
           // The 3D robot chunk (three.js) is about 1 MB.

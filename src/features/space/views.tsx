@@ -5,6 +5,7 @@ import { Img3D } from '@/features/learn/Img3D'
 import { canRender3D } from '@/features/mascot/webgl'
 import { KIND, PLANETS, pictureOf, type SpaceId } from './content'
 import { useSpaceText } from './useSpaceText'
+import { useContent3D } from '@/components/three/content3d'
 
 // three.js is loaded only when a planet is opened up close
 const Planet3D = lazy(() => import('./three/Planet3D'))
@@ -50,6 +51,7 @@ export function PlanetView({ id, className }: { id: SpaceId; className?: string 
   const name = text.objects[id].name
   const picture = <SpacePicture id={id} alt={name} eager className="size-full" />
   const live = id !== 'stars' && !failed && canRender3D()
+  useContent3D(live)
 
   return (
     <figure className={clsx('flex flex-col items-center gap-2', className)}>

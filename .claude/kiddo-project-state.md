@@ -51,6 +51,8 @@ Phase 8: 790 unit, 80 e2e.
 Phase 9: 862 unit, 84 e2e.
 Phase 10: 931 unit, 86 e2e, 246 SQL assertions.
 Phase 11: 941 unit, 112 e2e; page audit (9 viewports) 369 pages ru clean on the final build.
+Phase 12: initial JS 296 → 266 KB gz; Home cold load 1417 → 899 KB transferred (strong device),
+weak device scripts 301 → 271 KB, images 617 → 134 KB; budgets in `e2e/performance.spec.ts`.
 
 ## UI foundation (Phase 1)
 
@@ -245,7 +247,8 @@ prod) · B7 promo policy.
 - [x] 9 Parent Dashboard: skills, last 7 days, practise/strengths, history, healthy play, export (2026-10-23)
 - [x] 10 AI tutor + learning memory: hint ladder in Math Lab, spaced review, memory (device + 0008 server rules), `tutor` Edge Function (Gemini free adapter, OFF: terms forbid under-18 apps → B5), parent memory panel + AI helper switch (2026-10-24)
 - [x] 11 Cross-device responsive QA: 9 viewports, folding language switch, wrapping buttons, 3D frames follow rotation, hotspots separated, pinch-zoom allowed, city building looks per level (2026-10-24)
-- [ ] 12 performance · 13 security
+- [x] 12 Performance: pet poses on demand, ru/en texts lazy, decorative robot 30 fps on demand + idle mount + 2D beside 3D content, content canvases pause off screen, SW registers after load (2026-10-24)
+- [ ] 13 security · 14 connected universe · 15 adaptive learning (one continuous prompt)
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
@@ -281,8 +284,29 @@ clue → picture → card removed → solution, `data-review` question from due 
 - Not present in the app (asked for in QA): Scale Portal, Shadow Lab, Music, Mistake Garden
   pages; no rigged per-world mascots (the 3D/SVG robot is the mascot).
 
+## Performance (Phase 12)
+
+- Measure with the scratch probes (static bundle, cold load fast/throttled, routes, idle CPU,
+  repeated-navigation memory); this container has 2 cores (= weak device: no 3D) and software
+  WebGL, so compare builds, never absolutes. Budgets: `e2e/performance.spec.ts`.
+- 3D: `components/three/` — `renderBudget.ts` (ambient robot 30 fps / 10 reduced motion),
+  `FrameTicker` (demand canvas ticker), `useInView` (content canvases stop off screen),
+  `prepareRenderer` (no sync shader-log read in prod), `content3d.ts` (a page with a content
+  3D view keeps the robot 2D: one WebGL canvas). Robot mounts on `lib/onIdle` (SVG first, same box).
+- i18n: uz in the entry chunk; ru/en lazy (`loadLanguage`, `registerLanguage` for tests);
+  vite plugin `preloadStoredLanguage` modulepreloads the stored language's chunk from <head>;
+  main.tsx waits ≤ 1.5 s for it. A chunk that fails: stored language rolls back to the one on
+  screen (`applyLanguage(language, onFail)` in LanguageSync).
+- PetSprite mounts only showable poses and switches only after the new picture loaded;
+  companions `warm` all six on idle; pets precached. SW registers after `load` (precache ≈ 7 MB).
+- Robot: empty 5:6 box until idle, then 3D; beside a content 3D view it stays 2D for the visit;
+  contact shadow drawn once, live while happy/celebrate jumps.
+- Known: Blink's DOM-node counter grows ~45 nodes per 3D canvas mount; not reachable from JS
+  (heap snapshot: 0 detached), WebGL contexts are released (60/62 lost, no limit warning).
+  No dinosaur sounds exist (only UI sounds 16 KB + voice clips cached on play).
+
 ## Next
 
-Phase 12 – performance. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
+Phases 13 → 14 → 15 (security hardening → connected universe → adaptive learning), one prompt. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

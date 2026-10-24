@@ -22,6 +22,7 @@ import { checkLength } from './logic'
 import { TaleCheck } from './TaleCheck'
 import { TALES_UI, type TalesUi } from './ui'
 import { useReader } from './useReader'
+import { useContent3D } from '@/components/three/content3d'
 
 const TaleScene3D = lazy(() => import('./three/TaleScene3D'))
 
@@ -38,9 +39,11 @@ function SceneStage({
   const [failed, setFailed] = useState(false)
   const onFail = useCallback(() => setFailed(true), [])
   const flat = <StaticScene scene={scene} label={label} />
+  const live = !failed && canRender3D()
+  useContent3D(live)
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card bg-sky-soft shadow-press-lg sm:aspect-[16/10] landscape:max-h-[64dvh]">
-      {failed || !canRender3D() ? (
+      {!live ? (
         flat
       ) : (
         <Suspense fallback={flat}>

@@ -2,6 +2,13 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { MotionGlobalConfig } from 'framer-motion'
 import { afterEach, vi } from 'vitest'
+import { registerLanguage } from '@/i18n'
+import { en } from '@/i18n/locales/en'
+import { ru } from '@/i18n/locales/ru'
+
+// tests switch languages synchronously: every language is there from the start
+registerLanguage('ru', ru)
+registerLanguage('en', en)
 
 afterEach(() => {
   cleanup()

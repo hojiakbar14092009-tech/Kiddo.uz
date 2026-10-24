@@ -8,6 +8,7 @@ import { tDynamic } from '@/lib/tDynamic'
 import { ExplorerRemote, KEY_ZOOM } from './orbit'
 import { explorerSupport, type ExplorerSupport } from './support'
 import type { ExplorerModelDef } from './types'
+import { useContent3D } from '@/components/three/content3d'
 
 // three.js and R3F load only with the 3D view, never with the page that shows the explorer
 const ExplorerView = lazy(() => import('./ExplorerView'))
@@ -50,6 +51,7 @@ export function Explorer3D({ model, label, onHotspot, activeHotspot, className }
     remote.redraw()
   }
   const hotspots = model.hotspots ?? []
+  useContent3D(mode === '3d')
 
   const still = (
     <img

@@ -19,13 +19,23 @@ vi.mock('@react-three/fiber', () => ({
     onCreated,
   }: {
     onCreated?: (state: {
-      gl: { setClearColor: () => void; domElement: HTMLCanvasElement }
+      gl: {
+        setClearColor: () => void
+        domElement: HTMLCanvasElement
+        debug: { checkShaderErrors: boolean }
+      }
     }) => void
   }) => {
     const ref = useRef<HTMLCanvasElement>(null)
     useEffect(() => {
       if (ref.current)
-        onCreated?.({ gl: { setClearColor: () => undefined, domElement: ref.current } })
+        onCreated?.({
+          gl: {
+            setClearColor: () => undefined,
+            domElement: ref.current,
+            debug: { checkShaderErrors: true },
+          },
+        })
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     return <canvas ref={ref} data-testid="r3f-canvas" />

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
 import { tDynamic } from '@/lib/tDynamic'
 import { addExplorerLights, disposeObject } from './lights'
+import { prepareRenderer } from '@/components/three/prepareRenderer'
 import { MARKER_GAP, MARKER_SIZE, clamp, separate } from './markers'
 import {
   KEY_TURN,
@@ -269,6 +270,7 @@ export default function ExplorerView({
           gl={{ antialias: quality === 'high', alpha: true, powerPreference: 'low-power' }}
           style={{ touchAction: 'pan-y' }}
           onCreated={({ gl }) => {
+            prepareRenderer(gl)
             gl.setClearColor(new THREE.Color(0x000000), 0)
             const canvas = gl.domElement
             canvas.style.touchAction = 'pan-y'
