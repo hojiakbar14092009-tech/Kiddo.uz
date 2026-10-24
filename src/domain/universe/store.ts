@@ -493,6 +493,15 @@ export function emitActivity(e: ActivityCompleted): AwardSummary {
     awards: [{ id, award }, ...child.awards].slice(0, MAX_AWARDS),
   }))
   emitUniverse({ type: 'activity.completed', childKey, activityId: id, activity, award })
+  // the adaptation moved: published as an event only (it never pays anything)
+  if (e.level !== undefined) {
+    const age = childAgeFor(childKey)
+    const from = levelOf(before.strands, e.strand, age)
+    const to = levelOf(universeChild(childKey).strands, e.strand, age)
+    if (from !== to) {
+      emitUniverse({ type: 'adaptation.updated', childKey, strand: e.strand, from, to })
+    }
+  }
   return award
 }
 

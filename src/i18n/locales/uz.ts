@@ -377,6 +377,30 @@ export const uz = {
           mastered: 'yaxshi o‘zlashtirildi',
         },
       },
+      focus: {
+        title: 'O‘rganish yo‘nalishi',
+        intro:
+          'Kiddo matematikadagi mashqlarni bolaning o‘z javoblariga qarab tanlaydi. Yosh faqat boshlanish nuqtasi, chegara emas.',
+        level: 'Matematika: {{level}}-daraja',
+        band: 'Yosh guruhi {{band}}: faqat ko‘rinish va boshlanish uchun',
+        current: 'Hozirgi e’tibor',
+        mastered: 'O‘zlashtirildi',
+        needs: 'Mashq kerak',
+        reviewSoon: 'Tez orada takrorlanadi',
+        none: 'Hozircha yo‘q',
+        why: 'Nega shunday',
+        reasons: {
+          'age-start': 'Javoblar hali kam – yoshga qarab boshlandi.',
+          'own-answers': 'Daraja bolaning o‘z javoblari bilan belgilanadi.',
+          'strong-runs':
+            'Mustaqil javoblar ko‘p – ketma-ket ikki shunday mashg‘ulot keyingi darajani ochadi.',
+          'needs-support': 'Yordam rasmdan boshlanadi, 3-darajadan boshlab javob kartalari kamroq.',
+          'hint-reliant': 'Ko‘p javob yordam bilan topildi – yordam avval rasm bilan beriladi.',
+          'confirmed-mistake':
+            'Takrorlangan qiyinchilik bor – mashg‘ulotda shunga o‘xshash mashq bo‘ladi.',
+          'review-due': 'Takrorlash vaqti keldi – bilim mustahkamlanadi.',
+        },
+      },
       skillNames: {
         drag: 'Narsalarni savatga sanab solish',
         count: 'Sanash',
@@ -448,9 +472,10 @@ export const uz = {
       nameRequired: 'Ismni yozing.',
       age: 'Yoshi',
       birthDate: 'Tug‘ilgan kuni',
-      birthDateHint: 'Kiddo 4–6 yoshli bolalar uchun.',
-      birthDateError: 'Tug‘ilgan kunni kiriting: bola 4 yoshdan 6 yoshgacha bo‘lishi kerak.',
+      birthDateHint: 'Kiddo 4 yoshdan. Mashqlar yoshga emas, bolaning javoblariga moslashadi.',
+      birthDateError: 'Tug‘ilgan kunni kiriting: bola 4 yoshdan 18 yoshgacha bo‘lishi kerak.',
       ageLevel: 'Yoshi: {{count}}. {{level}} yoshli bolalar uchun o‘yinlar ochiq.',
+      ageAll: 'Yoshi: {{count}}. Barcha o‘yinlar ochiq; qiyinlik javoblarga qarab tanlanadi.',
       gender: 'Jinsi',
       girl: 'Qiz',
       boy: 'O‘g‘il',

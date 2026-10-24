@@ -252,6 +252,13 @@ interface MakeContext {
   rng: Rng
   used: ReadonlySet<string>
   object: MathObject
+  /** Answer cards from the adaptive plan (2–4); the level's own count without it. */
+  options?: number
+}
+
+/** The answer cards of a question: the adaptive plan's count, else the level's. */
+function optionsOf(c: MakeContext): number {
+  return Math.min(4, Math.max(2, Math.round(c.options ?? optionCount(c.level))))
 }
 
 type Maker = (c: MakeContext) => LabQuestion
@@ -283,7 +290,7 @@ const makeCount: Maker = (c) => {
   const { options, errors } = numberOptions(
     n,
     [...near(n), { value: n + 2, error: 'off-by-more' }],
-    optionCount(c.level),
+    optionsOf(c),
     levelMax(c.level),
     c.rng,
     'dots',
@@ -312,7 +319,7 @@ const makeOneMore: Maker = (c) => {
       { value: n + 2, error: 'off-by-one' },
       { value: n - 1, error: 'wrong-direction' },
     ],
-    optionCount(c.level),
+    optionsOf(c),
     levelMax(c.level),
     c.rng,
     'group',
@@ -391,7 +398,7 @@ function makeArithmetic(op: Op, within: number, objects: boolean): Maker {
         { value: other, error: 'wrong-operation' },
         { value: op === '+' ? Math.max(a, b) : a, error: 'kept-number' },
       ],
-      optionCount(c.level),
+      optionsOf(c),
       // the wrong options stay inside the level too (no 15 at level 2)
       max,
       c.rng,
@@ -439,7 +446,7 @@ const makeOneLess: Maker = (c) => {
       { value: n + 1, error: 'wrong-direction' },
       { value: n - 2, error: 'off-by-one' },
     ],
-    optionCount(c.level),
+    optionsOf(c),
     levelMax(c.level),
     c.rng,
     'dots',
@@ -530,7 +537,7 @@ function makeMissing(forms: readonly MissingForm[], within: number): Maker {
         skill = 'missing:sub'
         break
     }
-    const { options, errors } = numberOptions(answer, mistakes, optionCount(c.level), within, c.rng)
+    const { options, errors } = numberOptions(answer, mistakes, optionsOf(c), within, c.rng)
     return {
       ...base(c),
       id: `missing:${form}:${a}:${b}`,
@@ -603,7 +610,7 @@ function makeNeighbor(kind: 'before' | 'after' | 'between'): Maker {
     const { options, errors } = numberOptions(
       answer,
       mistakes,
-      optionCount(c.level),
+      optionsOf(c),
       levelMax(c.level),
       c.rng,
     )
@@ -659,7 +666,7 @@ const makeTwoStep: Maker = (c) => {
       { value: swapped, error: 'wrong-operation' },
       ...near(answer),
     ],
-    optionCount(c.level),
+    optionsOf(c),
     levelMax(c.level),
     c.rng,
   )
@@ -701,7 +708,7 @@ const makeWord: Maker = (c) => {
       ...near(answer),
       { value: a, error: 'kept-number' },
     ],
-    optionCount(c.level),
+    optionsOf(c),
     levelMax(c.level),
     c.rng,
   )
@@ -764,11 +771,12 @@ export function makeQuestion(
   index: number,
   rng: Rng = Math.random,
   used: ReadonlySet<string> = new Set(),
+  options?: number,
 ): LabQuestion {
   const plan = LEVEL_PLAN[level]
   const maker = plan[index % plan.length]!
   const object = LAB_OBJECTS[Math.floor(rng() * LAB_OBJECTS.length)] ?? 'apple'
-  return maker({ level, rng, used, object })
+  return maker({ level, rng, used, object, ...(options ? { options } : {}) })
 }
 
 /**
@@ -782,10 +790,11 @@ export function reviewQuestion(
   level: ChallengeLevel,
   avoid: ReadonlySet<string>,
   rng: Rng = Math.random,
+  options?: number,
 ): LabQuestion | null {
   const plan = LEVEL_PLAN[level]
   for (let attempt = 0; attempt < plan.length * 12; attempt += 1) {
-    const q = makeQuestion(level, attempt % plan.length, rng, avoid)
+    const q = makeQuestion(level, attempt % plan.length, rng, avoid, options)
     if (q.skill === skill && !avoid.has(q.id)) return { ...q, review: true }
   }
   return null
@@ -800,31 +809,49 @@ export interface ReviewPlan {
   avoid: readonly string[]
 }
 
+/** How the adaptive plan shapes a session (domain/adaptive). */
+export interface SessionShape {
+  /** Answer cards per question (2–4). */
+  options?: number
+}
+
 /**
  * The questions of one session at a level: every kind of the level once, the
  * drag task first for levels 1–2 (hands first), the rest in a random order,
- * no question twice. A due review takes the place of one question (the
- * second for levels 1–2, else the first), so a session never gets longer.
+ * no question twice. Due reviews (retrieval practice, at most two) take the
+ * place of questions (from the second for levels 1–2, else from the first),
+ * so a session never gets longer.
  */
 export function planSession(
   level: ChallengeLevel,
   rng: Rng = Math.random,
-  review?: ReviewPlan | null,
+  review?: ReviewPlan | readonly ReviewPlan[] | null,
+  shape: SessionShape = {},
 ): LabQuestion[] {
   const count = sessionLength(level)
   const used = new Set<string>()
   const out: LabQuestion[] = []
   for (let index = 0; index < count; index += 1) {
-    const q = makeQuestion(level, index, rng, used)
+    const q = makeQuestion(level, index, rng, used, shape.options)
     used.add(q.id)
     out.push(q)
   }
   const ordered = level <= 2 ? [out[0]!, ...shuffle(out.slice(1), rng)] : shuffle(out, rng)
-  if (!review || review.level > level) return ordered
-  const q = reviewQuestion(review.skill, review.level, new Set([...review.avoid, ...used]), rng)
-  if (!q) return ordered
-  const at = level <= 2 ? 1 : 0
-  return ordered.map((item, index) => (index === at ? q : item))
+  const reviews = (Array.isArray(review) ? review : review ? [review] : [])
+    .filter((item) => item.level <= level)
+    .slice(0, 2)
+  let at = level <= 2 ? 1 : 0
+  const result = [...ordered]
+  for (const item of reviews) {
+    if (at >= result.length) break
+    const avoid = new Set([...item.avoid, ...result.map((q) => q.id)])
+    const q = reviewQuestion(item.skill, item.level, avoid, rng, shape.options)
+    if (!q) continue
+    result[at] = q
+    // the second review is spread out (never two reviews in a row)
+    at += 2
+  }
+  return result
 }
 
 /** Is this option (or for 'drag', this many in the basket) the right answer? */

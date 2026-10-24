@@ -22,12 +22,14 @@ describe('age levels', () => {
     expect(levelForAge(9)).toBe(6)
   })
 
-  it('accepts only real birthdays of children aged 4 to 6', () => {
+  it('accepts real birthdays from age 4, with no learning ceiling (up to 18)', () => {
     const today = '2026-10-18'
     expect(isAllowedBirthDate(birthDateForAge(4, today), today)).toBe(true)
     expect(isAllowedBirthDate(birthDateForAge(6, today), today)).toBe(true)
     expect(isAllowedBirthDate(birthDateForAge(3, today), today)).toBe(false)
-    expect(isAllowedBirthDate(birthDateForAge(7, today), today)).toBe(false)
+    expect(isAllowedBirthDate(birthDateForAge(7, today), today)).toBe(true)
+    expect(isAllowedBirthDate(birthDateForAge(16, today), today)).toBe(true)
+    expect(isAllowedBirthDate(birthDateForAge(19, today), today)).toBe(false)
     expect(isAllowedBirthDate('2021-02-30', today)).toBe(false)
   })
 

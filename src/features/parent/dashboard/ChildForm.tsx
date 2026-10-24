@@ -8,6 +8,7 @@ import {
   isAllowedBirthDate,
   levelForAge,
   MAX_AGE,
+  MAX_PROFILE_AGE,
   MIN_AGE,
 } from '@/features/age/ageLevel'
 import { dayKey } from '@/features/tasks/rules'
@@ -42,9 +43,9 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
   const [today] = useState(() => dayKey())
   const [birthDate, setBirthDate] = useState(initial?.birthDate ?? '')
   const [birthError, setBirthError] = useState(false)
-  // A child of 4 to 6: born between (today − 7 years + 1 day) and (today − 4 years).
+  // A child from 4 to 18: born between (today − 19 years + 1 day) and (today − 4 years).
   const latest = birthDateForAge(MIN_AGE, today)
-  const earliest = nextDay(birthDateForAge(MAX_AGE + 1, today))
+  const earliest = nextDay(birthDateForAge(MAX_PROFILE_AGE + 1, today))
   const age = isAllowedBirthDate(birthDate, today) ? ageOn(birthDate, today) : null
   const [gender, setGender] = useState<Gender>(initial?.gender ?? 'girl')
   const [mascot, setMascot] = useState<MascotModel>(initial?.mascot ?? 'girl')
@@ -112,9 +113,11 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
         >
           {birthError
             ? t('parent.profiles.birthDateError')
-            : age !== null
-              ? t('parent.profiles.ageLevel', { count: age, level: levelForAge(age) })
-              : t('parent.profiles.birthDateHint')}
+            : age !== null && age > MAX_AGE
+              ? t('parent.profiles.ageAll', { count: age })
+              : age !== null
+                ? t('parent.profiles.ageLevel', { count: age, level: levelForAge(age) })
+                : t('parent.profiles.birthDateHint')}
         </span>
       </label>
 

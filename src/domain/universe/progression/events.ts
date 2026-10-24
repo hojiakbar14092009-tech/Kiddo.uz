@@ -34,6 +34,8 @@ export type DomainEvent =
   /** A confirmed misconception the child got past (learning memory). */
   | { type: 'mistake.resolved'; childKey: string; skill: string; code: string }
   | { type: 'skill.mastered'; childKey: string; skill: string }
+  /** The adaptive challenge level of a strand moved (domain/adaptive); never a reward. */
+  | { type: 'adaptation.updated'; childKey: string; strand: Strand; from: number; to: number }
   | { type: 'world.unlocked'; childKey: string; id: string }
   | { type: 'artifact.discovered'; childKey: string; id: string }
   | { type: 'seed.planted'; childKey: string; plot: string }

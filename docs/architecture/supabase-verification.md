@@ -474,3 +474,8 @@ psql "$DB" -c "select reason, ref_id, resource, amount, needs_ref from public.wo
 Expect three rows: `discovery mars-seed seed 1 upgrade|spaceport|1`,
 `journey journey|first-flight crystal 2 plot|mars`, `plant plot|mars seed -1 mars-seed`.
 A unit test (`progression.test.ts`) keeps the rows equal to the app's data.
+
+## 10. Applying 0012 (age bands)
+
+`0012_age_bands.sql` lets a child's synced age be 3 to 25 (0002: 3 to 12); the
+app's form asks 4 to 18 and the age grows with birthdays. `supabase db push`, then a profile of a 13-year-old syncs.

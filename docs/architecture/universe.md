@@ -71,6 +71,9 @@ corrected birthday re-seeds). Guests start at 2. Device-only for now; the
 `learner_profile` table and sync come with Phase 14. Presentation scales: level 1–2 large visual
 UI, 3–4 missions/collections, 5 strategy/evidence/simulation.
 
+Phase 15: the plan for each session comes from `src/domain/adaptive`
+(docs/architecture/adaptive-learning.md); age bands guide, evidence decides.
+
 ## 5. Quests
 
 - Daily quest: 3 short steps chosen from due review (mistake seeds), the child's

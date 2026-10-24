@@ -705,6 +705,11 @@ select pg_temp.expect_error($$select public.record_resource('cb','seed',1,'disco
 select pg_temp.check((select count(*) from public.building_levels where building in ('spaceport','mistake-garden','science-lab')) = 9, 'world: the new buildings have prices');
 commit;
 
+-- ===== 0012: no age ceiling for learning (form 4 to 18, synced age up to 25)
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('ck','00000000-0000-0000-0000-0000000000d2','Kamola',16,'girl','girl');
+select pg_temp.check((select age from public.children where id='ck') = 16, 'age: a sixteen-year-old profile is allowed');
+select pg_temp.expect_error($$insert into public.children (id,parent_id,name,age,gender,mascot) values ('cl','00000000-0000-0000-0000-0000000000d2','X',26,'girl','girl')$$, 'children_age_check');
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

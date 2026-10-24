@@ -299,3 +299,31 @@ describe('Math Lab adaptation', () => {
     expect(getChallengeLevel('lab-kid', 'number', 4)).toBe(2)
   })
 })
+
+describe('the adaptive plan shapes a session', () => {
+  it('asks for fewer answer cards when the plan says so, at every level', () => {
+    for (const level of [1, 2, 3, 4, 5] as const) {
+      for (const seed of SEEDS.slice(0, 10)) {
+        for (const q of planSession(level, seeded(seed), null, { options: 2 })) {
+          if (q.kind === 'drag' || q.kind === 'compare-groups' || q.kind === 'compare') continue
+          expect(q.options.length, `${level} ${q.id}`).toBe(2)
+          expect(q.options.some((o) => String(o.value) === q.answer || o.id === q.answer)).toBe(
+            true,
+          )
+        }
+      }
+    }
+  })
+
+  it('takes up to two due reviews (retrieval practice), never two in a row', () => {
+    const questions = planSession(4, seeded(3), [
+      { skill: 'sub:within10', level: 3, avoid: [] },
+      { skill: 'missing:add', level: 3, avoid: [] },
+      { skill: 'add:within10', level: 3, avoid: [] },
+    ])
+    const at = questions.flatMap((q, i) => (q.review ? [i] : []))
+    expect(at.length).toBe(2)
+    expect(at[1]! - at[0]!).toBeGreaterThan(1)
+    expect(questions).toHaveLength(6)
+  })
+})

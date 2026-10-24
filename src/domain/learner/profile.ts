@@ -4,7 +4,7 @@ import type { Strand } from '@/domain/universe/types'
  * LearnerProfile (docs/architecture/universe.md §4). Pure logic, no store.
  *
  * Every strand has a challenge level 1–5. Age only picks where a strand starts
- * (4 → 1, 5 → 2, 6 → 3, guest → 3); after that the child's own results move it:
+ * (4 → 1, 5 → 2, 6 → 3, 7–9 → 4, 10+ → 5, guest → 2); after that the child's own results move it:
  * two strong runs in a row at a level → one level up, two weak runs in a row →
  * one level down (never below 1, never announced as failure). Age never locks
  * anything: a strong four-year-old reaches level 5, a struggling six-year-old
@@ -45,7 +45,9 @@ export function startLevel(age: number | null): ChallengeLevel {
   if (age <= 4) return 1
   if (age === 5) return 2
   if (age === 6) return 3
-  return 4
+  // older children start higher (age bands 7–9, 10+); their answers decide from there
+  if (age <= 9) return 4
+  return 5
 }
 
 export function levelOf(

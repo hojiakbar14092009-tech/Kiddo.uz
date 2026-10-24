@@ -378,6 +378,30 @@ export const en: Translation = {
           mastered: 'mastered',
         },
       },
+      focus: {
+        title: 'Learning focus',
+        intro:
+          'Kiddo picks the maths work from the child’s own answers. Age is only a starting point, never a limit.',
+        level: 'Maths: level {{level}}',
+        band: 'Age band {{band}}: for presentation and the start only',
+        current: 'Current focus',
+        mastered: 'Mastered',
+        needs: 'Needs practice',
+        reviewSoon: 'Review soon',
+        none: 'Nothing yet',
+        why: 'Why it looks like this',
+        reasons: {
+          'age-start': 'Few answers so far – started from the age.',
+          'own-answers': 'The level follows the child’s own answers.',
+          'strong-runs':
+            'Many answers on their own – two such sessions in a row open the next level.',
+          'needs-support': 'Help starts with a picture; from level 3 there are fewer answer cards.',
+          'hint-reliant': 'Many answers came with a hint – hints start with a picture.',
+          'confirmed-mistake':
+            'A repeated difficulty – a similar exercise comes up in the session.',
+          'review-due': 'Time to review – so it sticks.',
+        },
+      },
       skillNames: {
         drag: 'Counting objects into the basket',
         count: 'Counting',
@@ -447,9 +471,11 @@ export const en: Translation = {
       nameRequired: 'Please enter a name.',
       age: 'Age',
       birthDate: 'Birthday',
-      birthDateHint: 'Kiddo is for children aged 4 to 6.',
-      birthDateError: 'Enter the birthday: the child must be 4 to 6 years old.',
+      birthDateHint:
+        'Kiddo is for children from 4. The work follows the child’s answers, not their age.',
+      birthDateError: 'Enter the birthday: the child must be 4 to 18 years old.',
       ageLevel: 'Age: {{count}}. Games for age {{level}} are open.',
+      ageAll: 'Age: {{count}}. Every game is open; the difficulty follows the answers.',
       gender: 'Gender',
       girl: 'Girl',
       boy: 'Boy',

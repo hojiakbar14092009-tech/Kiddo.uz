@@ -20,6 +20,7 @@ import {
 import { useChildInsights } from '../insights/useChildInsights'
 import { ActivityPanel } from './ActivityPanel'
 import { LearnResultsPanel } from './LearnResultsPanel'
+import { FocusPanel } from '../insights/FocusPanel'
 import { MemoryPanel } from '../insights/MemoryPanel'
 import { Panel } from './Panel'
 
@@ -92,6 +93,7 @@ export function ReportSection({ child }: { child: ChildProfile }) {
       <MedalsCityRow insights={insights} />
       <SkillsPanel child={child} insights={insights} />
       <PracticePanel child={child} insights={insights} />
+      <FocusPanel child={child} />
       <MemoryPanel child={child} />
       <PlayedPanel child={child} insights={insights} />
       <HealthPanel child={child} insights={insights} />

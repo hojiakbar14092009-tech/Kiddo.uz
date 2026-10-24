@@ -219,3 +219,52 @@ describe('Math Lab review planning', () => {
     }
   })
 })
+
+describe('Math Lab: the adaptive plan picks the help', () => {
+  beforeEach(() => {
+    useSettingsStore.setState({ language: 'uz' })
+    clearLearningMemory('kid')
+    sixYearOld()
+  })
+
+  it('a child who relies on hints gets the picture first after a mistake', async () => {
+    // six recent answers that all needed a hint (learning memory evidence)
+    const at = new Date().toISOString()
+    const skill: SkillMemory = {
+      skill: 'math:add:within10',
+      level: 3,
+      mastery: 0.4,
+      evidence: 6,
+      successStreak: 0,
+      firstAt: at,
+      lastPracticedAt: at,
+      lastErrorAt: null,
+      retained: false,
+      nextReviewAt: null,
+      reviewStep: 0,
+      reviewCount: 0,
+      misconceptions: {},
+      hintsRecent: [2, 2, 1, 2, 3, 2],
+      correctedAfterHint: 4,
+      masteredAt: null,
+    }
+    useLearningMemoryStore.setState({
+      byChild: { kid: { skills: { [skill.skill]: skill }, processed: [] } },
+    })
+    const { user } = await renderRoute('/math-lab')
+    await user.click(screen.getByTestId('lab-start'))
+    while (question().dataset.kind === 'compare' || question().dataset.kind === 'drag') {
+      const before = question()
+      if (before.dataset.kind === 'drag') break
+      await user.click(cards().find((b) => isAnswer(b, before.dataset.answer!))!)
+      await waitFor(() => expect(screen.getByTestId('lab-question')).not.toBe(before), {
+        timeout: 3000,
+      })
+    }
+    expect(question()).toHaveAttribute('data-hints', 'picture-first')
+    const answer = question().dataset.answer!
+    const wrong = cards().find((b) => b.dataset.status === 'idle' && !isAnswer(b, answer))!
+    await user.click(wrong)
+    expect(help()).toHaveAttribute('data-hint-level', '2')
+  })
+})

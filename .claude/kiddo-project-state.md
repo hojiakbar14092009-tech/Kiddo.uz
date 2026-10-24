@@ -55,6 +55,7 @@ Phase 12: initial JS 296 → 266 KB gz; Home cold load 1417 → 899 KB transferr
 weak device scripts 301 → 271 KB, images 617 → 134 KB; budgets in `e2e/performance.spec.ts`.
 Phase 13: 302 SQL assertions, 978 unit, 118 e2e (`supabase/tests/run.sh`; local PG: /var/tmp/kiddo-pg, see Security).
 Phase 14: 321 SQL assertions, ~1018 unit, 120 e2e (journey.spec: the whole first journey on phone + tablet).
+Phase 15: 323 SQL assertions, ~1030 unit, 122 e2e (adaptive.spec: a ten-year-old's profile, focus, Math Lab L5).
 
 ## UI foundation (Phase 1)
 
@@ -252,7 +253,7 @@ prod) · B7 promo policy.
 - [x] 12 Performance: pet poses on demand, ru/en texts lazy, decorative robot 30 fps on demand + idle mount + 2D beside 3D content, content canvases pause off screen, SW registers after load (2026-10-24)
 - [x] 13 Security: balance from ledger (0009), integrity hardening (0010), security headers/CSP, no device admin in prod, cloud-voice name guard, child-removal cleanup, per-account audio caps (2026-10-24)
 - [x] 14 Connected universe: domain events, progression engine + content data, first journey (maths → rocket → Mars seed → Practice Garden → science runs → bloom → Science Lab), 0011 world_rules (2026-10-24)
-- [ ] 15 adaptive learning (same prompt, continue)
+- [x] 15 Adaptive learning: `domain/adaptive` service (age bands, evidence-weighted, latest-run share, hint reliance, focus + retrieval practice), Math Lab uses options/reviews/picture-first, parent Learning focus panel, profiles 4–18 (0012), `adaptation.updated` event (2026-10-24)
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
@@ -344,8 +345,17 @@ clue → picture → card removed → solution, `data-review` question from due 
 - Known: growth/lab invisible to the server (bounded: 2 crystals once); guest journey not saved;
   event bus listeners still get the loose UniverseEvent type.
 
+## Adaptive (Phase 15) – docs/architecture/adaptive-learning.md
+
+- `adaptivePlan({ age, strand, skills, now, recent })` pure; `useAdaptivePlan` / `useChildPlan` hooks.
+- Learner start by age band: 4→1, 5→2, 6→3, 7–9→4, 10+→5. Profiles 4–18 (`MAX_PROFILE_AGE`);
+  DB age 3–25 (0012). Older children get every game (age level 6).
+- Math Lab: plan fixed per session; `planSession(level, rng, reviews[], { options })`;
+  picture-first hint on evidence only. Parent `FocusPanel` (current / needs / review soon / mastered / why).
+- Not consumed yet: aids, vocabulary, explanation depth (plan data only); other sections keep their rules.
+
 ## Next
 
-Phase 15 (adaptive learning), same prompt. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
+Phases 16+ per the roadmap. Owner actions: apply 0005–0012, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

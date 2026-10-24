@@ -11,9 +11,9 @@ import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { Button } from '@/components/ui/Button'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { StepDots } from '@/components/ui/Progress'
+import { useAdaptivePlan } from '@/domain/adaptive'
 import { useChallengeLevel, type ChallengeLevel } from '@/domain/learner'
 import {
-  dueReviews,
   getChildMemory,
   getSkillMemory,
   isActive,
@@ -235,17 +235,24 @@ interface Finished {
 }
 
 /**
- * The due spaced review for this session, if any: a skill the learning memory
- * says needs another look, practised at a level not above today's.
+ * The spaced reviews the adaptive plan chose for this session (retrieval
+ * practice): skills the learning memory says need another look, practised at
+ * a level not above today's, with the items already seen wrong to avoid.
  */
-function reviewFor(childKey: string, level: ChallengeLevel): ReviewPlan | null {
-  const due = dueReviews(getChildMemory(childKey).skills, new Date().toISOString(), 5)
-  for (const memory of due) {
-    if (!memory.skill.startsWith('math:') || !memory.level || memory.level > level) continue
-    const avoid = Object.values(memory.misconceptions).flatMap((m) => m.items)
-    return { skill: memory.skill.slice(5), level: memory.level as ChallengeLevel, avoid }
+function reviewsFor(
+  childKey: string,
+  level: ChallengeLevel,
+  skills: readonly string[],
+): ReviewPlan[] {
+  const memory = getChildMemory(childKey).skills
+  const out: ReviewPlan[] = []
+  for (const key of skills) {
+    const skill = memory[key]
+    if (!skill || !key.startsWith('math:') || !skill.level || skill.level > level) continue
+    const avoid = Object.values(skill.misconceptions).flatMap((m) => m.items)
+    out.push({ skill: key.slice(5), level: skill.level as ChallengeLevel, avoid })
   }
-  return null
+  return out
 }
 
 /** Is this error one the learning memory already knows for this skill (confirmed or improving)? */
@@ -260,7 +267,15 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
   const language = useLanguage()
   const childKey = useChildKey()
   const { say, reset } = useLearnMascot()
-  const [questions] = useState(() => planSession(level, Math.random, reviewFor(childKey, level)))
+  // the adaptive plan (domain/adaptive): how many cards, which reviews, picture-first hints
+  // fixed for the whole session (the memory changes after every answer)
+  const live = useAdaptivePlan('number', 'math')
+  const [plan] = useState(live)
+  const [questions] = useState(() =>
+    planSession(level, Math.random, reviewsFor(childKey, level, plan.reviews), {
+      options: plan.options,
+    }),
+  )
   const [runId] = useState(newId)
   const sheet = useRef<SessionSheet>(newSheet('test'))
   const [index, setIndex] = useState(0)
@@ -463,8 +478,9 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
     setMisses(count)
     if (code) errors.current = [...errors.current, code]
     lastAnswer.current = { value, code }
-    // each mistake climbs one step of the ladder (never down, never straight to the answer)
-    const step = nextHint(hint)
+    // each mistake climbs one step of the ladder (never down, never straight to the
+    // answer); a child the plan says relies on pictures gets the picture first
+    const step = hint === 0 && plan.hints === 'picture-first' ? 2 : nextHint(hint)
     // the basket's "too many / too few" line: the first clue already says it
     if (q.kind === 'drag' && step >= 2) {
       setNote(
@@ -528,6 +544,8 @@ function LabSession({ level, onAgain }: { level: ChallengeLevel; onAgain: () => 
         data-answer={q.answer}
         data-step={index}
         data-review={q.review ? 'true' : undefined}
+        data-options={q.options.length}
+        data-hints={plan.hints}
         className={clsx(
           'mx-auto flex w-full max-w-4xl flex-col items-center gap-4 sm:gap-6',
           // a phone held sideways: the question beside the answers (the basket needs the width)

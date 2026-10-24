@@ -15,6 +15,7 @@ import {
   GUEST_LEVEL,
   levelForAge,
   MAX_AGE,
+  MAX_PROFILE_AGE,
   MIN_AGE,
   type AgeLevel,
 } from '@/features/age/ageLevel'
@@ -60,7 +61,7 @@ export const DEFAULT_DAILY_LIMIT_MINUTES = 30
 /** Daily time limits a parent can choose, in minutes. */
 export const DAILY_LIMIT_OPTIONS = [15, 20, 30, 45, 60] as const
 export const MIN_CHILD_AGE = MIN_AGE
-export const MAX_CHILD_AGE = MAX_AGE
+export const MAX_CHILD_AGE = MAX_PROFILE_AGE
 export const MAX_NAME_LENGTH = 20
 export const MAX_HOMEWORK_LETTERS = 5
 

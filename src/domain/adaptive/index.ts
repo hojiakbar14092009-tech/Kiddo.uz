@@ -1,0 +1,19 @@
+export {
+  ADAPTIVE_POLICY,
+  AGE_BANDS,
+  adaptivePlan,
+  ageBand,
+  hintShare,
+  numberMaxFor,
+  skillsOf,
+  type AdaptiveInput,
+  type AdaptivePlan,
+  type AdaptivePolicy,
+  type AdaptReason,
+  type AgeBand,
+  type Aids,
+  type Explanation,
+  type HintTiming,
+  type Vocabulary,
+} from './adaptive'
+export { useAdaptivePlan, useChildPlan } from './hooks'
