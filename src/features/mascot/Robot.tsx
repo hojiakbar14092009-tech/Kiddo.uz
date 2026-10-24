@@ -17,7 +17,7 @@ import { useGaze } from './useGaze'
 
 const PALETTES: Record<MascotModel, RobotPalette> = {
   girl: { accent: ['#FFD0E2', '#F27BA6', '#C24C7B'], glow: '#FFB8DC' },
-  boy: { accent: ['#9BE8D6', '#17A08B', '#0A5C50'], glow: '#7FF0FF' },
+  boy: { accent: ['#9CC8FF', '#1E7BF0', '#0E4FB0'], glow: '#7FE8FF' },
 }
 
 const EASE_IN_OUT = [0.42, 0, 0.58, 1] as const

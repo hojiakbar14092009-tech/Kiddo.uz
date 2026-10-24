@@ -1,66 +1,108 @@
 import clsx from 'clsx'
 import { useReducedMotion } from 'framer-motion'
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useContext, useEffect, useState } from 'react'
+import { UNSAFE_LocationContext } from 'react-router-dom'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { onIdle } from '@/lib/onIdle'
-import { Robot, type RobotProps } from './Robot'
-import { canRender3D } from './webgl'
 import { useContent3DActive } from '@/components/three/content3d'
+import { onIdle } from '@/lib/onIdle'
+import {
+  contextOf,
+  MASCOTS,
+  mascotFor,
+  type MascotContext,
+  type MascotId,
+} from './characters/registry'
+import { Robot, type RobotProps } from './Robot'
+import { canRender3D, mascotQuality } from './webgl'
 
-const Robot3D = lazy(() => import('./three/Robot3D'))
+const Character3D = lazy(() => import('./characters/Character3D'))
+
+/** KidoBot in the child's colours (the 2D robot uses the same ones). */
+const PALETTES = {
+  boy: undefined,
+  girl: { accent: '#F27BA6', glow: '#FFB8DC' },
+} as const
+
+/** The page's mascot context; 'home' outside a router (splash, tests). */
+function usePageContext(): MascotContext {
+  const location = useContext(UNSAFE_LocationContext)?.location
+  return location ? contextOf(location.pathname) : 'home'
+}
+
+export interface MascotFigureProps extends RobotProps {
+  /** A specific mascot; by default the page's guide (registry.ts CONTEXT_ROUTES). */
+  mascot?: MascotId
+  /** Home and celebrations: spontaneous idle gestures. Lessons stay calm. */
+  lively?: boolean
+}
 
 /**
- * The mascot’s body: the articulated 3D robot when the device can render it,
- * otherwise (or while the 3D code is still loading) the animated SVG robot.
- * The 3D robot starts once the page's own content is up (onIdle): creating its
- * WebGL canvas compiles shaders, which held a lesson page back by up to a
- * second on a slow device. Until then its 5:6 box is kept empty (the 2D robot
- * is drawn larger, so showing it first made the robot shrink). A page that
- * shows a 3D model of its own keeps the 2D robot for the whole visit
- * (content3d.ts), so the robot never switches style back and forth.
+ * The mascot's body. The page's 3D character (KidoBot at home, Astro in
+ * space, Dinoo with the dinosaurs, ...) when the device can render it;
+ * otherwise, or until it has loaded, a picture of the same character (the 2D
+ * robot for KidoBot). Starts once the page's own content is up (onIdle), and
+ * a page that shows a 3D model of its own keeps the picture (content3d.ts).
  */
-export function MascotFigure({ tint: useTint = true, ...input }: RobotProps & { tint?: boolean }) {
-  // Red and sad after a mistake, green and happy after a right answer,
-  // its own colours the rest of the time.
-  const tint = !useTint
-    ? undefined
-    : input.mood === 'oops'
-      ? 'mascot-tint-oops'
-      : input.mood === 'happy' || input.mood === 'celebrate'
-        ? 'mascot-tint-happy'
-        : 'mascot-tint-none'
-  const props = { ...input, className: clsx(input.className, tint) }
+export function MascotFigure({ mascot: chosen, lively = false, ...input }: MascotFigureProps) {
+  const context = usePageContext()
+  const mascot = chosen ?? mascotFor(context)
   const [failed, setFailed] = useState(false)
+  const [ready, setReady] = useState(false)
   const reducedMotion = useReducedMotion() ?? false
-  // a page with its own 3D model keeps the robot in 2D (content3d.ts)
   const contentIn3D = useContent3DActive()
   const [besideContent, setBesideContent] = useState(false)
   if (contentIn3D && !besideContent) setBesideContent(true)
   const wants3D = !failed && !besideContent && canRender3D()
   const [pageReady, setPageReady] = useState(false)
   useEffect(() => (wants3D ? onIdle(() => setPageReady(true)) : undefined), [wants3D])
-  const flat = <Robot {...props} />
+  // a new character starts hidden until its model is in
+  const [shownMascot, setShownMascot] = useState(mascot)
+  if (shownMascot !== mascot) {
+    setShownMascot(mascot)
+    setReady(false)
+  }
 
-  if (!wants3D) return flat
-  // the box is held (same size), the 3D robot appears in it
-  const waiting = <Robot {...props} className={clsx(props.className, 'invisible')} />
-  if (!pageReady) return waiting
+  const picture =
+    mascot === 'kidobot' ? (
+      <Robot
+        {...input}
+        className={clsx(input.className, input.mood === 'happy' && 'mascot-tint-happy')}
+      />
+    ) : (
+      <img
+        src={MASCOTS[mascot].poster}
+        alt={input.label ?? ''}
+        aria-hidden={input.label ? undefined : true}
+        draggable={false}
+        data-mascot-poster={mascot}
+        className={clsx('aspect-[5/6] object-contain select-none', input.className)}
+      />
+    )
 
+  if (!wants3D || !pageReady) return picture
   return (
-    <ErrorBoundary fallback={flat} onError={() => setFailed(true)}>
-      <Suspense fallback={waiting}>
-        <Robot3D
-          model={props.model}
-          mood={props.mood ?? 'idle'}
-          reactionKey={props.reactionKey ?? 0}
-          followPointer={props.followPointer ?? true}
-          reducedMotion={reducedMotion}
-          wearing={props.wearing}
-          label={props.label}
-          className={props.className}
-          onFail={() => setFailed(true)}
-        />
-      </Suspense>
-    </ErrorBoundary>
+    <div className={clsx('relative', input.className)} data-mascot-figure={mascot}>
+      {!ready && <div className="pointer-events-none">{picture}</div>}
+      <ErrorBoundary fallback={picture} onError={() => setFailed(true)}>
+        <Suspense fallback={null}>
+          <Character3D
+            mascot={mascot}
+            context={context}
+            mood={input.mood ?? 'idle'}
+            reactionKey={input.reactionKey ?? 0}
+            followPointer={input.followPointer ?? true}
+            reducedMotion={reducedMotion}
+            lively={lively}
+            quality={mascotQuality()}
+            palette={mascot === 'kidobot' ? PALETTES[input.model] : undefined}
+            wearing={mascot === 'kidobot' ? input.wearing : undefined}
+            label={input.label}
+            className={clsx('w-full', !ready && 'absolute inset-0 opacity-0')}
+            onReady={() => setReady(true)}
+            onFail={() => setFailed(true)}
+          />
+        </Suspense>
+      </ErrorBoundary>
+    </div>
   )
 }

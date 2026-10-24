@@ -3,9 +3,9 @@ import * as THREE from 'three'
 import { OUTFIT_COLORS as C, type OutfitId } from '@/features/shop/outfits'
 
 /*
- * Robot clothes for the 3D robot. Sizes follow the head in RobotModel: the
- * head shell is a sphere of radius 0.62 scaled (1.18, 1, 0.95), centred at
- * the origin of the head group.
+ * KidoBot's clothes from the shop, placed on the model's sockets
+ * (Socket_Head at the head's centre, Socket_Face on the visor, Socket_Neck).
+ * Sizes follow KidoBot's head: a sphere of radius 0.62 scaled (1.18, 1, 0.95).
  */
 
 function useMaterials() {

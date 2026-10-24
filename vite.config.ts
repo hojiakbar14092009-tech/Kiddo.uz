@@ -107,9 +107,25 @@ export default defineConfig(({ mode }) => {
             'audio/ui/*.mp3',
             '3d/**/*.webp',
             'pets/**/*.webp',
+            // the mascots' still pictures (≈ 0.1 MB): a mascot is never missing offline
+            'mascots/posters/*.webp',
           ],
           globIgnores: ['**/node_modules/**', ...VOICE_GLOB_IGNORES],
-          runtimeCaching: voiceRuntimeCaching(voicePrivate),
+          runtimeCaching: [
+            ...voiceRuntimeCaching(voicePrivate),
+            // 3D mascots (0.2–0.4 MB each) are cached when first met, not precached; a rebuilt
+            // model replaces the cached one on the next visit (the cached one plays meanwhile)
+            {
+              urlPattern: ({ url }: { url: URL }) =>
+                url.pathname.startsWith('/mascots/') && url.pathname.endsWith('.glb'),
+              handler: 'StaleWhileRevalidate' as const,
+              options: {
+                cacheName: 'kiddo-mascots',
+                expiration: { maxEntries: 20 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+          ],
           // The 3D robot chunk (three.js) is about 1 MB.
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           navigateFallback: '/index.html',

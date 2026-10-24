@@ -55,13 +55,7 @@ export function ProShowcase({ onChoose }: { onChoose: () => void }) {
           >
             <CrownIcon size={44} />
           </motion.span>
-          <MascotFigure
-            model={model}
-            mood="talk"
-            followPointer={false}
-            tint={false}
-            className="h-auto w-full"
-          />
+          <MascotFigure model={model} mood="talk" followPointer={false} className="h-auto w-full" />
         </motion.div>
 
         <div className="flex flex-1 flex-col gap-3 text-center sm:text-left">

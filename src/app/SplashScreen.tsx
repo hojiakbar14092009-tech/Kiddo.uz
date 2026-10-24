@@ -124,8 +124,9 @@ export function SplashScreen() {
                           opacity: 0,
                           scale: 2.4,
                           rotate: from * 200,
-                          translateX: `${Math.cos(angle) * 140}vw`,
-                          translateY: `${Math.sin(angle) * 90}vh`,
+                          // rounded: a tiny float like 8.6e-15 is not a valid CSS length
+                          translateX: `${Math.round(Math.cos(angle) * 1400) / 10}vw`,
+                          translateY: `${Math.round(Math.sin(angle) * 900) / 10}vh`,
                         }
                   }
                   animate={

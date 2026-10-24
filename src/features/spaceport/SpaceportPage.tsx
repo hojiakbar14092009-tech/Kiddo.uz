@@ -12,6 +12,8 @@ import { useUnlockNeeds, useWorldProgress } from '@/domain/universe/progression'
 import { QuestNeeds } from '@/features/city/QuestNeeds'
 import { costRows } from '@/features/city/cityModel'
 import { useState } from 'react'
+import { MascotFigure } from '@/features/mascot/MascotFigure'
+import { useMascotModel } from '@/store/familyStore'
 
 /**
  * The Spaceport: the rocket is built with what maths earned (a crystal and a
@@ -40,6 +42,7 @@ export function SpaceportPage() {
     }
   }
 
+  const model = useMascotModel()
   const rocket = (
     <span className="flex size-40 items-center justify-center rounded-card bg-sky-soft sm:size-48 short:size-28">
       <Img3D name="rocket" className="size-[80%]" eager />
@@ -51,7 +54,15 @@ export function SpaceportPage() {
       header={<TitleTopBar title={t('spaceport.title')} back="/home" />}
       className="items-center gap-5 px-4 py-6 text-center sm:py-8 short:gap-3 short:py-3"
     >
-      {justBuilt ? <RewardBurst pieces={10}>{rocket}</RewardBurst> : rocket}
+      <div className="flex items-end justify-center gap-2">
+        {justBuilt ? <RewardBurst pieces={10}>{rocket}</RewardBurst> : rocket}
+        {/* Pixel, the workshop's mechanic: it reacts to the build itself (building.upgraded) */}
+        <MascotFigure
+          model={model}
+          followPointer={false}
+          className="h-auto w-24 shrink-0 sm:w-32 short:w-20"
+        />
+      </div>
       <p className="font-display text-2xl font-extrabold" data-testid="rocket-level">
         {level > 0 ? t('spaceport.rocketLevel', { level }) : t('spaceport.notBuilt')}
       </p>

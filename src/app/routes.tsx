@@ -18,6 +18,9 @@ import { LoadingScreen } from './LoadingScreen'
 import { RequireLanguage } from './RequireLanguage'
 import { RouteErrorScreen } from './errors/RouteErrorScreen'
 
+/** Development and the e2e build only: the Mascot Lab route does not exist in production. */
+const MASCOT_LAB = import.meta.env.DEV || import.meta.env.MODE === 'e2e'
+
 /*
  * Everyday child screens are in the main bundle so they open instantly.
  * The shop, the big test and the parent area (with Supabase) load on demand.
@@ -234,6 +237,17 @@ export const routes: RouteObject[] = [
           Component: (await import('@/features/admin/AdminPage')).AdminPage,
         }),
       },
+      // Developers only (never in a production build): the 3D mascot inspection lab.
+      ...(MASCOT_LAB
+        ? [
+            {
+              path: '/dev/mascots',
+              lazy: async () => ({
+                Component: (await import('@/features/mascot/lab/MascotLab')).MascotLab,
+              }),
+            },
+          ]
+        : []),
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

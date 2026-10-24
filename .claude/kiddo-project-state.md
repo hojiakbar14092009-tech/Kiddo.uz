@@ -293,7 +293,7 @@ clue → picture → card removed → solution, `data-review` question from due 
   devices (this 2-core container counts as low-end; probes override hardwareConcurrency).
 - City: `BuildingTile` `LEVEL_LOOK` (same model grows + ground/ring/decor per level).
 - Not present in the app (asked for in QA): Scale Portal, Shadow Lab, Music, Mistake Garden
-  pages; no rigged per-world mascots (the 3D/SVG robot is the mascot).
+  pages (Phase 19 added rigged per-world 3D mascots, see below).
 
 ## Performance (Phase 12)
 
@@ -404,8 +404,31 @@ clue → picture → card removed → solution, `data-review` question from due 
   Mars step not split, no rocket build stages, no new celebration/sound, no offline e2e, no journey replay.
 - Test hygiene: UzbekistanPage first test waits for the lazy hub (was flaky under load).
 
+## 3D mascots (Phase 19) – docs/architecture/mascot-3d-system.md
+
+- Ten rigged GLB characters (KidoBot, Astro, Dinoo, Ziyo, Lumi, Leafy, Melo, Pixel, Scribble, Story), built from
+  code: `tools/mascots/*.py` (Blender 5.2 `bpy`, `npm run mascots:build`) → `npm run mascots:optimize`
+  (shared-pose channels, resample, sparse morphs, meshopt, Khronos validator errors+warnings fail, contract) →
+  `public/mascots/<id>.glb` (235–400 KB, 9–25 k tris) + `posters/<id>.webp`. No .blend files; `tools/mascots/out` ignored.
+- Rig families robot-biped (rigid) / human-biped (Ziyo, soft elbows/knees) / creature (chains) / prop; shared bone
+  names, all bones rest on world axes → one clip library (`clips.py`, 21 shared clips + own clips). In-place clips.
+- Runtime `features/mascot/characters/`: registry (contexts by `CONTEXT_ROUTES`), emotions (13 → 17 morphs, blink,
+  syllable mouth, no lip-sync), director (priorities, merge 350 ms, queue ≤ 3, tap gate), reactions (wrong → think/
+  encourage, never sad; Phase 18 events), bridge (subscribeDomainEvents while shown, playing child only), assets
+  (ref-counted cache, dispose after 20 s), controller (mixer crossfade 0.25 s, glance without accumulation, glow,
+  palette, sockets), Character3D (lazy; data-mascot/data-clip), prefetch (JourneyCard next route).
+- `MascotFigure` picks the page's mascot; KidoBot = child's robot (girl pink palette, shop outfits on sockets);
+  fallback = 2D robot (KidoBot) / poster. Old procedural robot (`mascot/three/*`) removed; red mistake tint removed.
+  Pixel added to Spaceport. Melo/Lumi only in the Lab (no Music room / Shadow Lab yet).
+- Tiers: weak → picture; ≤ 4 cores/GB → low (dpr 1, 20 fps, no reflections/idle gestures); reduced motion → still
+  base pose, no blink/glow/lips, calm reactions. PWA: posters precached, GLBs StaleWhileRevalidate.
+- Mascot Lab `/dev/mascots` (DEV/e2e only). e2e `mascots.spec.ts` uses swiftshader WebGL + hardwareConcurrency 8.
+- Splash: rounded vw/vh (console warnings fixed).
+- Critic: REJECT (High: glance accumulated on clips without a head key; ikat sash missing) → fixed (+ faces, details,
+  cache, docs, skeleton dispose, low tier) → ACCEPT.
+
 ## Next
 
-Phase 19 (advanced 3D mascots) per the owner's prompt; hook: `subscribeDomainEvents`. Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
+Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

@@ -537,7 +537,7 @@ export function RoamingMascot({
           wearing={wearing}
           mood={mood}
           followPointer={false}
-          tint={false}
+          lively
           className="h-auto w-full drop-shadow-[0_10px_8px_rgba(58,46,77,0.18)]"
         />
       </div>

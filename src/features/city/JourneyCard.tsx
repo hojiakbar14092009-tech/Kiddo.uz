@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon } from '@/components/icons'
 import { ResourceIcon } from '@/components/reward/ResourceIcon'
@@ -7,7 +8,9 @@ import { LinkButton } from '@/components/ui/LinkButton'
 import { ageBand } from '@/domain/adaptive'
 import { useMainQuest } from '@/domain/universe/progression'
 import { childAge, useActiveChild } from '@/store/familyStore'
+import { onIdle } from '@/lib/onIdle'
 import { tDynamic } from '@/lib/tDynamic'
+import { prefetchMascotFor } from '@/features/mascot/characters/prefetch'
 import { QuestNeeds } from './QuestNeeds'
 
 /**
@@ -24,6 +27,9 @@ export function JourneyCard() {
   const young = ageBand(child ? childAge(child) : null) === '4-6'
   const current = journey.steps.find((step) => step.status === 'current')
   const needs = main?.needs ?? []
+  const nextRoute = main?.route
+  // the next place's guide is fetched quietly once the page is idle
+  useEffect(() => (nextRoute ? onIdle(() => prefetchMascotFor(nextRoute)) : undefined), [nextRoute])
 
   return (
     <section

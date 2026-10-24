@@ -57,3 +57,17 @@ export function resetWebGLDetection(): void {
   cached = null
   cachedContext = null
 }
+
+/**
+ * Mascot render quality for a device that gets 3D at all: 'low' on modest
+ * phones (≤ 4 cores or ≤ 4 GB): pixel ratio 1, no reflections, a still
+ * contact shadow. The mascot stays; only its cost goes down.
+ */
+export function mascotQuality(hints: DeviceHints = navigatorHints()): 'high' | 'low' {
+  if ((hints.hardwareConcurrency ?? 8) <= 4) return 'low'
+  return hints.deviceMemory !== undefined && hints.deviceMemory <= 4 ? 'low' : 'high'
+}
+
+function navigatorHints(): DeviceHints {
+  return typeof navigator === 'undefined' ? {} : (navigator as Navigator & DeviceHints)
+}
