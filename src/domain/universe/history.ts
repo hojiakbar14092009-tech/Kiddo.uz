@@ -1,3 +1,4 @@
+import { isRegisteredSkill } from '@/domain/learning/skills'
 import type { Strand } from './types'
 
 /*
@@ -149,7 +150,11 @@ export function normalizeMistakes(
   return compactMistakes(valid, max, isOpen)
 }
 
-/** The learning-memory skill key of a journal entry (Math Lab entries are `math:` skills). */
+/**
+ * The learning-memory skill key of a journal entry: entries of the shared
+ * recorder carry a registered key; Math Lab's older entries are `math:` skills.
+ */
 export function memorySkillOf(record: Pick<MistakeRecord, 'skill' | 'strand'>): string | null {
+  if (isRegisteredSkill(record.skill)) return record.skill
   return record.strand === 'number' ? `math:${record.skill}` : null
 }

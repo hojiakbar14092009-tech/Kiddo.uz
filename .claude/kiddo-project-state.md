@@ -57,6 +57,7 @@ Phase 13: 302 SQL assertions, 978 unit, 118 e2e (`supabase/tests/run.sh`; local 
 Phase 14: 321 SQL assertions, ~1018 unit, 120 e2e (journey.spec: the whole first journey on phone + tablet).
 Phase 15: 323 SQL assertions, ~1030 unit, 122 e2e (adaptive.spec: a ten-year-old's profile, focus, Math Lab L5).
 Phase 16: 326 SQL assertions, 1061 unit, 128 e2e (garden.spec: seed → practice → grow, bloom, reload, child isolation, ru viewports).
+Phase 17: 326 SQL assertions, 1079 unit, 136 e2e (garden-domains.spec: letter game + dino quiz plants, mixed garden, isolation, reload, ru 320).
 
 ## UI foundation (Phase 1)
 
@@ -256,7 +257,8 @@ prod) · B7 promo policy.
 - [x] 14 Connected universe: domain events, progression engine + content data, first journey (maths → rocket → Mars seed → Practice Garden → science runs → bloom → Science Lab), 0011 world_rules (2026-10-24)
 - [x] 15 Adaptive learning: `domain/adaptive` service (age bands, evidence-weighted, latest-run share, hint reliance, focus + retrieval practice), Math Lab uses options/reviews/picture-first, parent Learning focus panel, profiles 4–18 (0012), `adaptation.updated` event (2026-10-24)
 - [x] 16 Mistake Garden: garden derived from learning memory (`domain/garden`), refined `gardenStage`, SVG plants (6 families × 4 stages, deterministic per skill), growth animation, plant card + practice → Math Lab `?practice=`, journal compaction (open needs kept, ≤ 200, v2 migration), 0013 resolved memory (2026-10-24)
-- [ ] 17–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
+- [x] 17 Multi-domain learning memory: `domain/learning` (skill registry, evidence contract, recordLearning), adapters for learn sections (words, tales, space, classic math), letter games + alphabet test, dino quiz; garden areas, domain markers, filter, practice routes + way back; parent names/routes (2026-10-24)
+- [ ] 18–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
 speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
@@ -368,8 +370,25 @@ clue → picture → card removed → solution, `data-review` question from due 
 - Critic: REJECT (2 High: bloom lost after a slip, next-step promise) → fixed → ACCEPT. Known: a relapse on a
   never-bloomed plant shows a seed; garden `now` read when memory changes; migration compaction without the memory.
 
+## Multi-domain learning (Phase 17) – docs/architecture/learning-evidence.md
+
+- `domain/learning`: `skills.ts` (registry: `<domain>:<skill>`, domain math|language|science, strand, practice
+  target; `practiceRoute` adds `from=garden`, Math Lab `?practice=`), `evidence.ts` (`LearningOutcome` →
+  `Evidence`, hashed items, `errorCode`, `HINT` 0–4, auto due-review not on items seen wrong), `record.ts`
+  (`recordLearning`: memory + journal). Names `learning.skills.<domain>-<skill>`, `learning.domains`.
+- Adapters (pure): `features/learn/learnEvidence.ts` (in `useLearnSession.close`), `features/tasks/taskEvidence.ts`
+  (ChoiceRounds; `data-answer`/`data-option` for e2e), `features/worlds/dino/quizEvidence.ts`.
+- Excluded: garden nature section, Help Kiddo, tracing/writing (motor precision, not knowledge), memory game,
+  feelings, studio, exploration; deferred: Story Engine questions, Uzbekistan quizzes, Science Lab experiment.
+- Garden: grouped by area, `DomainIcon` next to the stage chip, `GardenFilter` from 7 plants in ≥ 2 areas,
+  `gardenTrip` (bound to the practice route) + `BackToGarden` on result screens.
+- Critic: REJECT (High: invented `mirror-letter` diagnosis; Medium: classic maths altering Math Lab inputs,
+  unreachable within5 practice, review item, trip leak) → fixed → ACCEPT. Known: journal keeps two key shapes for
+  maths (handled by `memorySkillOf`); tabs lack arrow-key navigation (pre-existing); adaptive plan remains maths-only
+  (other areas use their sections' own review).
+
 ## Next
 
-Phase 17+: read the roadmap first (scope not yet specified). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
+Phase 18+: read the roadmap first (scope not yet specified). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

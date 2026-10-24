@@ -12,6 +12,7 @@ import { dayKey, ROUNDS_PER_TASK } from '@/features/tasks/rules'
 import type { ChildProgress } from '@/store/progressStore'
 import { weeklyCoins } from '../report'
 import { activityName, skillFamily, STRAND_ROUTES, type SkillFamily } from './activityNames'
+import { parentSkillNameKey, parentSkillRoute } from './skillLabel'
 
 /*
  * Pure selectors of the parent dashboard ("Insights"). Everything is built
@@ -294,7 +295,15 @@ function enoughData(row: StrandRow): boolean {
 // ------------------------------------------------------------ suggestions & strengths
 
 export type Suggestion =
-  | { kind: 'skill'; strand: Strand; skill: SkillFamily; count: number; route: string }
+  | {
+      kind: 'skill'
+      strand: Strand
+      skill: SkillFamily
+      /** i18n key of the skill's name (maths by family, other areas by the registry). */
+      nameKey: string
+      count: number
+      route: string
+    }
   | { kind: 'strand'; strand: Strand; route: string }
   | { kind: 'explore'; strand: Strand; route: string }
 
@@ -319,21 +328,34 @@ export function suggestions(
   const used = new Set<Strand>()
   const since = now.getTime() - MISTAKE_WINDOW_DAYS * 24 * 60 * 60 * 1000
 
-  const families = new Map<string, { strand: Strand; skill: SkillFamily; count: number }>()
+  const families = new Map<
+    string,
+    { strand: Strand; skill: SkillFamily; nameKey: string; route?: string; count: number }
+  >()
   for (const mistake of input.mistakes ?? []) {
     const time = new Date(mistake.at).getTime()
     if (Number.isNaN(time) || time < since) continue
-    const skill = skillFamily(mistake.skill)
-    const key = `${mistake.strand}|${skill}`
+    const skill = skillFamily(mistake.skill.replace(/^math:/, ''))
+    const nameKey = parentSkillNameKey(mistake.skill)
+    const key = `${mistake.strand}|${nameKey}`
     const entry = families.get(key)
     if (entry) entry.count += 1
-    else families.set(key, { strand: mistake.strand, skill, count: 1 })
+    else {
+      const route = parentSkillRoute(mistake.skill)
+      families.set(key, {
+        strand: mistake.strand,
+        skill,
+        nameKey,
+        count: 1,
+        ...(route ? { route } : {}),
+      })
+    }
   }
   const ranked = [...families.values()].sort((a, b) => b.count - a.count)
   for (const entry of ranked) {
     if (out.length >= limit || used.has(entry.strand)) continue
     used.add(entry.strand)
-    out.push({ kind: 'skill', ...entry, route: STRAND_ROUTES[entry.strand] })
+    out.push({ kind: 'skill', ...entry, route: entry.route ?? STRAND_ROUTES[entry.strand] })
   }
 
   const weak = input.rows

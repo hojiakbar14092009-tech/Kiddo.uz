@@ -10,6 +10,10 @@ import { isDinoId, type Diet } from './content'
 import { DINO_ROOT } from './explore'
 import { ChoiceName, DietPicture, DinoFrame, DinoPicture, StartCard } from './parts'
 import { planQuiz, type QuizQuestion } from './quiz'
+import { quizOutcome } from './quizEvidence'
+import { recordLearning } from '@/domain/learning'
+import { newId } from '@/lib/id'
+import { useChildKey } from '@/store/progressStore'
 import { hintOf, promptOf } from './quizText'
 import { DinoResult } from './run'
 import { NEXT_DELAY_MS, useDinoRecorder, useStepLabel, type DinoFinished } from './session'
@@ -78,6 +82,8 @@ export function QuizRun({
   const { say, reset } = useLearnMascot()
   const [questions] = useState(() => given ?? planQuiz(level))
   const record = useDinoRecorder('quiz', level)
+  const childKey = useChildKey()
+  const [sessionId] = useState(newId)
   const [index, setIndex] = useState(0)
   const [statuses, setStatuses] = useState<Record<string, ChoiceStatus>>({})
   const [misses, setMisses] = useState(0)
@@ -110,6 +116,14 @@ export function QuizRun({
   const answer = (value: string) => {
     if (solved) return
     if (value === q.answer) {
+      try {
+        recordLearning(
+          childKey,
+          quizOutcome(q, { sessionId, index, misses, level }, new Date().toISOString()),
+        )
+      } catch {
+        // the memory is best effort: the quiz never breaks
+      }
       const right = firstTry + (misses === 0 ? 1 : 0)
       setFirstTry(right)
       setStatuses((s) => ({ ...s, [value]: 'correct' }))

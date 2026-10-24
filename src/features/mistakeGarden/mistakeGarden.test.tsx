@@ -14,7 +14,7 @@ import type { Language } from '@/content/languages'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
 import { resetSeen } from './seenStages'
-import { NAMED_MATH_SKILLS, skillNameKey } from './skillName'
+import { isRegisteredSkill, SKILLS, skillNameKey } from '@/domain/learning'
 
 const T0 = Date.parse('2026-10-10T09:00:00.000Z')
 const at = (hours: number) => new Date(T0 + hours * 3_600_000).toISOString()
@@ -106,7 +106,7 @@ describe('Mistake Garden page', () => {
     )
     expect(within(sheet).getByTestId('plant-practise')).toHaveAttribute(
       'href',
-      '/math-lab?practice=add%3Awithin10',
+      '/math-lab?practice=add%3Awithin10&from=garden',
     )
     fireEvent.click(within(sheet).getByRole('button', { name: 'Yopish' }))
     fireEvent.click(screen.getAllByTestId('garden-plant')[1]!)
@@ -183,16 +183,16 @@ describe('skill names', () => {
         for (const q of planSession(level, rng)) skills.add(q.skill)
       }
     }
-    // every practised skill is named (the list may also name rarer ones)
-    for (const skill of skills) expect(NAMED_MATH_SKILLS as readonly string[]).toContain(skill)
+    // every practised skill is registered (so it has a name and a practice route)
+    for (const skill of skills) expect(isRegisteredSkill(`math:${skill}`), skill).toBe(true)
     for (const texts of [uz, ru, en]) {
-      const names = texts.practiceGarden.skills as Record<string, string>
-      for (const skill of NAMED_MATH_SKILLS) {
-        const key = skillNameKey(`math:${skill}`).replace('practiceGarden.skills.', '')
-        expect(names[key], `${skill}`).toBeTruthy()
+      const names = texts.learning.skills as Record<string, string>
+      for (const { key } of SKILLS) {
+        const nameKey = skillNameKey(key).replace('learning.skills.', '')
+        expect(names[nameKey], key).toBeTruthy()
       }
     }
-    expect(skillNameKey('math:unknown:thing')).toBe('practiceGarden.skills.fallback')
+    expect(skillNameKey('math:unknown:thing')).toBe('learning.skills.fallback')
   })
 })
 

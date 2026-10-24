@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { BackToGarden } from '@/features/mistakeGarden/BackToGarden'
 import { HomeIcon } from '@/components/icons'
 import { ActivityReward } from '@/components/reward/ActivityReward'
 import { Button } from '@/components/ui/Button'
@@ -77,6 +78,7 @@ export function DinoResult({
           <ActivityReward stars={award.stars} crystals={award.crystals} />
         </div>
         <div className="flex flex-wrap justify-center gap-3 short:col-span-2">
+          <BackToGarden />
           <Button variant="coin" size="md" onClick={onAgain} data-testid="dino-again">
             {text.result.again}
           </Button>

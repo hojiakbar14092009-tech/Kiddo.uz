@@ -31,6 +31,7 @@ import { markHelp, newSheet, recordAnswer, type SessionSheet } from '@/features/
 import { SpeakButton } from '@/features/learn/SpeakButton'
 import { SPEAK_PRIORITY, useSpeakable } from '@/features/learn/speakable'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
+import { BackToGarden } from '@/features/mistakeGarden/BackToGarden'
 import { useLearnVoice } from '@/features/learn/voice'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascotStore } from '@/features/mascot/mascotStore'
@@ -735,11 +736,7 @@ function LabResult({
           <ActivityReward stars={award.stars} crystals={award.crystals} />
         </div>
         <div className="flex flex-wrap justify-center gap-3 short:col-span-2">
-          {fromGarden && (
-            <LinkButton to="/mistake-garden" size="md" data-testid="lab-to-garden">
-              {t('practiceGarden.backToGarden')}
-            </LinkButton>
-          )}
+          {fromGarden && <BackToGarden testId="lab-to-garden" force />}
           <Button variant="coin" size="md" onClick={onAgain} data-testid="lab-again">
             {t('learn.again')}
           </Button>

@@ -5,9 +5,10 @@ import { Dialog } from '@/components/ui/Dialog'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { PLANT_STAGES, stageRank, type GardenPlant, type NextStep } from '@/domain/garden'
 import { tDynamic } from '@/lib/tDynamic'
+import { startGardenTrip } from './gardenTrip'
 import { STAGE_CHIP } from './gardenStyles'
 import { PlantArt } from './PlantArt'
-import { skillNameKey } from './skillName'
+import { skillNameKey } from '@/domain/learning'
 
 /** What makes the plant grow next, in words (no scores). */
 function NextText({ next }: { next: NextStep }) {
@@ -113,7 +114,12 @@ export function PlantSheet({ plant, onClose }: { plant: GardenPlant; onClose: ()
         <NextText next={plant.next} />
         <div className="flex w-full flex-wrap justify-center gap-3">
           {plant.practice && (
-            <LinkButton to={plant.practice} size="md" data-testid="plant-practise">
+            <LinkButton
+              to={plant.practice}
+              size="md"
+              data-testid="plant-practise"
+              onClick={() => startGardenTrip(plant.practice!)}
+            >
               {t('practiceGarden.practise')}
             </LinkButton>
           )}

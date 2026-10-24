@@ -1,4 +1,6 @@
 export {
+  FILTER_FROM_PLANTS,
+  gardenAreas,
   gardenPlants,
   gardenSummary,
   nextStep,
@@ -6,7 +8,6 @@ export {
   PLANT_HUES,
   PLANT_STAGES,
   plantLook,
-  practiceRoute,
   stableHash,
   stageRank,
   type GardenPlant,

@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { useInView } from '@/components/three/useInView'
 import { stableHash, type GardenPlant } from '@/domain/garden'
 import { tDynamic } from '@/lib/tDynamic'
+import { DomainIcon } from './DomainIcon'
 import { STAGE_CHIP } from './gardenStyles'
 import { PlantArt } from './PlantArt'
-import { skillNameKey } from './skillName'
+import { skillNameKey } from '@/domain/learning'
 
 /*
  * The garden as a place: sky, hills, a meadow and one patch of soil per
@@ -73,6 +74,7 @@ export function PlantPatch({ plant, grewFrom, onOpen }: PlantPatchProps) {
       aria-label={t('practiceGarden.plantLabel', { name, stage })}
       data-testid="garden-plant"
       data-skill={plant.skillKey}
+      data-domain={plant.domain ?? undefined}
       data-stage={plant.stage}
       data-grew={grewFrom !== undefined ? 'true' : undefined}
       className="group flex w-full min-w-0 flex-col items-center rounded-card p-1 transition-transform duration-200 ease-soft focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
@@ -89,10 +91,16 @@ export function PlantPatch({ plant, grewFrom, onOpen }: PlantPatchProps) {
         <span className="font-display text-base leading-tight font-bold break-words sm:text-lg">
           {name}
         </span>
-        <span
-          className={clsx('rounded-full px-2.5 py-0.5 text-sm font-bold', STAGE_CHIP[plant.stage])}
-        >
-          {stage}
+        <span className="flex items-center gap-1.5">
+          {plant.domain && <DomainIcon domain={plant.domain} />}
+          <span
+            className={clsx(
+              'rounded-full px-2.5 py-0.5 text-sm font-bold',
+              STAGE_CHIP[plant.stage],
+            )}
+          >
+            {stage}
+          </span>
         </span>
       </span>
     </button>

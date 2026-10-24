@@ -4,14 +4,23 @@ import { Screen } from '@/components/layout/Screen'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { GUEST_KEY } from '@/domain/childKey'
-import { useGarden, type GardenPlant, type GardenSummary } from '@/domain/garden'
+import {
+  FILTER_FROM_PLANTS,
+  gardenAreas,
+  useGarden,
+  type GardenPlant,
+  type GardenSummary,
+} from '@/domain/garden'
+import { tabPanelProps } from '@/components/ui/tabPanel'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useChildKey } from '@/store/progressStore'
+import { FILTER_ID, GardenFilter, type GardenArea } from './GardenFilter'
 import { GardenScene, PlantGrid, PlantPatch } from './GardenScene'
 import { MarsBed } from './MarsBed'
 import { useMarsActionPending } from './useMarsActionPending'
 import { GrowthPath, PlantSheet } from './PlantSheet'
+import { endGardenTrip } from './gardenTrip'
 import { anyGrew, grownSince, markSeen } from './seenStages'
 import './garden.css'
 
@@ -47,10 +56,19 @@ function Garden({ childKey }: { childKey: string }) {
   const { react } = useMascot()
   const line = mascotLine(summary, anyGrew(grown))
   const open = plants.find((plant) => plant.skillKey === openSkill) ?? null
+  // a big, mixed garden can show one area at a time (never for a few plants)
+  const areas = gardenAreas(plants)
+  const filterable = plants.length >= FILTER_FROM_PLANTS && areas.length >= 2
+  const [area, setArea] = useState<GardenArea>('all')
+  const shownArea = filterable && (area === 'all' || areas.includes(area)) ? area : 'all'
+  const shown = shownArea === 'all' ? plants : plants.filter((plant) => plant.domain === shownArea)
 
   useEffect(() => {
     markSeen(childKey, plants)
   }, [childKey, plants])
+
+  // back in the garden: the practice trip is over
+  useEffect(() => endGardenTrip(), [])
 
   useEffect(() => {
     react(
@@ -78,17 +96,22 @@ function Garden({ childKey }: { childKey: string }) {
         {plants.length === 0 ? (
           <EmptyGarden />
         ) : (
-          <PlantGrid>
-            {plants.map((plant) => (
-              <li key={plant.skillKey}>
-                <PlantPatch
-                  plant={plant}
-                  grewFrom={grown.get(plant.skillKey)}
-                  onOpen={(chosen: GardenPlant) => setOpenSkill(chosen.skillKey)}
-                />
-              </li>
-            ))}
-          </PlantGrid>
+          <div className="flex flex-col gap-4">
+            {filterable && <GardenFilter areas={areas} value={shownArea} onChange={setArea} />}
+            <div {...(filterable ? tabPanelProps(FILTER_ID, shownArea) : {})}>
+              <PlantGrid>
+                {shown.map((plant) => (
+                  <li key={plant.skillKey}>
+                    <PlantPatch
+                      plant={plant}
+                      grewFrom={grown.get(plant.skillKey)}
+                      onOpen={(chosen: GardenPlant) => setOpenSkill(chosen.skillKey)}
+                    />
+                  </li>
+                ))}
+              </PlantGrid>
+            </div>
+          </div>
         )}
       </GardenScene>
 

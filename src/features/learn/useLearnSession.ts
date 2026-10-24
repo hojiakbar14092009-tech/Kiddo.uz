@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
+import { recordLearning } from '@/domain/learning'
 import { useChildKey } from '@/store/progressStore'
+import { learnOutcome } from './learnEvidence'
 import { useLearnStore, type LearnLanguage, type SectionId } from './learnStore'
 import {
   markHelp,
@@ -33,7 +35,8 @@ function newId(): string {
 /**
  * Runs one learning or test session: keeps the answer sheet (first answers
  * are never overwritten), logs every question to the child's learning record
- * when it is done, and saves the session with its coins exactly once.
+ * and, as normalized evidence, to the shared learning memory when it is done
+ * (once per question), and saves the session with its coins exactly once.
  */
 export function useLearnSession({
   section,
@@ -86,8 +89,17 @@ export function useLearnSession({
       if (!record || logged.current.has(question.id)) return
       logged.current.add(question.id)
       recordAttempt(childKey, { ...record, section, language, mode })
+      // the same finished question, as evidence for the shared learning memory
+      const outcome = learnOutcome(section, id, record, new Date().toISOString())
+      if (outcome) {
+        try {
+          recordLearning(childKey, outcome)
+        } catch {
+          // the memory is best effort: the session itself never breaks
+        }
+      }
     },
-    [childKey, language, mode, recordAttempt, section],
+    [childKey, id, language, mode, recordAttempt, section],
   )
 
   const finish = useCallback(

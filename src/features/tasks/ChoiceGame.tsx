@@ -21,13 +21,17 @@ import {
 } from './taskSession'
 import { TaskShell } from './TaskShell'
 import { useFinishTask } from './useFinishTask'
+import { GLOW_AFTER_MISTAKES, roundOutcome } from './taskEvidence'
+import { recordLearning } from '@/domain/learning'
+import { newId } from '@/lib/id'
+import { useChildKey } from '@/store/progressStore'
 import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 
 /** Pause after a right answer, so the celebration can play before moving on. */
 const ADVANCE_DELAY_MS = 1700
 /** After this many wrong taps in a round, the right answer gently glows. */
-const HINT_AFTER_MISTAKES = 2
+const HINT_AFTER_MISTAKES = GLOW_AFTER_MISTAKES
 
 /** “Find the letter” and “Find the picture”: pick the right one out of 3–4 options. */
 export function ChoiceGame({ type }: { type: ChoiceGameType }) {
@@ -72,6 +76,30 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
   const { sayText, speaking } = useSpeaker()
   const [session, dispatch] = useReducer(taskSessionReducer, rounds, createSession)
   const round = currentRound(session)
+  const childKey = useChildKey()
+  const [sessionId] = useState(newId)
+
+  // a solved round is one piece of learning evidence (counted once per run and round)
+  useEffect(() => {
+    if (!session.solved || !round) return
+    try {
+      recordLearning(
+        childKey,
+        roundOutcome(
+          type,
+          {
+            sessionId,
+            index: session.index,
+            targetId: round.target.id,
+            wrongIds: session.wrongIds,
+          },
+          new Date().toISOString(),
+        ),
+      )
+    } catch {
+      // the memory is best effort: the game never breaks
+    }
+  }, [childKey, round, session.index, session.solved, session.wrongIds, sessionId, type])
 
   const prompt = useCallback(
     (letter: LetterEntry, spoken: boolean) => {
@@ -140,6 +168,8 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
       struggling={session.wrongIds.length > 0}
     >
       <div
+        data-testid="task-options"
+        data-answer={round.target.id}
         className={clsx(
           'mx-auto grid w-full flex-1 content-center gap-4 sm:gap-6',
           round.options.length === 2

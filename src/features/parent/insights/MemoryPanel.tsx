@@ -5,7 +5,7 @@ import { summaryAsOfNow, useChildMemory } from '@/domain/learningMemory'
 import { tDynamic } from '@/lib/tDynamic'
 import type { ChildProfile } from '@/store/familyStore'
 import { Panel } from '../dashboard/Panel'
-import { skillFamily } from './activityNames'
+import { parentSkillNameKey } from './skillLabel'
 
 /**
  * What Kiddo remembers about a child's learning (Phase 10): skills that need
@@ -16,8 +16,7 @@ export function MemoryPanel({ child }: { child: ChildProfile }) {
   const { t } = useTranslation()
   const memory = useChildMemory(child.id)
   const summary = useMemo(() => summaryAsOfNow(memory.skills), [memory.skills])
-  const name = (skill: string) =>
-    tDynamic(t, `parent.insights.skillNames.${skillFamily(skill.replace(/^math:/, ''))}`)
+  const name = (skill: string) => tDynamic(t, parentSkillNameKey(skill))
   // one line per skill name (add within 10 and within 20 are both "adding")
   const needs = dedupe(summary.needsPractice.map((item) => ({ ...item, label: name(item.skill) })))
   // a skill name still being practised is not also listed as improved

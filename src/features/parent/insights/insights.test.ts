@@ -372,7 +372,14 @@ describe('suggestions', () => {
       TODAY,
     )
     expect(list).toEqual([
-      { kind: 'skill', strand: 'number', skill: 'sub', count: 2, route: '/math-lab' },
+      {
+        kind: 'skill',
+        strand: 'number',
+        skill: 'sub',
+        nameKey: 'parent.insights.skillNames.sub',
+        count: 2,
+        route: '/math-lab',
+      },
       { kind: 'strand', strand: 'letters', route: '/alphabet' },
       { kind: 'strand', strand: 'reading', route: '/learn/words' },
     ])

@@ -5,6 +5,13 @@ import {
   type GardenStage,
   type SkillMemory,
 } from '@/domain/learningMemory/memory'
+import {
+  domainOf,
+  LEARNING_DOMAINS,
+  practiceRoute,
+  type LearningDomain,
+} from '@/domain/learning/skills'
+import { stableHash } from '@/lib/stableHash'
 
 /*
  * Mistake Garden (Phase 16, docs/architecture/mistake-garden.md). Pure and
@@ -38,21 +45,26 @@ export interface PlantLook {
   mirrored: boolean
 }
 
-/** FNV-1a (32 bit): a stable number for a text, the same on every device. */
-export function stableHash(text: string): number {
-  let hash = 0x811c9dc5
-  for (let i = 0; i < text.length; i += 1) {
-    hash ^= text.charCodeAt(i)
-    hash = Math.imul(hash, 0x01000193) >>> 0
-  }
-  return hash >>> 0
+export { stableHash }
+
+/**
+ * Families each domain grows: maths keeps all six (Phase 16 looks never
+ * change); language grows leafy, climbing and flowering plants, science
+ * natural botanical ones. The domain only shapes the character; it is one
+ * garden in one style.
+ */
+const DOMAIN_FAMILIES: Record<LearningDomain, readonly PlantFamily[]> = {
+  math: PLANT_FAMILIES,
+  language: ['leaf', 'vine', 'flower'],
+  science: ['tree', 'flower', 'leaf'],
 }
 
 /** The plant a skill always grows into (never random per render or session). */
 export function plantLook(skillKey: string): PlantLook {
   const hash = stableHash(skillKey)
+  const families = DOMAIN_FAMILIES[domainOf(skillKey) ?? 'math']
   return {
-    family: PLANT_FAMILIES[hash % PLANT_FAMILIES.length]!,
+    family: families[hash % families.length]!,
     hue: Math.floor(hash / PLANT_FAMILIES.length) % PLANT_HUES,
     mirrored: Math.floor(hash / (PLANT_FAMILIES.length * PLANT_HUES)) % 2 === 1,
   }
@@ -103,15 +115,11 @@ export function nextStep(memory: SkillMemory, stage: PlantStage, now: string): N
   }
 }
 
-/** Where the skill is practised (an existing activity), or null when none fits. */
-export function practiceRoute(skillKey: string): string | null {
-  const match = /^math:([a-z0-9-]{1,16}:[a-z0-9-]{1,24})$/.exec(skillKey)
-  return match ? `/math-lab?practice=${encodeURIComponent(match[1]!)}` : null
-}
-
 export interface GardenPlant {
   /** The learning-memory skill key, e.g. `math:add:within10` (never shown to the child). */
   skillKey: string
+  /** The learning area (registry); null for a skill the registry does not know. */
+  domain: LearningDomain | null
   stage: PlantStage
   look: PlantLook
   next: NextStep
@@ -136,6 +144,7 @@ export function gardenPlants(
       since: memory.firstAt,
       plant: {
         skillKey: memory.skill,
+        domain: domainOf(memory.skill),
         stage,
         look: plantLook(memory.skill),
         next: nextStep(memory, stage, now),
@@ -143,8 +152,14 @@ export function gardenPlants(
       },
     })
   }
+  // one patch per area (maths, language, science), the skill first practised first
+  const area = (plant: GardenPlant) =>
+    plant.domain ? LEARNING_DOMAINS.indexOf(plant.domain) : LEARNING_DOMAINS.length
   rows.sort(
-    (a, b) => a.since.localeCompare(b.since) || a.plant.skillKey.localeCompare(b.plant.skillKey),
+    (a, b) =>
+      area(a.plant) - area(b.plant) ||
+      a.since.localeCompare(b.since) ||
+      a.plant.skillKey.localeCompare(b.plant.skillKey),
   )
   return rows.map((row) => row.plant)
 }
@@ -181,4 +196,13 @@ export function gardenSummary(plants: readonly GardenPlant[]): GardenSummary {
     bloom,
     seed: plants.filter((plant) => plant.stage === 'seed').length,
   }
+}
+
+/** A filter is offered only when the garden is big and mixed (never for a few plants). */
+export const FILTER_FROM_PLANTS = 7
+
+/** The learning areas present in a garden, in the registry's order (no empty area). */
+export function gardenAreas(plants: readonly GardenPlant[]): LearningDomain[] {
+  const present = new Set(plants.map((plant) => plant.domain))
+  return LEARNING_DOMAINS.filter((domain) => present.has(domain))
 }

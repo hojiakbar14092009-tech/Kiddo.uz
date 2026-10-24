@@ -242,7 +242,7 @@ export function PlayedPanel({ child, insights }: { child: ChildProfile; insights
 function suggestionText(t: TFunction, item: Suggestion): string {
   if (item.kind === 'skill') {
     return t('parent.insights.practice.skill', {
-      skill: tDynamic(t, `parent.insights.skillNames.${item.skill}`),
+      skill: tDynamic(t, item.nameKey),
     })
   }
   return item.kind === 'strand'

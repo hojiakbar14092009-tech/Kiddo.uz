@@ -2,6 +2,7 @@ import { motion, useReducedMotion, type HTMLMotionProps } from 'framer-motion'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { BackToGarden } from '@/features/mistakeGarden/BackToGarden'
 import { ChevronRightIcon, CoinIcon, HomeIcon, StarIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
@@ -112,6 +113,7 @@ function RewardContent({ taskType, outcome }: RewardState) {
       <AwardLines award={award} />
 
       <div className="mt-2 flex flex-wrap justify-center gap-4">
+        <BackToGarden />
         <Button variant="soft" icon={<HomeIcon size={26} />} onClick={() => navigate('/home')}>
           {t('reward.home')}
         </Button>

@@ -3,7 +3,7 @@ import { useChildPlan } from '@/domain/adaptive'
 import { tDynamic } from '@/lib/tDynamic'
 import { childAge, type ChildProfile } from '@/store/familyStore'
 import { Panel } from '../dashboard/Panel'
-import { skillFamily } from './activityNames'
+import { parentSkillNameKey } from './skillLabel'
 
 /**
  * Learning focus (Phase 15): what the adaptive service plans for the child's
@@ -14,11 +14,7 @@ export function FocusPanel({ child }: { child: ChildProfile }) {
   const { t } = useTranslation()
   const plan = useChildPlan(child.id, childAge(child), 'number', 'math')
   const names = (skills: readonly string[]) => [
-    ...new Set(
-      skills.map((skill) =>
-        tDynamic(t, `parent.insights.skillNames.${skillFamily(skill.replace(/^math:/, ''))}`),
-      ),
-    ),
+    ...new Set(skills.map((skill) => tDynamic(t, parentSkillNameKey(skill)))),
   ]
   const groups = [
     { id: 'needs', items: names(plan.focus) },

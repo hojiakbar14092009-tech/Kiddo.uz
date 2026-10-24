@@ -82,3 +82,9 @@ Science Lab.
 - Each plant is a button (≥ 44 px) named "skill — stage", opening a dialog (focus trap, Escape);
   no hover-only actions. The growth path legend explains seed → sprout → plant → flower.
 - Guests see a temporary garden with a note that it lasts for this visit only.
+
+## Phase 17: more areas
+
+Language and science skills grow in the same garden from the shared evidence contract
+(`learning-evidence.md`). Names, practice routes and domains come from the skill registry
+(`domain/learning/skills.ts`); the garden has no per-area branching beyond the registry data.

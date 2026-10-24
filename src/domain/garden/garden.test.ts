@@ -11,9 +11,9 @@ import {
   nextStep,
   PLANT_FAMILIES,
   plantLook,
-  practiceRoute,
   stageRank,
 } from './garden'
+import { practiceRoute } from '@/domain/learning/skills'
 
 const T0 = '2026-10-01T09:00:00.000Z'
 const at = (hours: number) => new Date(new Date(T0).getTime() + hours * 3_600_000).toISOString()
@@ -146,7 +146,7 @@ describe('garden model', () => {
   })
 
   it('practice goes to the existing activity; a bloom needs none; unknown skills have none', () => {
-    expect(practiceRoute(ADD)).toBe('/math-lab?practice=add%3Awithin10')
+    expect(practiceRoute(ADD)).toBe('/math-lab?practice=add%3Awithin10&from=garden')
     expect(practiceRoute('feelings:faces')).toBeNull()
     expect(practiceRoute('math:<script>')).toBeNull()
     let memory = grow([right(ADD, 'a', 2), right(ADD, 'b', 3), right(ADD, 'c', 4)], seed())

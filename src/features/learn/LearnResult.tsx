@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { AwardLines } from '@/components/reward/AwardLines'
 import { useAward } from '@/components/reward/useAward'
 import { RewardBurst } from '@/components/ui/RewardBurst'
+import { BackToGarden } from '@/features/mistakeGarden/BackToGarden'
 import { Img3D } from './Img3D'
 import { useSpeakable } from './speakable'
 import type { FinishedSession } from './useLearnSession'
@@ -69,6 +70,7 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
       <AwardLines award={award} />
       <p className="text-sm text-ink-soft">{t('learn.result.note')}</p>
       <div className="flex flex-wrap justify-center gap-3">
+        <BackToGarden />
         <Button variant="coin" size="md" onClick={onAgain}>
           {t('learn.again')}
         </Button>

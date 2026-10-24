@@ -43,6 +43,7 @@ export function OptionCard({ option, target, taskType, status, onChoose }: Optio
       type="button"
       aria-label={label}
       aria-disabled={status === 'wrong'}
+      data-option={option.id}
       onClick={() => onChoose(option)}
       animate={reduceMotion ? undefined : STATUS_MOTION[status]}
       className={clsx(
