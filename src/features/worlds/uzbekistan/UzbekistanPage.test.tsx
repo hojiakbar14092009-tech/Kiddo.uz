@@ -32,7 +32,8 @@ function askedCity(): CityId {
 describe('My Uzbekistan', () => {
   it('shows free games and landmarks as links and PRO ones as locked, with a calm note', async () => {
     const { user, router } = await renderRoute('/worlds/uzbekistan')
-    expect(screen.getByRole('heading', { name: 'My Uzbekistan' })).toBeInTheDocument()
+    // the hub's own lazy part may still be loading on a busy machine
+    expect(await screen.findByRole('heading', { name: 'My Uzbekistan' })).toBeInTheDocument()
     expect(screen.getByTestId('uz-game-map')).toHaveAttribute('href', '/worlds/uzbekistan/map')
     expect(screen.getByTestId('uz-game-table')).toHaveAttribute('href', '/worlds/uzbekistan/table')
     expect(screen.getByTestId('uz-explore-registan')).toHaveAttribute(

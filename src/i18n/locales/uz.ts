@@ -1157,6 +1157,21 @@ export const uz = {
     },
     status: { done: 'bajarildi', current: 'hozirgi qadam', later: 'keyinroq' },
   },
+  quests: {
+    alsoTitle: 'Yana qilsa bo‘ladi',
+    go: 'Boshlash',
+    practice: {
+      title: 'O‘simligingga yordam ber: {{skill}}',
+    },
+    needs: {
+      star: 'Yana {{count}} ta yulduz kerak',
+      crystal: 'Yana {{count}} ta kristall kerak',
+      seed: 'Yana {{count}} ta urug‘ kerak',
+      part: 'Yana {{count}} ta detal kerak',
+      scroll: 'Yana {{count}} ta o‘ram kerak',
+      key: 'Yana {{count}} ta kalit kerak',
+    },
+  },
   spaceport: {
     title: 'Kosmodrom',
     rocketLevel: 'Raketa: {{level}}-daraja',
@@ -1275,6 +1290,7 @@ export const uz = {
   scienceLab: {
     title: 'Fan laboratoriyasi',
     locked: 'Laboratoriya Mars guli ochilganda ochiladi.',
+    flower: 'Mars guli: {{stage}} / {{total}}',
     toGarden: 'Mashq bog‘iga',
     intro: 'Tajriba: o‘simlik o‘sishi uchun nima kerak?',
     start: 'Tajribani boshlash',

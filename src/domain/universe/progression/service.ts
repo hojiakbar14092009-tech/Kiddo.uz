@@ -22,7 +22,7 @@ import {
   type WorldProgress,
   type WorldSnapshot,
 } from './engine'
-import type { DomainEvent } from './events'
+import type { DomainEvent, DomainEventType } from './events'
 import { memoryEvents } from './memoryEvents'
 
 /*
@@ -51,6 +51,41 @@ export function snapshotOf(childKey: string): WorldSnapshot {
     recent: child.recent ?? [],
     balances: { ...EMPTY_BALANCES, ...child.balances },
   }
+}
+
+/** Every domain event type (a new type in events.ts must be added here: the compiler checks). */
+const DOMAIN_TYPE_LIST = {
+  'activity.completed': true,
+  'resource.changed': true,
+  'achievement.reached': true,
+  'quest.claimed': true,
+  'building.upgraded': true,
+  'mistake.made': true,
+  'mistake.confirmed': true,
+  'mistake.resolved': true,
+  'skill.mastered': true,
+  'adaptation.updated': true,
+  'world.unlocked': true,
+  'artifact.discovered': true,
+  'seed.planted': true,
+  'plant.grew': true,
+  'journey.step': true,
+  'quest.completed': true,
+} satisfies Record<DomainEventType, true>
+const DOMAIN_TYPES: ReadonlySet<string> = new Set(Object.keys(DOMAIN_TYPE_LIST))
+
+/**
+ * Typed listening to the universe (Phase 18): every domain event, typed, for
+ * features that react to the world without owning it. Its first users come
+ * with Phase 19 (mascots reacting to quest and world events) and sound. Listeners never change progression; they
+ * only react. Returns an unsubscribe.
+ */
+export function subscribeDomainEvents(listener: (event: DomainEvent) => void): () => void {
+  return subscribeUniverse((event) => {
+    if (typeof event.type === 'string' && DOMAIN_TYPES.has(event.type)) {
+      listener(event as unknown as DomainEvent)
+    }
+  })
 }
 
 /** Publishes a typed domain event on the universe bus. */

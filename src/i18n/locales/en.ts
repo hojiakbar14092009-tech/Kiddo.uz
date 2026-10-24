@@ -1156,6 +1156,21 @@ export const en: Translation = {
     },
     status: { done: 'done', current: 'current step', later: 'later' },
   },
+  quests: {
+    alsoTitle: 'You can also',
+    go: 'Start',
+    practice: {
+      title: 'Help your plant grow: {{skill}}',
+    },
+    needs: {
+      star: 'Stars still needed: {{count}}',
+      crystal: 'Crystals still needed: {{count}}',
+      seed: 'Seeds still needed: {{count}}',
+      part: 'Parts still needed: {{count}}',
+      scroll: 'Scrolls still needed: {{count}}',
+      key: 'Keys still needed: {{count}}',
+    },
+  },
   spaceport: {
     title: 'Spaceport',
     rocketLevel: 'Rocket: level {{level}}',
@@ -1273,6 +1288,7 @@ export const en: Translation = {
   scienceLab: {
     title: 'Science Lab',
     locked: 'The lab opens when the Mars flower blooms.',
+    flower: 'The Mars flower: {{stage}} / {{total}}',
     toGarden: 'To the Practice Garden',
     intro: 'Experiment: what does a plant need to grow?',
     start: 'Start the experiment',

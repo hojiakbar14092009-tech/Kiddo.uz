@@ -34,6 +34,28 @@ export {
   progressOf,
   PROGRESSION_REASONS,
   publish,
+  subscribeDomainEvents,
   syncProgression,
 } from './service'
-export { useJourney, useWorldProgress, type WorldProgressView } from './hooks'
+export {
+  useJourney,
+  useMainQuest,
+  useSmartQuests,
+  useUnlockNeeds,
+  useWorldProgress,
+  useWorldState,
+  type WorldProgressView,
+} from './hooks'
+export {
+  conditionNeeds,
+  MAX_OPTIONAL,
+  mainQuest,
+  practiceQuests,
+  smartQuests,
+  worldState,
+  type Need,
+  type Quest,
+  type QuestKind,
+  type SmartQuests,
+  type WorldState,
+} from './quests'

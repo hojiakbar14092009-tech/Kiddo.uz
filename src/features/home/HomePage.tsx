@@ -24,9 +24,9 @@ import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
 import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
-import { LearnReviewCard } from '@/features/learn/LearnHome'
 import { DailyQuestCard } from '@/features/city/DailyQuestCard'
 import { JourneyCard } from '@/features/city/JourneyCard'
+import { QuestExtras } from './QuestExtras'
 import { KiddoCity } from '@/features/city/KiddoCity'
 
 export function HomePage() {
@@ -117,13 +117,14 @@ export function HomePage() {
         </ul>
       )}
 
+      {/* the next adventure first: one main quest, then today's plan, then at most two extras */}
+      <JourneyCard />
+
       <JourneyPath plan={plan} />
 
       <DailyQuestCard />
 
-      <LearnReviewCard />
-
-      <JourneyCard />
+      <QuestExtras />
 
       <KiddoCity />
 

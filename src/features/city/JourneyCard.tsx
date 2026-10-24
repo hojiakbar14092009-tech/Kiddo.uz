@@ -4,8 +4,11 @@ import { CheckIcon } from '@/components/icons'
 import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
-import { useJourney } from '@/domain/universe/progression'
+import { ageBand } from '@/domain/adaptive'
+import { useMainQuest } from '@/domain/universe/progression'
+import { childAge, useActiveChild } from '@/store/familyStore'
 import { tDynamic } from '@/lib/tDynamic'
+import { QuestNeeds } from './QuestNeeds'
 
 /**
  * The big journey across the worlds on the home screen: every step with its
@@ -15,8 +18,12 @@ import { tDynamic } from '@/lib/tDynamic'
  */
 export function JourneyCard() {
   const { t } = useTranslation()
-  const journey = useJourney()
+  const { view: journey, main } = useMainQuest()
+  const child = useActiveChild()
+  // the youngest see the short title (and what is missing); from 7 on also how
+  const young = ageBand(child ? childAge(child) : null) === '4-6'
   const current = journey.steps.find((step) => step.status === 'current')
+  const needs = main?.needs ?? []
 
   return (
     <section
@@ -83,9 +90,12 @@ export function JourneyCard() {
             <span className="font-display text-xl font-bold">
               {tDynamic(t, `voyage.steps.${current.id}.title`)}
             </span>
-            <span className="text-base text-ink-soft">
-              {tDynamic(t, `voyage.steps.${current.id}.text`)}
-            </span>
+            {!young && (
+              <span className="text-base text-ink-soft">
+                {tDynamic(t, `voyage.steps.${current.id}.text`)}
+              </span>
+            )}
+            <QuestNeeds needs={needs} className="mt-1" />
           </div>
           <LinkButton to={current.route} size="md" data-testid="journey-go" className="shrink-0">
             {t('voyage.go')}

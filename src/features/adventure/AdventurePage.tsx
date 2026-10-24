@@ -1,3 +1,4 @@
+import { JourneyCard } from '@/features/city/JourneyCard'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
@@ -53,6 +54,9 @@ export function AdventurePage() {
       header={<TitleTopBar title={t('adventure.title')} back="/home" />}
       className="items-center gap-5 px-4 py-6 sm:gap-6 sm:py-8 short:gap-3 short:py-3"
     >
+      {/* the big journey's chain of places, above the map of worlds */}
+      <JourneyCard />
+
       <div className="flex w-full max-w-5xl flex-col items-center gap-2 text-center">
         <p className="flex min-h-11 items-center gap-2 rounded-full bg-coin-soft px-4 py-1.5 font-display text-xl font-extrabold">
           <ResourceIcon resource="star" size={30} />

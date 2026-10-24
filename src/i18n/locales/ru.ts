@@ -1155,6 +1155,21 @@ export const ru: Translation = {
     },
     status: { done: 'сделано', current: 'текущий шаг', later: 'позже' },
   },
+  quests: {
+    alsoTitle: 'Ещё можно',
+    go: 'Начать',
+    practice: {
+      title: 'Помоги растению вырасти: {{skill}}',
+    },
+    needs: {
+      star: 'Нужно ещё звёзд: {{count}}',
+      crystal: 'Нужно ещё кристаллов: {{count}}',
+      seed: 'Нужно ещё семян: {{count}}',
+      part: 'Нужно ещё деталей: {{count}}',
+      scroll: 'Нужно ещё свитков: {{count}}',
+      key: 'Нужно ещё ключей: {{count}}',
+    },
+  },
   spaceport: {
     title: 'Космодром',
     rocketLevel: 'Ракета: уровень {{level}}',
@@ -1273,6 +1288,7 @@ export const ru: Translation = {
   scienceLab: {
     title: 'Научная лаборатория',
     locked: 'Лаборатория откроется, когда расцветёт марсианский цветок.',
+    flower: 'Марсианский цветок: {{stage}} / {{total}}',
     toGarden: 'В Сад практики',
     intro: 'Опыт: что нужно растению, чтобы расти?',
     start: 'Начать опыт',

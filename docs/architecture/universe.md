@@ -145,3 +145,8 @@ lesson; learning buildings stay open from the start. Mistakes become sprouts
 Offline: everything works without a network; sync sends the ledger entries in
 order (a spend after the grants it needs). Analytics: none beyond the
 existing local logs; no event leaves the device except the ledger rows above.
+
+## 9. Quests (Phase 18)
+
+The main journey, optional practice quests, world-state names, needs and static validation:
+`quests.md`.

@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { QuestNeeds } from '@/features/city/QuestNeeds'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Screen } from '@/components/layout/Screen'
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { RewardBurst } from '@/components/ui/RewardBurst'
-import { useWorldProgress } from '@/domain/universe/progression'
+import { useUnlockNeeds, useWorldProgress } from '@/domain/universe/progression'
 
 const ROCKS = 3
 
@@ -19,6 +20,8 @@ const ROCKS = 3
 export function MarsPage() {
   const { t } = useTranslation()
   const { isUnlocked, isDiscovered, discover } = useWorldProgress()
+  // a closed Mars says what the rocket still needs, not just "locked"
+  const rocket = useUnlockNeeds('mars')
   const [turned, setTurned] = useState<number[]>([])
   const found = isDiscovered('mars-seed')
   const seedUnder = turned.length === ROCKS ? turned[ROCKS - 1] : null
@@ -33,6 +36,7 @@ export function MarsPage() {
         <p className="max-w-md text-lg text-ink-soft" data-testid="mars-locked">
           {t('mars.locked')}
         </p>
+        <QuestNeeds needs={rocket} className="justify-center" />
         <LinkButton to="/spaceport">{t('mars.toSpaceport')}</LinkButton>
       </Screen>
     )

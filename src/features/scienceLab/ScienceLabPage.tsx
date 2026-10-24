@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { ProgressBar } from '@/components/ui/Progress'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Screen } from '@/components/layout/Screen'
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { emitActivity, type AwardSummary } from '@/domain/universe'
-import { useWorldProgress } from '@/domain/universe/progression'
+import { PLANT_STAGES, useWorldProgress } from '@/domain/universe/progression'
 import { newId } from '@/lib/id'
 import { tDynamic } from '@/lib/tDynamic'
 import { useChildKey } from '@/store/progressStore'
@@ -26,7 +27,8 @@ type Phase =
 export function ScienceLabPage() {
   const { t } = useTranslation()
   const childKey = useChildKey()
-  const { isUnlocked } = useWorldProgress()
+  const { isUnlocked, stageOf } = useWorldProgress()
+  const flower = stageOf('mars')
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
   const [runId, setRunId] = useState(newId)
   const [missed, setMissed] = useState<string[]>([])
@@ -51,6 +53,20 @@ export function ScienceLabPage() {
         <p className="max-w-md text-lg text-ink-soft" data-testid="lab-locked">
           {t('scienceLab.locked')}
         </p>
+        {/* how far the flower is: progress, not a dead lock */}
+        {flower >= 0 && (
+          <ProgressBar
+            value={flower}
+            max={PLANT_STAGES}
+            label={t('scienceLab.flower', { stage: flower, total: PLANT_STAGES })}
+            className="w-full max-w-xs"
+          />
+        )}
+        {flower >= 0 && (
+          <p aria-hidden="true" className="font-display text-lg font-bold" data-testid="lab-flower">
+            {t('scienceLab.flower', { stage: flower, total: PLANT_STAGES })}
+          </p>
+        )}
         <LinkButton to="/mistake-garden">{t('scienceLab.toGarden')}</LinkButton>
       </Screen>
     )

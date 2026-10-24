@@ -8,7 +8,8 @@ import { LinkButton } from '@/components/ui/LinkButton'
 import { RewardBurst } from '@/components/ui/RewardBurst'
 import { toast } from '@/components/ui/toast'
 import { useResources, useWorld } from '@/domain/universe'
-import { useWorldProgress } from '@/domain/universe/progression'
+import { useUnlockNeeds, useWorldProgress } from '@/domain/universe/progression'
+import { QuestNeeds } from '@/features/city/QuestNeeds'
 import { costRows } from '@/features/city/cityModel'
 import { useState } from 'react'
 
@@ -29,6 +30,8 @@ export function SpaceportPage() {
   const marsOpen = isUnlocked('mars')
   const rows = port && level === 0 ? costRows(port, balances) : []
   const ready = rows.length > 0 && rows.every((row) => row.missing === 0)
+  // what is still missing, said plainly (the unlock rules and the server's price list)
+  const needs = useUnlockNeeds('mars')
 
   const build = () => {
     if (upgrade('spaceport') === 'ok') {
@@ -73,6 +76,7 @@ export function SpaceportPage() {
             </Button>
           ) : (
             <>
+              <QuestNeeds needs={needs} className="justify-center" />
               <p className="text-base font-semibold text-ink-soft">{t('spaceport.howToEarn')}</p>
               <LinkButton to="/math-lab" variant="soft" size="md">
                 {t('spaceport.toMathLab')}

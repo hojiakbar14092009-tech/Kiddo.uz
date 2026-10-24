@@ -58,6 +58,7 @@ Phase 14: 321 SQL assertions, ~1018 unit, 120 e2e (journey.spec: the whole first
 Phase 15: 323 SQL assertions, ~1030 unit, 122 e2e (adaptive.spec: a ten-year-old's profile, focus, Math Lab L5).
 Phase 16: 326 SQL assertions, 1061 unit, 128 e2e (garden.spec: seed → practice → grow, bloom, reload, child isolation, ru viewports).
 Phase 17: 326 SQL assertions, 1079 unit, 136 e2e (garden-domains.spec: letter game + dino quiz plants, mixed garden, isolation, reload, ru 320).
+Phase 18: 326 SQL assertions, 1095 unit, 142 e2e (quests.spec: next adventure, needs instead of locks, double tap builds once, reload, profiles, adventure map, ru 320).
 
 ## UI foundation (Phase 1)
 
@@ -258,7 +259,8 @@ prod) · B7 promo policy.
 - [x] 15 Adaptive learning: `domain/adaptive` service (age bands, evidence-weighted, latest-run share, hint reliance, focus + retrieval practice), Math Lab uses options/reviews/picture-first, parent Learning focus panel, profiles 4–18 (0012), `adaptation.updated` event (2026-10-24)
 - [x] 16 Mistake Garden: garden derived from learning memory (`domain/garden`), refined `gardenStage`, SVG plants (6 families × 4 stages, deterministic per skill), growth animation, plant card + practice → Math Lab `?practice=`, journal compaction (open needs kept, ≤ 200, v2 migration), 0013 resolved memory (2026-10-24)
 - [x] 17 Multi-domain learning memory: `domain/learning` (skill registry, evidence contract, recordLearning), adapters for learn sections (words, tales, space, classic math), letter games + alphabet test, dino quiz; garden areas, domain markers, filter, practice routes + way back; parent names/routes (2026-10-24)
-- [ ] 18–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
+- [x] 18 Smart Quest: `progression/quests.ts` (main quest = journey step, ≤ 2 optional practice quests, needs, world state), `validate.ts` (refs, stages, cycles), typed `subscribeDomainEvents`; Home order + QuestExtras, journey on the Adventure Map, needs on Spaceport/Mars, flower progress on a closed Science Lab (2026-10-24)
+- [ ] 19–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
 speaker-button fix (reads current question, uz/ru/en, no overlap, Pro-gated).
@@ -387,8 +389,23 @@ clue → picture → card removed → solution, `data-review` question from due 
   maths (handled by `memorySkillOf`); tabs lack arrow-key navigation (pre-existing); adaptive plan remains maths-only
   (other areas use their sections' own review).
 
+## Smart Quest (Phase 18) – docs/architecture/quests.md
+
+- No new engine/store/migration: quests are derived from the Phase 14 progression engine.
+  `quests.ts`: `smartQuests` (main = current journey step; optional = garden practice, youngest stage first,
+  one per area, skips `check-later`, text from the plant's own next step), `conditionNeeds` / `useUnlockNeeds`
+  (what a building still costs, server price list), `worldState` (named lasting facts). Hooks `useMainQuest`
+  (no garden subscription), `useSmartQuests`, `useWorldState`, `useUnlockNeeds`.
+- `validate.ts`: unknown refs, impossible stages/levels, invalid rewards, cycles (journey steps are graph nodes).
+- `subscribeDomainEvents` (typed, `satisfies Record<DomainEventType, true>`): the Phase 19 mascot/sound hook.
+- Home: homework → JourneyCard (main) → today's plan → daily quest → QuestExtras (review + practice ≤ 2).
+  4–6 band sees step title + needs only. Adventure Map shows the JourneyCard.
+- Critic: REJECT (High: Home card wall/main quest 5th; undisclosed gaps) → fixed → ACCEPT. Gaps (documented):
+  Mars step not split, no rocket build stages, no new celebration/sound, no offline e2e, no journey replay.
+- Test hygiene: UzbekistanPage first test waits for the lazy hub (was flaky under load).
+
 ## Next
 
-Phase 18+: read the roadmap first (scope not yet specified). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
+Phase 19 (advanced 3D mascots) per the owner's prompt; hook: `subscribeDomainEvents`. Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.
