@@ -1,6 +1,6 @@
 import type { ChildProfile } from '@/store/familyStore'
 import { GUEST_KEY, type ChildProgress } from '@/store/progressStore'
-import { childRow, childStateRow, resultRow } from './rows'
+import { childRow, childStateRow, openingRow, resultRow } from './rows'
 import type { SyncOperation } from './syncQueue'
 
 /** What changed in the child profiles since the last look, as sync operations. */
@@ -40,13 +40,22 @@ export function progressChanges(
   return operations
 }
 
-/** Everything a family has on this device, for the first sync of a cloud account. */
+/**
+ * Everything a family has on this device, for the first sync of a cloud
+ * account: the profiles, then each child's coins and items as its opening
+ * (the server's balance is its ledger, which starts here), then the rest.
+ */
 export function snapshot(
   children: readonly ChildProfile[],
   byChild: Readonly<Record<string, ChildProgress>>,
 ): SyncOperation[] {
+  const openings: SyncOperation[] = children.flatMap((child) => {
+    const progress = byChild[child.id]
+    return progress ? [{ kind: 'openBalance' as const, row: openingRow(child.id, progress) }] : []
+  })
   return [
     ...childChanges([], children),
+    ...openings,
     ...progressChanges({}, byChild, new Set(children.map((child) => child.id))),
   ]
 }

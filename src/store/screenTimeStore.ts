@@ -6,6 +6,8 @@ interface ScreenTimeState {
   /** Extra minutes a parent allowed after the limit, per child and day: `${childKey}|${day}`. */
   extraMinutes: Record<string, number>
   grantExtra: (childKey: string, day: string, minutes: number) => void
+  /** A child was removed: its extra minutes go too. */
+  forgetChild: (childKey: string) => void
 }
 
 const KEEP_DAYS = 14
@@ -27,6 +29,14 @@ export const useScreenTimeStore = create<ScreenTimeState>()(
           extraMinutes[key(childKey, day)] = (extraMinutes[key(childKey, day)] ?? 0) + minutes
           return { extraMinutes }
         }),
+      forgetChild: (childKey) =>
+        set((state) => ({
+          extraMinutes: Object.fromEntries(
+            Object.entries(state.extraMinutes).filter(
+              ([entryKey]) => entryKey.split('|')[0] !== childKey,
+            ),
+          ),
+        })),
     }),
     { name: 'kiddo.screen-time', version: 1 },
   ),

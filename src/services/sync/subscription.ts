@@ -15,6 +15,12 @@ export interface ServerSubscription {
 export const SUBSCRIPTION_REFRESH_MS = 6 * 60 * 60 * 1000
 /** Offline grace: without one successful server read for this long, cloud PRO lapses. */
 export const VERIFY_GRACE_MS = 7 * 24 * 60 * 60 * 1000
+/**
+ * How far the device clock may be off before the grace no longer trusts it:
+ * a "last confirmed" time in the future, or a clock wound back past a time
+ * this device already saw, ends the grace (the next server read decides).
+ */
+export const CLOCK_SLACK_MS = 60 * 60 * 1000
 
 interface VerifyState {
   /** The cloud account these times belong to. */
@@ -23,6 +29,8 @@ interface VerifyState {
   verifiedAt: number | null
   /** When this account was first seen on this device (ms): the grace counts from here until a read succeeds. */
   since: number | null
+  /** The latest device time the grace has seen (ms): a clock set back cannot stretch it. */
+  lastSeen?: number | null
 }
 
 /** When the server last confirmed this device's PRO (kiddo.cloudPro). */
@@ -57,9 +65,14 @@ function clearLocalPro() {
  * Returns true when PRO was taken away now.
  */
 export function enforceVerifyGrace(userId: string, now: number = Date.now()): boolean {
-  const { verifiedAt, since } = forUser(userId, now)
+  const { verifiedAt, since, lastSeen } = forUser(userId, now)
   const last = verifiedAt ?? since ?? now
-  if (now - last <= VERIFY_GRACE_MS) return false
+  // These times live in the browser's storage: one from the future or a clock
+  // set back means they can no longer be trusted, so the grace is over.
+  const clockSane =
+    last <= now + CLOCK_SLACK_MS && (lastSeen == null || now >= lastSeen - CLOCK_SLACK_MS)
+  useProVerifyStore.setState({ lastSeen: Math.max(lastSeen ?? now, now) })
+  if (clockSane && now - last <= VERIFY_GRACE_MS) return false
   const before = useSubscriptionStore.getState().plan
   clearLocalPro()
   return before !== null && useSubscriptionStore.getState().plan === null
@@ -68,7 +81,7 @@ export function enforceVerifyGrace(userId: string, now: number = Date.now()): bo
 /** On cloud sign-out or when the Supabase session ends: PRO belonged to that account. */
 export function forgetCloudPro(): void {
   clearLocalPro()
-  useProVerifyStore.setState({ userId: null, verifiedAt: null, since: null })
+  useProVerifyStore.setState({ userId: null, verifiedAt: null, since: null, lastSeen: null })
 }
 
 const PLANS: readonly string[] = ['monthly', 'yearly', 'lifetime'] satisfies PlanId[]
@@ -127,6 +140,7 @@ export async function pullSubscription(
     return false
   }
   applyServerSubscription((data as ServerSubscription | null) ?? null)
-  useProVerifyStore.setState({ userId, verifiedAt: now() })
+  const at = now()
+  useProVerifyStore.setState({ userId, verifiedAt: at, lastSeen: at })
   return true
 }

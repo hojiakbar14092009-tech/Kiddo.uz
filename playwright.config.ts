@@ -29,7 +29,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
+    // `--mode e2e`: a production build with the device admin the tests drive (never deployed)
+    command: `npx tsc -b && npx vite build --mode e2e && npx vite preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
     env: { VITE_ADMIN_PIN: E2E_ADMIN_PIN },
     reuseExistingServer: !process.env.CI,

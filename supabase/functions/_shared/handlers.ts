@@ -28,8 +28,17 @@ export const SIGNED_URL_SECONDS = 300
 /** Defaults when the secrets are unset: 30 generated sentences per user per hour, 2000 a day in all. */
 export const DEFAULT_TTS_RATE_LIMIT = 30
 export const DEFAULT_TTS_DAILY_CAP = 2000
+/**
+ * Per account and 24 hours (0010): TTS requests, texts really synthesised,
+ * and voice-link requests (each up to 20 clips; a child's day of play needs a
+ * few dozen, the whole library several hundred).
+ */
+export const DEFAULT_TTS_USER_DAILY = 200
+export const DEFAULT_SYNTH_USER_DAILY = 100
+export const DEFAULT_VOICE_USER_DAILY = 300
 
-export type AudioKind = 'voice' | 'tts' | 'auth'
+/** `synth`: one text the TTS provider really spoke (cache hits are not counted). */
+export type AudioKind = 'voice' | 'tts' | 'auth' | 'synth'
 
 export interface CachedTts {
   path: string
@@ -42,8 +51,17 @@ export interface AudioDeps {
   userIdFromToken(token: string): Promise<string | null>
   /** public.is_pro_active (service role). */
   isPro(userId: string): Promise<boolean>
-  /** public.audio_rate_ok (service role): true = allowed and counted. */
-  rateOk(userId: string, kind: AudioKind, limit: number, windowSeconds: number): Promise<boolean>
+  /**
+   * public.audio_rate_ok (service role): true = allowed and counted. With
+   * `dailyLimit`, the last 24 hours are checked in the same call.
+   */
+  rateOk(
+    userId: string,
+    kind: AudioKind,
+    limit: number,
+    windowSeconds: number,
+    dailyLimit?: number,
+  ): Promise<boolean>
   /** public.audio_daily_count (service role): every user's requests of a kind since 00:00 UTC. */
   dailyCount(kind: AudioKind): Promise<number>
   /** Signed URLs for objects in bucket `voice`; paths without an object are left out. */
@@ -112,7 +130,8 @@ export async function handleVoiceUrl(request: Request, deps: AudioDeps): Promise
     if (!keys) return errorResponse('bad_request', cors)
     const limit = envInt(deps.env('VOICE_RATE_LIMIT'), 120, 1, 100000)
     const windowSeconds = envInt(deps.env('VOICE_RATE_WINDOW_S'), 60, 1, 86400)
-    if (!(await deps.rateOk(front.userId, 'voice', limit, windowSeconds))) {
+    const daily = envInt(deps.env('VOICE_USER_DAILY'), DEFAULT_VOICE_USER_DAILY, 1, 1000000)
+    if (!(await deps.rateOk(front.userId, 'voice', limit, windowSeconds, daily))) {
       return errorResponse('rate_limited', cors)
     }
     const signed = await deps.signUrls(keys.map(voicePath), SIGNED_URL_SECONDS)
@@ -140,12 +159,10 @@ export async function handleTts(request: Request, deps: AudioDeps): Promise<Resp
       ? deps.chooseTts(input.language)
       : selectTts(deps.env, input.language)
     if (!choice) return errorResponse('unavailable', cors)
-    // Global cost ceiling: every user's tts requests today (UTC) together.
-    const dailyCap = envInt(deps.env('TTS_DAILY_CAP'), DEFAULT_TTS_DAILY_CAP, 1, 1000000)
-    if ((await deps.dailyCount('tts')) >= dailyCap) return errorResponse('rate_limited', cors)
     const limit = envInt(deps.env('TTS_RATE_LIMIT'), DEFAULT_TTS_RATE_LIMIT, 1, 100000)
     const windowSeconds = envInt(deps.env('TTS_RATE_WINDOW_S'), 3600, 1, 86400)
-    if (!(await deps.rateOk(front.userId, 'tts', limit, windowSeconds))) {
+    const daily = envInt(deps.env('TTS_USER_DAILY'), DEFAULT_TTS_USER_DAILY, 1, 1000000)
+    if (!(await deps.rateOk(front.userId, 'tts', limit, windowSeconds, daily))) {
       return errorResponse('rate_limited', cors)
     }
 
@@ -159,6 +176,15 @@ export async function handleTts(request: Request, deps: AudioDeps): Promise<Resp
       // the row outlived its object: make it again below
     }
 
+    // A text the provider must really speak: the global cost ceiling (every
+    // account's syntheses today, UTC) and this account's daily share. Cache
+    // hits above never count toward either.
+    const dailyCap = envInt(deps.env('TTS_DAILY_CAP'), DEFAULT_TTS_DAILY_CAP, 1, 1000000)
+    if ((await deps.dailyCount('synth')) >= dailyCap) return errorResponse('rate_limited', cors)
+    const synthDaily = envInt(deps.env('SYNTH_USER_DAILY'), DEFAULT_SYNTH_USER_DAILY, 1, 1000000)
+    if (!(await deps.rateOk(front.userId, 'synth', synthDaily, 86400))) {
+      return errorResponse('rate_limited', cors)
+    }
     const bytes = await choice.provider.synthesize(input.text, input.language, choice.voice)
     await deps.storeAudio(path, bytes)
     await deps.rememberTts(input.language, hash, path, voiceTag)

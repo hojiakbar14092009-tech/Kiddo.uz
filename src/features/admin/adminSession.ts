@@ -7,12 +7,15 @@ export type AdminSession = { source: 'device' } | { source: 'cloud'; email: stri
 const DEV_PIN = '2026'
 
 /**
- * PIN for the device admin view, from VITE_ADMIN_PIN at build time. A
- * production build without it has no device admin at all (`null`): a default
- * PIN that ships with the app is no PIN. Development and tests fall back to
- * the old one so local work stays easy.
+ * PIN for the device admin view, or `null` when this build has no device
+ * admin. A production build never has one: anything built into the app (a
+ * PIN included) can be read by anyone who opens it, so admin rights come only
+ * from a signed-in cloud account the server knows as an admin (is_admin()).
+ * Development uses the old PIN; the browser tests build with `--mode e2e`
+ * and VITE_ADMIN_PIN.
  */
 export function adminPin(): string | null {
+  if (import.meta.env.PROD && import.meta.env.MODE !== 'e2e') return null
   const configured = (import.meta.env.VITE_ADMIN_PIN as string | undefined)?.trim()
   if (configured) return configured
   return import.meta.env.PROD ? null : DEV_PIN

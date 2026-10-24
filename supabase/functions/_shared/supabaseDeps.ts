@@ -43,12 +43,20 @@ export function supabaseDeps(env: Env): AudioDeps {
       if (error) throw new Error(`is_pro_active: ${error.message}`)
       return data === true
     },
-    async rateOk(userId: string, kind: AudioKind, limit: number, windowSeconds: number) {
+    async rateOk(
+      userId: string,
+      kind: AudioKind,
+      limit: number,
+      windowSeconds: number,
+      dailyLimit?: number,
+    ) {
       const { data, error } = await admin.rpc('audio_rate_ok', {
         p_uid: userId,
         p_kind: kind,
         p_limit: limit,
         p_window_seconds: windowSeconds,
+        // the five-argument form (0010) also checks the last 24 hours
+        ...(dailyLimit === undefined ? {} : { p_daily_limit: dailyLimit }),
       })
       if (error) throw new Error(`audio_rate_ok: ${error.message}`)
       return data === true

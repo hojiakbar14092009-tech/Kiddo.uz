@@ -202,7 +202,9 @@ class AudioManager {
           }
           this.setStatus('speaking')
           // No device voice for the language: silence, counted as missing (never 'done').
-          if (await speech.say(part.text, { ...options, volume })) played += 1
+          // a cloud device voice gets the sentence without the child's name (or nothing)
+          const remoteText = part.kind === 'tts' ? part.remoteText : undefined
+          if (await speech.say(part.text, { ...options, volume, remoteText })) played += 1
           else missing += 1
         }
       }

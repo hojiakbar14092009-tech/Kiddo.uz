@@ -39,6 +39,19 @@ export function childStateRow(childId: string, progress: ChildProgress) {
   }
 }
 
+/**
+ * A family's first sync: what the child already has on this device becomes
+ * its opening on the server, once (record_opening_balance, migration 0009).
+ */
+export function openingRow(childId: string, progress: ChildProgress) {
+  return {
+    p_child: childId,
+    p_coins: progress.coins,
+    p_outfits: progress.outfits,
+    p_pets: progress.pets ?? [],
+  }
+}
+
 export function resultRow(childId: string, result: TaskResult) {
   return {
     id: result.id,
@@ -115,6 +128,7 @@ export function evidenceRow(childId: string, e: Evidence) {
 
 export type ChildRow = ReturnType<typeof childRow>
 export type ChildStateRow = ReturnType<typeof childStateRow>
+export type OpeningRow = ReturnType<typeof openingRow>
 export type ResultRow = ReturnType<typeof resultRow>
 export type EventRow = ReturnType<typeof eventRow>
 export type RewardRow = ReturnType<typeof rewardRow>

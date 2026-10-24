@@ -602,6 +602,7 @@ export const en: Translation = {
       leaveNo: 'Keep watching',
       failed: {
         already: 'You have already got your promo code.',
+        emailNotConfirmed: 'Please confirm your e-mail address first: tap the link in the letter.',
         notFinished: 'The ad was not watched to the end. Please try again.',
         noCodes: 'There are no free promo codes right now. Please try later.',
         error: 'Something went wrong. Please try again.',

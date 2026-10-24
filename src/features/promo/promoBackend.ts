@@ -19,7 +19,7 @@ export interface ClaimedPromo {
   days: number
 }
 
-export type ClaimFailure = 'already' | 'notFinished' | 'noCodes' | 'error'
+export type ClaimFailure = 'already' | 'notFinished' | 'noCodes' | 'emailNotConfirmed' | 'error'
 export type ClaimOutcome = { ok: true; promo: ClaimedPromo } | { ok: false; reason: ClaimFailure }
 export type RedeemOutcome = PromoResult | 'error'
 
@@ -159,6 +159,8 @@ const FAILURES: Record<string, ClaimFailure> = {
   already_claimed: 'already',
   not_finished: 'notFinished',
   no_codes: 'noCodes',
+  // a promo code needs a confirmed e-mail address (0010: no farming with throwaway accounts)
+  email_not_confirmed: 'emailNotConfirmed',
 }
 
 export const cloudBackend: PromoBackend = {

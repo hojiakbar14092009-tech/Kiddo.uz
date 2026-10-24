@@ -183,7 +183,8 @@ function AdminLogin() {
             <section className="flex flex-col gap-2">
               <h2 className="font-display font-semibold">Shu qurilma</h2>
               <p className="rounded-lg bg-[var(--a-raise)] px-3 py-2 text-sm text-[var(--a-ink-soft)]">
-                Shu qurilma uchun admin PIN sozlanmagan. Uni build’da VITE_ADMIN_PIN bilan bering.
+                Bu versiyada qurilma admini yo‘q: admin PIN sozlanmagan. Admin bo‘lish uchun
+                yuqorida admin hisobi bilan kiring.
               </p>
             </section>
           ) : (

@@ -368,7 +368,9 @@ describe('offline grace for cloud PRO', () => {
       }),
     }) as never
 
-  beforeEach(() => useProVerifyStore.setState({ userId: null, verifiedAt: null, since: null }))
+  beforeEach(() =>
+    useProVerifyStore.setState({ userId: null, verifiedAt: null, since: null, lastSeen: null }),
+  )
 
   it('keeps PRO through failed reads for 7 days after the last confirmation, then falls back to Free', async () => {
     const row = { plan: 'yearly', source: 'payment', expires_at: null, status: 'active' }
@@ -388,11 +390,44 @@ describe('offline grace for cloud PRO', () => {
     expect(useSubscriptionStore.getState().plan).toBe('yearly')
   })
 
+  it('a browser that writes PRO into its own storage is set back to Free by the server', async () => {
+    // the edit an attacker makes in devtools: kiddo.subscription = lifetime
+    useSubscriptionStore.setState({ plan: 'lifetime', source: 'payment', expiresAt: null })
+    expect(await pullSubscription(answering(null), USER, () => Date.now())).toBe(true)
+    expect(useSubscriptionStore.getState().plan).toBeNull()
+  })
+
   it('counts the grace from the first cloud start when the server never answered', () => {
     const t0 = Date.parse('2026-10-01T00:00:00Z')
     useSubscriptionStore.getState().activatePlan('monthly', 'payment')
     expect(enforceVerifyGrace(USER, t0)).toBe(false)
     expect(enforceVerifyGrace(USER, t0 + VERIFY_GRACE_MS + 1)).toBe(true)
     expect(useSubscriptionStore.getState().plan).toBeNull()
+  })
+
+  it('a "last confirmed" time from the future (edited storage) ends the grace at once', () => {
+    const t0 = Date.parse('2026-10-01T00:00:00Z')
+    useSubscriptionStore.getState().activatePlan('lifetime', 'payment')
+    useProVerifyStore.setState({ userId: USER, verifiedAt: 9e15, since: t0 })
+    expect(enforceVerifyGrace(USER, t0)).toBe(true)
+    expect(useSubscriptionStore.getState().plan).toBeNull()
+  })
+
+  it('a clock wound back past a time the device already saw ends the grace', () => {
+    const t0 = Date.parse('2026-10-01T00:00:00Z')
+    useSubscriptionStore.getState().activatePlan('monthly', 'payment')
+    useProVerifyStore.setState({ userId: USER, verifiedAt: t0, since: t0 })
+    expect(enforceVerifyGrace(USER, t0 + 3 * DAY)).toBe(false)
+    expect(enforceVerifyGrace(USER, t0 + DAY)).toBe(true)
+    expect(useSubscriptionStore.getState().plan).toBeNull()
+  })
+
+  it('small clock differences (under an hour) are fine', () => {
+    const t0 = Date.parse('2026-10-01T00:00:00Z')
+    useSubscriptionStore.getState().activatePlan('monthly', 'payment')
+    useProVerifyStore.setState({ userId: USER, verifiedAt: t0 + 10 * 60_000, since: t0 })
+    expect(enforceVerifyGrace(USER, t0)).toBe(false)
+    expect(enforceVerifyGrace(USER, t0 - 30 * 60_000)).toBe(false)
+    expect(useSubscriptionStore.getState().plan).toBe('monthly')
   })
 })

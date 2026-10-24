@@ -7,6 +7,8 @@ import { clearChildRewards } from '@/domain/rewards/rewardStore'
 import { clearLearningMemory } from '@/domain/learningMemory/store'
 import { clearUniverseChild } from '@/domain/universe/store'
 import { useLearnStore } from '@/features/learn/learnStore'
+import { useActivityStore } from './activityStore'
+import { useScreenTimeStore } from './screenTimeStore'
 import {
   ageOn,
   birthDateForAge,
@@ -139,6 +141,12 @@ export const useFamilyStore = create<FamilyState>()(
         clearUniverseChild(id)
         clearLearningMemory(id)
         useLearnStore.getState().clearChild(id)
+        useActivityStore.getState().forgetChild(id)
+        useScreenTimeStore.getState().forgetChild(id)
+        // the parent's AI-helper choice for this child (the tutor code loads on demand)
+        void import('@/domain/tutor/aiClient')
+          .then(({ useAiConsentStore }) => useAiConsentStore.getState().forget(id))
+          .catch(() => undefined)
         // the child's pictures from the studio (loaded on demand, kept out of the main bundle)
         void import('@/features/studio/gallery')
           .then(({ studioGallery }) => studioGallery().removeChild(id))

@@ -605,6 +605,7 @@ export const uz = {
       leaveNo: 'Ko‘rishda davom etish',
       failed: {
         already: 'Siz promokodni allaqachon olgansiz.',
+        emailNotConfirmed: 'Avval elektron pochtangizni tasdiqlang: xatdagi havolani bosing.',
         notFinished: 'Reklama oxirigacha ko‘rilmadi. Qaytadan urinib ko‘ring.',
         noCodes: 'Hozircha bo‘sh promokod qolmadi. Keyinroq urinib ko‘ring.',
         error: 'Nimadir xato ketdi. Qaytadan urinib ko‘ring.',

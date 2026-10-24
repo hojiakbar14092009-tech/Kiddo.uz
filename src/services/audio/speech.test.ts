@@ -78,4 +78,20 @@ describe('speech', () => {
 
     expect(spoken[0]?.lang).toBe('en-GB')
   })
+
+  it('a voice on the device hears the child’s name', async () => {
+    const { spoken } = installSynth([{ lang: 'ru-RU', localService: true }])
+    await speech.say('Молодец, Азиз!', { language: 'ru', remoteText: 'Молодец!' })
+    expect(spoken.map((u) => u.text)).toEqual(['Молодец, Азиз!'])
+  })
+
+  it('a cloud voice never gets the name: the sentence without it, or silence', async () => {
+    const { spoken } = installSynth([{ lang: 'ru-RU', localService: false }])
+    expect(await speech.say('Молодец, Азиз!', { language: 'ru', remoteText: 'Молодец!' })).toBe(
+      true,
+    )
+    expect(spoken.map((u) => u.text)).toEqual(['Молодец!'])
+    expect(await speech.say('Азиз', { language: 'ru', remoteText: null })).toBe(false)
+    expect(spoken).toHaveLength(1)
+  })
 })

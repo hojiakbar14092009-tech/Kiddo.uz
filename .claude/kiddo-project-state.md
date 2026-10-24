@@ -53,6 +53,7 @@ Phase 10: 931 unit, 86 e2e, 246 SQL assertions.
 Phase 11: 941 unit, 112 e2e; page audit (9 viewports) 369 pages ru clean on the final build.
 Phase 12: initial JS 296 → 266 KB gz; Home cold load 1417 → 899 KB transferred (strong device),
 weak device scripts 301 → 271 KB, images 617 → 134 KB; budgets in `e2e/performance.spec.ts`.
+Phase 13: 302 SQL assertions, 978 unit, 118 e2e (`supabase/tests/run.sh`; local PG: /var/tmp/kiddo-pg, see Security).
 
 ## UI foundation (Phase 1)
 
@@ -248,7 +249,8 @@ prod) · B7 promo policy.
 - [x] 10 AI tutor + learning memory: hint ladder in Math Lab, spaced review, memory (device + 0008 server rules), `tutor` Edge Function (Gemini free adapter, OFF: terms forbid under-18 apps → B5), parent memory panel + AI helper switch (2026-10-24)
 - [x] 11 Cross-device responsive QA: 9 viewports, folding language switch, wrapping buttons, 3D frames follow rotation, hotspots separated, pinch-zoom allowed, city building looks per level (2026-10-24)
 - [x] 12 Performance: pet poses on demand, ru/en texts lazy, decorative robot 30 fps on demand + idle mount + 2D beside 3D content, content canvases pause off screen, SW registers after load (2026-10-24)
-- [ ] 13 security · 14 connected universe · 15 adaptive learning (one continuous prompt)
+- [x] 13 Security: balance from ledger (0009), integrity hardening (0010), security headers/CSP, no device admin in prod, cloud-voice name guard, child-removal cleanup, per-account audio caps (2026-10-24)
+- [ ] 14 connected universe · 15 adaptive learning (same prompt, continue)
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
@@ -305,8 +307,28 @@ clue → picture → card removed → solution, `data-review` question from due 
   (heap snapshot: 0 detached), WebGL contexts are released (60/62 lost, no limit warning).
   No dinosaur sounds exist (only UI sounds 16 KB + voice clips cached on play).
 
+## Security (Phase 13) – docs/architecture/security.md
+
+- Device mode (production today) protects nothing by design; cloud mode: server decides.
+- 0009: `child_state.coins` = ledger sum (trigger), paid outfits/pets need a purchase row
+  (`outfit|id|…`, `pet|id|…`, exact `shop_items` price, once) or `grandfathered_items`;
+  `record_reward` refuses spending below zero; new families: first-sync `openBalance` op →
+  `record_opening_balance` (once, ≤ 5000 coins, shop items only).
+- 0010: entries > 30 days late or before the account → lifetime budget (`history_cap`),
+  quest day ∈ [earned−2, earned+1], server building
+  prices (`building_levels/costs`, drift test `serverPrices.test.ts`), stars needed; ad
+  starts 10/h 30/day, claim needs confirmed e-mail, new ads ≥ 15 s; `deleted_children`
+  tombstones (not on account delete), ≤ 5 new profiles/day by server `registered_at` (no
+  cap on how many kept, 0002); sync moves a newer child state behind purchases; anon
+  write grants revoked; `audio_rate_ok(…, p_daily_limit)` + kind `synth` (global TTS cap
+  counts real synthesis only).
+- vercel.json security headers + CSP (`src/app/securityHeaders.test.ts`); language preload
+  is `/lang-preload.js`. Production has no device admin (e2e builds `--mode e2e`).
+- SQL tests: start PG as postgres in /var/tmp/kiddo-pg (`pg_ctl -o '-k /var/tmp/kiddo-pg/sock'`),
+  `PGHOST=/var/tmp/kiddo-pg/sock PGUSER=postgres sh supabase/tests/run.sh`.
+
 ## Next
 
-Phases 13 → 14 → 15 (security hardening → connected universe → adaptive learning), one prompt. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
+Phase 14 (connected universe) → Phase 15 (adaptive learning), same prompt. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

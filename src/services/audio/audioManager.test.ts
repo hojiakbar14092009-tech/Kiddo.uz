@@ -41,7 +41,12 @@ describe('audioManager', () => {
       true,
     )
     expect(speech.say).toHaveBeenCalledTimes(1)
-    expect(speech.say).toHaveBeenCalledWith('Тест без записи.', { language: 'ru', volume: 0.8 })
+    expect(speech.say).toHaveBeenCalledWith('Тест без записи.', {
+      language: 'ru',
+      volume: 0.8,
+      // a sentence without the child's name may also go to a cloud device voice
+      remoteText: 'Тест без записи.',
+    })
   })
 
   it('counts a sentence without a device voice as missing, never done', async () => {

@@ -231,7 +231,8 @@ describe('voice-url', () => {
     })
     expect(deps.rateCalls).toEqual([
       ['user-1', 'auth', 300, 60],
-      ['user-1', 'voice', 120, 60],
+      // the short window and the account's last 24 hours (0010)
+      ['user-1', 'voice', 120, 60, 300],
     ])
   })
 
@@ -360,12 +361,16 @@ describe('tts', () => {
     expect(((await second.json()) as { cached: boolean }).cached).toBe(true)
     expect(provider.calls).toBe(1)
     expect(deps.rateCalls.filter((call) => call[1] === 'tts')).toEqual([
-      ['user-1', 'tts', 30, 3600],
-      ['user-1', 'tts', 30, 3600],
+      ['user-1', 'tts', 30, 3600, 200],
+      ['user-1', 'tts', 30, 3600, 200],
+    ])
+    // only the first request made the provider speak
+    expect(deps.rateCalls.filter((call) => call[1] === 'synth')).toEqual([
+      ['user-1', 'synth', 100, 86400],
     ])
   })
 
-  it('stops at the global daily cap before the per-user count and the provider', async () => {
+  it('stops at the global daily cap of real syntheses, before the provider', async () => {
     const provider = fakeProvider()
     const deps = makeDeps({
       chooseTts: () => ({ provider, voice: 'uz-UZ-MadinaNeural' }),
@@ -373,8 +378,8 @@ describe('tts', () => {
     })
     const response = await handleTts(post('tts', { language: 'uz', text: 'Salom' }), deps)
     expect([response.status, await response.json()]).toEqual([429, { error: 'rate_limited' }])
-    expect(deps.dailyCount).toHaveBeenCalledWith('tts')
-    expect(deps.rateCalls.some((call) => call[1] === 'tts')).toBe(false)
+    expect(deps.dailyCount).toHaveBeenCalledWith('synth')
+    expect(deps.rateCalls.some((call) => call[1] === 'synth')).toBe(false)
     expect(provider.calls).toBe(0)
 
     const raised = makeDeps({
@@ -385,6 +390,28 @@ describe('tts', () => {
     expect((await handleTts(post('tts', { language: 'uz', text: 'Salom' }), raised)).status).toBe(
       200,
     )
+  })
+
+  it('a cached sentence is served even when the day’s syntheses are used up', async () => {
+    const provider = fakeProvider()
+    const deps = makeDeps({ chooseTts: () => ({ provider, voice: 'uz-UZ-MadinaNeural' }) })
+    await handleTts(post('tts', { language: 'uz', text: 'Salom' }), deps)
+    deps.dailyCount = vi.fn(async () => 999999)
+    const again = await handleTts(post('tts', { language: 'uz', text: 'Salom' }), deps)
+    expect(again.status).toBe(200)
+    expect(((await again.json()) as { cached: boolean }).cached).toBe(true)
+    expect(deps.dailyCount).not.toHaveBeenCalled()
+  })
+
+  it('an account that used its daily synthesis share is refused, others are not', async () => {
+    const provider = fakeProvider()
+    const deps = makeDeps({
+      chooseTts: () => ({ provider, voice: 'uz-UZ-MadinaNeural' }),
+      rateOk: async (_user, kind) => kind !== 'synth',
+    })
+    const response = await handleTts(post('tts', { language: 'uz', text: 'Salom' }), deps)
+    expect([response.status, await response.json()]).toEqual([429, { error: 'rate_limited' }])
+    expect(provider.calls).toBe(0)
   })
 
   it('accepts generic sentences only', async () => {

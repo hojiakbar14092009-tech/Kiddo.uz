@@ -5,6 +5,8 @@ insert into auth.users values
  ('00000000-0000-0000-0000-00000000000b','b@x.uz'),
  ('00000000-0000-0000-0000-0000000000ad','admin@x.uz');
 insert into public.admins values ('00000000-0000-0000-0000-0000000000ad');
+-- B has confirmed the e-mail address (a promo claim needs it, 0010); A has not
+update auth.users set email_confirmed_at = now() where id = '00000000-0000-0000-0000-00000000000b';
 insert into public.children (id,parent_id,name,age,gender,mascot) values
  ('ca','00000000-0000-0000-0000-00000000000a','Ali',5,'boy','boy'),
  ('cb','00000000-0000-0000-0000-00000000000b','Lola',5,'girl','girl');
@@ -12,8 +14,8 @@ insert into public.child_state (child_id,parent_id) values ('ca','00000000-0000-
 insert into public.payments (id,parent_id,plan,provider,amount) values
  ('pa','00000000-0000-0000-0000-00000000000a','monthly','click',1000),
  ('pb','00000000-0000-0000-0000-00000000000b','monthly','click',1000);
--- B watched an ad 60 s ago (the server's clock decides; 10 s ad)
-insert into public.ads (id,title,video_url,duration_s) values ('11111111-1111-1111-1111-111111111111','A','https://x/a.mp4',10);
+-- B watched an ad 60 s ago (the server's clock decides; 20 s ad)
+insert into public.ads (id,title,video_url,duration_s) values ('11111111-1111-1111-1111-111111111111','A','https://x/a.mp4',20);
 insert into public.ad_views (id,user_id,ad_id,started_at) values
  ('22222222-2222-2222-2222-222222222222','00000000-0000-0000-0000-00000000000b','11111111-1111-1111-1111-111111111111', now() - interval '60 seconds');
 
@@ -85,7 +87,7 @@ select pg_temp.expect_error($$select public.record_resource('ca','star',1,'cheat
 select pg_temp.expect_error($$select public.record_resource('ca','crystal',1,'activity','x4')$$, 'bad_reason');
 select pg_temp.expect_error($$select public.record_resource('ca','star',-1,'upgrade','x5')$$, 'bad_reason');
 select pg_temp.expect_error($$select public.record_resource('ca','star',4,'activity','x6')$$, 'out_of_bounds');
-select pg_temp.expect_error($$select public.record_resource('ca','crystal',5,'quest','daily|2026-01-01')$$, 'out_of_bounds');
+select pg_temp.expect_error($$select public.record_resource('ca','crystal',5,'quest','daily|' || to_char((now() at time zone 'Asia/Tashkent')::date, 'YYYY-MM-DD'))$$, 'out_of_bounds');
 select pg_temp.expect_error($$select public.record_resource('ca','star',-2,'activity','x8')$$, 'bad_sign');
 select pg_temp.expect_error($$select public.record_resource('ca','crystal',1,'upgrade','x9')$$, 'bad_sign');
 select pg_temp.expect_error($$select public.record_resource('ca','crystal',10,'admin','x10')$$, 'not_admin');
@@ -216,7 +218,7 @@ begin;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
 update public.child_state set coins = 999999 where child_id='ca';
-select pg_temp.check((select coins from public.child_state where child_id='ca') = 999999, 'KNOWN GAP: child_state.coins is still client-writable (documented)');
+select pg_temp.check((select coins from public.child_state where child_id='ca') <> 999999, 'closed (0009): child_state.coins is no longer client-writable');
 rollback;
 
 -- ===== cascade delete still works with append-only ledger
@@ -455,6 +457,221 @@ commit;
 select pg_temp.check((select prosecdef from pg_proc where oid = 'public.record_learning_evidence(text,text,text,text,integer,timestamptz,boolean,boolean,text[],integer,boolean)'::regprocedure), 'record_learning_evidence is security definer');
 delete from public.children where id = 'm1';
 select pg_temp.check((select count(*) from public.learning_memory where child_id='m1') = 0 and (select count(*) from public.learning_misconceptions where child_id='m1') = 0 and (select count(*) from public.ai_consent where child_id='m1') = 0, 'memory: child delete cascades');
+
+-- ===== 0009: balance and paid items come from the ledger
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('cd','00000000-0000-0000-0000-00000000000a','Dilshod',6,'boy','boy');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select public.record_reward('cd', 150, 'learn', 'cd-l1');
+insert into public.child_state (child_id, coins) values ('cd', 99999)
+  on conflict (child_id) do update set coins = excluded.coins;
+select pg_temp.check((select coins from public.child_state where child_id='cd') = (select coalesce(sum(coins),0) from public.reward_ledger where child_id='cd'), 'balance: a forged coins value is replaced by the ledger sum');
+update public.child_state set coins = 1000000 where child_id = 'cd';
+select pg_temp.check((select coins from public.child_state where child_id='cd') < 1000, 'balance: a direct update cannot raise it');
+update public.child_state set outfits = '{crown,cap}', wearing = '{"head":"cap"}', pets = '["cat"]', pet = 'cat' where child_id = 'cd';
+select pg_temp.check((select outfits = '{}' and wearing = '{}'::jsonb and pets = '[]'::jsonb and pet is null from public.child_state where child_id='cd'), 'items: unpaid outfits, wearing and pets are dropped');
+select public.record_reward('cd', -40, 'purchase', 'outfit|crown|u1');
+select public.record_reward('cd', -75, 'purchase', 'pet|cat|u2');
+select pg_temp.expect_error($$select public.record_reward('cd', -1, 'purchase', 'outfit|cap|cheap')$$, 'bad_purchase');
+select pg_temp.expect_error($$select public.record_reward('cd', -5, 'purchase', 'pet|dragon|x')$$, 'bad_purchase');
+select pg_temp.expect_error($$select public.record_reward('cd', -40, 'purchase', 'outfit|crown|again')$$, 'already_owned');
+update public.child_state set outfits = '{crown,cap}', wearing = '{"head":"crown","neck":"cap"}', pets = '["cat","bunny"]', pet = 'cat' where child_id = 'cd';
+select pg_temp.check((select outfits = '{crown}' and wearing = '{"head":"crown"}'::jsonb and pets = '["cat"]'::jsonb and pet = 'cat' from public.child_state where child_id='cd'), 'items: a paid outfit and pet stay, the rest go');
+select pg_temp.check((select coins from public.child_state where child_id='cd') = (select coalesce(sum(coins),0) from public.reward_ledger where child_id='cd'), 'balance: a purchase lowers the stored balance at once');
+select pg_temp.expect_error($$select public.record_reward('cd', -1000, 'purchase', 'too-much')$$, 'insufficient_coins');
+select pg_temp.expect_error($$select public.record_reward('cd', -1000, 'penalty', 'too-much-2')$$, 'insufficient_coins');
+select pg_temp.expect_error($$select public.record_reward('cd', 500, 'opening-balance', 'opening')$$, 'bad_reason');
+select pg_temp.expect_error($$insert into public.grandfathered_items values ('cd','outfit','crown')$$, 'permission denied');
+select pg_temp.expect_error($$select public.open_balances()$$, 'permission denied');
+select pg_temp.expect_error($$select public.child_coin_balance('cb')$$, 'permission denied');
+-- the other family's state cannot be touched at all
+update public.child_state set outfits = '{}' where child_id = 'cb';
+select pg_temp.expect_error($$insert into public.child_state (child_id, parent_id) values ('cb','00000000-0000-0000-0000-00000000000b')$$, 'row-level security');
+commit;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select public.record_reward('cd', 25, 'admin', 'grant-1');
+commit;
+select pg_temp.check((select coins from public.child_state where child_id='cd') = public.child_coin_balance('cd'), 'balance: an admin grant through record_reward shows at once');
+
+-- coins and items from before the ledger are kept (the migration's opening)
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('cc','00000000-0000-0000-0000-00000000000b','Old',6,'boy','boy');
+alter table public.child_state disable trigger child_state_server_authority;
+insert into public.child_state (child_id,parent_id,coins,outfits,pets,pet) values ('cc','00000000-0000-0000-0000-00000000000b',70,'{flower}','["parrot"]','parrot');
+alter table public.child_state enable trigger child_state_server_authority;
+select pg_temp.check(public.open_balances() = 1 and public.open_balances() = 0, 'opening: one entry per child, idempotent');
+update public.child_state set updated_at = now() where child_id = 'cc';
+select pg_temp.check((select coins = 70 and outfits = '{flower}' and pet = 'parrot' from public.child_state where child_id='cc'), 'opening: legacy coins, outfits and pet are kept');
+delete from public.children where id = 'cc';
+select pg_temp.check((select count(*) from public.grandfathered_items where child_id='cc') = 0 and (select count(*) from public.reward_ledger where child_id='cc') = 0, 'opening: child delete cascades');
+
+-- ===== 0010: integrity hardening (Phase 13 audit)
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('ce','00000000-0000-0000-0000-00000000000a','Ezoza',6,'girl','girl');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+-- a year of backdated daily caps is no longer one call loop away
+do $$
+declare v_refused boolean := false;
+begin
+  for d in 3..362 loop
+    for k in 1..2 loop
+      begin
+        perform public.record_resource('ce','star',3,'activity','hist-'||d||'-'||k, now() - make_interval(days => d));
+      exception when others then
+        if sqlerrm like '%history_cap%' then v_refused := true; exit; end if;
+        raise;
+      end;
+    end loop;
+    exit when v_refused;
+  end loop;
+  perform pg_temp.check(v_refused, 'history: backdated uploads stop at the lifetime budget');
+end $$;
+select pg_temp.check((select sum(amount) from public.resource_ledger where child_id='ce' and resource='star') <= 1500, 'history: no more than the budget was paid');
+select pg_temp.check((select (public.record_resource('ce','star',3,'activity','today-1')).amount) = 3, 'history: today''s play still pays');
+select pg_temp.expect_error($$select public.record_resource('ce','crystal',1,'quest','daily|1900-01-01', now() - interval '900 days')$$, 'bad_ref');
+select pg_temp.expect_error($$select public.record_resource('ce','crystal',1,'quest','daily|' || to_char((now() at time zone 'Asia/Tashkent')::date - 3, 'YYYY-MM-DD'))$$, 'bad_ref');
+select pg_temp.check((select (public.record_resource('ce','crystal',1,'quest','daily|' || to_char((now() at time zone 'Asia/Tashkent')::date - 1, 'YYYY-MM-DD'), now() - interval '1 day')).amount) = 1, 'quest: yesterday''s crystal on yesterday');
+-- buildings: real ones, full price, stars
+select pg_temp.expect_error($$select public.record_building_level('ce','anything-i-like',1)$$, 'bad_building');
+select public.record_resource('ce','crystal',1,'three-stars','c-'||g) from generate_series(1,3) g;
+select public.record_resource('ce','crystal',-1,'upgrade','upgrade|math-land|1');
+select pg_temp.check((select (public.record_building_level('ce','math-land',1)).buildings ->> 'math-land') = '1', 'buildings: level 1 for its price');
+select public.record_resource('ce','crystal',-1,'upgrade','upgrade|math-land|2');
+select pg_temp.expect_error($$select public.record_building_level('ce','math-land',2)$$, 'not_paid');
+select public.record_resource('ce','crystal',-1,'upgrade','upgrade|robot-workshop|1');
+select pg_temp.expect_error($$select public.record_building_level('ce','robot-workshop',1)$$, 'not_paid');
+commit;
+-- stars: a child with crystals but no stars cannot take level 2
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('cf','00000000-0000-0000-0000-00000000000a','Farid',6,'boy','boy');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select public.record_resource('cf','crystal',1,'three-stars','f-'||g) from generate_series(1,3) g;
+select public.record_resource('cf','crystal',-1,'upgrade','upgrade|garden|1');
+select public.record_building_level('cf','garden',1);
+select public.record_resource('cf','crystal',-2,'upgrade','upgrade|garden|2');
+select pg_temp.expect_error($$select public.record_building_level('cf','garden',2)$$, 'not_enough_stars');
+-- ads: A has not confirmed the e-mail; too many starts are refused
+select pg_temp.expect_error($$select public.claim_promo('22222222-2222-2222-2222-222222222222')$$, 'email_not_confirmed');
+do $$
+declare v_refused boolean := false;
+begin
+  for i in 1..11 loop
+    begin
+      perform public.start_ad_view('11111111-1111-1111-1111-111111111111');
+    exception when others then
+      if sqlerrm like '%too_many_views%' then v_refused := true; exit; end if;
+      raise;
+    end;
+  end loop;
+  perform pg_temp.check(v_refused, 'ads: an account cannot start ads without end');
+end $$;
+-- child_events only for own children
+select pg_temp.expect_error($$insert into public.child_events (id, child_id, kind) values ('ev-x','cb','opened')$$, 'row-level security');
+commit;
+-- a short ad still needs 15 s before a claim
+select pg_temp.expect_error($$insert into public.ads (title,video_url,duration_s) values ('Tiny','https://x/t.mp4',1)$$, 'ads_min_duration');
+insert into public.ads (id,title,video_url,duration_s) values ('33333333-3333-3333-3333-333333333333','Short','https://x/s.mp4',20);
+insert into auth.users (id,email,email_confirmed_at) values ('00000000-0000-0000-0000-0000000000ce','ce@x.uz', now());
+insert into public.ad_views (id,user_id,ad_id,started_at) values
+ ('44444444-4444-4444-4444-444444444444','00000000-0000-0000-0000-0000000000ce','33333333-3333-3333-3333-333333333333', now() - interval '5 seconds');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ce","role":"authenticated"}', true);
+select pg_temp.expect_error($$select public.claim_promo('44444444-4444-4444-4444-444444444444')$$, 'not_finished');
+commit;
+-- a deleted child id never comes back; at most five new profiles a day
+delete from public.children where id = 'cf';
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select pg_temp.expect_error($$insert into public.children (id,name,age,gender,mascot) values ('cf','Again',6,'boy','boy')$$, 'child_id_used');
+do $$
+declare v_refused boolean := false;
+begin
+  for i in 1..6 loop
+    begin
+      insert into public.children (id,name,age,gender,mascot) values ('new-'||i,'N',5,'boy','boy');
+      delete from public.children where id = 'new-'||i;
+    exception when others then
+      if sqlerrm like '%too_many_new_children%' then v_refused := true; exit; end if;
+      raise;
+    end;
+  end loop;
+  perform pg_temp.check(v_refused, 'children: no endless new profiles to reset the caps');
+end $$;
+commit;
+select pg_temp.check((select count(*) from public.deleted_children where child_id='cf') = 1 and (select count(*) from public.resource_ledger where child_id='cf') = 0, 'children: a deleted child leaves only its id');
+begin;
+set local role anon;
+select pg_temp.expect_error($$insert into public.app_settings (key, value) values ('x', '1')$$, 'permission denied');
+select pg_temp.expect_error($$insert into public.ads (title, video_url, duration_s) values ('x','https://x/x.mp4',5)$$, 'permission denied');
+commit;
+
+-- ===== Phase 13 critic fixes
+-- yesterday's finished quest can be claimed today
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select pg_temp.check((select (public.record_resource('cd','crystal',1,'quest','daily|' || to_char((now() at time zone 'Asia/Tashkent')::date - 1, 'YYYY-MM-DD'), now())).earned_at) > now() - interval '1 minute', 'quest: yesterday''s finished quest can be claimed today');
+commit;
+-- after the account exists: up to 30 days late with per-day caps, not older
+insert into auth.users (id,email,email_confirmed_at,created_at) values ('00000000-0000-0000-0000-0000000000d1','old@x.uz', now(), now() - interval '200 days');
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('cg','00000000-0000-0000-0000-0000000000d1','Gulnora',6,'girl','girl');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d1","role":"authenticated"}', true);
+select public.record_resource('cg','part',1,'number-3star','late-'||d||'-'||k, now() - make_interval(days => d)) from generate_series(3,12) d, generate_series(1,3) k;
+select pg_temp.check((select sum(amount) from public.resource_ledger where child_id='cg' and resource='part') = 30, 'late: a tablet that syncs after ten days keeps every part');
+select pg_temp.check((select (public.record_resource('cg','star',3,'activity','offline-long', now() - interval '45 days')).amount) = 3, 'late: a tablet offline for weeks still syncs (lifetime budget)');
+-- a new family brings its device balance and items once
+select pg_temp.check(public.record_opening_balance('cg', 9999, '{crown,unicorn}', '{cat,dragon}'), 'opening: a new family''s balance is opened');
+select pg_temp.check(not public.record_opening_balance('cg', 9999, '{crown}', '{}'), 'opening: only once');
+insert into public.child_state (child_id, coins, outfits, wearing, pets, pet) values ('cg', 1, '{crown,unicorn,cap}', '{"head":"crown"}', '["cat","dragon"]', 'cat');
+select pg_temp.check((select coins = 5000 and outfits = '{crown}' and wearing = '{"head":"crown"}'::jsonb and pets = '["cat"]'::jsonb and pet = 'cat' from public.child_state where child_id='cg'), 'opening: capped coins, only real items, kept in the stored state');
+select pg_temp.check((select (public.record_reward('cg', -15, 'purchase', 'outfit|cap|n1')).coins) = -15, 'opening: the next purchase is accepted');
+select pg_temp.expect_error($$select public.record_opening_balance('cb', 100, '{}', '{}')$$, 'not_your_child');
+commit;
+-- a child that already earned on the server gets no opening
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select pg_temp.check(not public.record_opening_balance('cd', 500, '{}', '{}'), 'opening: not for a child with ledger rows');
+-- the client's created_at cannot dodge the new-profile limit
+do $$
+declare v_refused boolean := false;
+begin
+  for i in 1..7 loop
+    begin
+      insert into public.children (id,name,age,gender,mascot,created_at) values ('back-'||i,'B',5,'boy','boy', now() - interval '10 days');
+    exception when others then
+      if sqlerrm like '%too_many_new_children%' then v_refused := true; exit; end if;
+      raise;
+    end;
+  end loop;
+  perform pg_temp.check(v_refused, 'children: a backdated created_at does not dodge the limit');
+end $$;
+commit;
+-- a whole account (with children) can still be deleted
+begin;
+delete from auth.users where id = '00000000-0000-0000-0000-0000000000d1';
+select pg_temp.check((select count(*) from public.children where id = 'cg') = 0 and (select count(*) from public.deleted_children where child_id = 'cg') = 0, 'account delete: children and their data go, no tombstone left');
+commit;
+
+-- ===== 0010: audio limits per account and day
+begin;
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-0000000000ce','voice',100,60,2) and public.audio_rate_ok('00000000-0000-0000-0000-0000000000ce','voice',100,60,2), 'audio: allowed under the daily limit');
+select pg_temp.check(not public.audio_rate_ok('00000000-0000-0000-0000-0000000000ce','voice',100,60,2), 'audio: refused at the daily limit, even with room in the short window');
+select pg_temp.check(public.audio_rate_ok('00000000-0000-0000-0000-0000000000ce','synth',100,86400,100), 'audio: a real synthesis is allowed');
+select pg_temp.check(public.audio_daily_count('synth') = 1, 'audio: real synthesis is counted on its own');
+commit;
+select pg_temp.check(not has_function_privilege('authenticated','public.audio_rate_ok(uuid,text,integer,integer,integer)','execute') and not has_function_privilege('anon','public.audio_rate_ok(uuid,text,integer,integer,integer)','execute'), 'audio: the limit function is service-only');
 
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (

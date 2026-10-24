@@ -422,6 +422,36 @@ a word shows a `POST /functions/v1/voice-url` (200) and then a GET of
 `/storage/v1/object/sign/voice/…`; `https://kiddo-uz.vercel.app/audio/voice/uz/000cef41.mp3`
 no longer returns audio. A free account gets the PRO lock, never another voice.
 
+## 8. Applying 0009 and 0010 (balance authority, integrity hardening)
+
+`0009_balance_authority.sql` makes the coin balance the sum of the reward ledger
+(with one opening entry per child for coins earned before the ledger existed,
+and the outfits and pets owned then kept). `0010_integrity_hardening.sql`
+closes the Phase 13 audit's findings: backdated resource uploads, unpaid city
+upgrades, ad and promo farming, child-id reuse, `child_events` ownership, the
+anon grants, per-account audio limits. Both are safe to run twice;
+`docs/architecture/security.md` explains the whole trust boundary.
+
+```bash
+supabase db push                       # applies 0009, 0010 after 0001–0008
+```
+
+Check (SQL editor):
+
+```sql
+-- every stored balance equals its ledger
+select count(*) from public.child_state s
+where s.coins <> public.child_coin_balance(s.child_id);          -- expect 0
+-- the city's prices are on the server
+select count(*) from public.building_levels;                       -- expect 42
+```
+
+Redeploy the Edge Functions afterwards (`supabase functions deploy tts voice-url`):
+they call the five-argument `audio_rate_ok` that 0010 adds. Optional secrets:
+`VOICE_USER_DAILY` (300), `TTS_USER_DAILY` (200), `SYNTH_USER_DAILY` (100).
+A promo claim now needs a confirmed e-mail address: keep "Confirm email" on in
+Supabase Auth.
+
 ## Report back
 
 Send the output of `vercel env ls`, `supabase migration list`, the two RLS

@@ -168,7 +168,11 @@ describe('audioManager in private voice mode', () => {
     it('falls back to the device voice as before when the server has none (503)', async () => {
       mockedTts.mockResolvedValue({ status: 'missing' } satisfies TtsResult)
       expect(await audioManager.say([{ text: UNRECORDED }], { language: 'en' })).toBe('done')
-      expect(speech.say).toHaveBeenCalledWith(UNRECORDED, { language: 'en', volume: 0.8 })
+      expect(speech.say).toHaveBeenCalledWith(UNRECORDED, {
+        language: 'en',
+        volume: 0.8,
+        remoteText: UNRECORDED,
+      })
     })
 
     it('is locked when the server says not_pro', async () => {
@@ -213,8 +217,17 @@ describe('audioManager in private voice mode', () => {
       expect(await audioManager.say(named('Ali!'), { language: 'en' })).toBe('done')
       expect(await audioManager.say(named('Bravo, Ali!'), { language: 'en' })).toBe('done')
       expect(mockedTts).not.toHaveBeenCalled()
-      expect(speech.say).toHaveBeenCalledWith('Ali!', { language: 'en', volume: 0.8 })
-      expect(speech.say).toHaveBeenCalledWith('Bravo, Ali!', { language: 'en', volume: 0.8 })
+      // the device voice says the name only when it runs on the device (remoteText: null)
+      expect(speech.say).toHaveBeenCalledWith('Ali!', {
+        language: 'en',
+        volume: 0.8,
+        remoteText: null,
+      })
+      expect(speech.say).toHaveBeenCalledWith('Bravo, Ali!', {
+        language: 'en',
+        volume: 0.8,
+        remoteText: null,
+      })
     })
 
     it('is missing, not done, when such a sentence has no device voice either', async () => {

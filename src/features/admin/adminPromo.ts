@@ -48,6 +48,8 @@ export interface AdminPromo {
 
 export const CODE_PATTERN = /^[A-Z0-9]{3,20}$/
 const MAX_AD_SECONDS = 600
+/** The server refuses shorter ads (0010: a one-second ad was a free promo code); cloud only. */
+export const MIN_AD_SECONDS = 15
 
 async function durationOf(source: NewAd): Promise<number> {
   const src = source.file ? URL.createObjectURL(source.file) : source.url!
@@ -220,6 +222,8 @@ function useCloudPromo(enabled: boolean): AdminPromo {
     addAd: async (ad) => {
       const client = await supabase()
       const duration = await durationOf(ad)
+      if (duration < MIN_AD_SECONDS)
+        throw new Error(`Reklama kamida ${MIN_AD_SECONDS} soniya bo‘lsin`)
       let url = ad.url ?? ''
       if (ad.file) {
         const extension = ad.file.name.split('.').pop()?.toLowerCase() || 'mp4'

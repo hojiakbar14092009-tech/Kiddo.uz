@@ -34,26 +34,30 @@ function dropPublicVoice(): Plugin {
 
 /**
  * A Russian or English child's interface texts are their own chunk (src/i18n).
- * This tiny script in <head> reads the stored language and preloads that chunk
+ * A tiny script in <head> reads the stored language and preloads that chunk
  * at once, in parallel with the app, so the first paint does not wait one more
- * round trip for it. Built from the bundle, so the hashed file names are right.
+ * round trip for it. It is a file of its own (/lang-preload.js, not inline), so
+ * a Content-Security-Policy needs no 'unsafe-inline' for scripts; it is written
+ * after the bundle, when the hashed chunk names are known.
  */
 function preloadStoredLanguage(): Plugin {
+  const FILE = 'lang-preload.js'
   return {
     name: 'kiddo:preload-stored-language',
     apply: 'build',
-    transformIndexHtml: {
-      order: 'post',
-      handler(_html, context) {
-        const files: Record<string, string> = {}
-        for (const chunk of Object.values(context.bundle ?? {})) {
-          if (chunk.type !== 'chunk') continue
-          const match = /src\/i18n\/locales\/(ru|en)\.ts$/.exec(chunk.facadeModuleId ?? '')
-          if (match?.[1]) files[match[1]] = `/${chunk.fileName}`
-        }
-        const script = `(function(){try{var s=JSON.parse(localStorage.getItem('kiddo.settings')||'null');var f=${JSON.stringify(files)}[s&&s.state&&s.state.language];if(f){var l=document.createElement('link');l.rel='modulepreload';l.href=f;document.head.appendChild(l)}}catch(e){}})()`
-        return [{ tag: 'script', children: script, injectTo: 'head-prepend' }]
-      },
+    enforce: 'post',
+    transformIndexHtml: () => [
+      { tag: 'script', attrs: { src: `/${FILE}` }, injectTo: 'head-prepend' },
+    ],
+    generateBundle(_options, bundle) {
+      const files: Record<string, string> = {}
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== 'chunk') continue
+        const match = /src\/i18n\/locales\/(ru|en)\.ts$/.exec(chunk.facadeModuleId ?? '')
+        if (match?.[1]) files[match[1]] = `/${chunk.fileName}`
+      }
+      const source = `(function(){try{var s=JSON.parse(localStorage.getItem('kiddo.settings')||'null');var f=${JSON.stringify(files)}[s&&s.state&&s.state.language];if(f){var l=document.createElement('link');l.rel='modulepreload';l.href=f;document.head.appendChild(l)}}catch(e){}})()\n`
+      this.emitFile({ type: 'asset', fileName: FILE, source })
     },
   }
 }

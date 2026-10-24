@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { EMPTY_PROGRESS, type ChildProgress, type TaskResult } from '@/store/progressStore'
 import type { ChildProfile } from '@/store/familyStore'
-import { childRow, resultRow } from './rows'
+import { childRow, childStateRow, resultRow } from './rows'
 import {
   coalesce,
   MAX_ATTEMPTS,
@@ -106,6 +106,8 @@ describe('flushQueue', () => {
     await flushQueue(client)
     expect(client.calls).toEqual([
       'upsert children ali',
+      // the device's coins and items open the server balance before the state arrives
+      'rpc record_opening_balance undefined',
       'upsert child_state ali',
       'upsert task_results r1',
       'upsert task_results r2',
@@ -282,5 +284,40 @@ describe('queue robustness', () => {
     expect(next.queue.map((item) => item.id)).toEqual(['d'])
     // Queued again once, now with learning data.
     expect(next.snapshotFor).toBeNull()
+  })
+})
+
+describe('child state and purchases', () => {
+  beforeEach(() => useSyncStore.setState({ queue: [], deadLetter: [], paused: null }))
+
+  it('a newer state goes after a purchase queued in between (the server keeps paid items only)', () => {
+    const state = (coins: number) =>
+      ({
+        kind: 'upsertChildState',
+        row: childStateRow('ali', { ...EMPTY_PROGRESS, coins }),
+      }) as const
+    const enqueue = useSyncStore.getState().enqueue
+    enqueue(state(50))
+    enqueue({
+      kind: 'recordReward',
+      row: { p_child: 'ali', p_coins: -15, p_reason: 'purchase', p_ref: 'outfit|cap|n1' },
+    })
+    enqueue(state(35))
+    expect(useSyncStore.getState().queue.map((item) => item.operation.kind)).toEqual([
+      'recordReward',
+      'upsertChildState',
+    ])
+  })
+
+  it('the first sync opens each child’s balance once, before its state', () => {
+    const operations = snapshot([ALI], { ali: { ...EMPTY_PROGRESS, coins: 120, outfits: ['cap'] } })
+    expect(operations.map((operation) => operation.kind)).toEqual([
+      'upsertChild',
+      'openBalance',
+      'upsertChildState',
+    ])
+    expect(operations[1]).toMatchObject({
+      row: { p_child: 'ali', p_coins: 120, p_outfits: ['cap'], p_pets: [] },
+    })
   })
 })

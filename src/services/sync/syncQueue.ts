@@ -7,6 +7,7 @@ import type {
   ChildStateRow,
   EventRow,
   LearnRow,
+  OpeningRow,
   ResourceRow,
   ResultRow,
   RewardRow,
@@ -15,6 +16,7 @@ import type {
 export type SyncOperation =
   | { kind: 'upsertChild'; row: ChildRow }
   | { kind: 'deleteChild'; childId: string }
+  | { kind: 'openBalance'; row: OpeningRow }
   | { kind: 'upsertChildState'; row: ChildStateRow }
   | { kind: 'upsertResult'; row: ResultRow }
   | { kind: 'upsertEvent'; row: EventRow }
@@ -100,6 +102,7 @@ function childOf(operation: SyncOperation): string {
     case 'upsertEvent':
     case 'upsertLearn':
       return operation.row.child_id
+    case 'openBalance':
     case 'recordReward':
     case 'recordResource':
     case 'recordBuildingLevel':
@@ -127,6 +130,11 @@ export function coalesce(
     (item) => childOf(item.operation) === child && sameTarget(item.operation, operation),
   )
   if (index === -1) return [...queue, next]
+  // A newer state goes to the end: it may list an outfit whose purchase was
+  // queued after the older state, and the server keeps only paid items.
+  if (operation.kind === 'upsertChildState') {
+    return [...queue.filter((_, position) => position !== index), next]
+  }
   return queue.map((item, position) => (position === index ? next : item))
 }
 
@@ -159,6 +167,9 @@ async function send(client: SyncClient, operation: SyncOperation) {
       return client.upsert('children', operation.row, 'id')
     case 'deleteChild':
       return client.remove('children', 'id', operation.childId)
+    case 'openBalance':
+      // Once per child on the server (false when there is nothing to open).
+      return client.rpc('record_opening_balance', operation.row)
     case 'upsertChildState':
       return client.upsert('child_state', operation.row, 'child_id')
     case 'upsertResult':

@@ -19,6 +19,8 @@ interface ActivityState {
   seenAt: string | null
   record: (childId: string, kind: ActivityEvent['kind'], at?: Date) => void
   markSeen: (at?: Date) => void
+  /** A child was removed: its events go too. */
+  forgetChild: (childId: string) => void
 }
 
 let counter = 0
@@ -44,6 +46,8 @@ export const useActivityStore = create<ActivityState>()(
           return { events: [...state.events, event].slice(-MAX_EVENTS) }
         }),
       markSeen: (at = new Date()) => set({ seenAt: at.toISOString() }),
+      forgetChild: (childId) =>
+        set((state) => ({ events: state.events.filter((event) => event.childId !== childId) })),
     }),
     { name: 'kiddo.activity', version: 1 },
   ),

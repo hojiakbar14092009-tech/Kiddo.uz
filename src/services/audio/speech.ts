@@ -8,6 +8,13 @@ export interface SpeakOptions {
   rate?: number
   /** Overrides the locale, e.g. to say “Yahoooo!” with an English voice. */
   locale?: string
+  /**
+   * For text with the child's name: the same words without it (null when the
+   * sentence cannot be said without the name). A device voice that is not
+   * local (it runs on its maker's servers, e.g. some Chrome "Google" voices)
+   * gets only this version, or stays silent: the name never leaves the device.
+   */
+  remoteText?: string | null
   /** 0–1; defaults to full volume. */
   volume?: number
 }
@@ -94,8 +101,12 @@ export const speech = {
     const voice = pickVoice(await loadVoices(synth), locale)
     if (!voice) return false
 
+    let list: readonly string[] = typeof phrases === 'string' ? [phrases] : phrases
+    if (!voice.localService && options.remoteText !== undefined) {
+      if (options.remoteText === null) return false
+      list = [options.remoteText]
+    }
     synth.cancel()
-    const list = typeof phrases === 'string' ? [phrases] : phrases
 
     await Promise.all(
       list.map(

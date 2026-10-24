@@ -422,13 +422,8 @@ function useCloudData(enabled: boolean): AdminData {
 
   const actions: AdminActions = {
     grantCoins: async (child, amount) => {
-      await supabaseCall((client) =>
-        client
-          .from('child_state')
-          .update({ coins: Math.max(0, child.coins + amount) })
-          .eq('child_id', child.id),
-      )
-      // The audit trail: only an admin account may write reason 'admin' (0005).
+      // The balance is the ledger (0009): an admin grant is one ledger row, which
+      // only an admin account may write (reason 'admin'); the stored balance follows.
       await supabaseCall((client) =>
         client.rpc('record_reward', {
           p_child: child.id,
