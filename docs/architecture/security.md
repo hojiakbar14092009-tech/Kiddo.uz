@@ -10,7 +10,7 @@ owner applies the migrations).
 | --------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
 | PRO             | `kiddo.subscription` in the browser: an honour system | the `subscriptions` row; the device only caches it               |
 | Coins           | device ledger (`kiddo.rewards`)                       | `reward_ledger`; `child_state.coins` is its sum (0009)           |
-| Resources, city | device (`kiddo.universe`)                             | `resource_ledger`, `world_state` via RPCs (0006, 0010)           |
+| Resources, city | device (`kiddo.universe`)                             | `resource_ledger`, `world_state` via RPCs (0006, 0010, 0011)     |
 | Voice clips     | public files in `dist/audio/voice`                    | private bucket, signed URLs for PRO (0007, `VITE_VOICE_PRIVATE`) |
 | Admin           | none in production builds                             | an account in `admins`, checked by `is_admin()`                  |
 
@@ -44,6 +44,9 @@ browser can show it. Serving that content from the server is future work.
   has one lifetime budget, later entries may arrive up to 30 days late; a quest
   crystal for its own day or the day before (yesterday's quest claimed today). `record_building_level` — only real
   buildings, the full price of the level spent under its ref, stars earned.
+  The connected world (0011): a find, a planted seed and a journey reward only
+  as listed in `world_rules`, with their exact amount, once, and only after
+  the step before is in the child's ledger.
 - **Children** (0010): a deleted child id never comes back (its ledgers would
   restart with fresh caps); at most five new profiles a day per family,
   counted by the server's own `registered_at`. Deleting a whole account still
@@ -83,7 +86,7 @@ private voice bucket, every Phase 13 fix) on a local PostgreSQL:
 
 ## Known limits and owner actions
 
-- **B1/B3**: apply migrations 0005–0010, set Vercel `VITE_SUPABASE_*`, deploy
+- **B1/B3**: apply migrations 0005–0011, set Vercel `VITE_SUPABASE_*`, deploy
   the Edge Functions, upload the voice clips and set `VITE_VOICE_PRIVATE=true`.
   Until then the table above's left column is what production has.
 - **No account deletion in the app**: removing a whole family needs a

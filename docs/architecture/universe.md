@@ -94,3 +94,51 @@ Tables (migration 0006+): `resource_ledger` (generic, unique(child, resource, re
 `world_state` (buildings and levels per child), `quest_progress`, `achievements`,
 `learner_profile` (strand levels). Writes through `security definer` RPCs with
 caps; reads by the family. Device mode: same logic locally.
+
+## 8. Connected world (Phase 14) – `src/domain/universe/progression`
+
+One universe, not mini-apps with shared coins: features publish domain events,
+one engine turns the world's state into what changes next.
+
+**Audit (before Phase 14).** Already connected: every activity → `emitActivity`
+(stars by quality, crystal on a first 3-star, part for maths, scroll for
+stories) → achievements → coins; city upgrades spend crystals/parts; the
+adventure map opens by stars; the daily quest pays a crystal; Math Lab moves
+the strand level; learning memory keeps mastery, misconceptions and a garden
+stage per skill. Isolated: seeds and keys had no source; mistakes had no
+place; no step led from one world into another; `mistake.made` was the only
+learning event on the bus; nothing tied an unlock to anything but stars.
+
+| Layer   | File                             | Role                                                                                                                                                                                                                                                                       |
+| ------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Events  | `events.ts`                      | typed `DomainEvent` union (activity.completed, resource.changed = reward earned / resource spent, building.upgraded, mistake.made / confirmed / resolved, skill.mastered, world.unlocked, artifact.discovered, seed.planted, plant.grew, journey.step, quest.completed, …) |
+| Content | `content.ts`                     | data only: `UNLOCKS`, `ARTIFACTS`, `PLOTS`, `JOURNEYS` with declarative `Condition`s (run, building, unlocked, discovered, planted, plotStage)                                                                                                                             |
+| Engine  | `engine.ts`                      | pure: `advance(progress, world) → { progress, effects }` (growth, unlocks, ordered journey steps, completion; chains in one call, bounded), `canDiscover`, `canPlant`, `journeyView`                                                                                       |
+| Service | `service.ts`                     | the only writer of `UniverseChild.progress`; `syncProgression` after any trigger event, `discoverArtifact`, `plantSeed`; grants and spends only through the universe ledger (`grantResource` / `spendResources`)                                                           |
+| Bridge  | `memoryEvents.ts`                | learning-memory changes → `mistake.confirmed`, `mistake.resolved`, `skill.mastered`                                                                                                                                                                                        |
+| UI      | `useJourney`, `useWorldProgress` | read-only views; pages: `/spaceport`, `/spaceport/mars`, `/mistake-garden` (shown as the Practice Garden), `/science-lab`, `JourneyCard` on home                                                                                                                           |
+
+**The first journey** (`FIRST_FLIGHT`): maths 3 stars (crystal + part) →
+spaceport level 1 (the rocket; opens `mars`) → find `mars-seed` on Mars (+1
+seed) → plant it in the `mars` bed (−1 seed) → three science runs with ≥ 2
+stars after planting (one stage each) → bloom opens `science-lab` → its first
+experiment → +2 crystals, announced on the card from the start. Steps count
+only in order; finishing pays once (`journey|first-flight`).
+
+**Rules of engagement.** No random rewards (the seed is under the last rock
+turned), no timers, no streak loss; the lab is a discovery place, never a
+lesson; learning buildings stay open from the start. Mistakes become sprouts
+("Practice Garden"), never a failure list; making mistakes pays nothing.
+
+**Source of truth.**
+
+| What                                                         | Device mode           | Cloud mode                                                                                                                                                                                                                   |
+| ------------------------------------------------------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Resources (incl. seed found, seed planted, journey crystals) | device ledger         | `resource_ledger`; `record_resource` checks `world_rules` (0011): exact resource and amount per ref, and the step before must be in the child's ledger (rocket paid → seed; seed found → planting; planted → journey reward) |
+| Building levels (spaceport, mistake-garden, science-lab)     | device                | `record_building_level` with server prices (0011 adds the three)                                                                                                                                                             |
+| Unlocks, finds, plots, steps (`progress`)                    | device, derived       | device, derived; everything paid in it is rebuildable from the ledger                                                                                                                                                        |
+| Plant growth, the lab experiment                             | device (science runs) | not visible to the server: the journey reward is one fixed amount once per child, so a forged growth gains at most 2 crystals once                                                                                           |
+
+Offline: everything works without a network; sync sends the ledger entries in
+order (a spend after the grants it needs). Analytics: none beyond the
+existing local logs; no event leaves the device except the ledger rows above.

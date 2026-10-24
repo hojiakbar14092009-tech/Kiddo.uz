@@ -54,6 +54,7 @@ Phase 11: 941 unit, 112 e2e; page audit (9 viewports) 369 pages ru clean on the 
 Phase 12: initial JS 296 → 266 KB gz; Home cold load 1417 → 899 KB transferred (strong device),
 weak device scripts 301 → 271 KB, images 617 → 134 KB; budgets in `e2e/performance.spec.ts`.
 Phase 13: 302 SQL assertions, 978 unit, 118 e2e (`supabase/tests/run.sh`; local PG: /var/tmp/kiddo-pg, see Security).
+Phase 14: 321 SQL assertions, ~1018 unit, 120 e2e (journey.spec: the whole first journey on phone + tablet).
 
 ## UI foundation (Phase 1)
 
@@ -250,7 +251,8 @@ prod) · B7 promo policy.
 - [x] 11 Cross-device responsive QA: 9 viewports, folding language switch, wrapping buttons, 3D frames follow rotation, hotspots separated, pinch-zoom allowed, city building looks per level (2026-10-24)
 - [x] 12 Performance: pet poses on demand, ru/en texts lazy, decorative robot 30 fps on demand + idle mount + 2D beside 3D content, content canvases pause off screen, SW registers after load (2026-10-24)
 - [x] 13 Security: balance from ledger (0009), integrity hardening (0010), security headers/CSP, no device admin in prod, cloud-voice name guard, child-removal cleanup, per-account audio caps (2026-10-24)
-- [ ] 14 connected universe · 15 adaptive learning (same prompt, continue)
+- [x] 14 Connected universe: domain events, progression engine + content data, first journey (maths → rocket → Mars seed → Practice Garden → science runs → bloom → Science Lab), 0011 world_rules (2026-10-24)
+- [ ] 15 adaptive learning (same prompt, continue)
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
@@ -327,8 +329,23 @@ clue → picture → card removed → solution, `data-review` question from due 
 - SQL tests: start PG as postgres in /var/tmp/kiddo-pg (`pg_ctl -o '-k /var/tmp/kiddo-pg/sock'`),
   `PGHOST=/var/tmp/kiddo-pg/sock PGUSER=postgres sh supabase/tests/run.sh`.
 
+## Connected world (Phase 14) – docs/architecture/universe.md §8
+
+- `domain/universe/progression`: `events.ts` (typed DomainEvent), `content.ts` (UNLOCKS, ARTIFACTS,
+  PLOTS, JOURNEYS as data + Conditions), `engine.ts` (pure `advance`, `canDiscover/canPlant`,
+  `journeyView`), `service.ts` (only writer of `UniverseChild.progress`; `installProgression()` in
+  main.tsx; `discoverArtifact`, `plantSeed`, journey reward via ledger reason 'journey'),
+  `memoryEvents.ts` (mistake.confirmed/resolved, skill.mastered from learning memory).
+- Buildings: spaceport (workshop), mistake-garden (shown "Practice Garden"), science-lab (`opensWith`
+  'science-lab': locked tile until the Mars flower blooms). Pages /spaceport, /spaceport/mars,
+  /mistake-garden, /science-lab; `JourneyCard` on home.
+- 0011: `world_rules` (discovery mars-seed needs upgrade|spaceport|1; plant plot|mars needs mars-seed;
+  journey|first-flight 2 crystals needs plot|mars); drift test in progression.test.ts.
+- Known: growth/lab invisible to the server (bounded: 2 crystals once); guest journey not saved;
+  event bus listeners still get the loose UniverseEvent type.
+
 ## Next
 
-Phase 14 (connected universe) → Phase 15 (adaptive learning), same prompt. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
+Phase 15 (adaptive learning), same prompt. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

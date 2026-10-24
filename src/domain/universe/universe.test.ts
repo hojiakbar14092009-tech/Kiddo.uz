@@ -258,9 +258,12 @@ describe('world', () => {
       'word-workshop',
       'writing-school',
       'observatory',
+      'spaceport',
       'story-library',
       'garden',
+      'mistake-garden',
       'robot-workshop',
+      'science-lab',
       'art-studio',
       'friendship-house',
       'dino-park',
@@ -272,6 +275,14 @@ describe('world', () => {
       expect(building.levels[0]).toEqual({ cost: {} })
       expect(building.levels).toHaveLength(4)
     }
+    // only discovery places open later; every learning building is open now
+    expect(BUILDINGS.filter((b) => b.opensWith).map((b) => b.id)).toEqual(['science-lab'])
+  })
+
+  it('a closed place cannot be upgraded until the world opens it', () => {
+    grantResource({ childKey: KID, resource: 'crystal', amount: 3, reason: 'admin', refId: 'g' })
+    expect(upgradeBuilding(KID, 'science-lab')).toBe('locked')
+    expect(getResources(KID).crystal).toBe(3)
   })
 
   it('upgrades by spending once, needs stars for higher levels, and stops at max', () => {

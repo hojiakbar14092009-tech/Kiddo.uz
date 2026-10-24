@@ -457,3 +457,20 @@ Supabase Auth.
 Send the output of `vercel env ls`, `supabase migration list`, the two RLS
 queries (no keys needed), the post-apply checklist of section 6, and whether step 5 showed requests. Phase 3 starts from
 those facts.
+
+## 9. Applying 0011 (connected world)
+
+`0011_connected_world.sql` adds `world_rules` (the finds, garden beds and
+journey rewards of `src/domain/universe/progression/content.ts`), lets
+`record_resource` take the reasons `discovery`, `plant` and `journey` only for
+those rows (exact amount, the step before already in the child's ledger), and
+adds the spaceport, mistake-garden and science-lab building prices.
+
+```sh
+supabase db push                       # applies 0011 after 0010
+psql "$DB" -c "select reason, ref_id, resource, amount, needs_ref from public.world_rules order by 1, 2"
+```
+
+Expect three rows: `discovery mars-seed seed 1 upgrade|spaceport|1`,
+`journey journey|first-flight crystal 2 plot|mars`, `plant plot|mars seed -1 mars-seed`.
+A unit test (`progression.test.ts`) keeps the rows equal to the app's data.

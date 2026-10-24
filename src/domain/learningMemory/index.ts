@@ -36,4 +36,5 @@ export {
   useChildMemory,
   useLearningMemoryStore,
   type ChildMemory,
+  type SkillChange,
 } from './store'

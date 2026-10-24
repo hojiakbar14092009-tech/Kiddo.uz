@@ -165,6 +165,33 @@ export const routes: RouteObject[] = [
                     .UzbekistanPage,
                 }),
               })),
+              // The connected world (Phase 14): the rocket and Mars, the Practice
+              // (Mistake) Garden, and the Science Lab the Mars flower opens.
+              {
+                path: '/spaceport',
+                lazy: async () => ({
+                  Component: (await import('@/features/spaceport/SpaceportPage')).SpaceportPage,
+                }),
+              },
+              {
+                path: '/spaceport/mars',
+                lazy: async () => ({
+                  Component: (await import('@/features/spaceport/MarsPage')).MarsPage,
+                }),
+              },
+              {
+                path: '/mistake-garden',
+                lazy: async () => ({
+                  Component: (await import('@/features/mistakeGarden/MistakeGardenPage'))
+                    .MistakeGardenPage,
+                }),
+              },
+              {
+                path: '/science-lab',
+                lazy: async () => ({
+                  Component: (await import('@/features/scienceLab/ScienceLabPage')).ScienceLabPage,
+                }),
+              },
               {
                 path: '/collection',
                 lazy: async () => ({

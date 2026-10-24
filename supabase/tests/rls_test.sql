@@ -673,6 +673,38 @@ select pg_temp.check(public.audio_daily_count('synth') = 1, 'audio: real synthes
 commit;
 select pg_temp.check(not has_function_privilege('authenticated','public.audio_rate_ok(uuid,text,integer,integer,integer)','execute') and not has_function_privilege('anon','public.audio_rate_ok(uuid,text,integer,integer,integer)','execute'), 'audio: the limit function is service-only');
 
+-- ===== 0011: the connected world (finds, garden beds, journey rewards)
+insert into auth.users (id,email,email_confirmed_at) values ('00000000-0000-0000-0000-0000000000d2','w@x.uz', now());
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('cj','00000000-0000-0000-0000-0000000000d2','Jasur',6,'boy','boy');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d2","role":"authenticated"}', true);
+select pg_temp.expect_error($$insert into public.world_rules values ('discovery','x','seed',5,'activity','r')$$, 'permission denied');
+select pg_temp.expect_error($$select public.record_resource('cj','seed',1,'discovery','moon-seed')$$, 'bad_ref');
+select pg_temp.expect_error($$select public.record_resource('cj','crystal',1,'discovery','mars-seed')$$, 'bad_reason');
+select pg_temp.expect_error($$select public.record_resource('cj','seed',5,'discovery','mars-seed')$$, 'out_of_bounds');
+-- the Mars seed needs the rocket's first level paid
+select pg_temp.expect_error($$select public.record_resource('cj','seed',1,'discovery','mars-seed')$$, 'not_unlocked');
+select pg_temp.expect_error($$select public.record_resource('cj','seed',-1,'plant','plot|mars')$$, 'not_unlocked');
+select pg_temp.expect_error($$select public.record_resource('cj','crystal',2,'journey','journey|first-flight')$$, 'not_unlocked');
+select public.record_resource('cj','crystal',1,'three-stars','math-lab:count:L1');
+select public.record_resource('cj','part',1,'number-3star','math-lab:count:L1|2026-10-24');
+select public.record_resource('cj','crystal',-1,'upgrade','upgrade|spaceport|1');
+select pg_temp.expect_error($$select public.record_building_level('cj','spaceport',1)$$, 'not_paid');
+select public.record_resource('cj','part',-1,'upgrade','upgrade|spaceport|1');
+select pg_temp.check((select (public.record_building_level('cj','spaceport',1)).buildings ->> 'spaceport') = '1', 'world: the rocket is built for crystal and part');
+select pg_temp.check((select (public.record_resource('cj','seed',1,'discovery','mars-seed')).amount) = 1, 'world: the Mars seed once the rocket flies');
+select pg_temp.check((select (public.record_resource('cj','seed',1,'discovery','mars-seed')).amount) = 1 and (select count(*) from public.resource_ledger where child_id='cj' and reason='discovery') = 1, 'world: a find is paid once');
+select pg_temp.expect_error($$select public.record_resource('cj','seed',1,'plant','plot|mars')$$, 'out_of_bounds');
+select pg_temp.check((select (public.record_resource('cj','seed',-1,'plant','plot|mars')).amount) = -1, 'world: the seed is planted');
+select pg_temp.check((select sum(amount) from public.resource_ledger where child_id='cj' and resource='seed') = 0, 'world: planting spent the seed');
+select pg_temp.expect_error($$select public.record_resource('cj','crystal',5,'journey','journey|first-flight')$$, 'out_of_bounds');
+select pg_temp.check((select (public.record_resource('cj','crystal',2,'journey','journey|first-flight')).amount) = 2, 'world: the journey reward after planting');
+select pg_temp.check((select (public.record_resource('cj','crystal',2,'journey','journey|first-flight')).amount) = 2 and (select count(*) from public.resource_ledger where child_id='cj' and reason='journey') = 1, 'world: the journey pays once');
+select pg_temp.expect_error($$select public.record_resource('cb','seed',1,'discovery','mars-seed')$$, 'not_your_child');
+select pg_temp.check((select count(*) from public.building_levels where building in ('spaceport','mistake-garden','science-lab')) = 9, 'world: the new buildings have prices');
+commit;
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

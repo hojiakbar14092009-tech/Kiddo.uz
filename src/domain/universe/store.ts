@@ -15,6 +15,7 @@ import {
 } from './achievements'
 import { applyRun, childAgeFor, levelOf, type LearnerStrands } from '@/domain/learner/profile'
 import { appendMistake, appendRecentRun, type MistakeRecord, type RecentRun } from './history'
+import type { WorldProgress } from './progression/engine'
 import { activityEffects } from './rules'
 import {
   isResourceId,
@@ -81,6 +82,8 @@ export interface UniverseChild {
   recent?: RecentRun[]
   /** Skills answered wrong first, newest first (capped; `mistake.made` events). */
   mistakes?: MistakeRecord[]
+  /** Places opened, finds, garden beds and journeys (progression/engine.ts). */
+  progress?: WorldProgress
 }
 
 export const EMPTY_BALANCES: Record<ResourceId, number> = Object.freeze(
@@ -502,6 +505,11 @@ export function getAward(activityId: string, childKey: string): AwardSummary | n
 
 export function setBuildingLevel(childKey: string, id: string, level: number) {
   update(childKey, (child) => ({ ...child, buildings: { ...child.buildings, [id]: level } }))
+}
+
+/** Replaces the world progress of a child (progression/service.ts is the only writer). */
+export function setProgress(childKey: string, progress: WorldProgress) {
+  update(childKey, (child) => ({ ...child, progress }))
 }
 
 export function markQuestClaimed(childKey: string, day: string) {

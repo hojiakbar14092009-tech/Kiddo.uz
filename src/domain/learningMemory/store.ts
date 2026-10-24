@@ -72,7 +72,13 @@ export function isValidEvidence(e: Evidence): boolean {
   )
 }
 
-type Listener = (childKey: string, evidence: Evidence) => void
+/** The skill's memory before and after this evidence (the after is what was stored). */
+export interface SkillChange {
+  before: SkillMemory | undefined
+  after: SkillMemory
+}
+
+type Listener = (childKey: string, evidence: Evidence, change: SkillChange) => void
 const listeners = new Set<Listener>()
 
 /** Called with every evidence counted for the first time (cloud sync listens). */
@@ -99,10 +105,9 @@ export function recordEvidence(childKey: string, evidence: Evidence): boolean {
   if (!childKey || !isValidEvidence(evidence)) return false
   const child = getChildMemory(childKey)
   if (child.processed.includes(evidence.id)) return false
-  const skills = capSkills({
-    ...child.skills,
-    [evidence.skill]: applyEvidence(child.skills[evidence.skill], evidence),
-  })
+  const before = child.skills[evidence.skill]
+  const after = applyEvidence(before, evidence)
+  const skills = capSkills({ ...child.skills, [evidence.skill]: after })
   const processed = [...child.processed, evidence.id].slice(-MEMORY_POLICY.maxProcessed)
   useLearningMemoryStore.setState((state) => ({
     byChild: { ...state.byChild, [childKey]: { skills, processed } },
@@ -110,7 +115,7 @@ export function recordEvidence(childKey: string, evidence: Evidence): boolean {
   if (childKey !== GUEST_KEY) {
     for (const listener of listeners) {
       try {
-        listener(childKey, evidence)
+        listener(childKey, evidence, { before, after })
       } catch {
         // a listener's failure never loses the memory
       }

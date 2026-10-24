@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { ArrowUpIcon, StarIcon } from '@/components/icons'
+import { ArrowUpIcon, LockIcon, StarIcon } from '@/components/icons'
 import { Img3D } from '@/components/ui/Img3D'
 import { RewardBurst } from '@/components/ui/RewardBurst'
 
@@ -62,6 +62,8 @@ export interface BuildingTileProps {
   onUpgrade?: () => void
   /** Changes when the building was just upgraded, to replay the burst once. */
   celebrate?: number
+  /** Not opened yet: what opens it, shown instead of the level (the link still explains it). */
+  lockedText?: string
 }
 
 /**
@@ -82,16 +84,22 @@ export function BuildingTile({
   upgradeReady = false,
   onUpgrade,
   celebrate,
+  lockedText,
 }: BuildingTileProps) {
   const { t } = useTranslation()
   const levelId = useId()
-  const hasLevels = level !== undefined && maxLevel !== undefined
+  const locked = lockedText !== undefined
+  const hasLevels = level !== undefined && maxLevel !== undefined && !locked
   const current = level ?? 0
   const look = hasLevels ? lookFor(current) : LEVEL_LOOK[0]!
   const art = (
     <Img3D
       name={icon3d}
-      className={clsx('drop-shadow-sm transition-[width,height] duration-500', ART_SIZE[current])}
+      className={clsx(
+        'drop-shadow-sm transition-[width,height] duration-500',
+        ART_SIZE[current],
+        locked && 'opacity-45 grayscale',
+      )}
     />
   )
 
@@ -99,8 +107,9 @@ export function BuildingTile({
     <li data-roam="home" className="relative" data-testid={`building-${route}`}>
       <Link
         to={route}
-        aria-describedby={hasLevels ? levelId : undefined}
+        aria-describedby={hasLevels || locked ? levelId : undefined}
         data-level={hasLevels ? current + 1 : undefined}
+        data-locked={locked || undefined}
         className={clsx(
           'flex h-full flex-col items-center gap-2 rounded-card bg-surface p-2.5 pb-3 shadow-press transition-transform active:translate-y-1 sm:gap-3 sm:p-3',
           look.frame,
@@ -154,6 +163,15 @@ export function BuildingTile({
         <span className="text-center font-display text-base leading-tight font-bold sm:text-xl">
           {name}
         </span>
+        {locked && (
+          <span
+            id={levelId}
+            className="flex items-center gap-1.5 rounded-full bg-cream px-2.5 py-0.5 text-center text-sm font-semibold text-ink-soft"
+          >
+            <LockIcon size={16} className="shrink-0" />
+            {lockedText}
+          </span>
+        )}
         {hasLevels && (
           <span
             id={levelId}

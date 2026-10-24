@@ -26,6 +26,7 @@ import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
 import { LearnReviewCard } from '@/features/learn/LearnHome'
 import { DailyQuestCard } from '@/features/city/DailyQuestCard'
+import { JourneyCard } from '@/features/city/JourneyCard'
 import { KiddoCity } from '@/features/city/KiddoCity'
 
 export function HomePage() {
@@ -121,6 +122,8 @@ export function HomePage() {
       <DailyQuestCard />
 
       <LearnReviewCard />
+
+      <JourneyCard />
 
       <KiddoCity />
 

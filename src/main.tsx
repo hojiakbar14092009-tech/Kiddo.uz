@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
 import { reloadForUpdate } from './app/errors/staleBuild'
+import { installProgression } from './domain/universe/progression/service'
 import { registerServiceWorker } from './app/registerServiceWorker'
 import { dropPublicVoiceCache } from './services/audio/voicePaths'
 import { useSettingsStore } from './store/settingsStore'
@@ -13,6 +14,9 @@ import './styles/index.css'
 window.addEventListener('vite:preloadError', (event) => {
   if (reloadForUpdate()) event.preventDefault()
 })
+
+// the connected world follows every activity, upgrade and resource from here on
+installProgression()
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {

@@ -132,6 +132,7 @@ describe('Kiddo City', () => {
       route: '/learn/help',
       level: 0,
       maxLevel: 3,
+      locked: false,
       next: { cost: { crystal: 1, part: 1 }, missing: { part: 1 } },
     }
     expect(

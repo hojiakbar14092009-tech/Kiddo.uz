@@ -12,8 +12,9 @@ import {
 import type { ResourceId } from './types'
 
 /*
- * Kiddo City, data-driven. Every building is built and open at level 0:
- * core learning is never locked. Levels 1–3 are upgrades that change how
+ * Kiddo City, data-driven. Every learning building is built and open at
+ * level 0: core learning is never locked. A discovery place (`opensWith`)
+ * opens when the connected world says so. Levels 1–3 are upgrades that change how
  * the building looks; they cost crystals (workshops also parts) and may need
  * a number of stars earned (stars are a measure, never spent).
  */
@@ -31,6 +32,11 @@ export interface BuildingDef {
   route: string
   /** levels[0] is the free, open building; the rest are upgrades. */
   levels: BuildingLevel[]
+  /**
+   * A place the connected world opens (progression/content.ts UNLOCKS): shown
+   * closed, with what opens it, until then. Learning buildings never have one.
+   */
+  opensWith?: string
 }
 
 function upgrades(workshop: boolean): BuildingLevel[] {
@@ -43,8 +49,21 @@ function upgrades(workshop: boolean): BuildingLevel[] {
   ]
 }
 
-function building(id: string, icon3d: string, route: string, workshop = false): BuildingDef {
-  return { id, nameKey: `universe.buildings.${id}`, icon3d, route, levels: upgrades(workshop) }
+function building(
+  id: string,
+  icon3d: string,
+  route: string,
+  workshop = false,
+  opensWith?: string,
+): BuildingDef {
+  return {
+    id,
+    nameKey: `universe.buildings.${id}`,
+    icon3d,
+    route,
+    levels: upgrades(workshop),
+    ...(opensWith ? { opensWith } : {}),
+  }
 }
 
 export const BUILDINGS: readonly BuildingDef[] = [
@@ -54,10 +73,16 @@ export const BUILDINGS: readonly BuildingDef[] = [
   building('word-workshop', 'pencil', '/learn/words', true),
   building('writing-school', 'notebook', '/trace'),
   building('observatory', 'telescope', '/learn/space'),
+  // the rocket: built with crystals and parts, it flies to Mars (the first journey)
+  building('spaceport', 'rocket', '/spaceport', true),
   // the Story Engine's library; it links on to the classic tales
   building('story-library', 'book', '/stories'),
   building('garden', 'garden-house', '/learn/garden'),
+  // practice plants from the learning memory, and the bed for the Mars seed
+  building('mistake-garden', 'seedling', '/mistake-garden'),
   building('robot-workshop', 'clock', '/learn/help', true),
+  // opens when the Mars flower blooms (a place to discover, not a lesson)
+  building('science-lab', 'blossom', '/science-lab', false, 'science-lab'),
   building('art-studio', 'paintbrush', '/studio'),
   // Emotions & Social Skills: open at level 0 like every building, first upgrade 1 crystal
   building('friendship-house', 'teddy', '/feelings'),
@@ -80,6 +105,8 @@ export interface BuildingView {
   route: string
   level: number
   maxLevel: number
+  /** Not opened yet by the connected world (`opensWith`); it cannot be upgraded. */
+  locked: boolean
   /** The next upgrade and what is still missing for it ('star' = stars to earn); null at max. */
   next: {
     cost: Partial<Record<ResourceId, number>>
@@ -92,10 +119,12 @@ export function buildingView(
   def: BuildingDef,
   level: number,
   balances: Readonly<Record<ResourceId, number>>,
+  unlocked: Readonly<Record<string, string>> = {},
 ): BuildingView {
   const maxLevel = def.levels.length - 1
   const current = Math.min(Math.max(0, level), maxLevel)
-  const upgrade = def.levels[current + 1]
+  const locked = def.opensWith !== undefined && !(def.opensWith in unlocked)
+  const upgrade = locked ? undefined : def.levels[current + 1]
   let next: BuildingView['next'] = null
   if (upgrade) {
     const missing: Partial<Record<ResourceId, number>> = {}
@@ -114,11 +143,12 @@ export function buildingView(
     route: def.route,
     level: current,
     maxLevel,
+    locked,
     next,
   }
 }
 
-export type UpgradeResult = 'ok' | 'missing' | 'max'
+export type UpgradeResult = 'ok' | 'missing' | 'max' | 'locked'
 
 /**
  * Upgrades a building one level: spends its cost once (refId
@@ -129,7 +159,8 @@ export function upgradeBuilding(childKey: string, id: string): UpgradeResult {
   if (!def || !childKey) return 'max'
   refreshIfStale(childKey)
   const child = universeChild(childKey)
-  const view = buildingView(def, child.buildings[id] ?? 0, child.balances)
+  const view = buildingView(def, child.buildings[id] ?? 0, child.balances, child.progress?.unlocked)
+  if (view.locked) return 'locked'
   if (!view.next) return 'max'
   if (Object.keys(view.next.missing).length > 0) return 'missing'
   const level = view.level + 1
@@ -150,11 +181,14 @@ export function useWorld(): { buildings: BuildingView[]; upgrade: (id: string) =
   const childKey = useChildKey()
   const levels = useUniverseStore((s) => s.byChild[childKey]?.buildings)
   const balances = useUniverseStore((s) => s.byChild[childKey]?.balances ?? EMPTY_BALANCES)
+  const unlocked = useUniverseStore((s) => s.byChild[childKey]?.progress?.unlocked)
   return useMemo(
     () => ({
-      buildings: BUILDINGS.map((def) => buildingView(def, levels?.[def.id] ?? 0, balances)),
+      buildings: BUILDINGS.map((def) =>
+        buildingView(def, levels?.[def.id] ?? 0, balances, unlocked),
+      ),
       upgrade: (id: string) => upgradeBuilding(childKey, id),
     }),
-    [levels, balances, childKey],
+    [levels, balances, unlocked, childKey],
   )
 }

@@ -79,11 +79,12 @@ export function KiddoCity() {
         upgradeReady={isReady(building)}
         onUpgrade={
           // a quiet level badge only, until there is a crystal to think about
-          building.next && (crystals > 0 || isReady(building))
+          building.next && !building.locked && (crystals > 0 || isReady(building))
             ? () => setSheetFor(building.id)
             : undefined
         }
         celebrate={celebrated?.id === building.id ? celebrated.at : undefined}
+        lockedText={building.locked ? tDynamic(t, `city.opensWith.${building.id}`) : undefined}
       />,
     )
     pushExtras(building.id)

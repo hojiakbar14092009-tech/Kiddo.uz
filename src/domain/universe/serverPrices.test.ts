@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import migration from '../../../supabase/migrations/0010_integrity_hardening.sql?raw'
+import hardening from '../../../supabase/migrations/0010_integrity_hardening.sql?raw'
+import connected from '../../../supabase/migrations/0011_connected_world.sql?raw'
 import { BUILDINGS } from './world'
+
+/** Every migration that adds buildings (0010 the first city, 0011 the connected world). */
+const MIGRATIONS = [hardening, connected]
+const migration = hardening
 
 /*
  * The server checks every upgrade against its own price list (migration
@@ -9,15 +14,28 @@ import { BUILDINGS } from './world'
  * cheaper one accepted). The migration writes the rule, not a table of
  * numbers, so the rule is read back here and compared level by level.
  */
-function serverBuildings(): string[] {
-  const list = /unnest\(array\[([\s\S]*?)\]\) b, generate_series\(1, 3\) l/.exec(migration)?.[1]
+function namesIn(list: string | undefined): string[] {
   return [...(list ?? '').matchAll(/'([a-z0-9-]+)'/g)].map((match) => match[1]!)
 }
 
-function serverWorkshops(): string[] {
-  const list = /where bl\.building in \(([^)]*)\)/.exec(migration)?.[1]
-  return [...(list ?? '').matchAll(/'([a-z0-9-]+)'/g)].map((match) => match[1]!)
+function serverBuildings(): string[] {
+  return MIGRATIONS.flatMap((sql) =>
+    namesIn(/unnest\(array\[([\s\S]*?)\]\) b, generate_series\(1, 3\) l/.exec(sql)?.[1]),
+  )
 }
+
+function serverWorkshops(): string[] {
+  return MIGRATIONS.flatMap((sql) => namesIn(/where bl\.building in \(([^)]*)\)/.exec(sql)?.[1]))
+}
+
+/** Both migrations use the same star rule. */
+it('every migration asks the same stars per level', () => {
+  const rules = MIGRATIONS.map((sql) =>
+    /case l when 1 then (\d+) when 2 then (\d+) else (\d+) end/.exec(sql)?.slice(1).join(','),
+  )
+  expect(rules[0]).toBeDefined()
+  expect(new Set(rules).size).toBe(1)
+})
 
 const SERVER_STARS = (
   /case l when 1 then (\d+) when 2 then (\d+) else (\d+) end/.exec(migration) ?? []
