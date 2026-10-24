@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
 import { tDynamic } from '@/lib/tDynamic'
 import { addExplorerLights, disposeObject } from './lights'
+import { MARKER_GAP, MARKER_SIZE, clamp, separate } from './markers'
 import {
   KEY_TURN,
   KEY_ZOOM,
@@ -94,16 +95,33 @@ function Scene({ object, orbit, distance, idle, active, hotspots, anchors, remot
 
     // the numbered buttons follow their points on the model
     centre.current.set(0, 0, 0).applyMatrix4(camera.matrixWorldInverse)
-    hotspots.forEach((spot, index) => {
-      const element = anchors.current[index]
-      if (!element) return
+    const half = MARKER_SIZE / 2
+    const placed = hotspots.map((spot) => {
       const p = point.current.set(...spot.position).applyMatrix4(object.matrixWorld)
       const depth = p.clone().applyMatrix4(camera.matrixWorldInverse).z
       p.project(camera)
       const x = ((p.x + 1) / 2) * size.width
       const y = ((1 - p.y) / 2) * size.height
+      const outside = x < 0 || x > size.width || y < 0 || y > size.height
+      return { x, y, outside, behind: depth < centre.current.z - 0.15 }
+    })
+    // spread apart inside the frame (a clamp afterwards could stack them again)
+    separate(placed, MARKER_SIZE + MARKER_GAP, {
+      width: size.width,
+      height: size.height,
+      inset: half,
+    })
+    placed.forEach((spot, index) => {
+      const element = anchors.current[index]
+      if (!element) return
+      // kept inside the frame (half a button from the edge): a point turned or zoomed out
+      // of view never lands on the buttons or text around the model; such a point is
+      // dimmed and cannot be tapped until it turns back into view
+      const x = clamp(spot.x, half, size.width - half)
+      const y = clamp(spot.y, half, size.height - half)
       element.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`
-      element.dataset.behind = depth < centre.current.z - 0.15 ? 'true' : 'false'
+      element.dataset.behind = spot.behind ? 'true' : 'false'
+      element.dataset.offscreen = spot.outside ? 'true' : 'false'
       element.style.visibility = 'visible'
     })
     if (moving) invalidate()
@@ -234,7 +252,8 @@ export default function ExplorerView({
       tabIndex={0}
       data-testid="explorer-3d"
       data-ready={object ? 'true' : 'false'}
-      className="relative size-full touch-pan-y outline-none select-none focus-visible:ring-4 focus-visible:ring-primary"
+      // absolute: the canvas never props up its square frame, so it shrinks on a turn or resize
+      className="absolute inset-0 touch-pan-y outline-none select-none focus-visible:ring-4 focus-visible:ring-primary"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerEnd}
@@ -297,7 +316,7 @@ export default function ExplorerView({
               style={{ visibility: 'hidden' }}
               className={clsx(
                 'absolute top-0 left-0 flex size-12 items-center justify-center rounded-full border-4 border-white font-display text-xl font-extrabold shadow-press-sm transition-opacity',
-                'data-[behind=true]:opacity-60 focus-visible:ring-4 focus-visible:ring-ink',
+                'data-[behind=true]:opacity-60 data-[offscreen=true]:pointer-events-none data-[offscreen=true]:opacity-40 focus-visible:ring-4 focus-visible:ring-ink',
                 activeHotspot === spot.id ? 'bg-primary text-white' : 'bg-coin text-ink',
               )}
             >

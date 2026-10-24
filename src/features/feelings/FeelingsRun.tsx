@@ -185,7 +185,7 @@ function Run({ kind, onAgain }: { kind: ScoredKind; onAgain: () => void }) {
         <div className="flex flex-col gap-3 short:w-[42%] short:shrink-0 short:gap-2">
           <div className="flex items-center gap-3">
             <Mascot
-              robotClassName="w-14 sm:w-20 short:w-10"
+              robotClassName="w-[56px] sm:w-20 short:w-10"
               className="min-w-0 flex-1"
               talkOnlyWhileSpeaking
             />

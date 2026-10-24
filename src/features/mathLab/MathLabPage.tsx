@@ -139,7 +139,7 @@ function LabFrame({
         className={clsx('mx-auto flex w-full max-w-4xl items-center gap-3', SHORT_SCREEN.mascotRow)}
       >
         <Mascot
-          robotClassName={clsx('w-14 sm:w-24', SHORT_SCREEN.robot)}
+          robotClassName={clsx('w-[56px] sm:w-24', SHORT_SCREEN.robot)}
           className={clsx('min-w-0 flex-1', hideMascotShort && 'short:hidden')}
           speaking={voice.speaking}
           talkOnlyWhileSpeaking
@@ -218,12 +218,7 @@ function LabStart({ level, onStart }: { level: ChallengeLevel; onStart: () => vo
               {t('mathLab.start')}
             </Button>
           </div>
-          <LinkButton
-            to="/learn/math"
-            variant="soft"
-            size="md"
-            className="max-w-full text-center text-lg whitespace-normal!"
-          >
+          <LinkButton to="/learn/math" variant="soft" size="md" className="text-lg">
             {t('mathLab.classic')}
           </LinkButton>
         </div>

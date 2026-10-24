@@ -51,7 +51,7 @@ export function StoryFrame({
         className={clsx('mx-auto flex w-full max-w-5xl items-center gap-3', SHORT_SCREEN.mascotRow)}
       >
         <Mascot
-          robotClassName={clsx('w-14 sm:w-24', SHORT_SCREEN.robot)}
+          robotClassName={clsx('w-[56px] sm:w-24', SHORT_SCREEN.robot)}
           className={clsx('min-w-0 flex-1', hideMascotShort && 'short:hidden')}
           speaking={voice.speaking}
           talkOnlyWhileSpeaking

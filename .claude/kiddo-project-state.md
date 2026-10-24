@@ -50,6 +50,7 @@ Phase 7: 743 unit, 70 e2e, 189 SQL assertions (`supabase/tests/run.sh`, local Po
 Phase 8: 790 unit, 80 e2e.
 Phase 9: 862 unit, 84 e2e.
 Phase 10: 931 unit, 86 e2e, 246 SQL assertions.
+Phase 11: 941 unit, 112 e2e; page audit (9 viewports) 369 pages ru clean on the final build.
 
 ## UI foundation (Phase 1)
 
@@ -243,7 +244,8 @@ prod) · B7 promo policy.
 - [x] 8 Story Engine: /stories, 6 branching stories, PRO narration, scroll per story (2026-10-23)
 - [x] 9 Parent Dashboard: skills, last 7 days, practise/strengths, history, healthy play, export (2026-10-23)
 - [x] 10 AI tutor + learning memory: hint ladder in Math Lab, spaced review, memory (device + 0008 server rules), `tutor` Edge Function (Gemini free adapter, OFF: terms forbid under-18 apps → B5), parent memory panel + AI helper switch (2026-10-24)
-- [ ] 11 responsive · 12 performance · 13 security
+- [x] 11 Cross-device responsive QA: 9 viewports, folding language switch, wrapping buttons, 3D frames follow rotation, hotspots separated, pinch-zoom allowed, city building looks per level (2026-10-24)
+- [ ] 12 performance · 13 security
 - [ ] 14–24 Universe architecture, living world, Mistake Garden, What If?, Detective, Magic Camera, connected journey, adaptation tests, final reviews
 
 Done before Phase 0: 6 learning sections (words, help, tales, space, math, garden),
@@ -259,8 +261,28 @@ clue → picture → card removed → solution, `data-review` question from due 
 `_shared/ai/*` + `tutor/` · parent `MemoryPanel`, `AiTutorPanel`. Other activities only emit
 `mistake.made` (tutor not yet wired there).
 
+## Responsive (Phase 11)
+
+- Viewports checked: 320×568, 360×800, 393×852, 852×393, 768×1024, 1024×768, 834×1194,
+  1440×900, 1920×1080; uz/ru/en; text 130/150/200 %. Guard: `e2e/responsive.spec.ts`.
+- Top bar: `layout/useFoldedSwitch` measures the bar (ResizeObserver) → crowding 0–3:
+  1 languages fold into one popover button, 2 plan badge sr-only, 3 coins + language wrap
+  to a second row (200 % text). Steps down only after the bar got wider or text smaller
+  (no update loop). Full language row stays laid out unseen to measure.
+- Buttons wrap long labels (`buttonStyles`, no nowrap). Viewport allows pinch zoom.
+- Game header: `layout/mascotRow.ts` (small robot, stacked actions below 480 px). Phone
+  robots in header rows are px-sized (`w-[56px]`): pictures don't grow with system text.
+  Mascot bubble words `break-words` (a word wider than the bubble breaks, never hides).
+- 3D: canvas `absolute inset-0` inside the square frame (shrinks on rotation);
+  `explorer3d/markers.ts` keeps numbered points ≥54 px apart and inside the frame,
+  off-frame points dimmed + untappable (`data-offscreen`). Space 3D only on non-low-end
+  devices (this 2-core container counts as low-end; probes override hardwareConcurrency).
+- City: `BuildingTile` `LEVEL_LOOK` (same model grows + ground/ring/decor per level).
+- Not present in the app (asked for in QA): Scale Portal, Shadow Lab, Music, Mistake Garden
+  pages; no rigged per-world mascots (the 3D/SVG robot is the mascot).
+
 ## Next
 
-Phase 11 – responsive audit. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
+Phase 12 – performance. Owner actions: apply 0005–0008, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.

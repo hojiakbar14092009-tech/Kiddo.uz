@@ -508,7 +508,8 @@ export const CITIES: Readonly<Record<CityId, City>> = {
     lat: 39.77,
     mapLon: 64.0,
     mapLat: 39.8,
-    labelSide: 'left',
+    // above: on a phone its name would run into Xiva's (just west, below its dot)
+    labelSide: 'above',
     find: { uz: 'Buxoroni top!', ru: 'Найди Бухару!', en: 'Find Bukhara!' },
     where: {
       uz: 'Ark qal’asi qayerda?',

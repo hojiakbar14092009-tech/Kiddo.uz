@@ -23,7 +23,9 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 
 export function buttonClasses(variant: ButtonVariant = 'primary', size: ButtonSize = 'lg') {
   return clsx(
-    'inline-flex items-center justify-center rounded-full font-display font-bold whitespace-nowrap',
+    // one line when it fits; a long label (Russian on a 320 px phone, large system
+    // text) wraps inside the button instead of pushing it off the screen
+    'inline-flex max-w-full items-center justify-center rounded-full py-1.5 text-center leading-tight font-display font-bold text-balance',
     'transition-[transform,box-shadow] duration-100 active:translate-y-1',
     VARIANT_CLASSES[variant],
     SIZE_CLASSES[size],

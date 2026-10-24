@@ -13,6 +13,7 @@ export const ru: Translation = {
     parentArea: 'Раздел для родителей',
     parentAreaHint: 'Отчёт, профили, PRO — только для взрослых',
     coins: 'Монеты',
+    languageCurrent: 'Язык: {{language}}. Выбрать другой язык',
     languageSwitcher: 'Сменить язык',
   },
   errors: {

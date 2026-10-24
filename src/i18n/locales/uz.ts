@@ -11,6 +11,7 @@ export const uz = {
     parentArea: 'Ota-ona bo‘limi',
     parentAreaHint: 'Hisobot, profillar, PRO — faqat kattalar uchun',
     coins: 'Coinlar',
+    languageCurrent: 'Til: {{language}}. Boshqa tilni tanlash',
     languageSwitcher: 'Tilni almashtirish',
   },
   errors: {

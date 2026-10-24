@@ -145,7 +145,7 @@ export function UzHub() {
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 pt-3 pb-8 sm:gap-6 sm:px-6 short:gap-2 short:py-2">
         <div ref={mascotRow} className="flex items-center gap-3 short:gap-2">
           <Mascot
-            robotClassName="w-14 sm:w-20 short:w-10"
+            robotClassName="w-[56px] sm:w-20 short:w-10"
             className="min-w-0 flex-1"
             talkOnlyWhileSpeaking
           />

@@ -125,11 +125,15 @@ export const TraceCanvas = forwardRef<TraceCanvasHandle, TraceCanvasProps>(funct
   }
 
   return (
+    // The board is square and never taller than the screen minus 23rem: the top bar,
+    // the instruction row and the Clear/Done buttons under it (measured on a
+    // 320×568 phone), so those buttons stay on screen; 14rem is the smallest
+    // board a finger can still trace on.
     <canvas
       ref={canvasRef}
       role="img"
       aria-label={label}
-      className="aspect-square w-full max-w-[min(440px,80vw)] touch-none short:max-w-[calc(100dvh-11rem)] rounded-[32px] bg-surface shadow-[0_8px_0_var(--color-line)]"
+      className="aspect-square w-full max-w-[min(440px,80vw,max(14rem,calc(100dvh-23rem)))] touch-none short:max-w-[calc(100dvh-11rem)] rounded-[32px] bg-surface shadow-[0_8px_0_var(--color-line)]"
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId)
         lastPoint.current = null

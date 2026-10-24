@@ -91,8 +91,10 @@ export function MascotThoughtBubble({
               )}
             >
               {!isPro && <CloudBumps />}
-              {/* A readable width, so it never wraps one word per line (but fits small phones). */}
-              <span className="relative min-w-[min(8.5rem,calc(100vw-13rem))] font-body text-lg leading-snug font-extrabold sm:min-w-[10rem] sm:text-xl">
+              {/* A readable width, so it never wraps one word per line (but fits small phones).
+                  A word longer than the bubble (large system text) breaks instead of running
+                  under the buttons beside it. */}
+              <span className="relative min-w-[min(8.5rem,calc(100vw-13rem))] font-body break-words text-lg leading-snug font-extrabold sm:min-w-[10rem] sm:text-xl">
                 {message.text}
               </span>
               {message.emoji && (

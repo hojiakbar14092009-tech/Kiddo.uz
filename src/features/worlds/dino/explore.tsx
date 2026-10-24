@@ -72,23 +72,24 @@ export function DinoHub() {
       </p>
       <ul className="mx-auto grid w-full max-w-5xl gap-3 sm:grid-cols-3 sm:gap-5 short:grid-cols-3 short:gap-3">
         {modes.map((mode) => (
-          <li key={mode.id}>
+          <li key={mode.id} className="min-w-0">
             <Link to={mode.to} className={CARD} data-testid={`dino-mode-${mode.id}`}>
               <span
                 aria-hidden="true"
-                className="flex size-20 shrink-0 items-center justify-center rounded-tile bg-coin-soft sm:size-32 short:size-16"
+                // a 320 px phone: a smaller picture and no arrow, so the long title fits
+                className="flex size-16 shrink-0 items-center justify-center rounded-tile bg-coin-soft min-[380px]:size-20 sm:size-32 short:size-16"
               >
                 {mode.picture}
               </span>
               <span className="flex min-w-0 flex-col gap-1">
-                <span className="font-display text-2xl font-extrabold short:text-xl">
+                <span className="font-display text-xl font-extrabold break-words min-[380px]:text-2xl short:text-xl">
                   {mode.title}
                 </span>
                 <span className="text-base text-ink-soft short:text-sm">{mode.text}</span>
               </span>
               <ChevronRightIcon
                 size={28}
-                className="ml-auto shrink-0 text-ink-soft sm:hidden short:block"
+                className="ml-auto shrink-0 text-ink-soft max-[379px]:hidden sm:hidden short:block"
               />
             </Link>
           </li>
@@ -244,8 +245,11 @@ export function DinoDetail({ id }: { id: DinoId }) {
       back={`${DINO_ROOT}/explore`}
       speak={[dino.name, ...dino.facts]}
     >
-      <div className="mx-auto grid w-full max-w-5xl items-start gap-4 md:grid-cols-2 md:gap-8 short:grid-cols-[auto_1fr] short:gap-4">
-        <div className="mx-auto w-full max-w-md rounded-panel bg-sky-soft p-2 shadow-press sm:p-4 short:w-[calc(100dvh-13rem)] short:max-w-none short:p-1">
+      {/* one column that never grows past the screen (minmax(0,1fr)); a phone held
+          sideways gives the model as much height as there is under the top bar
+          (9.5rem: the top bar, the page title row and the frame's padding) */}
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-[minmax(0,1fr)] items-start gap-4 md:grid-cols-2 md:gap-8 short:grid-cols-[auto_minmax(0,1fr)] short:gap-4">
+        <div className="mx-auto w-full max-w-md rounded-panel bg-sky-soft p-2 shadow-press sm:p-4 short:w-[calc(100dvh-9.5rem)] short:max-w-none short:p-1">
           <Explorer3D
             model={DINO_MODELS[id]}
             label={dino.name}

@@ -141,6 +141,35 @@ function obstacles(except: Element | null): Box[] {
     .filter((rect) => rect.width > 0 && rect.height > 0)
 }
 
+/** Headings and lines of text on the page (page coordinates), with their elements. */
+function textBoxes(): { element: Element; box: Box }[] {
+  return [...document.querySelectorAll('h1, h2, h3, p')]
+    .filter((element) => !element.closest('[data-roaming-robot]'))
+    .map((element) => ({ element, box: pageBox(element) }))
+    .filter(({ box }) => box.width > 0 && box.height > 0)
+}
+
+/**
+ * Would a robot standing on this card hide a heading or a line of text (the
+ * day's plan title above the cards, say)? Such a card is left out of the walk.
+ */
+function hidesText(
+  card: Element,
+  spot: Point,
+  size: number,
+  texts: readonly { element: Element; box: Box }[],
+): boolean {
+  const robot = { x: spot.x + size * 0.15, y: spot.y, width: size * 0.7, height: size * 1.25 }
+  return texts.some(
+    ({ element, box }) =>
+      !card.contains(element) &&
+      robot.x < box.x + box.width &&
+      robot.x + robot.width > box.x &&
+      robot.y < box.y + box.height &&
+      robot.y + robot.height > box.y,
+  )
+}
+
 /** Is something (a splash, a dialog) on top of the page at this point? */
 function coveredAt(point: Point): boolean {
   if (typeof document.elementFromPoint !== 'function') return false
@@ -404,9 +433,15 @@ export function RoamingMascot({
       let visits = 0
       while (!signal.aborted) {
         const others = othersTrips(me, (card) => spotOn(card, 'top', size))
-        const all = freeTargets(list(), me).filter(
-          (target) => !crossesAnother(position.current, spotOn(target, 'top', size), others, size),
-        )
+        // the page's text is measured once per pass, not once per card
+        const texts = textBoxes()
+        const all = freeTargets(list(), me).filter((target) => {
+          const spot = spotOn(target, 'top', size)
+          return (
+            !crossesAnother(position.current, spot, others, size) &&
+            !hidesText(target, spot, size, texts)
+          )
+        })
         if (all.length === 0) {
           // every card is taken by another robot: wait for one to be free
           await sleep(800, signal)

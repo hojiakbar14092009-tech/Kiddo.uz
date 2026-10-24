@@ -262,9 +262,10 @@
   .learn-space .space-card {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
+  /* a square no taller than 70 % of the screen (its canvas is absolute, so the square sets the size) */
   .learn-space .space-card .space-stage {
-    max-height: 70vh;
-    width: auto;
+    width: min(100%, 70dvh);
+    justify-self: center;
   }
 }
 

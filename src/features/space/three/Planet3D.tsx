@@ -120,7 +120,8 @@ export default function Planet3D({ id, label, reducedMotion, onFail }: Planet3DP
       role="img"
       aria-label={label}
       tabIndex={0}
-      className="space-model size-full"
+      // absolute in the square stage: the canvas never props it up, so it shrinks on a turn
+      className="space-model absolute inset-0"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerEnd}

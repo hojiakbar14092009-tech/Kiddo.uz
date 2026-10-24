@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SpeakerIcon } from '@/components/icons'
 import { Screen } from '@/components/layout/Screen'
+import { MASCOT_ROW } from '@/components/layout/mascotRow'
 import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TopBar } from '@/components/layout/TopBar'
 import { IconButton } from '@/components/ui/IconButton'
@@ -70,16 +71,20 @@ export function TaskShell({
       </h1>
       <div className={clsx('flex items-center gap-3', SHORT_SCREEN.mascotRow)}>
         <Mascot
-          robotClassName={clsx('w-20 sm:w-32', SHORT_SCREEN.robot)}
+          robotClassName={clsx(MASCOT_ROW.robot, SHORT_SCREEN.robot)}
           speaking={speaking}
           className="min-w-0 flex-1"
         />
-        {isPro && (
-          <IconButton label={t('task.repeatPrompt')} tone="primary" onClick={onRepeat}>
-            <SpeakerIcon size={28} />
-          </IconButton>
+        {(isPro || hint) && (
+          <div className={clsx(MASCOT_ROW.actions, SHORT_SCREEN.actions)}>
+            {isPro && (
+              <IconButton label={t('task.repeatPrompt')} tone="primary" onClick={onRepeat}>
+                <SpeakerIcon size={28} />
+              </IconButton>
+            )}
+            {hint && <TaskHint hint={hint} struggling={struggling} />}
+          </div>
         )}
-        {hint && <TaskHint hint={hint} struggling={struggling} />}
       </div>
       {children}
     </Screen>

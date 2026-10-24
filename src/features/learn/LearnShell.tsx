@@ -126,7 +126,7 @@ export function LearnShell({
           <div className={clsx('flex items-center gap-3', SHORT_SCREEN.mascotRow)}>
             {mascot ? (
               <Mascot
-                robotClassName={clsx('w-16 sm:w-28', SHORT_SCREEN.robot)}
+                robotClassName={clsx('w-[64px] sm:w-28', SHORT_SCREEN.robot)}
                 className="min-w-0 flex-1"
                 speaking={learnVoice.speaking}
                 talkOnlyWhileSpeaking

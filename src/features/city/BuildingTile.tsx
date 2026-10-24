@@ -9,6 +9,46 @@ import { RewardBurst } from '@/components/ui/RewardBurst'
 /** The picture grows a little with every level. */
 const ART_SIZE = ['size-[62%]', 'size-[70%]', 'size-[78%]', 'size-[86%]'] as const
 
+/**
+ * What the plot looks like at each level (domain level 0–3), so a child sees
+ * the building's place grow, not only a count of stars: a bare plot, then a
+ * green lawn with a sprout, flowers and a tree, and at the top a festive plot
+ * in a gold frame. Pictures are the same 3D set as everywhere else.
+ */
+interface LevelLook {
+  ground: string
+  /** The card's frame. */
+  frame: string
+  /** Small 3D pictures standing on the plot, left and right of the house. */
+  left: readonly string[]
+  right: readonly string[]
+  /** A soft sparkle above the house (the top level only). */
+  sparkle: boolean
+}
+
+const LEVEL_LOOK: readonly LevelLook[] = [
+  { ground: 'bg-primary/15', frame: '', left: [], right: [], sparkle: false },
+  { ground: 'bg-primary/30', frame: '', left: ['seedling'], right: [], sparkle: false },
+  {
+    ground: 'bg-primary/40',
+    frame: 'ring-2 ring-primary/40',
+    left: ['tulip'],
+    right: ['pine'],
+    sparkle: false,
+  },
+  {
+    ground: 'bg-primary/50',
+    frame: 'ring-4 ring-coin',
+    left: ['tulip', 'sunflower'],
+    right: ['pine'],
+    sparkle: true,
+  },
+]
+
+function lookFor(level: number): LevelLook {
+  return LEVEL_LOOK[Math.min(Math.max(0, level), LEVEL_LOOK.length - 1)]!
+}
+
 export interface BuildingTileProps {
   name: string
   icon3d: string
@@ -28,8 +68,9 @@ export interface BuildingTileProps {
  * Levels are shown to the child counting from 1 (the open building is level 1;
  * the domain counts upgrades from 0).
  *
- * One house of Kiddo City: a big link into it (always open), its level as
- * small stars on the ground that grow in number, and a round upgrade button.
+ * One house of Kiddo City: a big link into it (always open), its level as a
+ * plot that visibly grows (LEVEL_LOOK) plus small stars as a second sign, and
+ * a round upgrade button.
  */
 export function BuildingTile({
   name,
@@ -46,6 +87,7 @@ export function BuildingTile({
   const levelId = useId()
   const hasLevels = level !== undefined && maxLevel !== undefined
   const current = level ?? 0
+  const look = hasLevels ? lookFor(current) : LEVEL_LOOK[0]!
   const art = (
     <Img3D
       name={icon3d}
@@ -58,7 +100,11 @@ export function BuildingTile({
       <Link
         to={route}
         aria-describedby={hasLevels ? levelId : undefined}
-        className="flex h-full flex-col items-center gap-2 rounded-card bg-surface p-2.5 pb-3 shadow-press transition-transform active:translate-y-1 sm:gap-3 sm:p-3"
+        data-level={hasLevels ? current + 1 : undefined}
+        className={clsx(
+          'flex h-full flex-col items-center gap-2 rounded-card bg-surface p-2.5 pb-3 shadow-press transition-transform active:translate-y-1 sm:gap-3 sm:p-3',
+          look.frame,
+        )}
       >
         <span
           aria-hidden="true"
@@ -69,11 +115,25 @@ export function BuildingTile({
         >
           {/* the ground the house stands on; it gets greener as the house grows */}
           <span
-            className={clsx(
-              'absolute inset-x-0 bottom-0 h-[22%] rounded-b-tile',
-              current >= 2 ? 'bg-primary/35' : 'bg-primary/20',
-            )}
+            className={clsx('absolute inset-x-0 bottom-0 h-[22%] rounded-b-tile', look.ground)}
           />
+          {look.sparkle && (
+            <Img3D name="sparkles" className="absolute top-[6%] right-[8%] size-[22%] opacity-90" />
+          )}
+          {look.left.length > 0 && (
+            <span className="absolute bottom-[4%] left-[3%] flex items-end">
+              {look.left.map((name) => (
+                <Img3D key={name} name={name} className="-mr-1.5 size-7 sm:size-10" />
+              ))}
+            </span>
+          )}
+          {look.right.length > 0 && (
+            <span className="absolute right-[3%] bottom-[4%] flex items-end">
+              {look.right.map((name) => (
+                <Img3D key={name} name={name} className="size-8 sm:size-12" />
+              ))}
+            </span>
+          )}
           <span className="relative flex size-full items-end justify-center pb-[6%]">
             {celebrate ? (
               <RewardBurst key={celebrate} pieces={8} className="size-full items-end">

@@ -13,6 +13,7 @@ export const en: Translation = {
     parentArea: 'Parent area',
     parentAreaHint: 'Report, profiles, PRO — for grown-ups only',
     coins: 'Coins',
+    languageCurrent: 'Language: {{language}}. Choose another language',
     languageSwitcher: 'Change language',
   },
   errors: {
