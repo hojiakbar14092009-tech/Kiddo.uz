@@ -11,6 +11,9 @@ import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey, isFinalTestUnlocked } from '@/features/tasks/rules'
 import { usePendingActivityHomework, usePendingHomework } from '@/features/tasks/useHomework'
 import { ActivityHomeworkCard } from './ActivityHomeworkCard'
+import { homeLine } from '@/features/mascot/life'
+import { birthdayWeekYear, tashkentDay } from '@/features/birthday/birthday'
+import { tDynamic } from '@/lib/tDynamic'
 import { BirthdayCelebration } from '@/features/birthday/BirthdayCelebration'
 import { useActiveChild, useAgeLevel, useFamilyStore, useMascotModel } from '@/store/familyStore'
 import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
@@ -51,11 +54,16 @@ export function HomePage() {
   // While the robot says hello in its spot under the heading, the age badge steps aside.
   const [greetingInStage, setGreetingInStage] = useState(false)
 
-  const hello = plan.complete
-    ? t('mascot.homePlanDone')
-    : child
-      ? t('mascot.homeHello', { name: child.name })
-      : t('mascot.homeHelloNoName')
+  // the robot's line follows the child's day (features/mascot/life.ts)
+  const [hour] = useState(() => new Date().getHours())
+  const line = homeLine({
+    hour,
+    name: child?.name ?? null,
+    birthday: child ? birthdayWeekYear(child.birthDate, tashkentDay()) !== null : false,
+    homework: homeworks.length + activityHomeworks.length,
+    planDone: plan.complete,
+  })
+  const hello = tDynamic(t, `mascot.life.${line.key}`, line.params)
 
   return (
     <Screen

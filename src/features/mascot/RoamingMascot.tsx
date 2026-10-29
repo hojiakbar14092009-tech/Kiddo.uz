@@ -106,7 +106,7 @@ const MARGIN = 8
 /** The visible part of the page (page coordinates), without safe areas and the sticky top bar. */
 function visibleArea(): Box {
   const insets = safeInsets()
-  const header = document.querySelector('header')?.getBoundingClientRect()
+  const header = document.querySelector('[data-topbar]')?.getBoundingClientRect()
   // the top bar stays on screen while the page scrolls, so nothing goes under it
   const top = Math.max(insets.top, header && header.bottom > 0 ? header.bottom : 0)
   const width = document.documentElement.clientWidth || window.innerWidth
@@ -245,6 +245,33 @@ export function RoamingMascot({
   const [facing, setFacing] = useState<1 | -1>(-1)
   const position = useRef<Point>({ x: 0, y: 0 })
   const greetRef = useRef({ greeting, onGreet, onGreetEnd })
+  // Scrolled under the sticky top bar: the robot fades out there (never cut in
+  // half by the bar) and hops on to a card that is in view.
+  const [underBar, setUnderBar] = useState(false)
+
+  useEffect(() => {
+    if (reduceMotion) return undefined
+    let frame = 0
+    const check = () => {
+      frame = 0
+      const header = document.querySelector('[data-topbar]')?.getBoundingClientRect()
+      const barBottom = window.scrollY + (header && header.bottom > 0 ? header.bottom : 0)
+      // more than a fifth of the robot behind the bar
+      setUnderBar(position.current.y + size * 0.25 < barBottom)
+    }
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(check)
+    }
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    const timer = window.setInterval(schedule, 500)
+    return () => {
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      window.clearInterval(timer)
+      if (frame) cancelAnimationFrame(frame)
+    }
+  }, [reduceMotion, size])
 
   useEffect(() => {
     greetRef.current = { greeting, onGreet, onGreetEnd }
@@ -275,6 +302,8 @@ export function RoamingMascot({
       const others = othersTrips(me, (card) => spotOn(card, 'top', size)).map(([at]) => at)
       let lift = Math.min(160, 50 + distance * 0.25)
       const peak = () => ({ x: from.x + dx * 0.5, y: Math.min(from.y, to.y) - lift })
+      // never arc up behind the sticky top bar
+      lift = Math.max(12, Math.min(lift, Math.min(from.y, to.y) - visibleArea().y))
       while (
         lift > 12 &&
         others.some((o) => Math.hypot(o.x - peak().x, o.y - peak().y) < size * 1.1)
@@ -431,11 +460,46 @@ export function RoamingMascot({
 
       let index = 0
       let visits = 0
+      // waiting at the screen's edge (no card in view), not on a card
+      let atEdge = false
       while (!signal.aborted) {
         const others = othersTrips(me, (card) => spotOn(card, 'top', size))
+        const view = visibleArea()
+        const inView = freeTargets(list(), me).filter((target) => {
+          const spot = spotOn(target, 'top', size)
+          return (
+            // only cards in view: never a spot behind the sticky top bar
+            spot.y >= view.y &&
+            spot.y + size <= view.y + view.height &&
+            // not the card it already stands on
+            Math.hypot(spot.x - position.current.x, spot.y - position.current.y) > 4
+          )
+        })
+        if (inView.length === 0) {
+          // already standing on a card in view: stay there (no hop to the edge and back)
+          const here = position.current
+          const standsInView = here.y >= view.y && here.y + size * 1.25 <= view.y + view.height + 1
+          if (standsInView && !atEdge) {
+            await sleep(2000, signal)
+            continue
+          }
+          // no card in view (e.g. the bottom of the page): wait at the screen's edge, in view,
+          // the other robot (two on the language page) waiting at the left edge
+          const left = others.length > 0 && model === 'girl'
+          const edge = {
+            x: left ? view.x + size * 0.1 : view.x + view.width - size * 1.1,
+            y: Math.max(view.y, view.y + view.height - size * 1.25),
+          }
+          atEdge = true
+          if (Math.hypot(edge.x - here.x, edge.y - here.y) > 4) {
+            await travel(edge)
+          }
+          await sleep(2000, signal)
+          continue
+        }
         // the page's text is measured once per pass, not once per card
         const texts = textBoxes()
-        const all = freeTargets(list(), me).filter((target) => {
+        const all = inView.filter((target) => {
           const spot = spotOn(target, 'top', size)
           return (
             !crossesAnother(position.current, spot, others, size) &&
@@ -443,13 +507,14 @@ export function RoamingMascot({
           )
         })
         if (all.length === 0) {
-          // every card is taken by another robot: wait for one to be free
+          // every card in view is taken by another robot or covers words: wait a moment
           await sleep(800, signal)
           continue
         }
         const target =
           mode === 'tour' ? all[index % all.length]! : all[Math.floor(Math.random() * all.length)]!
         claim(target, me)
+        atEdge = false
         index += 1
         visits += 1
 
@@ -505,10 +570,14 @@ export function RoamingMascot({
     <motion.div
       animate={body}
       initial={{ x: -9999, y: -9999 }}
-      className="pointer-events-none absolute top-0 left-0 z-[15]"
+      className={clsx(
+        'pointer-events-none absolute top-0 left-0 z-[15] transition-opacity duration-200',
+        underBar && 'opacity-0',
+      )}
       style={{ width: size }}
       aria-hidden="true"
       data-roaming-robot=""
+      data-under-bar={underBar}
     >
       {bubble && (
         <div

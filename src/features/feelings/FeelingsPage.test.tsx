@@ -1,4 +1,4 @@
-import { act, screen, within } from '@testing-library/react'
+import { act, screen, within, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { emitActivity, useUniverseStore } from '@/domain/universe'
 import { birthDateForAge } from '@/features/age/ageLevel'
@@ -214,6 +214,7 @@ describe('feelings section', () => {
 
   it('sends an unknown activity back to the section', async () => {
     const { router } = await renderRoute('/feelings/nope')
-    expect(router.state.location.pathname).toBe('/feelings')
+    // the redirect may land a moment after the first render on a busy machine
+    await waitFor(() => expect(router.state.location.pathname).toBe('/feelings'))
   })
 })

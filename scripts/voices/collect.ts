@@ -26,6 +26,9 @@ const SPOKEN = [
   'shop',
   'language',
   'pro.celebrateSay',
+  // Phase 24–25: the birthday party and the welcome tour are said aloud
+  'birthday',
+  'welcome',
 ]
 const COUNTS = Array.from({ length: 41 }, (_, i) => i)
 

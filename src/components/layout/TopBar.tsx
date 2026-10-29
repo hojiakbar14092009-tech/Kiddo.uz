@@ -35,6 +35,7 @@ export function TopBar({ start, showHome = true, showCoins = true }: TopBarProps
 
   return (
     <header
+      data-topbar=""
       ref={header}
       className={clsx(
         'topbar sticky top-0 z-20 flex min-h-16 shrink-0 items-center gap-2 px-3 py-2.5 max-[359px]:gap-1.5 max-[359px]:px-2 transition-[background-color,box-shadow,backdrop-filter] duration-300 sm:min-h-20 sm:gap-3 sm:px-6 sm:py-3',

@@ -484,6 +484,12 @@ clue → picture → card removed → solution, `data-review` question from due 
 - `/welcome` five-step interactive KidoBot tour after the first language; `settingsStore.onboarded`; skip; replay
   from parent settings. e2e global `storageState` e2e/state/onboarded.json (tour seen).
 
+## Living mascots (Phase 26) – docs/architecture/living-mascots.md
+
+- RoamingMascot fades behind the sticky top bar (`data-under-bar`) and only picks cards in view (clip bug fixed).
+- `features/mascot/life.ts` home line: night > birthday > homework > plan done > time of day, named. A robot already on an in-view card stays (no edge ping-pong); with two robots the girl waits at the left edge. Critic re-review: ACCEPT (Critical 0 / High 0). phrases.json updated
+  (+ birthday, welcome sections in collect.ts); recordings = owner step.
+
 ## Next
 
 Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +

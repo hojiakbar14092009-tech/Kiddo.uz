@@ -45,6 +45,7 @@ export function ParentShell({
     <Screen
       header={
         <header
+          data-topbar=""
           className={clsx(
             'topbar sticky top-0 z-20 flex items-center justify-between gap-2 px-4 py-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-300 sm:gap-3 sm:px-6 sm:py-3',
             scrolled && 'topbar-scrolled',
