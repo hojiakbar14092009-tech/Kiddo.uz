@@ -15,7 +15,8 @@ describe('LanguagePage', () => {
     expect(screen.getByRole('button', { name: /English/ })).toBeInTheDocument()
   })
 
-  it('stores the chosen language and opens the home screen', async () => {
+  it('stores the chosen language and opens the home screen (tour already seen)', async () => {
+    useSettingsStore.setState({ onboarded: true })
     const { router, user } = await renderRoute('/')
     await user.click(screen.getByRole('button', { name: /English/ }))
 

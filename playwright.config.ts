@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 const PORT = 4180
 /** The production-flags build (not the demo): Free/PRO, prices and the PIN admin. */
 const PROD_PORT = 4181
+// e2e/state/onboarded.json names both ports (the tour seen): change it with them
 /**
  * A production build has no device admin without VITE_ADMIN_PIN, so the e2e
  * build gets one (not a real PIN; set your own for real builds).
@@ -18,6 +19,8 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
+    // the welcome tour (Phase 25) is seen; e2e/onboarding.spec.ts starts without this
+    storageState: 'e2e/state/onboarded.json',
     trace: 'retain-on-failure',
   },
   projects: [

@@ -1,0 +1,23 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:4180",
+      "localStorage": [
+        {
+          "name": "kiddo.settings",
+          "value": "{\"state\":{\"language\":null,\"volume\":0.8,\"onboarded\":true},\"version\":2}"
+        }
+      ]
+    },
+    {
+      "origin": "http://localhost:4181",
+      "localStorage": [
+        {
+          "name": "kiddo.settings",
+          "value": "{\"state\":{\"language\":null,\"volume\":0.8,\"onboarded\":true},\"version\":2}"
+        }
+      ]
+    }
+  ]
+}

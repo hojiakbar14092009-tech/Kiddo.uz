@@ -9,6 +9,9 @@ interface SettingsState {
   volume: number
   setLanguage: (language: Language) => void
   setVolume: (volume: number) => void
+  /** The welcome tour (Phase 25) was seen or skipped on this device. */
+  onboarded: boolean
+  setOnboarded: (done: boolean) => void
 }
 
 export const DEFAULT_VOLUME = 0.8
@@ -20,8 +23,18 @@ export const useSettingsStore = create<SettingsState>()(
       volume: DEFAULT_VOLUME,
       setLanguage: (language) => set({ language }),
       setVolume: (volume) => set({ volume: Math.min(1, Math.max(0, volume)) }),
+      onboarded: false,
+      setOnboarded: (done) => set({ onboarded: done }),
     }),
-    { name: 'kiddo.settings', version: 1 },
+    {
+      name: 'kiddo.settings',
+      version: 2,
+      // v1 had no tour: a device already in use (a language chosen) skips it
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as Partial<SettingsState>
+        return version < 2 ? { ...state, onboarded: state.language != null } : state
+      },
+    },
   ),
 )
 

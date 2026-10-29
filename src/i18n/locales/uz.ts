@@ -54,6 +54,48 @@ export const uz = {
     pickFirst: 'Avval uy hayvonini tanla',
     claim: 'Sovg‘ani olish',
   },
+  welcome: {
+    step: '{{current}}-qadam, jami {{total}} ta',
+    skip: 'O‘tkazib yuborish',
+    back: 'Orqaga',
+    next: 'Keyingisi',
+    finish: 'Boshladik!',
+    steps: {
+      robot: {
+        title: 'Salom! Men KidoBot',
+        text: 'Men senga o‘rganishda yordam beraman. Meni bos — qo‘l silkitaman!',
+        try: 'KidoBotni bosish',
+        done: 'Salom, do‘stim!',
+      },
+      coin: {
+        title: 'Tangalar',
+        text: 'Topshiriqni bajarsang, tanga yig‘asan. Tangani bosib ko‘r!',
+        try: 'Tangani bosish',
+        done: 'Mana shunday tanga yig‘iladi!',
+      },
+      speaker: {
+        textNoVoice: 'Bu tugma savolni o‘qib beradi. Ovozni ota-onang yoqib berishi mumkin.',
+        doneNoVoice: 'Ovoz yoqilganda shu tugma o‘qib beradi.',
+        title: 'Karnay tugmasi',
+        text: 'Bu tugma savolni o‘qib beradi. Bos-chi!',
+        try: 'Karnayni bosish',
+        heard: 'Men senga o‘qib beraman!',
+        done: 'Eshitding-a!',
+      },
+      help: {
+        title: 'Yordam chirog‘i',
+        text: 'Qiyin bo‘lsa, chiroqni bos — KidoBot maslahat beradi.',
+        try: 'Chiroqni bosish',
+        done: 'Chiroq yondi — yordam keldi!',
+      },
+      parent: {
+        title: 'Ota-ona bo‘limi',
+        text: 'Bu bo‘lim kattalar uchun: ular vazifa beradi va yutuqlaringni ko‘radi.',
+        try: 'Oilani bosish',
+        done: 'Oilang sen bilan faxrlanadi!',
+      },
+    },
+  },
   home: {
     greeting: 'Salom, {{name}}!',
     greetingNoName: 'Salom!',
@@ -592,6 +634,9 @@ export const uz = {
       saveFailed: 'Saqlab bo‘lmadi. Internetni tekshirib, qaytadan urinib ko‘ring.',
     },
     settings: {
+      welcomeTitle: 'KidoBot bilan tanishuv',
+      welcomeText: 'Bolaga ilovani tanishtiradigan qisqa sayohatni qayta ko‘rsating.',
+      welcomeReplay: 'Tanishuvni qayta ko‘rsatish',
       sound: 'Ovoz',
       volume: 'Balandligi',
       testSound: 'Tekshirib eshitish',

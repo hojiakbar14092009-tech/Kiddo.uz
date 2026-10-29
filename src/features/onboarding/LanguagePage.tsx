@@ -15,11 +15,14 @@ export function LanguagePage() {
   const language = useSettingsStore((state) => state.language)
   const setLanguage = useSettingsStore((state) => state.setLanguage)
   const hasProfiles = useFamilyStore((state) => state.children.length > 0)
+  const onboarded = useSettingsStore((state) => state.onboarded)
 
   const choose = (code: Language) => {
     setLanguage(code)
-    // With several children the next question is “who is playing?”.
-    navigate(hasProfiles ? '/child-select' : '/home')
+    // The first time: a short tour with KidoBot (Phase 25). Then, with several
+    // children, the next question is “who is playing?”.
+    if (!onboarded) navigate('/welcome')
+    else navigate(hasProfiles ? '/child-select' : '/home')
   }
 
   return (

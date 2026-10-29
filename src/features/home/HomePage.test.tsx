@@ -156,6 +156,8 @@ describe('Child select', () => {
     useFamilyStore
       .getState()
       .addChild({ name: 'Lola', birthDate: birthDateForAge(4, dayKey()), gender: 'girl' })
+    // the welcome tour was seen (WelcomePage.test.tsx has it)
+    useSettingsStore.setState({ onboarded: true })
     const { router, user } = await renderRoute('/')
     await user.click(screen.getByRole('button', { name: /Русский/ }))
     expect(router.state.location.pathname).toBe('/child-select')

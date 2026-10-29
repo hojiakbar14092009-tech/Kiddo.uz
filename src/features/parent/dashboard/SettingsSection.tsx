@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { LANGUAGE_INFO, LANGUAGES } from '@/content/languages'
 import { audioManager } from '@/services/audio/audioManager'
 import { isSupabaseConfigured } from '@/services/supabase/client'
-import { useParentStore } from '@/store/parentStore'
+import { useParentGateStore, useParentStore } from '@/store/parentStore'
 import { useLanguage, useSettingsStore } from '@/store/settingsStore'
 import { AiTutorPanel } from './AiTutorPanel'
 import { ChoiceChips } from './ChoiceChips'
@@ -15,6 +16,8 @@ export function SettingsSection() {
   const volume = useSettingsStore((state) => state.volume)
   const setVolume = useSettingsStore((state) => state.setVolume)
   const setLanguage = useSettingsStore((state) => state.setLanguage)
+  const closeGate = useParentGateStore((state) => state.close)
+  const navigate = useNavigate()
   const language = useLanguage()
   const session = useParentStore((state) => state.session)
   const percent = Math.round(volume * 100)
@@ -54,6 +57,23 @@ export function SettingsSection() {
           value={language}
           onChange={setLanguage}
         />
+      </Panel>
+
+      <Panel title={t('parent.settings.welcomeTitle')}>
+        <p className="text-ink-soft">{t('parent.settings.welcomeText')}</p>
+        <Button
+          variant="soft"
+          size="md"
+          className="self-start"
+          data-testid="replay-welcome"
+          onClick={() => {
+            // the grown-ups' area closes first: Back from the tour never reopens it
+            closeGate()
+            navigate('/welcome', { replace: true })
+          }}
+        >
+          {t('parent.settings.welcomeReplay')}
+        </Button>
       </Panel>
 
       <AiTutorPanel />

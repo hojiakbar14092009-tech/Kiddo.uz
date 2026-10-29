@@ -4,6 +4,7 @@ import { AlphabetItemPage } from '@/features/alphabet/AlphabetItemPage'
 import { AlphabetPage } from '@/features/alphabet/AlphabetPage'
 import { HomePage } from '@/features/home/HomePage'
 import { LanguagePage } from '@/features/onboarding/LanguagePage'
+import { WelcomePage } from '@/features/onboarding/WelcomePage'
 import { RequireParentGate } from '@/features/parent/gate/RequireParentGate'
 import { RequireParentSession } from '@/features/parent/RequireParentSession'
 import { ChildSelectPage } from '@/features/profiles/ChildSelectPage'
@@ -39,6 +40,7 @@ export const routes: RouteObject[] = [
           {
             element: <ScreenTimeGuard />,
             children: [
+              { path: '/welcome', element: <WelcomePage /> },
               { path: '/child-select', element: <ChildSelectPage /> },
               { path: '/home', element: <HomePage /> },
               { path: '/alphabet', element: <AlphabetPage /> },

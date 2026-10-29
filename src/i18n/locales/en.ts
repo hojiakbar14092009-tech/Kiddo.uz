@@ -56,6 +56,48 @@ export const en: Translation = {
     pickFirst: 'Choose a pet first',
     claim: 'Take the present',
   },
+  welcome: {
+    step: 'Step {{current}} of {{total}}',
+    skip: 'Skip',
+    back: 'Back',
+    next: 'Next',
+    finish: 'Let’s start!',
+    steps: {
+      robot: {
+        title: 'Hi! I’m KidoBot',
+        text: 'I will help you learn. Tap me — I will wave!',
+        try: 'Tap KidoBot',
+        done: 'Hello, friend!',
+      },
+      coin: {
+        title: 'Coins',
+        text: 'Finish a task and you collect coins. Tap the coin!',
+        try: 'Tap the coin',
+        done: 'That is how you collect coins!',
+      },
+      speaker: {
+        textNoVoice: 'This button reads the question aloud. A grown-up can turn the voice on.',
+        doneNoVoice: 'Once the voice is on, this button reads aloud.',
+        title: 'The speaker button',
+        text: 'This button reads the question aloud. Tap it!',
+        try: 'Tap the speaker',
+        heard: 'I will read it to you!',
+        done: 'Did you hear it?',
+      },
+      help: {
+        title: 'The help bulb',
+        text: 'When it is hard, tap the bulb — KidoBot gives a hint.',
+        try: 'Tap the bulb',
+        done: 'The bulb is on — help is here!',
+      },
+      parent: {
+        title: 'The grown-ups’ area',
+        text: 'This part is for grown-ups. They give you homework and see how you’re doing.',
+        try: 'Tap the family',
+        done: 'Your family is proud of you!',
+      },
+    },
+  },
   home: {
     greeting: 'Hi, {{name}}!',
     greetingNoName: 'Hi!',
@@ -590,6 +632,9 @@ export const en: Translation = {
       saveFailed: 'Could not save. Check the internet and try again.',
     },
     settings: {
+      welcomeTitle: 'Meeting KidoBot',
+      welcomeText: 'Show your child the short tour of the app again.',
+      welcomeReplay: 'Show the tour again',
       sound: 'Sound',
       volume: 'Volume',
       testSound: 'Play a test sound',
