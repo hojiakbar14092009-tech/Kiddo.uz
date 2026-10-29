@@ -116,6 +116,8 @@ interface ProgressState {
   grantCoins: (childKey: string, amount: number) => void
   /** Adopts a pet for coins; it walks with the robot at once. */
   buyPet: (childKey: string, pet: PetId) => boolean
+  /** A pet given as a gift (the birthday): no coins, never twice. Returns whether it was added. */
+  giftPet: (childKey: string, pet: PetId) => boolean
   /** Picks which owned pet walks with the robot (null: none). */
   choosePet: (childKey: string, pet: PetId | null) => void
 }
@@ -305,6 +307,18 @@ export const useProgressStore = create<ProgressState>()(
           return false
         set((state) => {
           const latest = state.byChild[childKey] ?? EMPTY_PROGRESS
+          const next: ChildProgress = { ...latest, pets: [...(latest.pets ?? []), pet], pet }
+          return { byChild: { ...state.byChild, [childKey]: next } }
+        })
+        return true
+      },
+
+      giftPet: (childKey, pet) => {
+        const current = get().byChild[childKey] ?? EMPTY_PROGRESS
+        if ((current.pets ?? []).includes(pet)) return false
+        set((state) => {
+          const latest = state.byChild[childKey] ?? EMPTY_PROGRESS
+          if ((latest.pets ?? []).includes(pet)) return state
           const next: ChildProgress = { ...latest, pets: [...(latest.pets ?? []), pet], pet }
           return { byChild: { ...state.byChild, [childKey]: next } }
         })

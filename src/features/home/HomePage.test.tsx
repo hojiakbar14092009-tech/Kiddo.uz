@@ -68,6 +68,10 @@ describe('Home', () => {
     const lola = useFamilyStore
       .getState()
       .addChild({ name: 'Lola', birthDate: birthDateForAge(4, dayKey()), gender: 'girl' })
+    // this year's birthday present was already given (birthday.test.tsx has the party)
+    useFamilyStore
+      .getState()
+      .updateChild(lola.id, { birthdayGifts: [Number(dayKey().slice(0, 4))] })
     useFamilyStore.getState().setActiveChild(lola.id)
     const { router, user } = await renderRoute('/home')
     expect(screen.getByText('0 / 2 vazifa bajarildi')).toBeInTheDocument()

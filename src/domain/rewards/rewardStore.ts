@@ -23,6 +23,8 @@ export type RewardReason =
   | 'quest'
   | 'achievement'
   | 'pro-gift'
+  /** The birthday gift: 50 coins once a year (Phase 24; ref `birthday|<year>`). */
+  | 'birthday'
   | 'penalty'
   | 'admin'
   | 'purchase'

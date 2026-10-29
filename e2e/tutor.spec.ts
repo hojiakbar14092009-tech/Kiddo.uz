@@ -40,7 +40,7 @@ async function sixYearOld(page: Page) {
   await page.getByRole('textbox', { name: 'Ismi' }).fill('Aziz')
   const born = new Date()
   born.setFullYear(born.getFullYear() - 6)
-  born.setDate(born.getDate() - 10)
+  born.setDate(born.getDate() - 30)
   await page.getByLabel(/^Tug‘ilgan kuni/).fill(born.toISOString().slice(0, 10))
   await page.getByRole('button', { name: 'Saqlash' }).click()
   await expect(page.getByRole('button', { name: 'Aziz profilini tahrirlash' })).toBeVisible()

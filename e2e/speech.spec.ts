@@ -20,7 +20,7 @@ async function seed(page: Page, { language, pro }: { language: Lang; pro: boolea
       localStorage.setItem('e2e-seeded', '1')
       const born = new Date()
       born.setFullYear(born.getFullYear() - 6)
-      born.setDate(born.getDate() - 10)
+      born.setDate(born.getDate() - 30)
       localStorage.setItem(
         'kiddo.settings',
         JSON.stringify({ state: { language, volume: 0.8 }, version: 1 }),

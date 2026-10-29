@@ -72,6 +72,8 @@ test('the parent area is behind the grown-ups gate', async ({ page }) => {
   // A five-year-old: born five years ago today.
   const born = new Date()
   born.setFullYear(born.getFullYear() - 5)
+  // a month past the birthday: no birthday party in the way (birthday.spec.ts has it)
+  born.setDate(born.getDate() - 30)
   await page.getByLabel(/^Tug‘ilgan kuni/).fill(born.toISOString().slice(0, 10))
   await page.getByRole('button', { name: 'Saqlash' }).click()
   await expect(page.getByRole('button', { name: 'Lola profilini tahrirlash' })).toBeVisible()

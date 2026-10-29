@@ -21,10 +21,18 @@ import {
   type MascotModel,
 } from '@/store/familyStore'
 import { ChoiceChips } from './ChoiceChips'
+import {
+  isStoredPhoto,
+  PHOTO_TYPES,
+  photoFromFile,
+  type PhotoError,
+} from '@/features/profiles/photo'
 
 export interface ChildFormValues {
   name: string
   birthDate: string
+  /** A small JPEG made on this device (features/profiles/photo.ts); undefined removes it. */
+  photo?: string
   gender: Gender
   mascot: MascotModel
   dailyLimitMinutes: number
@@ -51,6 +59,24 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
   const [mascot, setMascot] = useState<MascotModel>(initial?.mascot ?? 'girl')
   const [limit, setLimit] = useState(initial?.dailyLimitMinutes ?? DEFAULT_DAILY_LIMIT_MINUTES)
   const [nameError, setNameError] = useState(false)
+  const [photo, setPhoto] = useState<string | undefined>(
+    isStoredPhoto(initial?.photo) ? initial?.photo : undefined,
+  )
+  const [photoError, setPhotoError] = useState<PhotoError | null>(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
+
+  const choosePhoto = async (file: File | undefined) => {
+    if (!file) return
+    setPhotoBusy(true)
+    const result = await photoFromFile(file)
+    setPhotoBusy(false)
+    if (result.ok) {
+      setPhoto(result.dataUrl)
+      setPhotoError(null)
+    } else {
+      setPhotoError(result.error)
+    }
+  }
 
   const chooseGender = (next: Gender) => {
     // The robot follows the gender unless the parent picks the other one afterwards.
@@ -66,7 +92,7 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
     setNameError(nameMissing)
     setBirthError(birthWrong)
     if (nameMissing || birthWrong) return
-    onSave({ name: trimmed, birthDate, gender, mascot, dailyLimitMinutes: limit })
+    onSave({ name: trimmed, birthDate, photo, gender, mascot, dailyLimitMinutes: limit })
   }
 
   return (
@@ -150,6 +176,60 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
             </button>
           ))}
         </div>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-2 font-semibold">{t('parent.profiles.photo')}</legend>
+        <div className="flex flex-wrap items-center gap-3">
+          {photo ? (
+            <img
+              src={photo}
+              alt={t('parent.profiles.photoAlt')}
+              data-testid="child-photo-preview"
+              className="size-20 rounded-full object-cover"
+            />
+          ) : (
+            <span
+              className="flex size-20 items-center justify-center rounded-full bg-cream text-3xl"
+              aria-hidden="true"
+            >
+              📷
+            </span>
+          )}
+          <label className="inline-flex min-h-12 cursor-pointer items-center rounded-full border-2 border-line-strong bg-surface px-4 font-semibold focus-within:outline-2 focus-within:outline-primary">
+            {photoBusy ? t('parent.profiles.photoBusy') : t('parent.profiles.photoChoose')}
+            <input
+              type="file"
+              accept={PHOTO_TYPES.join(',')}
+              className="sr-only"
+              data-testid="child-photo-input"
+              aria-describedby="child-photo-hint"
+              onChange={(event) => {
+                void choosePhoto(event.target.files?.[0])
+                event.target.value = ''
+              }}
+            />
+          </label>
+          {photo && (
+            <button
+              type="button"
+              onClick={() => setPhoto(undefined)}
+              className="min-h-12 rounded-full px-3 font-semibold text-oops-ink underline"
+            >
+              {t('parent.profiles.photoRemove')}
+            </button>
+          )}
+        </div>
+        <p
+          id="child-photo-hint"
+          role={photoError ? 'alert' : undefined}
+          data-testid="child-photo-hint"
+          className={photoError ? 'font-semibold text-oops-ink' : 'text-sm text-ink-soft'}
+        >
+          {photoError
+            ? t(`parent.profiles.photoError.${photoError}`)
+            : t('parent.profiles.photoHint')}
+        </p>
       </fieldset>
 
       <ChoiceChips

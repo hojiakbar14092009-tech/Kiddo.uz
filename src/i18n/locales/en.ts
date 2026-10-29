@@ -48,6 +48,14 @@ export const en: Translation = {
     title: 'Choose a language',
     parentLogin: 'Parent login',
   },
+  birthday: {
+    title: 'Happy birthday, {{name}}!',
+    text: 'Your present: {{coins}} coins and one pet. Which one do you choose?',
+    textAllPets: 'Your present: {{coins}} coins! You already have every pet.',
+    choosePet: 'Choose a pet',
+    pickFirst: 'Choose a pet first',
+    claim: 'Take the present',
+  },
   home: {
     greeting: 'Hi, {{name}}!',
     greetingNoName: 'Hi!',
@@ -477,6 +485,17 @@ export const en: Translation = {
       birthDate: 'Birthday',
       birthDateHint:
         'Kiddo is for children from 4. The work follows the child’s answers, not their age.',
+      photo: 'Photo (optional)',
+      photoAlt: 'Your child’s photo',
+      photoChoose: 'Choose a photo',
+      photoBusy: 'Preparing…',
+      photoRemove: 'Remove the photo',
+      photoHint: 'PNG, JPEG or WebP, up to 5 MB. The photo stays on this device only.',
+      photoError: {
+        type: 'That is not a picture: choose a PNG, JPEG or WebP file.',
+        size: 'The file is too big: choose a photo up to 5 MB.',
+        notImage: 'This file does not open as a picture. Choose another photo.',
+      },
       birthDateError: 'Enter the birthday: the learner must be at least 4 years old.',
       ageLevel: 'Age: {{count}}. Games for age {{level}} are open.',
       ageAll: 'Age: {{count}}. Every game is open; the difficulty follows the answers.',

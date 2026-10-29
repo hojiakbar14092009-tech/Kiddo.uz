@@ -11,6 +11,7 @@ import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey, isFinalTestUnlocked } from '@/features/tasks/rules'
 import { usePendingActivityHomework, usePendingHomework } from '@/features/tasks/useHomework'
 import { ActivityHomeworkCard } from './ActivityHomeworkCard'
+import { BirthdayCelebration } from '@/features/birthday/BirthdayCelebration'
 import { useActiveChild, useAgeLevel, useFamilyStore, useMascotModel } from '@/store/familyStore'
 import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
 import { AppIcon, type AppIconName } from '@/features/age/AppIcon'
@@ -195,6 +196,7 @@ export function HomePage() {
         delayMs={900}
       />
       <UnlockCelebration />
+      <BirthdayCelebration />
     </Screen>
   )
 }

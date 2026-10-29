@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { Robot } from '@/features/mascot/Robot'
 import type { ChildProfile } from '@/store/familyStore'
+import { isStoredPhoto } from './photo'
 import { useWearing } from '@/store/progressStore'
 
 interface ChildAvatarProps {
@@ -25,7 +26,9 @@ export function ChildAvatar({ child, size, className }: ChildAvatarProps) {
         className,
       )}
     >
-      {child ? (
+      {child && isStoredPhoto(child.photo) ? (
+        <img src={child.photo} alt="" className="size-full self-stretch object-cover" />
+      ) : child ? (
         <Robot
           model={child.mascot}
           wearing={wearing}

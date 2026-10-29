@@ -26,7 +26,7 @@ async function parentAddsChild(page: Page, name: string, age: number) {
   await page.getByRole('textbox', { name: 'Ismi' }).fill(name)
   const born = new Date()
   born.setFullYear(born.getFullYear() - age)
-  born.setDate(born.getDate() - 1)
+  born.setDate(born.getDate() - 30)
   await page.getByLabel(/^Tug‘ilgan kuni/).fill(born.toISOString().slice(0, 10))
   await expect(page.getByText(`Yoshi: ${age}. Barcha o‘yinlar ochiq`)).toBeVisible()
   await page.getByRole('button', { name: 'Saqlash' }).click()

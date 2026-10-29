@@ -75,6 +75,24 @@ select public.record_reward('ca',200,'task','t'||g) from generate_series(1,2) g;
 select pg_temp.expect_error($$select public.record_reward('ca',200,'task','t3')$$, 'daily_cap');
 select pg_temp.check((select (public.record_reward('ca',-30,'purchase','buy1')).coins) = -30, 'ledger: spending allowed past cap');
 select pg_temp.check((select (public.record_reward('ca',-5,'penalty','pen1')).coins) = -5, 'ledger: penalty negative');
+-- birthday gift (0014): exactly 50 and one pet, once a year, only around the birthday
+update public.children set birth_date = ((now() at time zone 'Asia/Tashkent')::date - interval '6 years')::date where id = 'ca';
+select pg_temp.expect_error($$select public.record_reward('ca',49,'birthday','birthday|' || extract(year from (now() at time zone 'Asia/Tashkent'))::int)$$, 'out_of_bounds');
+select pg_temp.expect_error($$select public.record_reward('ca',50,'birthday','birthday|2001')$$, 'not_birthday');
+select pg_temp.expect_error($$select public.record_reward('ca',50,'birthday','cake')$$, 'not_birthday');
+select pg_temp.expect_error($$select public.record_reward('ca',50,'birthday','birthday|' || extract(year from (now() at time zone 'Asia/Tashkent'))::int || '|dragon')$$, 'bad_purchase');
+select pg_temp.check((select (public.record_reward('ca',50,'birthday','birthday|' || extract(year from (now() at time zone 'Asia/Tashkent'))::int || '|bunny')).coins) = 50, 'birthday: 50 coins and a pet in the birthday week');
+select pg_temp.check((select count(*) from public.reward_ledger where reason='birthday') = 1, 'birthday: one row');
+select public.record_reward('ca',50,'birthday','birthday|' || extract(year from (now() at time zone 'Asia/Tashkent'))::int || '|bunny');
+select public.record_reward('ca',50,'birthday','birthday|' || extract(year from (now() at time zone 'Asia/Tashkent'))::int || '|cat');
+select public.record_reward('ca',50,'birthday','birthday|' || extract(year from (now() at time zone 'Asia/Tashkent'))::int);
+select pg_temp.check((select count(*) from public.reward_ledger where reason='birthday') = 1, 'birthday: once a year, whatever pet is asked again');
+update public.child_state set pets = '["bunny","cat"]'::jsonb, pet = 'cat' where child_id = 'ca';
+select pg_temp.check((select pets from public.child_state where child_id='ca') = '["bunny"]'::jsonb, 'birthday: the gifted pet is owned, an unpaid one is not');
+select pg_temp.check((select pet from public.child_state where child_id='ca') is null, 'birthday: an unowned pet is not the active one');
+select pg_temp.expect_error($$select public.record_reward('cb',50,'birthday','birthday|2026')$$, 'not_your_child');
+update public.children set birth_date = ((now() at time zone 'Asia/Tashkent')::date - interval '6 years' - interval '20 days')::date where id = 'ca';
+select pg_temp.expect_error($$select public.record_reward('ca',50,'birthday','birthday|' || extract(year from (now() at time zone 'Asia/Tashkent'))::int)$$, 'not_birthday');
 select pg_temp.expect_error($$update public.reward_ledger set coins = 999$$, 'permission denied');
 -- resources (0006)
 select pg_temp.expect_error($$insert into public.resource_ledger (child_id,parent_id,resource,amount,reason,ref_id) values ('ca','00000000-0000-0000-0000-00000000000a','star',3,'activity','r')$$, 'permission denied');
@@ -722,7 +740,10 @@ commit;
 -- ===== 0012: no age ceiling for learning (form 4 to 18, synced age up to 25)
 insert into public.children (id,parent_id,name,age,gender,mascot) values ('ck','00000000-0000-0000-0000-0000000000d2','Kamola',16,'girl','girl');
 select pg_temp.check((select age from public.children where id='ck') = 16, 'age: a sixteen-year-old profile is allowed');
-select pg_temp.expect_error($$insert into public.children (id,parent_id,name,age,gender,mascot) values ('cl','00000000-0000-0000-0000-0000000000d2','X',26,'girl','girl')$$, 'children_age_check');
+-- 0014: no maximum age (Phase 22); only an impossible age is refused
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('cl','00000000-0000-0000-0000-0000000000d2','Dilshod',40,'boy','boy');
+select pg_temp.check((select age from public.children where id='cl') = 40, 'age: a forty-year-old learner is allowed');
+select pg_temp.expect_error($$insert into public.children (id,parent_id,name,age,gender,mascot) values ('cm','00000000-0000-0000-0000-0000000000d2','X',2,'girl','girl')$$, 'children_age_check');
 
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (

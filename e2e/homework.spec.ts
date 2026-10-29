@@ -37,6 +37,8 @@ test('activity homework: given by the parent, played by the child, counted by it
   await page.getByRole('textbox', { name: 'Ismi' }).fill('Lola')
   const born = new Date()
   born.setFullYear(born.getFullYear() - 6)
+  // a month past the birthday: no birthday party in the way (birthday.spec.ts has it)
+  born.setDate(born.getDate() - 30)
   await page.getByLabel(/^Tug‘ilgan kuni/).fill(born.toISOString().slice(0, 10))
   await page.getByRole('button', { name: 'Saqlash' }).click()
   await expect(page.getByRole('button', { name: 'Lola profilini tahrirlash' })).toBeVisible()

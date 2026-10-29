@@ -96,10 +96,14 @@ export interface ChildProfile {
   createdAt: string
   /** Homework a parent set – as many as they like; done ones stay for the report. */
   homeworks?: Homework[]
+  /** Years whose birthday gift (50 coins and a pet) was given (Phase 24). */
+  birthdayGifts?: number[]
+  /** The child's photo (a small JPEG data URL made on this device; never synced). */
+  photo?: string
 }
 
 export type NewChild = Pick<ChildProfile, 'name' | 'birthDate' | 'gender'> &
-  Partial<Pick<ChildProfile, 'mascot' | 'dailyLimitMinutes'>>
+  Partial<Pick<ChildProfile, 'mascot' | 'dailyLimitMinutes' | 'photo'>>
 
 export const DEFAULT_DAILY_LIMIT_MINUTES = 30
 /** Daily time limits a parent can choose, in minutes. */
@@ -159,6 +163,7 @@ export const useFamilyStore = create<FamilyState>()(
           mascot: input.mascot ?? input.gender,
           dailyLimitMinutes: input.dailyLimitMinutes ?? DEFAULT_DAILY_LIMIT_MINUTES,
           createdAt: new Date().toISOString(),
+          ...(input.photo ? { photo: input.photo } : {}),
         }
         set((state) => ({ children: [...state.children, child] }))
         return child

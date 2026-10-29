@@ -472,6 +472,13 @@ clue → picture → card removed → solution, `data-review` question from due 
   `isLetterHomework`/`isActivityHomework`. `HomeworkBridge` in AppShell counts `activity.completed`.
 - Child home `ActivityHomeworkCard`; parent `ActivityHomeworkPanel` + list; `FamilyOverview` (2+ children).
 
+## Photo + birthday (Phase 24) – docs/architecture/birthday-and-photo.md
+
+- `ChildProfile.photo` (256px JPEG data URL, validated type/size/magic bytes/decode, never synced), shown by
+  ChildAvatar. `ChildProfile.birthdayGifts` years; `claimBirthdayGift` = 50 coins (reward reason `birthday`,
+  ref `birthday|<year>`) + `giftPet`; `BirthdayCelebration` on Home after the unlock party.
+- Migration 0014: record_reward 'birthday' rule + no age ceiling (age >= 3). e2e profiles born −30 days.
+
 ## Next
 
 Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +

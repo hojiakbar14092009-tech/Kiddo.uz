@@ -42,7 +42,7 @@ async function seed(page: Page, { cores = 8 }: { cores?: number } = {}) {
     put('kiddo.settings', { language: 'uz', volume: 0.8 })
     const born = new Date()
     born.setFullYear(born.getFullYear() - 5)
-    born.setDate(born.getDate() - 2)
+    born.setDate(born.getDate() - 30)
     put(
       'kiddo.family',
       {

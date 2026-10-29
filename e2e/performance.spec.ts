@@ -35,6 +35,8 @@ async function child(page: Page, language: 'uz' | 'ru', strong = false) {
       put('kiddo.settings', { language, volume: 0.8 })
       const born = new Date()
       born.setFullYear(born.getFullYear() - 6)
+      // a month past the birthday: no birthday party in the way (birthday.spec.ts has it)
+      born.setDate(born.getDate() - 30)
       put(
         'kiddo.family',
         {

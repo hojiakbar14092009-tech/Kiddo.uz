@@ -32,7 +32,7 @@ async function sixYearOld(page: Page, { pro = false } = {}) {
     put('kiddo.settings', { language: 'ru', volume: 0.8 })
     const born = new Date()
     born.setFullYear(born.getFullYear() - 6)
-    born.setDate(born.getDate() - 10)
+    born.setDate(born.getDate() - 30)
     put(
       'kiddo.family',
       {
