@@ -172,22 +172,34 @@ test('a PRO story stays locked on Free, also by its direct link', async ({ page 
   await expect(page.getByText(STAR_FIRST)).toHaveCount(0)
 })
 
-test('“Read to me” on Free shows PRO and plays nothing', async ({ page }) => {
+test('the demo: “Read to me” works without PRO (the voice is free)', async ({ page }) => {
   await chooseUzbek(page)
   await page.goto('/stories/grandma-garden')
-  const narrate = page.getByRole('button', { name: 'O‘qib ber (PRO)' })
+  const narrate = page.getByRole('button', { name: 'O‘qib ber' })
   await expect(narrate).toBeVisible()
-  await expect(narrate).toHaveAttribute('data-state', 'locked')
-  await narrate.click()
-  await expect(page.getByTestId('story-note')).toHaveText(
-    'Ovozli o‘qish PRO versiyada. Matnni birga o‘qiymiz!',
-  )
-  // nothing is playing
-  const playing = await page.evaluate(() =>
-    [...document.querySelectorAll('audio')].some((audio) => !audio.paused),
-  )
-  expect(playing).toBe(false)
+  await expect(narrate).not.toHaveAttribute('data-state', 'locked')
+  await expect(page.getByRole('button', { name: 'O‘qib ber (PRO)' })).toHaveCount(0)
 })
+
+test(
+  'production build: “Read to me” on Free shows PRO and plays nothing',
+  { tag: '@production' },
+  async ({ page }) => {
+    await chooseUzbek(page)
+    await page.goto('/stories/grandma-garden')
+    const narrate = page.getByRole('button', { name: 'O‘qib ber (PRO)' })
+    await expect(narrate).toBeVisible()
+    await expect(narrate).toHaveAttribute('data-state', 'locked')
+    await narrate.click()
+    await expect(page.getByTestId('story-note')).toHaveText(
+      'Ovozli o‘qish PRO versiyada. Matnni birga o‘qiymiz!',
+    )
+    const playing = await page.evaluate(() =>
+      [...document.querySelectorAll('audio')].some((audio) => !audio.paused),
+    )
+    expect(playing).toBe(false)
+  },
+)
 
 test('a child reads a story twice: one scroll, also after a reload', async ({ page }) => {
   test.setTimeout(90_000)

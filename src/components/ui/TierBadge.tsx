@@ -1,12 +1,15 @@
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { CrownIcon } from '@/components/icons'
+import { DEMO } from '@/config/demo'
 import { useProTier } from '@/domain/entitlements'
 
 /** Shows whether the family is on Free or PRO, always in the same place in the top bar. */
 export function TierBadge() {
   const { t } = useTranslation()
   const isPro = useProTier() === 'pro'
+  // the demo shows PRO when it is on, but no "Free" label inviting an upgrade
+  if (!isPro && !DEMO.publicProUIEnabled) return null
 
   return (
     <span

@@ -1,3 +1,4 @@
+import { DEMO } from '@/config/demo'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useFamilyStore } from './familyStore'
@@ -31,10 +32,11 @@ interface SubscriptionState {
   redeemPromo: (code: string, days: number | null, now?: Date) => PromoResult
 }
 
-export type PromoResult = 'ok' | 'invalid' | 'used' | 'lifetime'
+export type PromoResult = 'ok' | 'invalid' | 'used' | 'lifetime' | 'expired'
 
+/** One spelling for a typed code: no spaces anywhere, upper case. */
 export function normalizePromo(code: string): string {
-  return code.trim().toUpperCase()
+  return code.replace(/\s+/g, '').toUpperCase()
 }
 
 interface ProSnapshot {
@@ -48,8 +50,8 @@ export function isProActive(
   now: number = Date.now(),
 ): boolean {
   if (!plan) return false
-  // the developer "Demo PRO" switch never counts in a production build
-  if (source === 'demo' && import.meta.env.PROD) return false
+  // the simulated "Demo PRO" counts only in development and in the demo build
+  if (source === 'demo' && import.meta.env.PROD && !DEMO.demoMode) return false
   return expiresAt === null || Date.parse(expiresAt) > now
 }
 
@@ -103,9 +105,17 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         if (days === null) return 'invalid'
         const state = get()
         if (state.usedPromoCodes.includes(key)) return 'used'
-        if (state.plan && state.expiresAt === null && isProActive(state, now.getTime())) {
+        // the demo switch is a simulation, not a purchase: a code replaces it
+        const simulated = state.source === 'demo'
+        if (
+          !simulated &&
+          state.plan &&
+          state.expiresAt === null &&
+          isProActive(state, now.getTime())
+        ) {
           return 'lifetime'
         }
+        if (simulated) set({ plan: null, expiresAt: null, source: null })
         get().grantDays(days, 'promo', now)
         set((current) => ({ usedPromoCodes: [...current.usedPromoCodes, key] }))
         return 'ok'

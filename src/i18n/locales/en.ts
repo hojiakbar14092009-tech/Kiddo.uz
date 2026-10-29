@@ -239,6 +239,7 @@ export const en: Translation = {
       profiles: 'Profiles',
       homework: 'Homework',
       pro: 'PRO',
+      promo: 'Promo code',
       settings: 'Settings',
     },
     report: {
@@ -599,11 +600,15 @@ export const en: Translation = {
     promo: 'Promo code',
     promoLabel: 'Enter a code',
     apply: 'Apply',
+    demoTitle: 'Demo version',
+    demoNote:
+      'This is a demo: payments are off and the voice is free for everyone. PRO parts (extra journeys and stories) can be tried with a promo code.',
     promoResult: {
       ok: 'Promo code accepted! PRO days added.',
       invalid: 'This promo code does not exist.',
       used: 'This promo code has already been used.',
       lifetime: 'You have lifetime PRO – no code needed.',
+      expired: 'This promo code has expired.',
       error: 'Something went wrong. Please try again.',
     },
     getPromo: {

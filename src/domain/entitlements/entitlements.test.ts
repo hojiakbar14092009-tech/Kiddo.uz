@@ -1,9 +1,14 @@
 import { act, renderHook } from '@testing-library/react'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFamilyStore } from '@/store/familyStore'
 import * as legacy from '@/store/subscriptionStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { canUse, getEntitlement, useCanUse, useEntitlement, useProTier, type ProFeature } from '.'
+
+// These tests cover a production (non-demo) build: PRO gates the voice there.
+vi.mock('@/config/demo', () => ({
+  DEMO: { demoMode: false, publicProUIEnabled: true, demoAdminEnabled: false },
+}))
 
 const FEATURES: ProFeature[] = [
   'audio',

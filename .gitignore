@@ -35,3 +35,4 @@ playwright-report
 # Mascot build output (rebuilt by npm run mascots:build)
 tools/mascots/out
 __pycache__
+dist-production

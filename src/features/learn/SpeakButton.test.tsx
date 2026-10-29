@@ -16,6 +16,11 @@ import { LearnShell } from './LearnShell'
 import { useSpeakable } from './speakable'
 import { setLearnVoiceOn } from './voice'
 
+// These tests cover a production (non-demo) build: PRO gates the voice there.
+vi.mock('@/config/demo', () => ({
+  DEMO: { demoMode: false, publicProUIEnabled: true, demoAdminEnabled: false },
+}))
+
 /*
  * The speaker button of the learning screens, with the real Koinot questions:
  * it reads the question on screen now, in the language chosen now, one voice

@@ -1,3 +1,4 @@
+import { DEMO } from '@/config/demo'
 import clsx from 'clsx'
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { YEARLY_DISCOUNT, yearlyPrice } from '@/store/appSettingsStore'
@@ -861,7 +862,9 @@ export function SettingsSection({ data }: { data: AdminData }) {
           </button>
           {saved && (
             <span role="status" className="text-sm font-bold text-[var(--a-online)]">
-              Saqlandi. Ota-onalar endi shu narxlarni ko‘radi va to‘laydi.
+              {DEMO.publicProUIEnabled
+                ? 'Saqlandi. Ota-onalar endi shu narxlarni ko‘radi va to‘laydi.'
+                : 'Saqlandi. Demoda narxlar ota-onalarga ko‘rsatilmaydi – keyingi versiya uchun saqlab qo‘yildi.'}
             </span>
           )}
         </div>

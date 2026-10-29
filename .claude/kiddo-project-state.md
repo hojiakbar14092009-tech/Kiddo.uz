@@ -427,6 +427,22 @@ clue → picture → card removed → solution, `data-review` question from due 
 - Critic: REJECT (High: glance accumulated on clips without a head key; ikat sash missing) → fixed (+ faces, details,
   cache, docs, skeleton dispose, low tier) → ACCEPT.
 
+## Demo / admin / Pro visibility (Phase 20) – src/config/demo.ts
+
+- `DEMO` (config/demo.ts) is the only switch: demoMode = no cloud backend && `VITE_DEMO_MODE`≠false (a cloud build is
+  never a demo); publicProUIEnabled = `VITE_PUBLIC_PRO_UI` ?? !demoMode; demoAdminEnabled = demoMode.
+- Demo: voice (`audio`) free (`FREE_IN_DEMO` in entitlements); premium content stays PRO; no prices/plans/payment
+  (ProSection shows `pro-demo-note`, TierBadge hidden, parent tab "Promokod", parent `parent-demo-chip`).
+- 10 demo codes `KIDDODEMO01–10` (config/demoPromoCodes.ts; 7/14/30/90 days, valid to 2027-12-31), once per device,
+  case/space-insensitive, 'expired' result. Demo PRO switch = source 'demo' (only honoured in a demo build); a code
+  replaces it.
+- `/admin` in demo: "Demo administrator sifatida kirish" → session `{source:'demo'}` (refused by non-demo builds),
+  device data only; Demo overview (KPIs, strands, children cards), Demo section (PRO switch, codes, reset = demo
+  codes + demo days only); no payments/children table.
+- e2e: main projects build with VITE_DEMO_MODE=true; project `production` (port 4181, dist-production,
+  VITE_DEMO_MODE=false) runs tests tagged `@production` (Free/PRO, PIN admin, prices).
+- Critic: REJECT (High: env var could open demo on a cloud build; Mediums) → fixed → re-review.
+
 ## Next
 
 Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +

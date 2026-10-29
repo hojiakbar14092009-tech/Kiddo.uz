@@ -237,6 +237,7 @@ export const uz = {
       profiles: 'Profillar',
       homework: 'Uy vazifasi',
       pro: 'PRO',
+      promo: 'Promokod',
       settings: 'Sozlamalar',
     },
     report: {
@@ -601,11 +602,15 @@ export const uz = {
     promo: 'Promokod',
     promoLabel: 'Kodni kiriting',
     apply: 'Qo‘llash',
+    demoTitle: 'Demo versiya',
+    demoNote:
+      'Bu demo: to‘lovlar o‘chirilgan, ovoz hammaga bepul. PRO qismlarini (qo‘shimcha sayohatlar va hikoyalar) promokod bilan sinab ko‘rish mumkin.',
     promoResult: {
       ok: 'Promokod qabul qilindi! PRO kunlari qo‘shildi.',
       invalid: 'Bunday promokod yo‘q.',
       used: 'Bu promokod allaqachon ishlatilgan.',
       lifetime: 'Sizda umrbod PRO bor – promokod kerak emas.',
+      expired: 'Bu promokodning muddati tugagan.',
       error: 'Nimadir xato ketdi. Qaytadan urinib ko‘ring.',
     },
     getPromo: {

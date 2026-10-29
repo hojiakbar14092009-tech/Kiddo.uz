@@ -1,3 +1,5 @@
+import { DEMO } from '@/config/demo'
+import { lookupDemoPromo } from '@/config/demoPromoCodes'
 import { useAdsStore } from '@/store/adsStore'
 import { useParentStore } from '@/store/parentStore'
 import { usePromoStore } from '@/store/promoStore'
@@ -103,6 +105,12 @@ export const deviceBackend: PromoBackend = {
   },
 
   redeem: async (code) => {
+    // the demo build also takes its ten public demo codes (config/demoPromoCodes.ts)
+    if (DEMO.demoMode) {
+      const demo = lookupDemoPromo(code)
+      if (demo === 'expired') return 'expired'
+      if (demo) return useSubscriptionStore.getState().redeemPromo(code, demo.days)
+    }
     const found = await usePromoStore.getState().lookup(code)
     const result = useSubscriptionStore.getState().redeemPromo(code, found?.days ?? null)
     if (result === 'ok' && found) usePromoStore.getState().markRedeemed(found.hash)

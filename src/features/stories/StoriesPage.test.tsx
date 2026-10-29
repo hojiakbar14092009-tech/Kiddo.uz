@@ -11,6 +11,11 @@ import { renderRoute } from '@/test/renderRoute'
 import { STORY_TEXT } from './content'
 import { STORIES_UI } from './ui'
 
+// These tests cover a production (non-demo) build: PRO gates the voice there.
+vi.mock('@/config/demo', () => ({
+  DEMO: { demoMode: false, publicProUIEnabled: true, demoAdminEnabled: false },
+}))
+
 vi.mock('@/domain/universe', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/domain/universe')>()
   return { ...original, emitActivity: vi.fn(original.emitActivity) }

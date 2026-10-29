@@ -1,3 +1,4 @@
+import { DEMO } from '@/config/demo'
 import clsx from 'clsx'
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -101,10 +102,20 @@ export function ParentDashboardPage() {
           ) : (
             <h1 className="font-display text-2xl font-extrabold">{t('parent.welcome')}</h1>
           )}
+          {DEMO.demoMode && (
+            <p
+              data-testid="parent-demo-chip"
+              className="self-start rounded-full bg-coin-soft px-3 py-1 text-sm font-bold text-ink"
+            >
+              {t('pro.demoTitle')}
+            </p>
+          )}
           <SegmentedTabs
             tabs={TABS.map((value) => {
               const Icon = ICONS[value]
-              return { value, symbol: <Icon size={22} />, label: t(`parent.tabs.${value}`) }
+              // the demo has no purchases: the PRO tab is where promo codes are typed in
+              const key = value === 'pro' && !DEMO.publicProUIEnabled ? 'promo' : value
+              return { value, symbol: <Icon size={22} />, label: t(`parent.tabs.${key}`) }
             })}
             value={tab}
             onChange={(next) => setParams({ tab: next }, { replace: true })}

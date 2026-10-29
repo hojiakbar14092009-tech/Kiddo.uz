@@ -1,8 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
 
-/** The device admin PIN the e2e build gets (playwright.config.ts webServer env). */
-const E2E_ADMIN_PIN = process.env.VITE_ADMIN_PIN ?? '481516'
-
 /** Starts every test as a first visit, with a fixed Math.random so the parent gate asks 3 × 3. */
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -48,11 +45,12 @@ test('a right answer earns praise, a finished game earns coins', async ({ page }
   await expect(page.getByRole('status', { name: /Coinlar: 7/ })).toBeVisible()
 })
 
-test('Free shows the PRO crown instead of a voice', async ({ page }) => {
+test('the demo: the voice is free (no PRO crown on “listen again”)', async ({ page }) => {
   await chooseUzbek(page)
   await page.goto('/alphabet/a')
-  await page.getByRole('button', { name: 'Yana tinglash (PRO)' }).click()
-  await expect(page.getByText('Ovozli o‘rganish PRO versiyada!')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Yana tinglash', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Yana tinglash (PRO)' })).toHaveCount(0)
+  await expect(page.getByRole('status', { name: 'Bepul' })).toHaveCount(0)
 })
 
 test('the parent area is behind the grown-ups gate', async ({ page }) => {
@@ -106,8 +104,7 @@ test('the admin puts up an ad; a parent watches it to the end and gets a promo c
 }) => {
   // The admin adds an ad and sets the monthly price; the year is worked out (−20 %).
   await page.goto('/admin')
-  await page.getByLabel('Admin PIN').fill(E2E_ADMIN_PIN)
-  await page.getByRole('button', { name: 'Ochish' }).click()
+  await page.getByRole('button', { name: 'Demo administrator sifatida kirish' }).click()
   await page.getByRole('button', { name: 'Reklamalar' }).click()
   await expect(
     page.getByText('Hozircha reklama yo‘q – ota-onalar promokod ola olmaydi.'),
@@ -123,11 +120,11 @@ test('the admin puts up an ad; a parent watches it to the end and gets a promo c
   await page.getByRole('button', { name: 'Saqlash' }).click()
   await expect(page.getByText('Saqlandi.', { exact: false })).toBeVisible()
 
-  // A parent sees the admin's prices and gets a code for watching the ad.
+  // The demo shows parents no prices or purchase; they get a code for watching the ad.
   await chooseUzbek(page)
   await openProTab(page)
-  await expect(page.getByRole('radio', { name: /1 oy.*35\s000/ })).toBeVisible()
-  await expect(page.getByRole('radio', { name: /1 yil.*336\s000/ })).toBeVisible()
+  await expect(page.getByRole('radio')).toHaveCount(0)
+  await expect(page.getByTestId('pro-demo-note')).toBeVisible()
 
   await page.getByRole('button', { name: 'Promokodni olish' }).click()
   await expect(page.getByRole('dialog', { name: 'Reklama' })).toBeVisible()
@@ -145,6 +142,88 @@ test('the admin puts up an ad; a parent watches it to the end and gets a promo c
   await expect(page.getByRole('button', { name: 'Promokodni olish' })).toHaveCount(0)
   await expect(page.getByText('Promokod faqat 1 marta beriladi', { exact: false })).toBeVisible()
 })
+
+test('demo admin: enter, look around, turn demo PRO on, leave; the app is unaffected', async ({
+  page,
+}) => {
+  await chooseUzbek(page)
+  await page.goto('/admin')
+  await page.getByRole('button', { name: 'Demo administrator sifatida kirish' }).click()
+  await expect(page.getByTestId('demo-admin-banner')).toBeVisible()
+  await expect(page.getByTestId('demo-overview')).toBeVisible()
+  // a refresh keeps the demo session for this tab
+  await page.reload()
+  await expect(page.getByTestId('demo-admin-banner')).toBeVisible()
+  await page.getByRole('button', { name: 'Demo', exact: true }).click()
+  await expect(page.getByTestId('demo-promo-list').locator('li')).toHaveCount(10)
+  await page.getByTestId('demo-pro-switch').click()
+  await expect(page.getByTestId('demo-pro-switch')).toHaveAttribute('aria-checked', 'true')
+  await page.getByTestId('demo-reset').click()
+  await expect(page.getByTestId('demo-pro-switch')).toHaveAttribute('aria-checked', 'false')
+  await page.getByRole('button', { name: 'Chiqish' }).click()
+  await expect(
+    page.getByRole('button', { name: 'Demo administrator sifatida kirish' }),
+  ).toBeVisible()
+  // the child's app is as before
+  await page.goto('/home')
+  await expect(page.getByRole('heading', { name: 'Kiddo shahri' })).toBeVisible()
+  await expect(page.getByTestId('demo-admin-banner')).toHaveCount(0)
+})
+
+test('a parent opens PRO with a demo promo code, once', async ({ page }) => {
+  await chooseUzbek(page)
+  await openProTab(page)
+  const field = page.getByRole('textbox', { name: 'Kodni kiriting' })
+  await field.fill('  kiddodemo05 ')
+  await page.getByRole('button', { name: 'Qo‘llash' }).click()
+  await expect(page.getByRole('heading', { name: 'PRO ochildi!' })).toBeVisible()
+  await page.getByRole('button', { name: 'Zo‘r, boshladik!' }).click()
+  await field.fill('KIDDODEMO05')
+  await page.getByRole('button', { name: 'Qo‘llash' }).click()
+  await expect(page.getByText('Bu promokod allaqachon ishlatilgan.')).toBeVisible()
+})
+
+/** The device admin PIN of the production-flags build (playwright.config.ts). */
+const E2E_ADMIN_PIN = process.env.VITE_ADMIN_PIN ?? '481516'
+
+test(
+  'production build: Free shows the PRO crown instead of a voice',
+  { tag: '@production' },
+  async ({ page }) => {
+    await chooseUzbek(page)
+    await page.goto('/alphabet/a')
+    await page.getByRole('button', { name: 'Yana tinglash (PRO)' }).click()
+    await expect(page.getByText('Ovozli o‘rganish PRO versiyada!')).toBeVisible()
+  },
+)
+
+test(
+  'production build: no demo admin; the PIN admin sets prices and parents see them',
+  { tag: '@production' },
+  async ({ page }) => {
+    await page.goto('/admin')
+    await expect(page.getByTestId('demo-admin-entry')).toHaveCount(0)
+    await page.getByLabel('Admin PIN').fill(E2E_ADMIN_PIN)
+    await page.getByRole('button', { name: 'Ochish' }).click()
+    await expect(page.getByTestId('demo-admin-banner')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Demo', exact: true })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Sozlamalar' }).click()
+    await page.getByLabel('PRO – 1 oy narxi').fill('35000')
+    await expect(page.getByTestId('yearly-price')).toHaveText('336 000 so‘m')
+    await page.getByRole('button', { name: 'Saqlash' }).click()
+    await expect(page.getByText('Saqlandi.', { exact: false })).toBeVisible()
+
+    await chooseUzbek(page)
+    await openProTab(page)
+    await expect(page.getByRole('radio', { name: /1 oy.*35\s000/ })).toBeVisible()
+    await expect(page.getByRole('radio', { name: /1 yil.*336\s000/ })).toBeVisible()
+    await expect(page.getByTestId('pro-demo-note')).toHaveCount(0)
+    // the public demo codes do nothing here
+    await page.getByRole('textbox', { name: 'Kodni kiriting' }).fill('KIDDODEMO05')
+    await page.getByRole('button', { name: 'Qo‘llash' }).click()
+    await expect(page.getByRole('heading', { name: 'PRO ochildi!' })).toHaveCount(0)
+  },
+)
 
 test('the learning sections open from their Kiddo City buildings without errors', async ({
   page,

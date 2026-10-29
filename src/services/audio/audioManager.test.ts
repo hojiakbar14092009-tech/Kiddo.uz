@@ -6,6 +6,11 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { audioManager } from './audioManager'
 import { speech } from './speech'
 
+// a production build: voice is PRO (the demo build makes it free, config/demo.test.tsx)
+vi.mock('@/config/demo', () => ({
+  DEMO: { demoMode: false, publicProUIEnabled: true, demoAdminEnabled: false },
+}))
+
 type FakeHowl = { options: { src: string[] } }
 const instances = () => (Howl as unknown as { instances: FakeHowl[] }).instances
 

@@ -1,3 +1,4 @@
+import { DEMO } from '@/config/demo'
 import { useFamilyStore } from '@/store/familyStore'
 import { isProActive, useSubscriptionStore } from '@/store/subscriptionStore'
 
@@ -36,11 +37,22 @@ const NEEDS_PRO: Record<ProFeature, boolean> = {
   premiumWorlds: true,
 }
 
+/** Free for everyone in the demo build: the voice (Phase 20). The entitlement stays for later. */
+const FREE_IN_DEMO: Record<ProFeature, boolean> = {
+  audio: true,
+  premiumStories: false,
+  aiFriend: false,
+  offlinePacks: false,
+  premiumWorlds: false,
+}
+
 export function entitlementFor(
   feature: ProFeature,
   { paid, child }: { paid: boolean; child: boolean },
+  demoMode: boolean = DEMO.demoMode,
 ): Entitlement {
   if (!NEEDS_PRO[feature]) return { allowed: true, reason: 'ok' }
+  if (demoMode && FREE_IN_DEMO[feature]) return { allowed: true, reason: 'ok' }
   if (!child) return { allowed: false, reason: 'guest' }
   if (!paid) return { allowed: false, reason: 'pro' }
   return { allowed: true, reason: 'ok' }

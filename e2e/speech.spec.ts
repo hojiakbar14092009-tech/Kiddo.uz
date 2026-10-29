@@ -236,19 +236,34 @@ test.describe('speaker button (PRO)', () => {
   })
 })
 
-test('Free: the speaker makes no sound and shows a calm PRO note', async ({ page }) => {
+test('the demo: the speaker speaks without PRO (the voice is free)', async ({ page }) => {
   test.setTimeout(60_000)
   await seed(page, { language: 'uz', pro: false })
   const clips = recordClips(page)
   await openQuickCheck(page, START.uz)
-  await expect(speaker(page)).toHaveAttribute('data-status', 'locked')
+  await expect(speaker(page)).not.toHaveAttribute('data-status', 'locked')
   await speaker(page).click()
-  await expect(page.getByText(/Ovozli o‘qish – PRO imkoniyati/)).toBeVisible()
-  await page.waitForTimeout(800)
-  expect(clips).toEqual([])
-  expect(await playingCount(page)).toBe(0)
-  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect.poll(() => clips.length, { timeout: 15_000 }).toBeGreaterThan(0)
+  await expect(page.getByText(/PRO imkoniyati/)).toHaveCount(0)
 })
+
+test(
+  'production build: on Free the speaker makes no sound and shows a calm PRO note',
+  { tag: '@production' },
+  async ({ page }) => {
+    test.setTimeout(60_000)
+    await seed(page, { language: 'uz', pro: false })
+    const clips = recordClips(page)
+    await openQuickCheck(page, START.uz)
+    await expect(speaker(page)).toHaveAttribute('data-status', 'locked')
+    await speaker(page).click()
+    await expect(page.getByText(/Ovozli o‘qish – PRO imkoniyati/)).toBeVisible()
+    await page.waitForTimeout(800)
+    expect(clips).toEqual([])
+    expect(await playingCount(page)).toBe(0)
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  },
+)
 
 test('the speaker is easy to tap and overlaps nothing, from 320px phones to desktop', async ({
   page,

@@ -8,6 +8,11 @@ import { useProgressStore } from '@/store/progressStore'
 import { renderRoute } from '@/test/renderRoute'
 import { adminPin, useAdminStore } from './adminSession'
 
+// These tests cover a production (non-demo) build: PRO gates the voice there.
+vi.mock('@/config/demo', () => ({
+  DEMO: { demoMode: false, publicProUIEnabled: true, demoAdminEnabled: false },
+}))
+
 describe('device admin PIN', () => {
   beforeEach(() => useAdminStore.setState({ session: null, theme: 'dark' }))
   afterEach(() => vi.unstubAllEnvs())

@@ -6,6 +6,11 @@ import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { audioManager, type SpeechStatus } from './audioManager'
 import { phraseKey } from './phrases'
 
+// a production build: voice is PRO (the demo build makes it free, config/demo.test.tsx)
+vi.mock('@/config/demo', () => ({
+  DEMO: { demoMode: false, publicProUIEnabled: true, demoAdminEnabled: false },
+}))
+
 /*
  * The shared speech control: one voice at a time, a status every speaker
  * button and the mascot can follow, and honest outcomes (nothing fails silently).

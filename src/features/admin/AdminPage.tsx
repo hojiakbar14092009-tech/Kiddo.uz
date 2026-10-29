@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { KiddoMark } from '@/components/brand/KiddoLogo'
+import { DEMO } from '@/config/demo'
 import { isSupabaseConfigured } from '@/services/supabase/config'
 import type { Payment } from '@/store/paymentStore'
 import './admin.css'
@@ -17,10 +18,17 @@ import {
   AdsSection,
   SettingsSection,
 } from './AdminSections'
-import { adminPin, useAdminStore, type AdminSession } from './adminSession'
+import {
+  acceptedSession,
+  adminPin,
+  dataSource,
+  useAdminStore,
+  type AdminSession,
+} from './adminSession'
+import { DemoBanner, DemoControls, DemoOverview } from './DemoAdmin'
 import { formatSom, revenueTotals } from './revenue'
 
-type Section = 'overview' | 'children' | 'payments' | 'promo' | 'ads' | 'settings'
+type Section = 'overview' | 'demo' | 'children' | 'payments' | 'promo' | 'ads' | 'settings'
 
 const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
   {
@@ -36,6 +44,11 @@ const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
     ),
   },
   { id: 'payments', label: 'To‘lovlar', icon: <IconPath d="M3 6h18v12H3zm0 4h18M7 15h3" /> },
+  {
+    id: 'demo',
+    label: 'Demo',
+    icon: <IconPath d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z" />,
+  },
   { id: 'promo', label: 'Promokodlar', icon: <IconPath d="M4 8V4h4l12 12-4 4L4 8m4-1h.01" /> },
   { id: 'ads', label: 'Reklamalar', icon: <IconPath d="M3 5h18v12H3zm7 4v4l4-2zM8 21h8" /> },
   {
@@ -74,9 +87,10 @@ const PLAN_NAMES: Record<string, string> = {
 export function AdminPage() {
   const stored = useAdminStore((state) => state.session)
   const theme = useAdminStore((state) => state.theme)
-  // A device session saved earlier (another build, a copied sessionStorage)
-  // never opens the panel when this build has no device admin PIN.
-  const session = stored?.source === 'device' && adminPin() === null ? null : stored
+  // A session saved earlier (another build, a copied sessionStorage) opens the
+  // panel only when this build allows its kind (no PIN: no device session; not a
+  // demo build: no demo session).
+  const session = acceptedSession(stored, { pin: adminPin(), demoAdmin: DEMO.demoAdminEnabled })
 
   return (
     <div className="kd-admin relative min-h-dvh" data-theme={theme}>
@@ -179,14 +193,33 @@ function AdminLogin() {
             </form>
           )}
 
-          {expectedPin === null ? (
-            <section className="flex flex-col gap-2">
-              <h2 className="font-display font-semibold">Shu qurilma</h2>
-              <p className="rounded-lg bg-[var(--a-raise)] px-3 py-2 text-sm text-[var(--a-ink-soft)]">
-                Bu versiyada qurilma admini yo‘q: admin PIN sozlanmagan. Admin bo‘lish uchun
-                yuqorida admin hisobi bilan kiring.
+          {DEMO.demoAdminEnabled && (
+            <section className="flex flex-col gap-3" data-testid="demo-admin-entry">
+              <h2 className="font-display font-semibold">Kiddo Demo boshqaruvi</h2>
+              <p className="text-sm text-[var(--a-ink-soft)]">
+                Demo rejimida administrator imkoniyatlarini sinab ko‘rishingiz mumkin: bolalar
+                faolligi, promokodlar va PRO sinovi. Faqat shu qurilmadagi ma’lumotlar ishlatiladi.
               </p>
+              <button
+                type="button"
+                onClick={() => signIn({ source: 'demo' })}
+                className="h-11 rounded-full bg-[var(--a-accent)] font-bold text-[var(--a-accent-ink)]"
+              >
+                Demo administrator sifatida kirish
+              </button>
             </section>
+          )}
+
+          {expectedPin === null ? (
+            !DEMO.demoAdminEnabled && (
+              <section className="flex flex-col gap-2">
+                <h2 className="font-display font-semibold">Shu qurilma</h2>
+                <p className="rounded-lg bg-[var(--a-raise)] px-3 py-2 text-sm text-[var(--a-ink-soft)]">
+                  Bu versiyada qurilma admini yo‘q: admin PIN sozlanmagan. Admin bo‘lish uchun
+                  yuqorida admin hisobi bilan kiring.
+                </p>
+              </section>
+            )
           ) : (
             <form onSubmit={device} className="flex flex-col gap-3">
               <h2 className="font-display font-semibold">Shu qurilma</h2>
@@ -301,15 +334,20 @@ function useNaviNotes(data: AdminData) {
 
 function AdminConsole({ session }: { session: AdminSession }) {
   const navigate = useNavigate()
-  const data = useAdminData(session.source)
-  const promo = useAdminPromo(session.source)
+  const data = useAdminData(dataSource(session))
+  const promo = useAdminPromo(dataSource(session))
+  const demo = session.source === 'demo'
+  // the demo shows children as cards in its overview, and no payments
+  const sections = SECTIONS.filter((item) =>
+    demo ? item.id !== 'payments' && item.id !== 'children' : item.id !== 'demo',
+  )
   const [section, setSection] = useState<Section>('overview')
   const theme = useAdminStore((state) => state.theme)
   const toggleTheme = useAdminStore((state) => state.toggleTheme)
   const signOut = useAdminStore((state) => state.signOut)
   const { notes, excited, pulse } = useNaviNotes(data)
   const online = data.children.filter((child) => child.online).length
-  const title = SECTIONS.find((item) => item.id === section)?.label ?? ''
+  const title = sections.find((item) => item.id === section)?.label ?? ''
 
   const leave = async () => {
     if (session.source === 'cloud') {
@@ -336,7 +374,7 @@ function AdminConsole({ session }: { session: AdminSession }) {
             </div>
           </div>
           <ul className="flex gap-1 overflow-x-auto lg:flex-col">
-            {SECTIONS.map((item) => (
+            {sections.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
@@ -359,7 +397,9 @@ function AdminConsole({ session }: { session: AdminSession }) {
             <p className="px-2 text-xs text-[var(--a-ink-faint)]">
               {session.source === 'cloud'
                 ? `Barcha oilalar: ${session.email}`
-                : 'Ma’lumot: shu qurilma'}
+                : demo
+                  ? 'Demo: shu qurilma'
+                  : 'Ma’lumot: shu qurilma'}
             </p>
           </div>
         </nav>
@@ -411,6 +451,8 @@ function AdminConsole({ session }: { session: AdminSession }) {
             </div>
           </header>
 
+          {demo && <DemoBanner />}
+
           {data.error && (
             <p
               role="alert"
@@ -428,7 +470,9 @@ function AdminConsole({ session }: { session: AdminSession }) {
             <p className="text-[var(--a-ink-soft)]">Yuklanmoqda…</p>
           ) : (
             <>
-              {section === 'overview' && <Overview data={data} />}
+              {section === 'overview' &&
+                (demo ? <DemoOverview data={data} /> : <Overview data={data} />)}
+              {section === 'demo' && demo && <DemoControls />}
               {section === 'children' && <ChildrenSection data={data} />}
               {section === 'payments' && <PaymentsSection data={data} />}
               {section === 'promo' && <PromoSection promo={promo} />}

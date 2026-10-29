@@ -9,6 +9,11 @@ import { requestTts, type TtsResult } from './remoteTts'
 import { speech } from './speech'
 import { resolveClips, voiceMode, type ClipResolution } from './voiceSource'
 
+// a production build: voice is PRO (the demo build makes it free, config/demo.test.tsx)
+vi.mock('@/config/demo', () => ({
+  DEMO: { demoMode: false, publicProUIEnabled: true, demoAdminEnabled: false },
+}))
+
 /*
  * audioManager in private voice mode (docs/architecture/audio-security.md):
  * clips come from voiceSource, the server's not_pro is `locked`, failures are

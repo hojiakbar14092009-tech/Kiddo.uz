@@ -34,6 +34,7 @@ export {
   progressOf,
   PROGRESSION_REASONS,
   publish,
+  snapshotOf,
   subscribeDomainEvents,
   syncProgression,
 } from './service'
