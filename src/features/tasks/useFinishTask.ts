@@ -21,12 +21,13 @@ export function useFinishTask(taskType: TaskType) {
   const homework = useHomeworkFor(taskType)
 
   return useCallback(
-    (letterIds: string[], mistakeDetails: MistakeDetail[]) => {
+    (letterIds: string[], mistakeDetails: MistakeDetail[], introduced: readonly string[] = []) => {
       const outcome = completeTask(childKey, {
         type: taskType,
         language,
         letterIds,
         mistakeDetails,
+        introduced,
       })
       if (homework) completeHomework(childKey, homework.id, outcome.mistakes)
       const state: RewardState = { taskType, outcome }

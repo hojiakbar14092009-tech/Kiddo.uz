@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { passMathExample } from './lesson.ts'
 import {
   applyEvidence,
   type Evidence,
@@ -80,6 +81,7 @@ function seedPlant(skill: string): SkillMemory {
 const SIGN_LABEL: Record<string, string> = { '<': 'kichik', '>': 'katta', '=': 'teng' }
 
 async function answerMathRight(page: Page) {
+  await passMathExample(page)
   const question = page.getByTestId('lab-question')
   const kind = await question.getAttribute('data-kind')
   const answer = (await question.getAttribute('data-answer'))!
@@ -149,6 +151,7 @@ test('a closed place says what it still needs; a double tap builds once; reload 
   await page.goto('/math-lab')
   await page.getByTestId('lab-start').click()
   for (let step = 0; step < 5; step += 1) {
+    await passMathExample(page, step)
     await expect(page.getByTestId('lab-question')).toHaveAttribute('data-step', String(step))
     await answerMathRight(page)
   }

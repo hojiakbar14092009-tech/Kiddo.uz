@@ -7,6 +7,9 @@ import { TitleTopBar } from '@/components/layout/TitleTopBar'
 import { ActivityReward } from '@/components/reward/ActivityReward'
 import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
+import { ACTIVITY_LESSONS } from '@/domain/learning'
+import { useLessonSeen } from '@/features/learn/learnStore'
+import { LessonDeck, type LessonCard } from '@/features/learn/LessonDeck'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { emitActivity, type AwardSummary } from '@/domain/universe'
 import { PLANT_STAGES, useWorldProgress } from '@/domain/universe/progression'
@@ -37,6 +40,28 @@ export function ScienceLabPage() {
   /** Counts wrong taps, so the same "think again" is announced again. */
   const [wrongCount, setWrongCount] = useState(0)
   const heading = useRef<HTMLHeadingElement>(null)
+  // Learn Before Play: what the experiment asks about is shown first
+  const seen = useLessonSeen(ACTIVITY_LESSONS.scienceLab)
+  const [review, setReview] = useState(false)
+  const lesson: LessonCard[] = (
+    [
+      ['water', ['droplet']],
+      ['light', ['sun']],
+      ['seed', ['sunflower']],
+      ['first', ['seedling', 'blossom']],
+    ] as const
+  ).map(([id, pictures]) => ({
+    id,
+    art: (
+      <span className="flex items-center gap-3">
+        {pictures.map((name) => (
+          <Img3D key={name} name={name} className="size-28 sm:size-36 short:size-20" eager />
+        ))}
+      </span>
+    ),
+    title: t(`learnFirst.lab.${id}.title`),
+    lines: [t(`learnFirst.lab.${id}.line`)],
+  }))
   const questionIndex = phase.kind === 'question' ? phase.index : -1
   // a new question: focus moves to it (the old answer buttons are gone)
   useEffect(() => {
@@ -103,15 +128,33 @@ export function ScienceLabPage() {
       header={<TitleTopBar title={t('scienceLab.title')} back="/home" />}
       className="items-center gap-5 px-4 py-6 text-center sm:py-8 short:gap-3 short:py-3"
     >
-      {phase.kind === 'intro' && (
+      {phase.kind === 'intro' && (!seen || review) && (
+        <LessonDeck
+          lessonId={ACTIVITY_LESSONS.scienceLab}
+          cards={lesson}
+          onDone={() => setReview(false)}
+        />
+      )}
+
+      {phase.kind === 'intro' && seen && !review && (
         <>
           <span className="flex size-36 items-center justify-center rounded-card bg-primary-soft">
             <Img3D name="blossom" className="size-[78%]" eager />
           </span>
           <p className="max-w-xl font-display text-2xl font-extrabold">{t('scienceLab.intro')}</p>
-          <Button onClick={start} data-testid="lab-start">
-            {t('scienceLab.start')}
-          </Button>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button onClick={start} data-testid="lab-start">
+              {t('scienceLab.start')}
+            </Button>
+            <Button
+              variant="soft"
+              size="md"
+              onClick={() => setReview(true)}
+              data-testid="lesson-review"
+            >
+              {t('learnFirst.review')}
+            </Button>
+          </div>
         </>
       )}
 

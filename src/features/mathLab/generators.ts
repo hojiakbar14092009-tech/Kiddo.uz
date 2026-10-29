@@ -1,3 +1,4 @@
+import { seededRandom } from '@/lib/random'
 import type { ChallengeLevel } from '@/domain/learner'
 import { OBJECTS, type MathObject } from '@/features/math/generators'
 import { makeOptions, shuffle, type Rng } from '@/features/learn/random'
@@ -874,4 +875,23 @@ export function errorOf(q: LabQuestion, answer: string): string | null {
   if (isRight(q, answer)) return null
   if (q.kind === 'drag') return Number(answer) > Number(q.answer) ? 'too-many' : 'too-few'
   return q.errors[answer] ?? 'other'
+}
+
+/**
+ * Learn Before Play (Phase 21): a worked example of the same skill as `q`,
+ * shown the first time a child meets the skill. Another item (never the
+ * question itself), chosen deterministically from the question's id; null
+ * when the skill has no other item.
+ */
+export function exampleQuestion(q: LabQuestion): LabQuestion | null {
+  let seed = 7
+  for (const char of q.id) seed = (Math.imul(seed, 31) + char.charCodeAt(0)) >>> 0
+  const other = reviewQuestion(
+    q.skill,
+    q.level,
+    new Set([q.id]),
+    seededRandom(seed),
+    q.options.length || undefined,
+  )
+  return other ? { ...other, review: false } : null
 }

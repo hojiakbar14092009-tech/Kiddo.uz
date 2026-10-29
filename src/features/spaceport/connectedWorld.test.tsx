@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, within } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useRewardStore } from '@/domain/rewards'
 import { useLearningMemoryStore } from '@/domain/learningMemory'
 import {
@@ -14,6 +14,11 @@ import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
+
+// Learn Before Play's worked examples are tested in features/learn/lessons.test.tsx
+vi.mock('@/features/learn/learnStore', async (original) =>
+  (await import('@/test/lesson')).mathSkillsMet(original),
+)
 
 let counter = 0
 function run(over: Partial<ActivityCompleted>): ActivityCompleted {
@@ -165,6 +170,10 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
       universe.emitActivity(run({ activity, strand: 'science' }))
     }
     await renderRoute('/science-lab')
+    // Learn Before Play: what a plant needs is shown before the experiment asks
+    expect(screen.getByTestId('lesson-deck')).toHaveAttribute('data-lesson', 'lab.plant')
+    for (let card = 0; card < 3; card += 1) fireEvent.click(screen.getByTestId('lesson-next'))
+    fireEvent.click(screen.getByTestId('lesson-start'))
     fireEvent.click(screen.getByTestId('lab-start'))
     fireEvent.click(screen.getByTestId('lab-option-milk'))
     expect(screen.getByText('Yana bir o‘ylab ko‘r.')).toBeInTheDocument()

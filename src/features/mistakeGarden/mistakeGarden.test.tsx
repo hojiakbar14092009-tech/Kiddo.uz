@@ -16,6 +16,11 @@ import { renderRoute } from '@/test/renderRoute'
 import { resetSeen } from './seenStages'
 import { isRegisteredSkill, SKILLS, skillNameKey } from '@/domain/learning'
 
+// Learn Before Play's worked examples are tested in features/learn/lessons.test.tsx
+vi.mock('@/features/learn/learnStore', async (original) =>
+  (await import('@/test/lesson')).mathSkillsMet(original),
+)
+
 const T0 = Date.parse('2026-10-10T09:00:00.000Z')
 const at = (hours: number) => new Date(T0 + hours * 3_600_000).toISOString()
 let n = 0

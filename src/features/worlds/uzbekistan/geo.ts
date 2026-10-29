@@ -109,3 +109,11 @@ export function cityPoint(id: CityId) {
   const city = CITIES[id]
   return project(city.mapLon, city.mapLat)
 }
+
+/** Where a city's name sits next to its dot (Tailwind classes). */
+export const LABEL_SIDE: Record<'above' | 'below' | 'left' | 'right', string> = {
+  above: 'bottom-full left-1/2 -translate-x-1/2 -mb-1',
+  below: 'top-full left-1/2 -translate-x-1/2 -mt-1',
+  left: 'right-full top-1/2 -translate-y-1/2 -mr-1',
+  right: 'left-full top-1/2 -translate-y-1/2 -ml-1',
+}

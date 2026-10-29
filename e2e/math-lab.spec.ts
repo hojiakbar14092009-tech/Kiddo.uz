@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { passMathExample } from './lesson.ts'
 
 /**
  * A repeatable Math.random. `0` is constant (the parent gate then asks 3 × 3);
@@ -72,6 +73,7 @@ async function dragOneToBasket(page: Page) {
 
 /** Answers the current question right; a basket question with one tap per object. */
 async function answerRight(page: Page) {
+  await passMathExample(page)
   const question = page.getByTestId('lab-question')
   const kind = await question.getAttribute('data-kind')
   const answer = (await question.getAttribute('data-answer'))!
@@ -105,6 +107,7 @@ test('Math Lab: a four-year-old fills the basket (drag and tap) and finishes a s
   await page.getByTestId('lab-start').click()
 
   for (let step = 0; step < 5; step += 1) {
+    await passMathExample(page, step)
     const question = page.getByTestId('lab-question')
     await expect(question).toHaveAttribute('data-step', String(step))
     await expect(question).toHaveAttribute('data-level', '1')
@@ -146,6 +149,7 @@ for (const seed of [7, 4242]) {
     await expect(page.getByRole('heading', { name: 'Matematika laboratoriyasi' })).toHaveCount(1)
     await page.getByTestId('lab-start').click()
     for (let step = 0; step < 5; step += 1) {
+      await passMathExample(page, step)
       const question = page.getByTestId('lab-question')
       await expect(question).toHaveAttribute('data-step', String(step))
       await expect(question).toHaveAttribute('data-level', '2')
@@ -169,6 +173,7 @@ test.describe('a small phone (320×568)', () => {
       await guest(page)
       await page.goto('/math-lab')
       await page.getByTestId('lab-start').click()
+      await passMathExample(page)
       const question = page.getByTestId('lab-question')
       await expect(question).toHaveAttribute('data-kind', 'drag')
       const basket = page.getByTestId('lab-basket')
@@ -190,6 +195,7 @@ test.describe('a small phone (320×568)', () => {
       await expect(basket).toHaveAttribute('data-count', String(target))
       expect(await inView(page.getByTestId('lab-done'))).toBe(true)
       await page.getByTestId('lab-done').click()
+      await passMathExample(page, 1)
       await expect(question).toHaveAttribute('data-step', '1')
     })
   }

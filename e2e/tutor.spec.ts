@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { passMathExample } from './lesson.ts'
 
 /*
  * Phase 10: the tutor inside Math Lab (hint ladder), Kiddo's own learning
@@ -75,6 +76,7 @@ test('tutor: hint ladder, memory after a reload, spaced review, parent summary',
   await sixYearOld(page)
   await page.goto('/math-lab')
   await page.getByTestId('lab-start').click()
+  await passMathExample(page)
   const question = page.getByTestId('lab-question')
   await expect(question).toHaveAttribute('data-level', '3')
 
@@ -110,6 +112,7 @@ test('tutor: hint ladder, memory after a reload, spaced review, parent summary',
   const step = await question.getAttribute('data-step')
   // the glowing card pulses without end: Playwright never sees it "stable"
   await question.locator('[data-status="hint"]').click({ force: true })
+  await passMathExample(page, Number(step) + 1)
   await expect(question).not.toHaveAttribute('data-step', step!)
 
   // the question went to Kiddo's own memory on this device

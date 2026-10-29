@@ -60,6 +60,11 @@ export interface ChildProgress {
 }
 
 export interface CompletedTask {
+  /**
+   * Letters shown to the child in this task just before being asked (Learn
+   * Before Play): practised, but not yet "learned" from this run.
+   */
+  introduced?: readonly string[]
   type: TaskType
   language: Language
   letterIds: string[]
@@ -141,7 +146,8 @@ function applyTask(childKey: string, progress: ChildProgress, task: CompletedTas
   task.mistakeDetails.forEach(({ targetId }) => {
     struggles[targetId] = (struggles[targetId] ?? 0) + 1
   })
-  const masteredNow = task.letterIds.filter((id) => !missed.has(id))
+  const shown = new Set(task.introduced ?? [])
+  const masteredNow = task.letterIds.filter((id) => !missed.has(id) && !shown.has(id))
   masteredNow.forEach((id) => {
     if (struggles[id] !== undefined) {
       struggles[id] -= 1

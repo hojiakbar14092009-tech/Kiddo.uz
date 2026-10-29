@@ -21,12 +21,15 @@ export function RunDone({
   doneText,
   art,
   onAgain,
+  onReview,
 }: {
   kind: GameKind
   reward: Reward
   doneText: string
   art: ReactNode
   onAgain: () => void
+  /** Show the game's lesson again (Learn Before Play). */
+  onReview?: () => void
 }) {
   const { t } = useTranslation()
   useSpeakable([doneText])
@@ -47,6 +50,11 @@ export function RunDone({
           <LinkButton to={HUB} variant="soft" size="md">
             {t('uzbekistan.chooseOther')}
           </LinkButton>
+          {onReview && (
+            <Button variant="soft" size="md" onClick={onReview} data-testid="lesson-review">
+              {t('learnFirst.review')}
+            </Button>
+          )}
           <Button size="md" onClick={onAgain}>
             {t('uzbekistan.again')}
           </Button>

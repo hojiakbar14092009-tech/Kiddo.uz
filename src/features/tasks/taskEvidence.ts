@@ -29,7 +29,14 @@ export function letterErrorCode(type: ChoiceGameType): string {
 /** A solved round: its target, the wrong taps before the right one, the run and round index. */
 export function roundOutcome(
   type: ChoiceGameType,
-  round: { sessionId: string; index: number; targetId: string; wrongIds: readonly string[] },
+  round: {
+    sessionId: string
+    index: number
+    targetId: string
+    wrongIds: readonly string[]
+    /** The letter was introduced right before this round: shown, so not independent. */
+    introduced?: boolean
+  },
   at: string,
 ): LearningOutcome {
   const misses = round.wrongIds.length
@@ -39,7 +46,7 @@ export function roundOutcome(
     questionId: `${round.index}`,
     item: `${type}|${round.targetId}`,
     firstTry: misses === 0,
-    helpedBefore: false,
+    helpedBefore: round.introduced === true,
     errors: round.wrongIds.length > 0 ? [letterErrorCode(type)] : [],
     hint: misses >= GLOW_AFTER_MISTAKES ? HINT.scaffold : HINT.none,
     at,

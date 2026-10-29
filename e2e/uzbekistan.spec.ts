@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { passLesson } from './lesson.ts'
 import { CITIES, CITY_IDS, FOOD_IDS } from '../src/features/worlds/uzbekistan/content.ts'
 
 /** "My Uzbekistan": the free path a guest can play, and a PRO item behind its lock. */
@@ -14,6 +15,9 @@ test('the map game: tap the matching city in every round and get a reward', asyn
   await page.goto('/worlds/uzbekistan')
   await page.getByTestId('uz-game-map').click()
   await expect(page).toHaveURL(/\/worlds\/uzbekistan\/map$/)
+  // Learn Before Play: the labelled map, city by city, first
+  await expect(page.getByTestId('lesson-map')).toBeVisible()
+  await passLesson(page)
 
   // a guest starts at level 2: "Find …!" with three cities on the map, four rounds
   for (let round = 0; round < 4; round += 1) {
@@ -32,6 +36,7 @@ test('the map game: tap the matching city in every round and get a reward', asyn
 test('the dasturxon can be set with taps only; a toy comes back', async ({ page }) => {
   await chooseUzbek(page)
   await page.goto('/worlds/uzbekistan/table')
+  await passLesson(page)
   for (let round = 0; round < 3; round += 1) {
     const items = page.getByTestId('uz-table-item')
     await expect(items.first()).toBeVisible()

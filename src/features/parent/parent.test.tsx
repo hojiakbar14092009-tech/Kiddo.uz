@@ -1,3 +1,4 @@
+import { meetNewLetter } from '@/test/lesson'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useFamilyStore } from '@/store/familyStore'
@@ -165,6 +166,9 @@ describe('Parent dashboard', () => {
     await child.user.click(screen.getByRole('link', { name: /Uy vazifasi: Ch/ }))
     expect(child.router.state.location.search).toBe(`?homework=${homework!.id}`)
     // The homework letter is practised in the game.
+    // a letter not met yet is introduced first
+    expect(screen.getByTestId('letter-intro')).toHaveAttribute('data-letter', 'ch')
+    await meetNewLetter(child.user)
     await child.user.click(screen.getByRole('button', { name: 'Ch harfi' }))
     expect(screen.getByText(/^(Yahoooo|Wow|Hooray|Yay|Woohoo)! /)).toBeInTheDocument()
   })

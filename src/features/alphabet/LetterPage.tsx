@@ -9,6 +9,9 @@ import { getAlphabet } from '@/content/alphabet'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
+import { letterLessonId } from '@/domain/learning'
+import { useLearnStore } from '@/features/learn/learnStore'
+import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { HighlightedWord } from './HighlightedWord'
 import { paletteFor } from './letterPalette'
@@ -23,6 +26,8 @@ export function LetterPage() {
   const language = useLanguage()
   const { sayLetter, speaking } = useSpeaker()
   const { react, reset } = useMascot()
+  const childKey = useChildKey()
+  const markLesson = useLearnStore((state) => state.markLesson)
 
   const { letters } = getAlphabet(language)
   const index = letters.findIndex((entry) => entry.id === letterId)
@@ -40,6 +45,11 @@ export function LetterPage() {
   }, [letter, react, sayLetter])
 
   useEffect(() => reset, [reset])
+
+  // Learn Before Play: a letter opened here is met; the letter games skip its introduction
+  useEffect(() => {
+    if (letter) markLesson(childKey, letterLessonId(language, letter.id))
+  }, [childKey, language, letter, markLesson])
 
   if (!letter) return <Navigate to="/alphabet" replace />
 

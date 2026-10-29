@@ -1,9 +1,14 @@
 import { expect, test, type Page } from '@playwright/test'
+import { meetNewLetter, passLessonIfShown } from './lesson.ts'
 import {
   applyEvidence,
   type Evidence,
   type SkillMemory,
 } from '../src/domain/learningMemory/memory.ts'
+
+/** Both children have met every Uzbek letter in the alphabet (Learn Before Play is not tested here). */
+const UZ_LETTERS = 'a b d e f g h i j k l m n o p q r s t u v x y z o2 g2 sh ch ng tutuq'.split(' ')
+const MET_LETTERS = UZ_LETTERS.map((id) => `letter.uz.${id}`)
 
 /*
  * Phase 17 QA: one learning memory for every area. Language and science
@@ -23,7 +28,7 @@ interface Seed {
 /** A family of two five-year-olds (and optional memory), as the app saves them, once per tab. */
 async function seed(page: Page, data: Seed, random = 11) {
   await page.addInitScript(
-    ({ data, random }) => {
+    ({ data, random, met }) => {
       let state = random
       Math.random = () => {
         state = (state * 9301 + 49297) % 233280
@@ -62,8 +67,17 @@ async function seed(page: Page, data: Seed, random = 11) {
         byChild[id] = { skills, processed: [] }
       }
       put('kiddo.learning-memory', { byChild })
+      const learner = {
+        skills: {},
+        attempts: [],
+        sessions: [],
+        rewarded: [],
+        stages: { lessons: met },
+        lastOrder: {},
+      }
+      put('kiddo.learn', { byChild: { 'kid-a': learner, 'kid-b': learner } })
     },
-    { data, random },
+    { data, random, met: MET_LETTERS },
   )
 }
 
@@ -112,6 +126,7 @@ async function playLetters(
 ): Promise<string | null> {
   let missed: string | null = null
   for (let round = 0; round < 5; round += 1) {
+    await meetNewLetter(page)
     const options = page.getByTestId('task-options')
     await expect(options).toBeVisible()
     const answer = (await options.getAttribute('data-answer'))!
@@ -209,6 +224,7 @@ test('D, science: a dinosaur-quiz difficulty becomes a plant and grows with prac
   await seed(page, {}, 23)
   for (let run = 0; run < 2; run += 1) {
     await page.goto('/worlds/dino/quiz')
+    await passLessonIfShown(page, 'quiz-start')
     await page.getByTestId('quiz-start').click()
     await playDinoQuiz(page, true)
   }
@@ -219,6 +235,7 @@ test('D, science: a dinosaur-quiz difficulty becomes a plant and grows with prac
   await diet.click()
   await page.getByTestId('plant-practise').click()
   await expect(page).toHaveURL(/\/worlds\/dino\/quiz\?from=garden$/)
+  await passLessonIfShown(page, 'quiz-start')
   await page.getByTestId('quiz-start').click()
   await playDinoQuiz(page, false)
   await page.getByTestId('to-garden').click()

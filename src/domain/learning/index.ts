@@ -13,3 +13,9 @@ export {
   type PracticeTarget,
   type SkillDef,
 } from './skills'
+export {
+  ACTIVITY_LESSONS,
+  letterLessonId,
+  mathSkillLessonId,
+  type ActivityLessonId,
+} from './lessons'

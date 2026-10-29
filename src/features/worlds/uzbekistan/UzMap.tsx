@@ -3,14 +3,16 @@ import { useTranslation } from 'react-i18next'
 import { CheckIcon } from '@/components/icons'
 import type { Language } from '@/content/languages'
 import { CITIES, CITY_IDS, type CityId } from './content'
-import { ARAL_PATH, BORDER_PATH, cityPoint, MAP_HEIGHT, MAP_WIDTH, PEAKS, RIVER_PATH } from './geo'
-
-const LABEL_SIDE: Record<'above' | 'below' | 'left' | 'right', string> = {
-  above: 'bottom-full left-1/2 -translate-x-1/2 -mb-1',
-  below: 'top-full left-1/2 -translate-x-1/2 -mt-1',
-  left: 'right-full top-1/2 -translate-y-1/2 -mr-1',
-  right: 'left-full top-1/2 -translate-y-1/2 -ml-1',
-}
+import {
+  ARAL_PATH,
+  BORDER_PATH,
+  cityPoint,
+  LABEL_SIDE,
+  MAP_HEIGHT,
+  MAP_WIDTH,
+  PEAKS,
+  RIVER_PATH,
+} from './geo'
 
 /** The outline, the Aral Sea, the river and a few peaks (decorative). */
 export function MapShape({ className }: { className?: string }) {

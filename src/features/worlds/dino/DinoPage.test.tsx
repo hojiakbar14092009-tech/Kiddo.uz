@@ -7,6 +7,7 @@ import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
+import { passLesson } from '@/test/lesson'
 import { renderRoute } from '@/test/renderRoute'
 import { DINO_IDS, DINOS } from './content'
 import { DINO_TEXT } from './text'
@@ -103,6 +104,10 @@ describe('Dinosaur world', () => {
   it('a quiz run counts once in the universe, at the level it was played at', async () => {
     childOfAge(5)
     const { user } = await renderRoute('/worlds/dino/quiz')
+    // Learn Before Play: the six animals first, then the quiz
+    expect(screen.queryByTestId('quiz-start')).not.toBeInTheDocument()
+    expect(screen.getByTestId('lesson-deck')).toHaveAttribute('data-card', 'trex')
+    await passLesson(user)
     await user.click(screen.getByTestId('quiz-start'))
     // a five-year-old starts the science strand at level 2: five questions, three pictures
     const first = screen.getByTestId('quiz-question')
@@ -134,6 +139,8 @@ describe('Dinosaur world', () => {
 
   it('the dig: the keyboard brushes the sand away, then the bone is matched', async () => {
     const { user } = await renderRoute('/worlds/dino/dig')
+    // Learn Before Play: the animals and their bones first
+    await passLesson(user)
     await user.click(screen.getByTestId('dig-start'))
     let rounds = 0
     while (screen.queryByTestId('dig-run') && rounds < 5) {

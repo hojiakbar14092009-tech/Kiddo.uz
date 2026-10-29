@@ -1,4 +1,5 @@
-import { act, screen } from '@testing-library/react'
+import { meetNewLetter } from '@/test/lesson'
+import { act, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useMascotStore } from '@/features/mascot/mascotStore'
 import { useFamilyStore } from '@/store/familyStore'
@@ -29,6 +30,7 @@ describe('find-letter game', () => {
     })
 
     for (let round = 0; round < 5; round += 1) {
+      await meetNewLetter(user)
       await user.click(screen.getByRole('button', { name: `${currentTargetLetter()} harfi` }))
       await act(async () => vi.advanceTimersByTime(1800))
     }
@@ -44,6 +46,7 @@ describe('find-letter game', () => {
       advanceTimers: vi.advanceTimersByTime,
     })
 
+    await meetNewLetter(user)
     const target = currentTargetLetter()
     const wrong = screen
       .getAllByRole('button', { name: / harfi$/ })
@@ -55,6 +58,7 @@ describe('find-letter game', () => {
     await user.click(screen.getByRole('button', { name: `${target} harfi` }))
     await act(async () => vi.advanceTimersByTime(1800))
     for (let round = 1; round < 5; round += 1) {
+      await meetNewLetter(user)
       await user.click(screen.getByRole('button', { name: `${currentTargetLetter()} harfi` }))
       await act(async () => vi.advanceTimersByTime(1800))
     }
@@ -65,8 +69,20 @@ describe('find-letter game', () => {
 describe('other games', () => {
   beforeEach(() => useSettingsStore.setState({ language: 'en' }))
 
-  it('deals four pairs of hidden cards in the memory game', async () => {
-    await renderRoute('/tasks/memory')
+  it('deals four pairs of hidden cards in the memory game, after meeting its new letters', async () => {
+    const { user } = await renderRoute('/tasks/memory')
+    // Learn Before Play: every letter not met yet is shown first, one by one
+    const shown: string[] = []
+    while (screen.queryByTestId('letter-intro')) {
+      shown.push(screen.getByTestId('letter-intro').dataset.letter!)
+      await user.click(screen.getByTestId('letter-intro-go'))
+    }
+    expect(shown.length).toBeGreaterThan(0)
+    expect(new Set(shown).size).toBe(shown.length)
+    // after the last new letter, keyboard focus moves on to the cards
+    await waitFor(() =>
+      expect(screen.getByTestId('memory-board').contains(document.activeElement)).toBe(true),
+    )
     expect(screen.getAllByRole('button', { name: 'Hidden card' })).toHaveLength(8)
   })
 

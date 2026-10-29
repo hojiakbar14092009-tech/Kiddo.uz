@@ -443,6 +443,19 @@ clue → picture → card removed → solution, `data-review` question from due 
   VITE_DEMO_MODE=false) runs tests tagged `@production` (Free/PRO, PIN admin, prices).
 - Critic: REJECT (High: env var could open demo on a cloud build; Mediums) → fixed → re-review.
 
+## Learn Before Play (Phase 21) – docs/architecture/learn-before-play.md
+
+- Registry `domain/learning/lessons.ts` (`ACTIVITY_LESSONS`: dino.animals, uz.map/table/patterns, lab.plant;
+  `letterLessonId`, `mathSkillLessonId`). Seen lessons per child in learnStore `stages.lessons` (`markLesson`,
+  `hasSeenLesson`, `useLessonSeen`); no new store.
+- `LessonDeck` (cards, speaker, focus on title) used by Dino quiz+dig (`DinoLesson`), Uzbekistan games (`UzLesson`),
+  Science Lab. "Yana o‘rganish" (`lesson-review`) on start cards / Uzbekistan result screens.
+- Letter games (choice + memory): `LetterIntro` for unmet letters (`useUnmetLetters`); alphabet page marks letters
+  met; introduced letters are `introduced` in completeTask (not learned this run, helpedBefore in evidence).
+- Math Lab: first time a skill appears, a worked example of another item (`exampleQuestion`) before answering.
+- Tests: `features/learn/lessons.test.tsx`; unrelated math tests mock math lessons as met (`src/test/lesson.ts`);
+  e2e helpers `e2e/lesson.ts` (passLesson, passLessonIfShown, meetNewLetter, passMathExample).
+
 ## Next
 
 Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +

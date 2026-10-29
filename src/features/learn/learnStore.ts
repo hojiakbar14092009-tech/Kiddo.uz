@@ -93,6 +93,17 @@ export function skillKey(section: SectionId, language: LearnLanguage, skill: str
 
 export const stageKey = (section: SectionId, language: LearnLanguage) => `${section}|${language}`
 
+/**
+ * The lessons a child has seen (Learn Before Play) live beside the taught
+ * stages, under their own key (no "|": no section and language clash).
+ */
+export const LESSONS_KEY = 'lessons'
+
+/** Has the child seen this lesson? */
+export function hasSeenLesson(learn: LearnChild, lessonId: string): boolean {
+  return (learn.stages[LESSONS_KEY] ?? []).includes(lessonId)
+}
+
 /** Coins for a finished session: a little for trying, more for independent answers. */
 export { sessionCoins }
 
@@ -106,6 +117,8 @@ interface LearnState {
   finishSession: (childKey: string, session: Omit<SessionRecord, 'coins' | 'at'>) => number
   markStage: (childKey: string, section: SectionId, language: LearnLanguage, stage: string) => void
   setLastOrder: (childKey: string, key: string, order: string) => void
+  /** A lesson was shown in full (Learn Before Play, domain/learning/lessons). */
+  markLesson: (childKey: string, lessonId: string) => void
   /** Forgets everything a child did here (the child was removed). */
   clearChild: (childKey: string) => void
 }
@@ -207,6 +220,22 @@ export const useLearnStore = create<LearnState>()(
           }
         }),
 
+      markLesson: (childKey, lessonId) =>
+        set((state) => {
+          const current = child(state, childKey)
+          const seen = current.stages[LESSONS_KEY] ?? []
+          if (seen.includes(lessonId)) return state
+          return {
+            byChild: {
+              ...state.byChild,
+              [childKey]: {
+                ...current,
+                stages: { ...current.stages, [LESSONS_KEY]: [...seen, lessonId] },
+              },
+            },
+          }
+        }),
+
       clearChild: (childKey) =>
         set((state) => {
           if (!state.byChild[childKey]) return state
@@ -222,6 +251,11 @@ export const useLearnStore = create<LearnState>()(
 export function useLearnChild(): LearnChild {
   const key = useChildKey()
   return useLearnStore((state) => state.byChild[key] ?? EMPTY)
+}
+
+/** Has the playing child seen this lesson (Learn Before Play)? */
+export function useLessonSeen(lessonId: string): boolean {
+  return hasSeenLesson(useLearnChild(), lessonId)
 }
 
 export function getLearnChild(childKey: string): LearnChild {

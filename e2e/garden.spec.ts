@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { passMathExample } from './lesson.ts'
 import {
   applyEvidence,
   type Evidence,
@@ -97,6 +98,7 @@ async function seed(page: Page, data: Seed) {
 const SIGN_LABEL: Record<string, string> = { '<': 'kichik', '>': 'katta', '=': 'teng' }
 
 async function answerRight(page: Page) {
+  await passMathExample(page)
   const question = page.getByTestId('lab-question')
   const kind = await question.getAttribute('data-kind')
   const answer = (await question.getAttribute('data-answer'))!
@@ -124,6 +126,7 @@ async function practise(page: Page, skill: string) {
   await page.getByTestId('lab-start').click()
   let reviewed = false
   for (let step = 0; step < 5; step += 1) {
+    await passMathExample(page, step)
     const question = page.getByTestId('lab-question')
     await expect(question).toHaveAttribute('data-step', String(step))
     if ((await question.getAttribute('data-review')) === 'true') reviewed = true

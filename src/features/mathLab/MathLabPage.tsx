@@ -42,7 +42,16 @@ import { newId } from '@/lib/id'
 import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { BasketTask } from './BasketTask'
-import { errorOf, isRight, planSession, type LabQuestion, type ReviewPlan } from './generators'
+import {
+  errorOf,
+  exampleQuestion,
+  isRight,
+  planSession,
+  type LabQuestion,
+  type ReviewPlan,
+} from './generators'
+import { mathSkillLessonId } from '@/domain/learning'
+import { hasSeenLesson, useLearnChild, useLearnStore } from '@/features/learn/learnStore'
 import { HelpPicture, OptionFace, SceneView } from './parts'
 import { labActivity, labSummary, type LabSummary } from './result'
 import { helpText, optionLabel, promptText } from './text'
@@ -349,6 +358,17 @@ function LabSession({
 
   const q = questions[index]
   const prompt = q ? promptText(t, language, q) : ''
+  // Learn Before Play: a skill met for the first time is shown as a worked
+  // example (another item of it) before the child answers on their own
+  const learnChild = useLearnChild()
+  const markLesson = useLearnStore((state) => state.markLesson)
+  const skillLesson = q ? mathSkillLessonId(q.skill) : ''
+  const needsExample = q !== undefined && !q.review && !hasSeenLesson(learnChild, skillLesson)
+  const example = useMemo(() => (q && needsExample ? exampleQuestion(q) : null), [q, needsExample])
+  // the example replaces what was focused: focus goes to its title
+  useEffect(() => {
+    if (example) document.getElementById('lab-intro-title')?.focus()
+  }, [example])
 
   // after a mistake the help comes into view (it may be below the answers on a small phone)
   useEffect(() => {
@@ -579,6 +599,57 @@ function LabSession({
     )
   }
   if (!q) return null
+
+  if (example) {
+    const exampleAnswer = example.options.find((option) => option.id === example.answer) ?? null
+    return (
+      <LabFrame
+        level={level}
+        speak={[t('learnFirst.mathTitle'), promptText(t, language, example), helpText(t, example)]}
+        step={{ current: index, total: questions.length }}
+        help={null}
+        compact={false}
+      >
+        <section
+          data-testid="lab-intro"
+          data-skill={example.skill}
+          aria-labelledby="lab-intro-title"
+          className="mx-auto flex w-full max-w-3xl flex-col items-center gap-3 rounded-panel bg-surface p-4 text-center shadow-press sm:gap-4 sm:p-6"
+        >
+          <p className="text-sm font-bold text-primary-ink">{t('learnFirst.mathTitle')}</p>
+          <h2
+            id="lab-intro-title"
+            tabIndex={-1}
+            className="font-display text-2xl font-extrabold focus-visible:outline-2 focus-visible:outline-primary sm:text-3xl"
+          >
+            {promptText(t, language, example)}
+          </h2>
+          <SceneView scene={example.scene} object={example.object} />
+          <HelpPicture visual={example.help.visual} object={example.object} />
+          <p className="text-lg text-ink-soft">{helpText(t, example)}</p>
+          <p className="font-display text-xl font-extrabold" data-testid="lab-intro-answer">
+            {t('learnFirst.mathAnswer', {
+              answer: exampleAnswer
+                ? optionLabel(t, language, example, exampleAnswer)
+                : example.answer,
+            })}
+          </p>
+          <Button
+            onClick={() => {
+              markLesson(childKey, skillLesson)
+              // the button goes away: focus moves on to the question's answers
+              requestAnimationFrame(() =>
+                document.querySelector<HTMLElement>('[data-testid="lab-question"] button')?.focus(),
+              )
+            }}
+            data-testid="lab-intro-go"
+          >
+            {t('learnFirst.mathGo')}
+          </Button>
+        </section>
+      </LabFrame>
+    )
+  }
 
   const choices = q.options.map((option) => ({
     id: option.id,

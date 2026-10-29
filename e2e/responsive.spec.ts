@@ -15,6 +15,8 @@ const ROUTES = [
   '/learn/space',
   '/worlds/dino',
   '/worlds/dino/explore/trex',
+  // Learn Before Play: the lesson deck on every screen size
+  '/worlds/dino/quiz',
   '/worlds/uzbekistan',
   '/worlds/uzbekistan/map',
   '/stories',

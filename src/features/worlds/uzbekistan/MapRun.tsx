@@ -1,6 +1,9 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ACTIVITY_LESSONS } from '@/domain/learning'
+import { useLessonSeen } from '@/features/learn/learnStore'
+import { UzLesson } from './UzLesson'
 import { Screen } from '@/components/layout/Screen'
 import { Button } from '@/components/ui/Button'
 import { StepDots } from '@/components/ui/Progress'
@@ -18,7 +21,20 @@ import { MapShape, UzMap } from './UzMap'
 /** "Map of Uzbekistan": tap the city that matches the picture and the words. */
 export function MapRun() {
   const [run, setRun] = useState(0)
-  return <Run key={run} onAgain={() => setRun((n) => n + 1)} />
+  // Learn Before Play: the lesson first (and again whenever the child asks)
+  const seen = useLessonSeen(ACTIVITY_LESSONS.uzMap)
+  const [review, setReview] = useState(false)
+  if (!seen || review) return <UzLesson kind="map" onDone={() => setReview(false)} />
+  return (
+    <Run
+      key={run}
+      onAgain={() => setRun((n) => n + 1)}
+      onReview={() => {
+        setReview(true)
+        setRun((n) => n + 1)
+      }}
+    />
+  )
 }
 
 function promptText(round: MapRound, language: 'uz' | 'ru' | 'en'): string {
@@ -26,7 +42,7 @@ function promptText(round: MapRound, language: 'uz' | 'ru' | 'en'): string {
   return city[round.prompt][language]
 }
 
-function Run({ onAgain }: { onAgain: () => void }) {
+function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void }) {
   const { t } = useTranslation()
   const language = useLanguage()
   const { react, reset } = useMascot()
@@ -87,6 +103,7 @@ function Run({ onAgain }: { onAgain: () => void }) {
     return (
       <RunDone
         kind="map"
+        onReview={onReview}
         reward={reward ?? { stars: 0, crystals: 0 }}
         doneText={doneText}
         onAgain={onAgain}

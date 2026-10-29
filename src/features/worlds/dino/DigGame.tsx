@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react'
 import { BrushIcon, BulbIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
@@ -17,6 +18,9 @@ import {
   type DigBone,
 } from './dig'
 import { DINO_ROOT } from './explore'
+import { ACTIVITY_LESSONS } from '@/domain/learning'
+import { useLessonSeen } from '@/features/learn/learnStore'
+import { DinoLesson } from './DinoLesson'
 import { BoneShape, ChoiceName, DinoFrame, DinoPicture, StartCard } from './parts'
 import { DinoResult } from './run'
 import { NEXT_DELAY_MS, useDinoRecorder, useStepLabel, type DinoFinished } from './session'
@@ -29,11 +33,19 @@ export function DigGame() {
   const level = useChallengeLevel('science')
   const [run, setRun] = useState<{ count: number; level: ChallengeLevel } | null>(null)
   const text = useDinoText()
+  const { t } = useTranslation()
   const { say } = useLearnMascot()
+  // Learn Before Play: "whose bone is this?" needs the animals and their bones first
+  const seen = useLessonSeen(ACTIVITY_LESSONS.dinoAnimals)
+  const [review, setReview] = useState(false)
 
   useEffect(() => {
     if (!run) say('greet', { text: text.modes.dig.title, emoji: '🦴' })
   }, [run, say, text.modes.dig.title])
+
+  if (!run && (!seen || review)) {
+    return <DinoLesson title={text.modes.dig.title} back={BACK} onDone={() => setReview(false)} />
+  }
 
   if (!run) {
     return (
@@ -51,9 +63,19 @@ export function DigGame() {
           title={text.modes.dig.title}
           text={text.dig.how}
           action={
-            <Button onClick={() => setRun({ count: 1, level })} data-testid="dig-start">
-              {text.dig.start}
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-2 short:justify-start">
+              <Button onClick={() => setRun({ count: 1, level })} data-testid="dig-start">
+                {text.dig.start}
+              </Button>
+              <Button
+                variant="soft"
+                size="md"
+                onClick={() => setReview(true)}
+                data-testid="lesson-review"
+              >
+                {t('learnFirst.review')}
+              </Button>
+            </div>
           }
         />
       </DinoFrame>

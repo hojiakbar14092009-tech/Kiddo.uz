@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { meetNewLetter } from './lesson.ts'
 
 /** Starts every test as a first visit, with a fixed Math.random so the parent gate asks 3 × 3. */
 test.beforeEach(async ({ page }) => {
@@ -29,14 +30,22 @@ test('a right answer earns praise, a finished game earns coins', async ({ page }
   await chooseUzbek(page)
   await page.getByRole('link', { name: '1. Harfni top — Navbatdagi' }).click()
 
-  let previous = ''
+  let previous: string | null = null
   for (let round = 0; round < 5; round += 1) {
-    const prompt = page.getByText(/harfini top!$/).last()
-    // Wait for the next round's instruction before reading the letter.
-    await expect(prompt).not.toHaveText(previous, { timeout: 5_000 })
-    previous = await prompt.innerText()
-    const letter = previous.replace(' harfini top!', '').trim()
-    await page.getByRole('button', { name: `${letter} harfi`, exact: true }).click()
+    const options = page.getByTestId('task-options')
+    const intro = page.getByTestId('letter-intro')
+    // the next round: a new letter's introduction, or new answers on the board
+    await expect
+      .poll(
+        async () =>
+          (await intro.isVisible()) ||
+          ((await options.isVisible()) && (await options.getAttribute('data-answer')) !== previous),
+      )
+      .toBe(true)
+    // Learn Before Play: a new letter is shown before it is asked
+    await meetNewLetter(page)
+    previous = await options.getAttribute('data-answer')
+    await page.locator(`[data-option="${previous}"]`).click()
     await expect(page.getByText(/^(Yahoooo|Wow|Hooray|Yay|Woohoo)! /)).toBeVisible()
   }
 

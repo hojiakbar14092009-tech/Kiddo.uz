@@ -346,3 +346,23 @@ describe('practice chosen in the Mistake Garden', () => {
     expect(planSession(2, rng, [{ ...chosen, chosen: false }]).some((q) => q.review)).toBe(false)
   })
 })
+
+describe('worked examples (Learn Before Play)', () => {
+  it('show another item of the same skill, the same one every time', async () => {
+    const { exampleQuestion, makeQuestion } = await import('./generators')
+    const { seededRandom } = await import('@/lib/random')
+    for (const level of [1, 2, 3, 4, 5] as const) {
+      for (let index = 0; index < 6; index += 1) {
+        const q = makeQuestion(level, index, seededRandom(level * 10 + index))
+        const example = exampleQuestion(q)
+        // every skill has another item to show
+        expect(example).not.toBeNull()
+        if (!example) continue
+        expect(example.skill).toBe(q.skill)
+        expect(example.id).not.toBe(q.id)
+        expect(example.review).toBe(false)
+        expect(exampleQuestion(q)?.id).toBe(example.id)
+      }
+    }
+  })
+})

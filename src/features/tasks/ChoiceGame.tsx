@@ -22,7 +22,10 @@ import {
 import { TaskShell } from './TaskShell'
 import { useFinishTask } from './useFinishTask'
 import { GLOW_AFTER_MISTAKES, roundOutcome } from './taskEvidence'
-import { recordLearning } from '@/domain/learning'
+import { letterLessonId, recordLearning } from '@/domain/learning'
+import { useLearnStore } from '@/features/learn/learnStore'
+import { LetterIntro } from './LetterIntro'
+import { useUnmetLetters } from './useUnmetLetters'
 import { newId } from '@/lib/id'
 import { useChildKey } from '@/store/progressStore'
 import { playableLetters } from './playableLetters'
@@ -40,6 +43,8 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
   const learner = useLearner(type)
   const finish = useFinishTask(type)
   const optionCount = OPTION_COUNT[useAgeLevel()][type]
+  // Learn Before Play: a letter the child has not learned or met yet is shown before it is asked
+  const unmet = useUnmetLetters(type, learner)
   // Rounds are drawn once when the game starts; progress updates must not reshuffle them.
   const [rounds] = useState(() =>
     generateRounds(
@@ -58,6 +63,7 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
       rounds={rounds}
       title={type === 'find-letter' ? t('task.findLetterTitle') : t('task.findPictureTitle')}
       onFinish={finish}
+      introduce={unmet}
     />
   )
 }
@@ -66,18 +72,25 @@ interface ChoiceRoundsProps {
   type: ChoiceGameType
   rounds: TaskRound[]
   title: string
-  onFinish: (letterIds: string[], mistakes: MistakeDetail[]) => void
+  onFinish: (letterIds: string[], mistakes: MistakeDetail[], introduced?: string[]) => void
+  /** Letters to show before their first question (the games; never the big test). */
+  introduce?: ReadonlySet<string>
 }
 
 /** Plays a fixed list of choice rounds; shared by the games and the big test. */
-export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProps) {
+export function ChoiceRounds({ type, rounds, title, onFinish, introduce }: ChoiceRoundsProps) {
   const { t } = useTranslation()
+  const language = useLanguage()
+  const markLesson = useLearnStore((state) => state.markLesson)
+  const [met, setMet] = useState<ReadonlySet<string>>(() => new Set())
   const { react, reset } = useMascot()
   const { sayText, speaking } = useSpeaker()
   const [session, dispatch] = useReducer(taskSessionReducer, rounds, createSession)
   const round = currentRound(session)
   const childKey = useChildKey()
   const [sessionId] = useState(newId)
+  const meeting =
+    round !== undefined && introduce?.has(round.target.id) === true && !met.has(round.target.id)
 
   // a solved round is one piece of learning evidence (counted once per run and round)
   useEffect(() => {
@@ -92,6 +105,7 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
             index: session.index,
             targetId: round.target.id,
             wrongIds: session.wrongIds,
+            introduced: met.has(round.target.id),
           },
           new Date().toISOString(),
         ),
@@ -99,7 +113,7 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
     } catch {
       // the memory is best effort: the game never breaks
     }
-  }, [childKey, round, session.index, session.solved, session.wrongIds, sessionId, type])
+  }, [childKey, met, round, session.index, session.solved, session.wrongIds, sessionId, type])
 
   const prompt = useCallback(
     (letter: LetterEntry, spoken: boolean) => {
@@ -113,13 +127,22 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
 
   const instruct = useCallback(() => {
     if (!round) return
+    if (meeting) {
+      const intro = t('learnFirst.letterWord', {
+        letter: round.target.upper,
+        word: round.target.word,
+      })
+      react('instruct', { text: intro, emoji: round.target.emoji }, { speak: false })
+      void sayText(`${round.target.spoken} — ${round.target.word}`)
+      return
+    }
     react(
       'instruct',
       { text: prompt(round.target, false), emoji: type === 'find-letter' ? '🔍' : '🖼️' },
       { speak: false },
     )
     void sayText(prompt(round.target, true))
-  }, [prompt, react, round, sayText, type])
+  }, [meeting, prompt, react, round, sayText, t, type])
 
   // Every new round: the mascot gives the instruction.
   useEffect(instruct, [instruct])
@@ -133,15 +156,25 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
         onFinish(
           session.rounds.map((item) => item.target.id),
           session.mistakes,
+          [...met],
         )
       } else {
         dispatch({ type: 'next' })
       }
     }, ADVANCE_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [onFinish, session])
+  }, [met, onFinish, session])
 
   if (!round) return null
+
+  const meet = () => {
+    markLesson(childKey, letterLessonId(language, round.target.id))
+    setMet((set) => new Set(set).add(round.target.id))
+    // the button goes away: keyboard focus moves on to the answers
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLElement>('[data-testid="task-options"] button')?.focus(),
+    )
+  }
 
   const choose = (option: LetterEntry) => {
     const verdict = judgeChoice(session, option.id)
@@ -167,29 +200,33 @@ export function ChoiceRounds({ type, rounds, title, onFinish }: ChoiceRoundsProp
       hint={{ kind: type, letter: round.target }}
       struggling={session.wrongIds.length > 0}
     >
-      <div
-        data-testid="task-options"
-        data-answer={round.target.id}
-        className={clsx(
-          'mx-auto grid w-full flex-1 content-center gap-4 sm:gap-6',
-          round.options.length === 2
-            ? 'max-w-2xl grid-cols-2 short:max-w-[calc((100dvh-10rem)*2+1.5rem)]'
-            : round.options.length === 3
-              ? 'max-w-3xl grid-cols-3 short:max-w-[calc((100dvh-10rem)*3+3rem)]'
-              : 'max-w-md grid-cols-2 landscape:max-w-4xl landscape:grid-cols-4 short:max-w-[calc((100dvh-10rem)*4+4.5rem)]',
-        )}
-      >
-        {round.options.map((option) => (
-          <OptionCard
-            key={option.id}
-            option={option}
-            target={round.target}
-            taskType={type}
-            status={statusOf(option)}
-            onChoose={choose}
-          />
-        ))}
-      </div>
+      {meeting ? (
+        <LetterIntro letter={round.target} onGo={meet} />
+      ) : (
+        <div
+          data-testid="task-options"
+          data-answer={round.target.id}
+          className={clsx(
+            'mx-auto grid w-full flex-1 content-center gap-4 sm:gap-6',
+            round.options.length === 2
+              ? 'max-w-2xl grid-cols-2 short:max-w-[calc((100dvh-10rem)*2+1.5rem)]'
+              : round.options.length === 3
+                ? 'max-w-3xl grid-cols-3 short:max-w-[calc((100dvh-10rem)*3+3rem)]'
+                : 'max-w-md grid-cols-2 landscape:max-w-4xl landscape:grid-cols-4 short:max-w-[calc((100dvh-10rem)*4+4.5rem)]',
+          )}
+        >
+          {round.options.map((option) => (
+            <OptionCard
+              key={option.id}
+              option={option}
+              target={round.target}
+              taskType={type}
+              status={statusOf(option)}
+              onChoose={choose}
+            />
+          ))}
+        </div>
+      )}
     </TaskShell>
   )
 }

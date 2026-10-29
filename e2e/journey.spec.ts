@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { passLessonIfShown, passMathExample } from './lesson.ts'
 
 /*
  * The connected universe's signature flow, played as a child plays it, in
@@ -22,6 +23,7 @@ async function seedRandom(page: Page, seed: number) {
 const SIGN_LABEL: Record<string, string> = { '<': 'kichik', '>': 'katta', '=': 'teng' }
 
 async function answerMathRight(page: Page) {
+  await passMathExample(page)
   const question = page.getByTestId('lab-question')
   const kind = await question.getAttribute('data-kind')
   const answer = (await question.getAttribute('data-answer'))!
@@ -86,6 +88,7 @@ test('the first journey links maths, space, the garden, biology and the lab', as
   await expect(page).toHaveURL(/\/math-lab$/)
   await page.getByTestId('lab-start').click()
   for (let step = 0; step < 5; step += 1) {
+    await passMathExample(page, step)
     await expect(page.getByTestId('lab-question')).toHaveAttribute('data-step', String(step))
     await answerMathRight(page)
   }
@@ -120,6 +123,7 @@ test('the first journey links maths, space, the garden, biology and the lab', as
   // 5. biology: three dinosaur quizzes done well make the flower grow
   await page.getByRole('link', { name: 'Dinozavrlar bog‘i' }).click()
   await page.getByTestId('dino-mode-quiz').click()
+  await passLessonIfShown(page, 'quiz-start')
   await page.getByTestId('quiz-start').click()
   for (let quiz = 0; quiz < 3; quiz += 1) {
     if (quiz > 0) await page.getByTestId('dino-again').click()
@@ -135,6 +139,7 @@ test('the first journey links maths, space, the garden, biology and the lab', as
   // 6. the Science Lab's first experiment ends the journey
   await card.getByTestId('journey-go').click()
   await expect(page).toHaveURL(/\/science-lab$/)
+  await passLessonIfShown(page, 'lab-start')
   await page.getByTestId('lab-start').click()
   for (const answer of ['droplet', 'sun', 'sunflower', 'seedling']) {
     await page.getByTestId(`lab-option-${answer}`).click()

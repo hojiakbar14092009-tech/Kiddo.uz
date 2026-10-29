@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { passMathExample } from './lesson.ts'
 
 /*
  * Phase 15 QA: age is a starting point, not a ceiling. A parent adds a
@@ -52,6 +53,7 @@ test('a ten-year-old: no age ceiling, focus explained to the parent, Math Lab st
   await expect(page).toHaveURL(/\/math-lab$/)
   await expect(page.getByTestId('lab-level').first()).toContainText('5')
   await page.getByTestId('lab-start').click()
+  await passMathExample(page)
   const question = page.getByTestId('lab-question')
   await expect(question).toHaveAttribute('data-level', '5')
   // no evidence yet: the ladder starts with the lowest help, four cards (or signs)

@@ -1,11 +1,16 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useUniverseStore } from '@/domain/universe'
 import { birthDateForAge } from '@/features/age/ageLevel'
 import { useFamilyStore } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
+
+// Learn Before Play's worked examples are tested in features/learn/lessons.test.tsx
+vi.mock('@/features/learn/learnStore', async (original) =>
+  (await import('@/test/lesson')).mathSkillsMet(original),
+)
 
 type User = Awaited<ReturnType<typeof renderRoute>>['user']
 

@@ -1,6 +1,9 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ACTIVITY_LESSONS } from '@/domain/learning'
+import { useLessonSeen } from '@/features/learn/learnStore'
+import { UzLesson } from './UzLesson'
 import { Screen } from '@/components/layout/Screen'
 import { Button } from '@/components/ui/Button'
 import { StepDots } from '@/components/ui/Progress'
@@ -35,10 +38,23 @@ interface Drag {
  */
 export function TableRun() {
   const [run, setRun] = useState(0)
-  return <Run key={run} onAgain={() => setRun((n) => n + 1)} />
+  // Learn Before Play: the lesson first (and again whenever the child asks)
+  const seen = useLessonSeen(ACTIVITY_LESSONS.uzTable)
+  const [review, setReview] = useState(false)
+  if (!seen || review) return <UzLesson kind="table" onDone={() => setReview(false)} />
+  return (
+    <Run
+      key={run}
+      onAgain={() => setRun((n) => n + 1)}
+      onReview={() => {
+        setReview(true)
+        setRun((n) => n + 1)
+      }}
+    />
+  )
 }
 
-function Run({ onAgain }: { onAgain: () => void }) {
+function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void }) {
   const { t } = useTranslation()
   const language = useLanguage()
   const { react, reset } = useMascot()
@@ -123,6 +139,7 @@ function Run({ onAgain }: { onAgain: () => void }) {
     return (
       <RunDone
         kind="table"
+        onReview={onReview}
         reward={reward ?? { stars: 0, crystals: 0 }}
         doneText={doneText}
         onAgain={onAgain}

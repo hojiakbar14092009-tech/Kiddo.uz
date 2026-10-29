@@ -1,3 +1,4 @@
+import { passLesson } from '@/test/lesson'
 import { screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { emitActivity, useUniverseStore } from '@/domain/universe'
@@ -80,6 +81,7 @@ describe('My Uzbekistan', () => {
 
   it('plays the map game to the reward and reports the run once, with its level', async () => {
     const { user } = await renderRoute('/worlds/uzbekistan/map')
+    await passLesson(user)
     // a guest starts at level 2: three cities on the map, four rounds
     for (let round = 0; round < 4; round += 1) {
       expect(screen.getAllByTestId('uz-city')).toHaveLength(3)
@@ -113,6 +115,7 @@ describe('My Uzbekistan', () => {
 
   it('sets the dasturxon with taps; a toy comes back with a kind word', async () => {
     const { user } = await renderRoute('/worlds/uzbekistan/table')
+    await passLesson(user)
     for (let round = 0; round < 3; round += 1) {
       const items = screen.getAllByTestId('uz-table-item')
       const toy = items.find((b) => !(FOOD_IDS as readonly string[]).includes(b.dataset.item!))!

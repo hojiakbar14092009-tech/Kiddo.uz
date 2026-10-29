@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { meetNewLetter } from './lesson.ts'
 
 /*
  * Phase 19 QA: the 3D mascot family. Real rigged GLB characters load per
@@ -130,6 +131,7 @@ test('a wrong answer makes the guide think, not sad; it reacts to the world', as
   await page.goto('/tasks/find-letter')
   const guide = mascot3D(page, 'scribble')
   await expect(guide).toBeVisible({ timeout: 30_000 })
+  await meetNewLetter(page)
   const answer = await page.locator('[data-answer]').first().getAttribute('data-answer')
   const wrong = page.locator(`[data-option]:not([data-option="${answer}"])`).first()
   await wrong.click()

@@ -11,6 +11,11 @@ import { useFamilyStore } from '@/store/familyStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
 
+// Learn Before Play's worked examples are tested in features/learn/lessons.test.tsx
+vi.mock('@/features/learn/learnStore', async (original) =>
+  (await import('@/test/lesson')).mathSkillsMet(original),
+)
+
 const iso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BulbIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
@@ -7,11 +8,13 @@ import { useChallengeLevel, type ChallengeLevel } from '@/domain/learner'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import { isDinoId, type Diet } from './content'
+import { DinoLesson } from './DinoLesson'
 import { DINO_ROOT } from './explore'
 import { ChoiceName, DietPicture, DinoFrame, DinoPicture, StartCard } from './parts'
 import { planQuiz, type QuizQuestion } from './quiz'
 import { quizOutcome } from './quizEvidence'
-import { recordLearning } from '@/domain/learning'
+import { ACTIVITY_LESSONS, recordLearning } from '@/domain/learning'
+import { useLessonSeen } from '@/features/learn/learnStore'
 import { newId } from '@/lib/id'
 import { useChildKey } from '@/store/progressStore'
 import { hintOf, promptOf } from './quizText'
@@ -26,11 +29,18 @@ export function QuizGame() {
   const level = useChallengeLevel('science')
   const [run, setRun] = useState<{ count: number; level: ChallengeLevel } | null>(null)
   const text = useDinoText()
+  const { t } = useTranslation()
   const { say } = useLearnMascot()
-
+  // Learn Before Play: the six animals are met before the first question
+  const seen = useLessonSeen(ACTIVITY_LESSONS.dinoAnimals)
+  const [review, setReview] = useState(false)
   useEffect(() => {
     if (!run) say('greet', { text: text.modes.quiz.title, emoji: '🦕' })
   }, [run, say, text.modes.quiz.title])
+
+  if (!run && (!seen || review)) {
+    return <DinoLesson title={text.modes.quiz.title} back={BACK} onDone={() => setReview(false)} />
+  }
 
   if (!run) {
     return (
@@ -50,9 +60,19 @@ export function QuizGame() {
           title={text.modes.quiz.title}
           text={text.modes.quiz.text}
           action={
-            <Button onClick={() => setRun({ count: 1, level })} data-testid="quiz-start">
-              {text.quiz.start}
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-2 short:justify-start">
+              <Button onClick={() => setRun({ count: 1, level })} data-testid="quiz-start">
+                {text.quiz.start}
+              </Button>
+              <Button
+                variant="soft"
+                size="md"
+                onClick={() => setReview(true)}
+                data-testid="lesson-review"
+              >
+                {t('learnFirst.review')}
+              </Button>
+            </div>
           }
         />
       </DinoFrame>

@@ -60,7 +60,7 @@ describe('Exam page', () => {
       const prompt = await screen.findByText(/Qaysi rasmda .+ harfi bor\?/)
       const letter = /Qaysi rasmda (.+) harfi bor\?/.exec(prompt.textContent ?? '')![1]!
       const target = getAlphabet('uz').letters.find((item) => item.upper === letter)!
-      await user.click(screen.getByRole('button', { name: new RegExp(target.word) }))
+      await user.click(screen.getByRole('button', { name: target.word }))
       await screen.findByText(/^(Yahoooo|Wow|Hooray|Yay|Woohoo)! /)
       act(() => vi.advanceTimersByTime(1750))
     }
