@@ -8,12 +8,18 @@ import { isGameOpen } from '@/features/age/ageLevel'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { GAME_TYPES, type GameType } from '@/features/tasks/games'
 import { playableLetters } from '@/features/tasks/playableLetters'
+import { dayKey } from '@/features/tasks/rules'
+import { isOverdue } from '@/features/homework/activityHomework'
+import { tDynamic } from '@/lib/tDynamic'
 import {
+  isActivityHomework,
   levelOfChild,
   MAX_HOMEWORK_LETTERS,
   useFamilyStore,
+  type ActivityHomework,
   type ChildProfile,
 } from '@/store/familyStore'
+import { ActivityHomeworkPanel } from './ActivityHomeworkPanel'
 import { useLanguage } from '@/store/settingsStore'
 import { formatDayMonth } from '@/lib/dates'
 import { ChoiceChips } from './ChoiceChips'
@@ -38,6 +44,7 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
   const game = openGames.includes(chosenGame) ? chosenGame : (openGames[0] ?? 'find-picture')
   const [letters, setLetters] = useState<string[]>([])
   const homeworks = child.homeworks ?? []
+  const today = dayKey()
   // unfinished first (oldest first), then the finished ones (newest first)
   const pending = homeworks.filter((homework) => !homework.completedAt)
   const done = homeworks
@@ -75,20 +82,28 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
               {[...pending, ...done].map((homework) => (
                 <li
                   key={homework.id}
+                  data-testid="hw-item"
+                  data-kind={homework.kind ?? 'letters'}
                   className="flex flex-col gap-2 rounded-2xl border-2 border-line bg-cream p-3"
                 >
-                  <p
-                    className="font-display text-2xl font-extrabold tracking-wide"
-                    lang={homework.language}
-                  >
-                    {homework.letterIds
-                      .map((id) => findLetter(homework.language, id)?.upper ?? id)
-                      .join(' ')}
-                  </p>
-                  <p>
-                    {GAME_META[homework.game].emoji} {t(GAME_META[homework.game].titleKey)} ·{' '}
-                    {LANGUAGE_INFO[homework.language].nativeName}
-                  </p>
+                  {isActivityHomework(homework) ? (
+                    <ActivityHomeworkLine homework={homework} today={today} />
+                  ) : (
+                    <>
+                      <p
+                        className="font-display text-2xl font-extrabold tracking-wide"
+                        lang={homework.language}
+                      >
+                        {homework.letterIds
+                          .map((id) => findLetter(homework.language, id)?.upper ?? id)
+                          .join(' ')}
+                      </p>
+                      <p>
+                        {GAME_META[homework.game].emoji} {t(GAME_META[homework.game].titleKey)} ·{' '}
+                        {LANGUAGE_INFO[homework.language].nativeName}
+                      </p>
+                    </>
+                  )}
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={clsx(
@@ -97,10 +112,14 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
                       )}
                     >
                       {homework.completedAt
-                        ? t('parent.homework.done', {
-                            date: formatDayMonth(new Date(homework.completedAt)),
-                            count: homework.mistakes ?? 0,
-                          })
+                        ? isActivityHomework(homework)
+                          ? t('parent.homework.activity.doneOn', {
+                              date: formatDayMonth(new Date(homework.completedAt)),
+                            })
+                          : t('parent.homework.done', {
+                              date: formatDayMonth(new Date(homework.completedAt)),
+                              count: homework.mistakes ?? 0,
+                            })
                         : t('parent.homework.waiting', {
                             date: formatDayMonth(new Date(homework.assignedAt)),
                           })}
@@ -108,7 +127,7 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
                     <button
                       type="button"
                       onClick={() => removeHomework(child.id, homework.id)}
-                      className="ml-auto rounded-full px-3 py-1 text-sm font-bold text-oops-ink underline"
+                      className="ml-auto min-h-11 rounded-full px-3 py-1 text-sm font-bold text-oops-ink underline"
                     >
                       {homework.completedAt
                         ? t('parent.homework.clear')
@@ -196,7 +215,35 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
           {added ? t('parent.homework.added') : t('parent.homework.unlimited')}
         </p>
       </Panel>
+      <ActivityHomeworkPanel child={child} />
       <CoinPenaltyPanel child={child} />
     </div>
+  )
+}
+
+/** One activity homework in the parent's list: what, how far, by when, the note. */
+function ActivityHomeworkLine({ homework, today }: { homework: ActivityHomework; today: string }) {
+  const { t } = useTranslation()
+  const overdue = isOverdue(homework, today)
+  return (
+    <>
+      <p className="font-display text-xl font-extrabold">
+        {tDynamic(t, `parent.insights.names.${homework.target}`)}
+      </p>
+      <p data-testid="hw-progress">
+        {t('parent.homework.activity.progress', {
+          done: Math.min(homework.runs.length, homework.times),
+          total: homework.times,
+        })}
+        {homework.dueDay &&
+          ` · ${t('parent.homework.activity.by', {
+            date: formatDayMonth(new Date(`${homework.dueDay}T12:00:00`)),
+          })}`}
+      </p>
+      {overdue && (
+        <p className="text-sm font-semibold text-oops-ink">{t('parent.homework.activity.late')}</p>
+      )}
+      {homework.note && <p className="text-ink-soft italic">“{homework.note}”</p>}
+    </>
   )
 }

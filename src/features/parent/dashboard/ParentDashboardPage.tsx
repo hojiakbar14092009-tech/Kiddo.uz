@@ -15,6 +15,7 @@ import { ProSection } from '@/features/pro/ProSection'
 import { ParentShell } from '../ParentShell'
 import { HomeworkSection } from './HomeworkSection'
 import { ProfilesSection } from './ProfilesSection'
+import { FamilyOverview } from './FamilyOverview'
 import { ExitAlert } from './ExitAlert'
 import { ReportSection } from './ReportSection'
 import { SettingsSection } from './SettingsSection'
@@ -137,8 +138,13 @@ export function ParentDashboardPage() {
               }}
             />
           )}
-          {tab === 'report' && child && <ReportSection child={child} />}
-          {tab === 'homework' && child && <HomeworkSection child={child} />}
+          {tab === 'report' && child && (
+            <div className="flex flex-col gap-5">
+              {children.length > 1 && <FamilyOverview family={children} selectedId={child.id} />}
+              <ReportSection child={child} />
+            </div>
+          )}
+          {tab === 'homework' && child && <HomeworkSection key={child.id} child={child} />}
           {tab === 'pro' && <ProSection />}
           {tab === 'settings' && <SettingsSection />}
         </div>

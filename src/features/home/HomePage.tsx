@@ -9,7 +9,8 @@ import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey, isFinalTestUnlocked } from '@/features/tasks/rules'
-import { usePendingHomework } from '@/features/tasks/useHomework'
+import { usePendingActivityHomework, usePendingHomework } from '@/features/tasks/useHomework'
+import { ActivityHomeworkCard } from './ActivityHomeworkCard'
 import { useActiveChild, useAgeLevel, useFamilyStore, useMascotModel } from '@/store/familyStore'
 import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
 import { AppIcon, type AppIconName } from '@/features/age/AppIcon'
@@ -42,6 +43,7 @@ export function HomePage() {
   const plan = dailyPlanState(results, dayKey(), level)
   const lockedGames = GAME_TYPES.filter((game) => !isGameOpen(game, level))
   const homeworks = usePendingHomework()
+  const activityHomeworks = usePendingActivityHomework()
   const language = useLanguage()
   const exam = examProgress(getAlphabet(language).letters, learned[language] ?? [])
   const examUnlocked = isFinalTestUnlocked(exam.learned, exam.total)
@@ -107,11 +109,16 @@ export function HomePage() {
         )}
       </div>
 
-      {homeworks.length > 0 && (
+      {homeworks.length + activityHomeworks.length > 0 && (
         <ul className="flex w-full max-w-3xl flex-col gap-4">
           {homeworks.map((homework) => (
             <li key={homework.id}>
               <HomeworkCard homework={homework} />
+            </li>
+          ))}
+          {activityHomeworks.map((homework) => (
+            <li key={homework.id}>
+              <ActivityHomeworkCard homework={homework} />
             </li>
           ))}
         </ul>

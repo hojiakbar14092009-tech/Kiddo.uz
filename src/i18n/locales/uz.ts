@@ -56,6 +56,8 @@ export const uz = {
     restText: 'Zo‘r ishlading! Endi biroz dam olsang ham bo‘ladi.',
     homework: 'Uy vazifasi',
     homeworkLabel: 'Uy vazifasi: {{letters}}. {{game}}',
+    homeworkDone: 'Uy vazifasi bajarildi! Barakalla!',
+    activityHomeworkLabel: 'Uy vazifasi: {{name}}. Yana {{count}} marta',
     examReady: 'Tayyor!',
   },
   childSelect: {
@@ -505,6 +507,14 @@ export const uz = {
       done: '{{name}}dan {{count}} coin ayirildi.',
       empty: '{{name}}da hozir coin yo‘q.',
     },
+    family: {
+      title: 'Oila bir qarashda',
+      today: 'Bugun: {{count}} ta mashg‘ulot, {{stars}} yulduz',
+      nothingToday: 'Bugun hali o‘ynamagan',
+      homework: 'Ochiq uy vazifasi: {{count}} ta',
+      homeworkLate: 'Ochiq uy vazifasi: {{count}} ta ({{late}} tasining muddati o‘tgan)',
+      noHomework: 'Ochiq uy vazifasi yo‘q',
+    },
     homework: {
       current: 'Uy vazifalari',
       summary: '{{pending}} ta kutilmoqda, {{done}} ta bajarilgan',
@@ -521,6 +531,24 @@ export const uz = {
       game: 'O‘yin',
       letters: 'Harflar ({{count}}/{{max}})',
       assign: '{{name}}ga berish',
+      activity: {
+        assign: 'Mashg‘ulotni {{name}}ga berish',
+        title: 'Mashg‘ulot vazifasi',
+        intro:
+          '{{name}}ga istalgan mashg‘ulotni bir necha marta bajarishni bering. Bola tugatgan har bir mashg‘ulot o‘zi hisoblanadi.',
+        what: 'Qaysi mashg‘ulot',
+        times: 'Necha marta',
+        timesValue: '{{count}} marta',
+        due: 'Qachongacha (ixtiyoriy)',
+        dueHint: 'Muddat o‘tsa ham jazo yo‘q – faqat sizga eslatma.',
+        note: 'Bolaga qisqa so‘z (ixtiyoriy)',
+        notePlaceholder: 'Masalan: Barakalla, sen uddalaysan!',
+        counted: 'Bola mashg‘ulotni tugatganda o‘zi hisoblanadi.',
+        progress: '{{done}} / {{total}} marta bajarildi',
+        by: '{{date}} gacha',
+        late: 'Muddat o‘tdi – bola hali bajarishi mumkin.',
+        doneOn: '{{date}} kuni bajarildi',
+      },
     },
     aiTutor: {
       title: 'AI yordamchi',

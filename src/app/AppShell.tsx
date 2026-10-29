@@ -10,6 +10,7 @@ import { Toaster } from '@/components/ui/Toaster'
 import { ExitWatcher } from './ExitWatcher'
 import { PresenceBeacon } from './PresenceBeacon'
 import { AppSettingsSync } from './AppSettingsSync'
+import { HomeworkBridge } from '@/features/homework/HomeworkBridge'
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
@@ -25,6 +26,7 @@ export function AppShell() {
       <ExitWatcher />
       <PresenceBeacon />
       <AppSettingsSync />
+      <HomeworkBridge />
       <Outlet />
       {!pathname.startsWith('/admin') && <SplashScreen />}
       <Toaster />

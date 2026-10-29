@@ -1,6 +1,14 @@
 import { useSearchParams } from 'react-router-dom'
 import { isGameOpen } from '@/features/age/ageLevel'
-import { levelOfChild, useActiveChild, type Homework } from '@/store/familyStore'
+import {
+  isActivityHomework,
+  isLetterHomework,
+  levelOfChild,
+  useActiveChild,
+  type ActivityHomework,
+  type Homework,
+  type LetterHomework,
+} from '@/store/familyStore'
 import { useProgress, type ChildProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import type { GameType } from './games'
@@ -8,14 +16,15 @@ import type { LearnerState } from './generateRounds'
 
 const NONE: Homework[] = []
 
-/** The active child’s unfinished homework in the current language, oldest first. */
-export function usePendingHomework(): Homework[] {
+/** The active child’s unfinished letter homework in the current language, oldest first. */
+export function usePendingHomework(): LetterHomework[] {
   const child = useActiveChild()
   const language = useLanguage()
   const level = levelOfChild(child ?? null)
   const list = child?.homeworks ?? NONE
   return list.filter(
-    (homework) =>
+    (homework): homework is LetterHomework =>
+      isLetterHomework(homework) &&
       !homework.completedAt &&
       homework.language === language &&
       // A game for an older child (e.g. after the birthday was corrected) waits until it opens.
@@ -23,8 +32,18 @@ export function usePendingHomework(): Homework[] {
   )
 }
 
+/** The active child’s unfinished activity homework (any language), oldest first. */
+export function usePendingActivityHomework(): ActivityHomework[] {
+  const child = useActiveChild()
+  const list = child?.homeworks ?? NONE
+  return list.filter(
+    (homework): homework is ActivityHomework =>
+      isActivityHomework(homework) && !homework.completedAt,
+  )
+}
+
 /** The homework this game was opened for (`/tasks/:type?homework=<id>`). */
-export function useHomeworkFor(game: GameType | 'exam'): Homework | null {
+export function useHomeworkFor(game: GameType | 'exam'): LetterHomework | null {
   const [params] = useSearchParams()
   const id = params.get('homework')
   return (
@@ -32,14 +51,14 @@ export function useHomeworkFor(game: GameType | 'exam'): Homework | null {
   )
 }
 
-export function homeworkPath(homework: Homework): string {
+export function homeworkPath(homework: LetterHomework): string {
   return `/tasks/${homework.game}?homework=${encodeURIComponent(homework.id)}`
 }
 
 export function learnerFrom(
   progress: ChildProgress,
-  language: Homework['language'],
-  homework: Homework | null,
+  language: LetterHomework['language'],
+  homework: LetterHomework | null,
 ): LearnerState {
   return {
     learned: progress.learned[language] ?? [],

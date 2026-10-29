@@ -1,3 +1,9 @@
+import type { ActivityNameKey } from '@/features/parent/insights/activityNames'
+import {
+  cleanHomeworkInput,
+  countsFor,
+  homeworkActivity,
+} from '@/features/homework/activityHomework'
 import { setAgeResolver } from '@/domain/learner/profile'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -23,7 +29,9 @@ export type Gender = 'girl' | 'boy'
 export type MascotModel = Gender
 
 /** Letters a parent picked for practice, played through one game. */
-export interface Homework {
+export interface LetterHomework {
+  /** Missing on homework saved before Phase 23. */
+  kind?: 'letters'
   id: string
   language: Language
   game: GameType
@@ -34,7 +42,44 @@ export interface Homework {
   mistakes: number | null
 }
 
-export type NewHomework = Pick<Homework, 'language' | 'game' | 'letterIds'>
+/**
+ * Any learning activity as homework (Phase 23): "Math Lab, 3 times". Each
+ * finished run of that activity counts once (`runs`: its run ids).
+ */
+export interface ActivityHomework {
+  kind: 'activity'
+  id: string
+  target: ActivityNameKey
+  /** Finished runs needed, 1–5. */
+  times: number
+  /** Run ids already counted (idempotent). */
+  runs: string[]
+  assignedAt: string
+  completedAt: string | null
+  /** Optional day to finish by (YYYY-MM-DD); never a punishment. */
+  dueDay: string | null
+  /** A short word from the parent, shown to the child. */
+  note: string
+  mistakes: null
+}
+
+export type Homework = LetterHomework | ActivityHomework
+
+export function isLetterHomework(homework: Homework): homework is LetterHomework {
+  return homework.kind !== 'activity'
+}
+
+export function isActivityHomework(homework: Homework): homework is ActivityHomework {
+  return homework.kind === 'activity'
+}
+
+export type NewHomework = Pick<LetterHomework, 'language' | 'game' | 'letterIds'>
+export interface NewActivityHomework {
+  target: ActivityNameKey
+  times: number
+  dueDay?: string | null
+  note?: string
+}
 
 export interface ChildProfile {
   id: string
@@ -72,6 +117,13 @@ interface FamilyState {
   setActiveChild: (id: string | null) => void
   /** Adds one more homework to the child's list. */
   assignHomework: (childId: string, homework: NewHomework) => void
+  /** Adds an activity homework ("Math Lab, 3 times"); see features/homework. */
+  assignActivityHomework: (childId: string, homework: NewActivityHomework) => void
+  /**
+   * A finished run of `activity` (its run id `runId`): counts once for every
+   * open activity homework of this child it fits. Returns the homework ids it finished.
+   */
+  recordHomeworkRun: (childId: string, runId: string, activity: string, at?: string) => string[]
   removeHomework: (childId: string, homeworkId: string) => void
   /** Removes the finished ones from the list. */
   clearDoneHomework: (childId: string) => void
@@ -177,6 +229,65 @@ export const useFamilyStore = create<FamilyState>()(
           ),
         })),
 
+      assignActivityHomework: (childId, input) => {
+        if (!homeworkActivity(input.target)) return
+        const clean = cleanHomeworkInput(input)
+        set((state) => ({
+          children: state.children.map((child) =>
+            child.id === childId
+              ? {
+                  ...child,
+                  homeworks: [
+                    ...(child.homeworks ?? []),
+                    {
+                      kind: 'activity',
+                      id: createId(),
+                      target: input.target,
+                      times: clean.times,
+                      runs: [],
+                      assignedAt: new Date().toISOString(),
+                      completedAt: null,
+                      dueDay: clean.dueDay,
+                      note: clean.note,
+                      mistakes: null,
+                    },
+                  ],
+                }
+              : child,
+          ),
+        }))
+      },
+
+      recordHomeworkRun: (childId, runId, activity, at) => {
+        const finished: string[] = []
+        set((state) => {
+          let changed = false
+          const children = state.children.map((child) => {
+            if (child.id !== childId || !child.homeworks) return child
+            const homeworks = child.homeworks.map((homework) => {
+              if (
+                !isActivityHomework(homework) ||
+                homework.completedAt ||
+                homework.runs.includes(runId) ||
+                // a run from before the homework was given never counts for it
+                (at !== undefined && at < homework.assignedAt) ||
+                !countsFor(homework.target, activity)
+              ) {
+                return homework
+              }
+              changed = true
+              const runs = [...homework.runs, runId]
+              const done = runs.length >= homework.times
+              if (done) finished.push(homework.id)
+              return { ...homework, runs, completedAt: done ? new Date().toISOString() : null }
+            })
+            return { ...child, homeworks }
+          })
+          return changed ? { children } : state
+        })
+        return finished
+      },
+
       removeHomework: (childId, homeworkId) =>
         set((state) => ({
           children: state.children.map((child) =>
@@ -202,7 +313,9 @@ export const useFamilyStore = create<FamilyState>()(
               ? {
                   ...child,
                   homeworks: (child.homeworks ?? []).map((homework) =>
-                    homework.id === homeworkId && !homework.completedAt
+                    homework.id === homeworkId &&
+                    !homework.completedAt &&
+                    isLetterHomework(homework)
                       ? { ...homework, completedAt: new Date().toISOString(), mistakes }
                       : homework,
                   ),

@@ -465,6 +465,13 @@ clue → picture → card removed → solution, `data-review` question from due 
   ColumnsHelp; `format.ts` digit grouping; font scaling for 320px; reviews cross plans; chip "5-daraja · ustalik m".
 - Parents: StrandRow.mastery, level word + "ustalik m". e2e: 40-year-old at 320px up to 5-digit numbers.
 
+## Homework + Parent Center 2.0 (Phase 23) – docs/architecture/homework.md
+
+- `Homework = LetterHomework | ActivityHomework` (`kind: 'activity'`, target ActivityNameKey, times 1–5, runs,
+  dueDay, note); `assignActivityHomework`, `recordHomeworkRun` (idempotent by run id); guards
+  `isLetterHomework`/`isActivityHomework`. `HomeworkBridge` in AppShell counts `activity.completed`.
+- Child home `ActivityHomeworkCard`; parent `ActivityHomeworkPanel` + list; `FamilyOverview` (2+ children).
+
 ## Next
 
 Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +

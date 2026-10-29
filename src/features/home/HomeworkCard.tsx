@@ -5,10 +5,10 @@ import { findLetter } from '@/content/alphabet'
 import { AppIcon } from '@/features/age/AppIcon'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { homeworkPath } from '@/features/tasks/useHomework'
-import type { Homework } from '@/store/familyStore'
+import type { LetterHomework } from '@/store/familyStore'
 
 /** Homework from a parent comes first on the home screen, before today’s plan. */
-export function HomeworkCard({ homework }: { homework: Homework }) {
+export function HomeworkCard({ homework }: { homework: LetterHomework }) {
   const { t } = useTranslation()
   const letters = homework.letterIds
     .map((id) => findLetter(homework.language, id)?.upper ?? id)

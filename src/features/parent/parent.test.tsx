@@ -152,7 +152,11 @@ describe('Parent dashboard', () => {
     await parent.user.click(screen.getByRole('button', { name: 'B' }))
     await parent.user.click(screen.getByRole('button', { name: 'Aliga berish' }))
     const homeworks = useFamilyStore.getState().children[0]?.homeworks ?? []
-    expect(homeworks.map((h) => h.letterIds)).toEqual([['ch'], ['sh'], ['b']])
+    expect(homeworks.map((h) => ('letterIds' in h ? h.letterIds : []))).toEqual([
+      ['ch'],
+      ['sh'],
+      ['b'],
+    ])
     expect(homeworks[0]).toMatchObject({ language: 'uz', game: 'find-letter' })
     expect(screen.getByText('3 ta kutilmoqda, 0 ta bajarilgan')).toBeInTheDocument()
     // one can be taken back

@@ -58,6 +58,8 @@ export const ru: Translation = {
     restText: 'Отличная работа! Теперь можно немного отдохнуть.',
     homework: 'Домашнее задание',
     homeworkLabel: 'Домашнее задание: {{letters}}. {{game}}',
+    homeworkDone: 'Задание выполнено! Молодец!',
+    activityHomeworkLabel: 'Задание: {{name}}. Осталось: {{count}}',
     examReady: 'Готово!',
   },
   childSelect: {
@@ -506,6 +508,14 @@ export const ru: Translation = {
       done: 'У ребёнка ({{name}}) снято {{count}} монет.',
       empty: 'У ребёнка ({{name}}) сейчас нет монет.',
     },
+    family: {
+      title: 'Вся семья',
+      today: 'Сегодня: занятий {{count}}, звёзд {{stars}}',
+      nothingToday: 'Сегодня занятий ещё не было',
+      homework: 'Открытых заданий: {{count}}',
+      homeworkLate: 'Открытых заданий: {{count}} (срок прошёл: {{late}})',
+      noHomework: 'Открытых заданий нет',
+    },
     homework: {
       current: 'Домашние задания',
       summary: 'Ждут: {{pending}}, выполнено: {{done}}',
@@ -522,6 +532,24 @@ export const ru: Translation = {
       game: 'Игра',
       letters: 'Буквы ({{count}}/{{max}})',
       assign: 'Задать: {{name}}',
+      activity: {
+        assign: 'Дать занятие: {{name}}',
+        title: 'Задание: занятие',
+        intro:
+          'Дайте {{name}} любое занятие на несколько раз. Каждое законченное занятие засчитывается само.',
+        what: 'Какое занятие',
+        times: 'Сколько раз',
+        timesValue: '× {{count}}',
+        due: 'До какого дня (необязательно)',
+        dueHint: 'Если срок прошёл, никакого наказания – это только напоминание для вас.',
+        note: 'Короткое слово ребёнку (необязательно)',
+        notePlaceholder: 'Например: Молодец, у тебя получится!',
+        counted: 'Засчитывается само, когда ребёнок заканчивает занятие.',
+        progress: 'Выполнено {{done}} из {{total}}',
+        by: 'до {{date}}',
+        late: 'Срок прошёл – ребёнок ещё может выполнить.',
+        doneOn: 'Выполнено {{date}}',
+      },
     },
     aiTutor: {
       title: 'ИИ-помощник',

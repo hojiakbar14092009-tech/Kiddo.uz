@@ -58,6 +58,8 @@ export const en: Translation = {
     restText: 'Great work! Now it’s fine to take a little rest.',
     homework: 'Homework',
     homeworkLabel: 'Homework: {{letters}}. {{game}}',
+    homeworkDone: 'Homework done! Well done!',
+    activityHomeworkLabel: 'Homework: {{name}}. {{count}} more to go',
     examReady: 'Ready!',
   },
   childSelect: {
@@ -505,6 +507,14 @@ export const en: Translation = {
       done: '{{count}} coins taken from {{name}}.',
       empty: '{{name}} has no coins right now.',
     },
+    family: {
+      title: 'The family at a glance',
+      today: 'Played today: {{count}} · stars: {{stars}}',
+      nothingToday: 'Not played yet today',
+      homework: 'Open homework: {{count}}',
+      homeworkLate: 'Open homework: {{count}} ({{late}} past their day)',
+      noHomework: 'No open homework',
+    },
     homework: {
       current: 'Homework',
       summary: '{{pending}} waiting, {{done}} done',
@@ -521,6 +531,24 @@ export const en: Translation = {
       game: 'Game',
       letters: 'Letters ({{count}}/{{max}})',
       assign: 'Give to {{name}}',
+      activity: {
+        assign: 'Give the activity to {{name}}',
+        title: 'Activity homework',
+        intro:
+          'Give {{name}} any activity a few times. Every activity they finish counts by itself.',
+        what: 'Which activity',
+        times: 'How many times',
+        timesValue: '× {{count}}',
+        due: 'By when (optional)',
+        dueHint: 'Nothing bad happens after the day – it is only a reminder for you.',
+        note: 'A short word for your child (optional)',
+        notePlaceholder: 'For example: Well done, you can do it!',
+        counted: 'It counts by itself when your child finishes the activity.',
+        progress: '{{done}} of {{total}} done',
+        by: 'by {{date}}',
+        late: 'The day has passed – your child can still do it.',
+        doneOn: 'Done on {{date}}',
+      },
     },
     aiTutor: {
       title: 'AI helper',
