@@ -495,3 +495,16 @@ clue → picture → card removed → solution, `data-review` question from due 
 Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +
 secrets (no AI_PROVIDER while B5 open), upload voice, then `VITE_VOICE_PRIVATE=true`;
 Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B4; B5.
+
+## Living pet shop (Phase 27) – docs/architecture/living-pet-shop.md
+
+- Original Phase 27 contract text was lost to context compaction; scope defined from the phase name and recorded here.
+- Pet friendship: `features/pets/bond.ts` (hearts at 1/3/7/14/30 days together, `addBondDay` once a day; a `last` more
+  than a day ahead — a wrong clock — does not freeze it). `progressStore.recordPetDay(childKey, day)` counts only the
+  owned pet walking with the robot; optional `ChildProgress.petBond` (persist v3 unchanged; local only, not synced;
+  a guest's resets with the guest's progress on reload, by design). Pays no coins, nothing is lost on missed days.
+- `PetBridge` (AppShell) listens to `activity.completed`, toast `shop.petBondUp` on a new heart.
+- Shop: owned pets show 5 hearts + days to the next one (also in the card's aria-label); a tapped pet answers
+  (surprised → happy pose) in the shop and at the robot's feet (`PetCompanion`). `HeartIcon`. uz/ru/en `shop.petBond*`.
+- Tests: bond.test.ts, PetBridge.test.tsx, progressStore + ShopPage tests, e2e/pet-shop.spec.ts. Critic: ACCEPT
+  (Critical 0 / High 0); its Medium (Russian wording) and Lows (aria days left, clock-ahead, toast text test) fixed.

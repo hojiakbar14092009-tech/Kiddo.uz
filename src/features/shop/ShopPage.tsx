@@ -143,7 +143,7 @@ export function ShopPage() {
               {tab === 'pets'
                 ? shownPet
                   ? t('shop.petTryHint')
-                  : t('shop.petsHint')
+                  : `${t('shop.petsHint')} ${t('shop.petBondHint')}`
                 : t('shop.outfitsHint')}
             </p>
           </div>

@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import { findOutfit, type OutfitId, type Wearing } from '@/features/shop/outfits'
 import { PET_PRICE, type PetId } from '@/features/pets/pets'
+import { addBondDay, bondLevel, type PetBond } from '@/features/pets/bond'
 import { nextSticker } from '@/features/stickers/stickers'
 import type { GameType } from '@/features/tasks/games'
 import { dayKey, ROUNDS_PER_TASK, starsFor } from '@/features/tasks/rules'
@@ -57,6 +58,8 @@ export interface ChildProgress {
   /** Pets adopted with coins, and the one walking with the robot (or none). */
   pets: PetId[]
   pet: PetId | null
+  /** Friendship with each pet: days they played together (Phase 27; this device only). */
+  petBond?: Partial<Record<PetId, PetBond>>
 }
 
 export interface CompletedTask {
@@ -120,6 +123,11 @@ interface ProgressState {
   giftPet: (childKey: string, pet: PetId) => boolean
   /** Picks which owned pet walks with the robot (null: none). */
   choosePet: (childKey: string, pet: PetId | null) => void
+  /**
+   * The walking pet played along on `day` (once a day): returns the pet and its new
+   * heart count when that day added a heart, otherwise null.
+   */
+  recordPetDay: (childKey: string, day: string) => { pet: PetId; level: number } | null
 }
 
 function unique(values: readonly string[]): string[] {
@@ -331,6 +339,26 @@ export const useProgressStore = create<ProgressState>()(
           if (pet !== null && !(current.pets ?? []).includes(pet)) return state
           return { byChild: { ...state.byChild, [childKey]: { ...current, pet } } }
         }),
+
+      recordPetDay: (childKey, day) => {
+        const current = get().byChild[childKey]
+        const pet = current?.pet
+        if (!current || !pet || !(current.pets ?? []).includes(pet)) return null
+        const before = current.petBond?.[pet]
+        const after = addBondDay(before, day)
+        if (after === before) return null
+        set((state) => {
+          const latest = state.byChild[childKey] ?? current
+          return {
+            byChild: {
+              ...state.byChild,
+              [childKey]: { ...latest, petBond: { ...latest.petBond, [pet]: after } },
+            },
+          }
+        })
+        const level = bondLevel(after.days)
+        return level > bondLevel(before?.days ?? 0) ? { pet, level } : null
+      },
 
       resetChild: (childKey) => {
         clearChildRewards(childKey)

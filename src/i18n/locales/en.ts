@@ -213,6 +213,11 @@ export const en: Translation = {
     petBuy: 'Adopt',
     petStopTry: 'Put back',
     petTryHint: 'The pet is standing next to your robot. Like it? Tap “Adopt”.',
+    petBond: 'Friendship: {{count}} of {{total}}',
+    petBondNext: 'Days to the next heart: {{count}}',
+    petBondFull: 'Best friends!',
+    petBondUp: 'You and {{name}} grew closer! Hearts: {{count}} of 5',
+    petBondHint: 'Play together every day and your friendship grows.',
     petHide: 'Walk alone',
     pets: {
       cat: 'Kitten',

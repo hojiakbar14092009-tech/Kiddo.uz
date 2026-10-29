@@ -211,6 +211,11 @@ export const uz = {
     petBuy: 'Olish',
     petStopTry: 'Qaytarish',
     petTryHint: 'Tanlangan hayvon robot yonida ko‘rinyapti. Yoqsa – «Olish»ni bos.',
+    petBond: 'Do‘stlik: {{count}} / {{total}}',
+    petBondNext: 'Yangi yurakchagacha: {{count}} kun',
+    petBondFull: 'Eng yaqin do‘st!',
+    petBondUp: '{{name}} bilan do‘stligingiz o‘sdi! Yurakchalar: {{count}} / 5',
+    petBondHint: 'Har kuni birga o‘ynasang, do‘stlik o‘sadi.',
     petHide: 'Yolg‘iz yurish',
     pets: {
       cat: 'Mushuk',

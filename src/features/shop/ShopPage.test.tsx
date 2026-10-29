@@ -92,4 +92,26 @@ describe('Shop', () => {
     expect(guest().pets).toEqual(['bunny'])
     expect(screen.queryByText(/Sinab ko‘rilyapti/)).not.toBeInTheDocument()
   })
+
+  it('shows the friendship hearts of an owned pet and how many days are left', async () => {
+    useProgressStore.setState({
+      byChild: {
+        [GUEST_KEY]: {
+          ...EMPTY_PROGRESS,
+          pets: ['cat'],
+          pet: 'cat',
+          petBond: { cat: { days: 4, last: '2026-10-01' } },
+        },
+      },
+    })
+    await renderRoute('/shop?tab=pets')
+    const cat = screen.getByRole('button', {
+      name: 'Mushuk — Yonimda. Do‘stlik: 2 / 5. Yangi yurakchagacha: 3 kun',
+    })
+    expect(within(cat).getByTestId('pet-bond')).toHaveAttribute('data-level', '2')
+    expect(within(cat).getByText('Yangi yurakchagacha: 3 kun')).toBeInTheDocument()
+    // pets not owned have no hearts
+    expect(screen.getAllByTestId('pet-bond')).toHaveLength(1)
+    expect(screen.getByText(/Har kuni birga o‘ynasang/)).toBeInTheDocument()
+  })
 })

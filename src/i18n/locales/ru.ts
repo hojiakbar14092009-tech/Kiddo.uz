@@ -213,6 +213,11 @@ export const ru: Translation = {
     petBuy: 'Взять',
     petStopTry: 'Убрать',
     petTryHint: 'Питомец стоит рядом с роботом. Нравится – нажми «Взять».',
+    petBond: 'Дружба: {{count}} из {{total}}',
+    petBondNext: 'Новое сердечко — через {{count}} дн.',
+    petBondFull: 'Лучшие друзья!',
+    petBondUp: 'Вы с питомцем стали ближе! {{name}}: сердечко {{count}} из 5',
+    petBondHint: 'Играй вместе каждый день — и вы подружитесь крепче.',
     petHide: 'Гулять без питомца',
     pets: {
       cat: 'Котёнок',

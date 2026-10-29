@@ -92,6 +92,28 @@ export function StarIcon({ size = 24, ...rest }: IconProps) {
   )
 }
 
+/** A heart, filled (`filled`) or as an outline. */
+export function HeartIcon({ size = 20, filled = true, ...rest }: IconProps & { filled?: boolean }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      {...rest}
+    >
+      <path
+        d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"
+        fill={filled ? 'currentColor' : 'none'}
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function CoinIcon({ size = 28, ...rest }: IconProps) {
   return (
     <svg

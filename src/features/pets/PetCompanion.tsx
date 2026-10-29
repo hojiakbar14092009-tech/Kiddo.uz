@@ -1,5 +1,5 @@
 import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MascotMood } from '@/features/mascot/types'
 import { PetSprite } from './PetSprite'
@@ -30,6 +30,19 @@ export function PetCompanion({ pet, mood, className }: PetCompanionProps) {
   const reduceMotion = useReducedMotion() ?? false
   const walk = useAnimationControls()
   const [facing, setFacing] = useState<1 | -1>(1)
+  // tapped: a surprised hop, then a happy face (the robot's mood comes back after)
+  const [tapped, setTapped] = useState<PetEmotion | null>(null)
+  const timers = useRef<number[]>([])
+  useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), [])
+  const tap = () => {
+    playPetSound(pet)
+    timers.current.forEach((id) => window.clearTimeout(id))
+    setTapped('surprised')
+    timers.current = [
+      window.setTimeout(() => setTapped('happy'), 700),
+      window.setTimeout(() => setTapped(null), 1900),
+    ]
+  }
 
   useEffect(() => {
     if (reduceMotion) return undefined
@@ -62,14 +75,14 @@ export function PetCompanion({ pet, mood, className }: PetCompanionProps) {
   return (
     <motion.button
       type="button"
-      onClick={() => playPetSound(pet)}
+      onClick={tap}
       animate={walk}
       initial={{ left: '0%' }}
       aria-label={t(`shop.pets.${pet}`)}
       className={className ?? 'absolute bottom-0 w-[42%]'}
     >
       <span className="block transition-transform" style={{ transform: `scaleX(${facing})` }}>
-        <PetSprite pet={pet} emotion={emotionFor(mood)} warm className="w-full" />
+        <PetSprite pet={pet} emotion={tapped ?? emotionFor(mood)} warm className="w-full" />
       </span>
     </motion.button>
   )

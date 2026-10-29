@@ -11,6 +11,7 @@ import { ExitWatcher } from './ExitWatcher'
 import { PresenceBeacon } from './PresenceBeacon'
 import { AppSettingsSync } from './AppSettingsSync'
 import { HomeworkBridge } from '@/features/homework/HomeworkBridge'
+import { PetBridge } from '@/features/pets/PetBridge'
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
@@ -27,6 +28,7 @@ export function AppShell() {
       <PresenceBeacon />
       <AppSettingsSync />
       <HomeworkBridge />
+      <PetBridge />
       <Outlet />
       {!pathname.startsWith('/admin') && <SplashScreen />}
       <Toaster />

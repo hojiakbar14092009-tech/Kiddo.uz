@@ -210,6 +210,31 @@ describe('robot clothes', () => {
     expect(progress().pet).toBeNull()
   })
 
+  it('grows a pet friendship once a day, only for the pet walking along, per child', () => {
+    useProgressStore.setState({
+      byChild: {
+        [KEY]: { ...EMPTY_PROGRESS, pets: ['cat', 'bunny'], pet: 'cat' },
+        other: { ...EMPTY_PROGRESS },
+      },
+    })
+    const store = useProgressStore.getState()
+    expect(store.recordPetDay(KEY, '2026-10-01')).toEqual({ pet: 'cat', level: 1 })
+    expect(store.recordPetDay(KEY, '2026-10-01')).toBeNull() // the same day: once
+    expect(store.recordPetDay(KEY, '2026-10-02')).toBeNull() // 2 days: still one heart
+    expect(store.recordPetDay(KEY, '2026-10-03')).toEqual({ pet: 'cat', level: 2 })
+    expect(progress().petBond).toEqual({ cat: { days: 3, last: '2026-10-03' } })
+
+    store.choosePet(KEY, 'bunny')
+    expect(store.recordPetDay(KEY, '2026-10-03')).toEqual({ pet: 'bunny', level: 1 })
+    store.choosePet(KEY, null)
+    expect(store.recordPetDay(KEY, '2026-10-04')).toBeNull()
+    // a child without a pet, or unknown: nothing
+    expect(store.recordPetDay('other', '2026-10-04')).toBeNull()
+    expect(store.recordPetDay('nobody', '2026-10-04')).toBeNull()
+    expect(useProgressStore.getState().byChild.other?.petBond).toBeUndefined()
+    expect(progress().coins).toBe(0) // friendship pays nothing
+  })
+
   it('moves an old flower from the head to the ear', () => {
     const migrated = migrateProgress(
       {
