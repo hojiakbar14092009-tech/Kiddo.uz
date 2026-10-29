@@ -4,6 +4,9 @@ export {
   childAgeFor,
   clampLevel,
   levelOf,
+  masteryOf,
+  stateMastery,
+  startMastery,
   MAX_CHALLENGE,
   MIN_CHALLENGE,
   runQuality,
@@ -13,4 +16,4 @@ export {
   type RunQuality,
   type StrandState,
 } from './profile'
-export { getChallengeLevel, useChallengeLevel, useLearnerStrands } from './hooks'
+export { getChallengeLevel, useChallengeLevel, useLearnerStrands, useMastery } from './hooks'

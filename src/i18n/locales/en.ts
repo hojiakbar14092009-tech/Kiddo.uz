@@ -285,6 +285,7 @@ export const en: Translation = {
         confident: 'Confident',
         strong: 'Strong',
         advanced: 'Advanced',
+        mastery: '{{word}} · mastery {{step}}',
       },
       strands: {
         letters: 'Letters',
@@ -474,7 +475,7 @@ export const en: Translation = {
       birthDate: 'Birthday',
       birthDateHint:
         'Kiddo is for children from 4. The work follows the child’s answers, not their age.',
-      birthDateError: 'Enter the birthday: the child must be 4 to 18 years old.',
+      birthDateError: 'Enter the birthday: the learner must be at least 4 years old.',
       ageLevel: 'Age: {{count}}. Games for age {{level}} are open.',
       ageAll: 'Age: {{count}}. Every game is open; the difficulty follows the answers.',
       gender: 'Gender',
@@ -892,6 +893,7 @@ export const en: Translation = {
     intro: 'We count, add and take away. The tasks fit you better every time!',
     start: 'Start',
     level: 'Level {{level}}',
+    levelMastery: 'Level {{level}} · mastery {{step}}',
     classic: 'Learn adding step by step',
     objects: {
       apple: 'apples',
@@ -932,6 +934,10 @@ export const en: Translation = {
       equal: 'equal to',
     },
     help: {
+      columnsAdd:
+        'Add ones to ones and tens to tens. If it is more than 10, carry 1 to the next column.',
+      columnsSub:
+        'Take ones from ones and tens from tens. If there are not enough, borrow 1 ten from the next column.',
       count: 'Let’s count together: one number for each one.',
       oneMore: 'One more is the next number: {{n}}, then {{next}}.',
       oneLess: 'One less is the number before: {{next}} comes before {{n}}.',
@@ -962,6 +968,8 @@ export const en: Translation = {
   tutor: {
     title: 'Kiddo’s hint',
     clue: {
+      'place-value':
+        'Look at the tens: one column slipped. Work out the ones and the tens separately.',
       'off-by-one': 'So close! Count once more, slowly.',
       'off-by-more': 'Not yet. Let’s count again, one by one.',
       'wrong-operation': 'Look at the sign: do we add or take away?',
@@ -1313,6 +1321,8 @@ export const en: Translation = {
       'math-compare-numbers': 'Comparing numbers',
       'math-add-within5': 'Adding up to 5',
       'math-add-within10': 'Adding up to 10',
+      'math-add-big': 'Adding big numbers',
+      'math-sub-big': 'Taking away with big numbers',
       'math-add-within20': 'Adding up to 20',
       'math-sub-within10': 'Taking away within 10',
       'math-sub-within20': 'Taking away within 20',

@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { StepDots } from '@/components/ui/Progress'
 import { useAdaptivePlan } from '@/domain/adaptive'
-import { useChallengeLevel, type ChallengeLevel } from '@/domain/learner'
+import { useChallengeLevel, useMastery, type ChallengeLevel } from '@/domain/learner'
 import {
   getChildMemory,
   getSkillMemory,
@@ -70,16 +70,22 @@ const NEXT_DELAY_MS = 1100
  */
 export function MathLabPage() {
   const level = useChallengeLevel('number')
+  const mastery = useMastery('number')
   const practice = usePracticeSkill()
-  const [run, setRun] = useState<{ count: number; level: ChallengeLevel } | null>(null)
+  const [run, setRun] = useState<{
+    count: number
+    level: ChallengeLevel
+    mastery: number
+  } | null>(null)
 
-  if (!run) return <LabStart level={level} onStart={() => setRun({ count: 1, level })} />
+  if (!run) return <LabStart level={level} onStart={() => setRun({ count: 1, level, mastery })} />
   return (
     <LabSession
       key={run.count}
       level={run.level}
+      mastery={run.mastery}
       practice={practice}
-      onAgain={() => setRun({ count: run.count + 1, level })}
+      onAgain={() => setRun({ count: run.count + 1, level, mastery })}
     />
   )
 }
@@ -101,24 +107,37 @@ function usePracticeSkill(): string | null {
 
 // ------------------------------------------------------------------ frame
 
-function LevelChip({ level, className }: { level: ChallengeLevel; className?: string }) {
+function LevelChip({
+  level,
+  mastery,
+  className,
+}: {
+  level: ChallengeLevel
+  /** The mastery step the screen's questions were made for (above level 5). */
+  mastery: number
+  className?: string
+}) {
   const { t } = useTranslation()
   if (level < SHOW_LEVEL_FROM) return null
   return (
     <span
       data-testid="lab-level"
+      data-mastery={level === 5 ? mastery : 0}
       className={clsx(
         className,
         'shrink-0 rounded-full bg-coin-soft px-3 py-1 font-display text-base font-extrabold whitespace-nowrap text-ink sm:text-lg short:text-sm',
       )}
     >
-      {t('mathLab.level', { level })}
+      {level === 5 && mastery > 0
+        ? t('mathLab.levelMastery', { level, step: mastery })
+        : t('mathLab.level', { level })}
     </span>
   )
 }
 
 function LabFrame({
   level,
+  mastery,
   speak,
   step,
   help,
@@ -127,6 +146,8 @@ function LabFrame({
   children,
 }: {
   level: ChallengeLevel
+  /** The mastery step shown next to the level (above level 5; 0 below). */
+  mastery: number
   /** A phone held sideways: no robot (the screen says the same in big letters). */
   hideMascotShort?: boolean
   /** A low phone (e.g. 320×568): the buttons side by side, so the task below fits. */
@@ -158,7 +179,7 @@ function LabFrame({
         <TitleTopBar
           title={title}
           back="/home"
-          extra={<LevelChip level={level} className="max-[479px]:hidden" />}
+          extra={<LevelChip level={level} mastery={mastery} className="max-[479px]:hidden" />}
         />
       }
       className={clsx('gap-3 px-4 py-3 sm:gap-5 sm:px-8 sm:py-5', SHORT_SCREEN.page)}
@@ -202,7 +223,7 @@ function LabFrame({
             label={t('learn.question', { current: step.current + 1, total: step.total })}
           />
         )}
-        <LevelChip level={level} className="min-[480px]:hidden" />
+        <LevelChip level={level} mastery={mastery} className="min-[480px]:hidden" />
       </div>
       {children}
     </Screen>
@@ -213,6 +234,7 @@ function LabFrame({
 
 function LabStart({ level, onStart }: { level: ChallengeLevel; onStart: () => void }) {
   const { t } = useTranslation()
+  const mastery = useMastery('number')
   const { say } = useLearnMascot()
   const intro = t('mathLab.intro')
 
@@ -222,7 +244,7 @@ function LabStart({ level, onStart }: { level: ChallengeLevel; onStart: () => vo
   }, [say, t])
 
   return (
-    <LabFrame level={level} speak={[t('mathLab.title'), intro]}>
+    <LabFrame level={level} mastery={mastery} speak={[t('mathLab.title'), intro]}>
       <section
         aria-labelledby="lab-start-title"
         className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-panel bg-surface p-5 text-center shadow-press-lg sm:p-8 short:max-w-3xl short:flex-row short:gap-5 short:p-4 short:text-left"
@@ -310,10 +332,13 @@ function remembered(childKey: string, q: LabQuestion, code: string | null): bool
 
 function LabSession({
   level,
+  mastery,
   practice,
   onAgain,
 }: {
   level: ChallengeLevel
+  /** Mastery step above level 5 for this session (0 below it). */
+  mastery: number
   /** The learning-memory skill the child chose to practise in the garden (or null). */
   practice: string | null
   onAgain: () => void
@@ -333,6 +358,7 @@ function LabSession({
       reviewsFor(childKey, level, withPractice(practice, plan.reviews), practice),
       {
         options: plan.options,
+        mastery,
       },
     ),
   )
@@ -592,6 +618,7 @@ function LabSession({
     return (
       <LabResult
         level={level}
+        mastery={mastery}
         finished={finished}
         onAgain={onAgain}
         fromGarden={practice !== null}
@@ -605,6 +632,7 @@ function LabSession({
     return (
       <LabFrame
         level={level}
+        mastery={mastery}
         speak={[t('learnFirst.mathTitle'), promptText(t, language, example), helpText(t, example)]}
         step={{ current: index, total: questions.length }}
         help={null}
@@ -660,6 +688,7 @@ function LabSession({
   return (
     <LabFrame
       level={level}
+      mastery={mastery}
       speak={[prompt]}
       step={{ current: index, total: questions.length }}
       help={help}
@@ -742,11 +771,13 @@ function LabSession({
 
 function LabResult({
   level,
+  mastery,
   finished,
   onAgain,
   fromGarden,
 }: {
   level: ChallengeLevel
+  mastery: number
   finished: Finished
   onAgain: () => void
   /** Came from a plant in the Mistake Garden: the way back to see it grow comes first. */
@@ -755,6 +786,7 @@ function LabResult({
   const { t } = useTranslation()
   const { say } = useLearnMascot()
   const nextLevel = useChallengeLevel('number')
+  const nextMastery = useMastery('number')
   const { summary, award } = finished
   const allOwn = summary.independent === summary.total
   const title = t('mathLab.result.title')
@@ -763,14 +795,23 @@ function LabResult({
     total: summary.total,
   })
   // only a step up is told; a step down happens quietly
-  const levelUp = nextLevel > level ? t('mathLab.result.levelUp') : null
+  const levelUp =
+    nextLevel > level || (nextLevel === level && nextMastery > mastery)
+      ? t('mathLab.result.levelUp')
+      : null
 
   useEffect(() => {
     say('celebrate', { text: title, emoji: allOwn ? '🏆' : '🌟' })
   }, [allOwn, say, title])
 
   return (
-    <LabFrame level={level} speak={[title, score, levelUp ?? '']} hideMascotShort>
+    <LabFrame
+      // the chip shows where the learner is now (one source for level and mastery)
+      level={nextLevel}
+      mastery={nextMastery}
+      speak={[title, score, levelUp ?? '']}
+      hideMascotShort
+    >
       <section
         aria-labelledby="lab-result-title"
         data-testid="lab-result"

@@ -58,6 +58,9 @@ export const SKILLS: readonly SkillDef[] = [
     'add:within20',
     'sub:within10',
     'sub:within20',
+    // mastery above level 5 (Phase 22): bigger numbers each step, no ceiling
+    'add:big',
+    'sub:big',
     'missing:add',
     'missing:sub',
     'neighbor:before',

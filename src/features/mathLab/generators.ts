@@ -66,6 +66,8 @@ export type HelpVisual =
   | { type: 'objects'; groups: number[]; crossed?: number; continued?: boolean }
   /** A number line from `from` to `to`: start at `start`, walk to `end` (marks = numbers to show). */
   | { type: 'line'; from: number; to: number; start: number; end: number; marks?: number[] }
+  /** Big numbers (mastery): the two numbers written in columns, ones under ones. */
+  | { type: 'columns'; a: number; b: number; op: Op }
 
 export interface HelpText {
   key: HelpKey
@@ -73,6 +75,8 @@ export interface HelpText {
 }
 
 export type HelpKey =
+  | 'columnsAdd'
+  | 'columnsSub'
   | 'count'
   | 'oneMore'
   | 'oneLess'
@@ -131,6 +135,8 @@ export interface LabQuestion {
   errors: Record<string, string>
   /** A spaced review of a skill the learning memory says is due (Phase 10). */
   review?: boolean
+  /** Mastery step above level 5 the question was made for (0 or missing below it). */
+  mastery?: number
 }
 
 // ------------------------------------------------------------------ helpers
@@ -766,6 +772,134 @@ export const LEVEL_PLAN: Record<ChallengeLevel, readonly Maker[]> = {
   ],
 }
 
+// ------------------------------------------------------------------ mastery
+
+/**
+ * Numbers stay at most five digits: big enough to keep growing for many
+ * steps, small enough to stay exact and fit a 320 px phone. The mastery count
+ * itself has no ceiling.
+ */
+export const MASTERY_NUMBER_CAP = 99_999
+
+/**
+ * The biggest number of a mastery step above level 5 (Phase 22): 50, 100,
+ * 200, 500, 1000, 2000, 5000, 10 000, 20 000, 50 000, then 99 999.
+ */
+export function masteryMax(mastery: number): number {
+  const step = Number.isFinite(mastery) ? Math.min(Math.max(1, Math.floor(mastery)), 20) : 1
+  const k = step + 4
+  return Math.min(MASTERY_NUMBER_CAP, [1, 2, 5][k % 3]! * 10 ** Math.floor(k / 3))
+}
+
+function int(rng: Rng, from: number, to: number): number {
+  return from + Math.floor(rng() * (to - from + 1))
+}
+
+type BigForm = '+' | '-' | 'a+?=s' | 'a-?=r'
+
+/** A sum or a difference with big numbers, sampled (the ranges are too big to list). */
+function makeBig(form: BigForm, max: number, mastery: number): Maker {
+  return (c) => {
+    const id = (a: number, b: number) => `big:${form}:${a}:${b}`
+    let a = 0
+    let b = 0
+    for (let tries = 0; tries < 40; tries += 1) {
+      // a with tens to carry or borrow: never a trivial "+ 1"
+      a = int(c.rng, Math.ceil(max / 10), max - 2)
+      b = int(c.rng, Math.max(2, Math.ceil(max / 50)), Math.max(2, max - a))
+      if (!c.used.has(id(a, b)) && a + b <= max) break
+    }
+    if (a + b > max) b = max - a
+    // never the same item twice in a session, even when sampling was unlucky
+    while (c.used.has(id(a, b)) && a > Math.ceil(max / 10)) a -= 1
+    const s = a + b
+    let tokens: Token[]
+    let answer: number
+    let mistakes: { value: number; error: string }[]
+    let visual: HelpVisual
+    let key: HelpKey
+    let skill: string
+    switch (form) {
+      case '+':
+        tokens = [a, '+', b, '=', '?']
+        answer = s
+        mistakes = [{ value: Math.abs(a - b), error: 'wrong-operation' }]
+        visual = { type: 'columns', a, b, op: '+' }
+        key = 'columnsAdd'
+        skill = 'add:big'
+        break
+      case '-':
+        tokens = [s, '-', b, '=', '?']
+        answer = a
+        mistakes = [{ value: s + b, error: 'wrong-operation' }]
+        visual = { type: 'columns', a: s, b, op: '-' }
+        key = 'columnsSub'
+        skill = 'sub:big'
+        break
+      case 'a+?=s':
+        tokens = [a, '+', '?', '=', s]
+        answer = b
+        mistakes = [{ value: s, error: 'wrote-total' }]
+        visual = { type: 'columns', a: s, b: a, op: '-' }
+        key = 'columnsSub'
+        skill = 'missing:add'
+        break
+      case 'a-?=r':
+        tokens = [s, '-', '?', '=', a]
+        answer = b
+        mistakes = [{ value: s + a, error: 'wrong-operation' }]
+        visual = { type: 'columns', a: s, b: a, op: '-' }
+        key = 'columnsSub'
+        skill = 'missing:sub'
+        break
+    }
+    const { options, errors } = numberOptions(
+      answer,
+      [
+        ...mistakes,
+        // a slip in the tens: the classic big-number mistake
+        { value: answer + 10, error: 'place-value' },
+        { value: answer - 10, error: 'place-value' },
+        ...near(answer),
+      ],
+      optionsOf(c),
+      max,
+      c.rng,
+      'number',
+    )
+    return {
+      ...base(c),
+      id: id(a, b),
+      kind: form === '+' ? 'add' : form === '-' ? 'sub' : 'missing',
+      skill,
+      prompt: { key: 'equation', params: {} },
+      scene: { type: 'equation', tokens },
+      answer: String(answer),
+      options,
+      help: { visual, text: { key, params: {} } },
+      errors,
+      mastery,
+    }
+  }
+}
+
+/** The kinds of a session at a mastery step: the same four kinds, bigger numbers each step. */
+function masteryPlan(mastery: number): readonly Maker[] {
+  const max = masteryMax(mastery)
+  return [
+    makeBig('+', max, mastery),
+    makeBig('-', max, mastery),
+    makeBig('a+?=s', max, mastery),
+    makeBig('a-?=r', max, mastery),
+    (c) => makeBig(c.rng() < 0.5 ? '+' : '-', max, mastery)(c),
+    (c) => makeBig(c.rng() < 0.5 ? 'a+?=s' : 'a-?=r', max, mastery)(c),
+  ]
+}
+
+function planOf(level: ChallengeLevel, mastery: number): readonly Maker[] {
+  return level === 5 && mastery > 0 ? masteryPlan(mastery) : LEVEL_PLAN[level]
+}
+
 /** One question of a kind at a level (for tests and later phases such as review). */
 export function makeQuestion(
   level: ChallengeLevel,
@@ -773,8 +907,9 @@ export function makeQuestion(
   rng: Rng = Math.random,
   used: ReadonlySet<string> = new Set(),
   options?: number,
+  mastery = 0,
 ): LabQuestion {
-  const plan = LEVEL_PLAN[level]
+  const plan = planOf(level, mastery)
   const maker = plan[index % plan.length]!
   const object = LAB_OBJECTS[Math.floor(rng() * LAB_OBJECTS.length)] ?? 'apple'
   return maker({ level, rng, used, object, ...(options ? { options } : {}) })
@@ -792,11 +927,17 @@ export function reviewQuestion(
   avoid: ReadonlySet<string>,
   rng: Rng = Math.random,
   options?: number,
+  mastery = 0,
 ): LabQuestion | null {
-  const plan = LEVEL_PLAN[level]
-  for (let attempt = 0; attempt < plan.length * 12; attempt += 1) {
-    const q = makeQuestion(level, attempt % plan.length, rng, avoid, options)
-    if (q.skill === skill && !avoid.has(q.id)) return { ...q, review: true }
+  // a skill of the other plan is still practised: a level-5 skill (word problems,
+  // two steps) in a mastery session, a big-number skill after a step back
+  const steps = skill.endsWith(':big') ? [Math.max(1, mastery)] : [mastery, 0]
+  for (const step of [...new Set(steps)]) {
+    const plan = planOf(level, step)
+    for (let attempt = 0; attempt < plan.length * 12; attempt += 1) {
+      const q = makeQuestion(level, attempt % plan.length, rng, avoid, options, step)
+      if (q.skill === skill && !avoid.has(q.id)) return { ...q, review: true }
+    }
   }
   return null
 }
@@ -819,6 +960,8 @@ export interface ReviewPlan {
 export interface SessionShape {
   /** Answer cards per question (2–4). */
   options?: number
+  /** Mastery steps above level 5 (domain/learner): bigger numbers, no ceiling. */
+  mastery?: number
 }
 
 /**
@@ -837,8 +980,9 @@ export function planSession(
   const count = sessionLength(level)
   const used = new Set<string>()
   const out: LabQuestion[] = []
+  const mastery = level === 5 ? Math.max(0, Math.floor(shape.mastery ?? 0)) : 0
   for (let index = 0; index < count; index += 1) {
-    const q = makeQuestion(level, index, rng, used, shape.options)
+    const q = makeQuestion(level, index, rng, used, shape.options, mastery)
     used.add(q.id)
     out.push(q)
   }
@@ -852,7 +996,7 @@ export function planSession(
   for (const item of reviews) {
     if (at >= result.length) break
     const avoid = new Set([...item.avoid, ...result.map((q) => q.id)])
-    const q = reviewQuestion(item.skill, item.level, avoid, rng, shape.options)
+    const q = reviewQuestion(item.skill, item.level, avoid, rng, shape.options, mastery)
     if (!q) continue
     // a second item of a skill chosen in the garden is extra practice, not another
     // review: one session moves the review schedule on once at most
@@ -892,6 +1036,7 @@ export function exampleQuestion(q: LabQuestion): LabQuestion | null {
     new Set([q.id]),
     seededRandom(seed),
     q.options.length || undefined,
+    q.mastery ?? 0,
   )
   return other ? { ...other, review: false } : null
 }

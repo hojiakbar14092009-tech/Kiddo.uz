@@ -456,6 +456,15 @@ clue → picture → card removed → solution, `data-review` question from due 
 - Tests: `features/learn/lessons.test.tsx`; unrelated math tests mock math lessons as met (`src/test/lesson.ts`);
   e2e helpers `e2e/lesson.ts` (passLesson, passLessonIfShown, meetNewLetter, passMathExample).
 
+## Infinite age + mastery (Phase 22) – docs/architecture/infinite-age-mastery.md
+
+- No maximum age: `isAllowedBirthDate` = real date ≥ 1900-01-01 and age ≥ 4 (MAX_PROFILE_AGE removed).
+- `StrandState.mastery` above level 5 (no ceiling on the count; MAX_MASTERY guard for corrupt saves): 2 strong
+  runs at 5 → +1, 2 weak → −1 before the level drops. `startMastery(age)` 12+:1, 15+:2, 18+:3. `useMastery`.
+- Math Lab mastery sessions: `masteryMax` 50…50 000 then capped 99 999; skills add:big/sub:big/missing:*;
+  ColumnsHelp; `format.ts` digit grouping; font scaling for 320px; reviews cross plans; chip "5-daraja · ustalik m".
+- Parents: StrandRow.mastery, level word + "ustalik m". e2e: 40-year-old at 320px up to 5-digit numbers.
+
 ## Next
 
 Next phase per the owner's prompt (do not invent its scope). Owner actions: apply 0005–0013, deploy voice-url/tts/tutor +

@@ -79,7 +79,7 @@ describe('Parent dashboard', () => {
     // Too young for Kiddo: the form refuses it.
     fireEvent.change(birthday, { target: { value: birthDateForAge(2, dayKey()) } })
     await user.click(screen.getByRole('button', { name: 'Saqlash' }))
-    expect(screen.getByText(/bola 4 yoshdan 18 yoshgacha/)).toBeInTheDocument()
+    expect(screen.getByText(/kamida 4 yoshda/)).toBeInTheDocument()
     expect(useFamilyStore.getState().children).toHaveLength(0)
     fireEvent.change(birthday, { target: { value: birthDateForAge(4, dayKey()) } })
     await user.click(screen.getByRole('radio', { name: 'O‘g‘il' }))

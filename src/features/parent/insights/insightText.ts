@@ -18,8 +18,10 @@ export function strandName(t: TFunction, strand: Strand): string {
   return tDynamic(t, `parent.insights.strands.${strand}`)
 }
 
-export function levelWord(t: TFunction, level: number): string {
-  return tDynamic(t, `parent.insights.levels.${strandLevelWord(level)}`)
+export function levelWord(t: TFunction, level: number, mastery = 0): string {
+  const word = tDynamic(t, `parent.insights.levels.${strandLevelWord(level)}`)
+  // above the top level: the mastery step, with no ceiling
+  return mastery > 0 ? t('parent.insights.levels.mastery', { word, step: mastery }) : word
 }
 
 export function runName(t: TFunction, run: Pick<PlayedRun, 'activity'>): string {

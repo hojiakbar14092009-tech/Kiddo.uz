@@ -22,14 +22,24 @@ describe('age levels', () => {
     expect(levelForAge(9)).toBe(6)
   })
 
-  it('accepts real birthdays from age 4, with no learning ceiling (up to 18)', () => {
+  it('accepts real birthdays from age 4, with no maximum age', () => {
     const today = '2026-10-18'
     expect(isAllowedBirthDate(birthDateForAge(4, today), today)).toBe(true)
     expect(isAllowedBirthDate(birthDateForAge(6, today), today)).toBe(true)
     expect(isAllowedBirthDate(birthDateForAge(3, today), today)).toBe(false)
     expect(isAllowedBirthDate(birthDateForAge(7, today), today)).toBe(true)
     expect(isAllowedBirthDate(birthDateForAge(16, today), today)).toBe(true)
-    expect(isAllowedBirthDate(birthDateForAge(19, today), today)).toBe(false)
+    expect(isAllowedBirthDate(birthDateForAge(19, today), today)).toBe(true)
+    expect(isAllowedBirthDate(birthDateForAge(45, today), today)).toBe(true)
+    // only a typing error is refused
+    expect(isAllowedBirthDate('1850-05-01', today)).toBe(false)
+    expect(isAllowedBirthDate('2030-01-01', today)).toBe(false)
+    expect(isAllowedBirthDate(today, today)).toBe(false)
+    expect(isAllowedBirthDate('1900-01-01', today)).toBe(true)
+    expect(isAllowedBirthDate('1899-12-31', today)).toBe(false)
+    // the fourth birthday is the first day
+    expect(isAllowedBirthDate('2022-10-18', today)).toBe(true)
+    expect(isAllowedBirthDate('2022-10-19', today)).toBe(false)
     expect(isAllowedBirthDate('2021-02-30', today)).toBe(false)
   })
 

@@ -366,3 +366,103 @@ describe('worked examples (Learn Before Play)', () => {
     }
   })
 })
+
+describe('mastery sessions (Phase 22)', () => {
+  it('numbers grow with each step, with no ceiling: 50, 100, 200, 500, 1000, …', async () => {
+    const { masteryMax } = await import('./generators')
+    expect([1, 2, 3, 4, 5, 6, 7].map(masteryMax)).toEqual([50, 100, 200, 500, 1000, 2000, 5000])
+    // numbers stop at five digits (exact, and they fit a phone); the mastery count goes on
+    expect(masteryMax(10)).toBe(50_000)
+    expect(masteryMax(11)).toBe(99_999)
+    expect(masteryMax(5000)).toBe(99_999)
+    expect(masteryMax(Number.POSITIVE_INFINITY)).toBe(50)
+    expect(masteryMax(Number.NaN)).toBe(50)
+  })
+
+  it('a mastery session asks right sums inside its range, with the answer among the cards', async () => {
+    const { planSession, masteryMax, exampleQuestion } = await import('./generators')
+    const { seededRandom } = await import('@/lib/random')
+    for (const mastery of [1, 2, 3, 6]) {
+      for (let seed = 1; seed <= 20; seed += 1) {
+        const qs = planSession(5, seededRandom(seed * 31 + mastery), null, { mastery })
+        expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length)
+        for (const q of qs) {
+          expect(q.mastery).toBe(mastery)
+          expect(q.options.some((o) => o.id === q.answer)).toBe(true)
+          if (q.scene.type !== 'equation') throw new Error('mastery asks equations')
+          const nums = q.scene.tokens.filter((t): t is number => typeof t === 'number')
+          for (const n of nums) expect(n).toBeLessThanOrEqual(masteryMax(mastery))
+          const [x, op, y, , z] = q.scene.tokens
+          const value = (tok: unknown) => (tok === '?' ? Number(q.answer) : Number(tok))
+          if (op === '+') expect(value(x) + value(y)).toBe(value(z))
+          if (op === '-') expect(value(x) - value(y)).toBe(value(z))
+          // every mastery skill has a worked example too, at the same step and in its range
+          const example = exampleQuestion(q)
+          expect(example?.skill).toBe(q.skill)
+          expect(example?.mastery).toBe(mastery)
+        }
+      }
+    }
+  })
+
+  it('below level 5 a mastery value changes nothing', async () => {
+    const { planSession } = await import('./generators')
+    const { seededRandom } = await import('@/lib/random')
+    const a = planSession(4, seededRandom(3), null, { mastery: 4 })
+    const b = planSession(4, seededRandom(3), null, {})
+    expect(a.map((q) => q.id)).toEqual(b.map((q) => q.id))
+  })
+})
+
+describe('mastery reviews and big numbers (Phase 22)', () => {
+  it('a due review of a big-number skill is served in a mastery session', async () => {
+    const { planSession } = await import('./generators')
+    const { seededRandom } = await import('@/lib/random')
+    for (let seed = 1; seed <= 10; seed += 1) {
+      const qs = planSession(5, seededRandom(seed), [{ skill: 'add:big', level: 5, avoid: [] }], {
+        mastery: 2,
+      })
+      const review = qs.find((q) => q.review)
+      expect(review?.skill).toBe('add:big')
+      expect(review?.mastery).toBe(2)
+    }
+  })
+
+  it('writes big numbers in groups of three, small ones as they are', async () => {
+    const { formatNumber, digitsOf } = await import('./format')
+    expect(formatNumber(950)).toBe('950')
+    expect(formatNumber(9999)).toBe('9999')
+    expect(formatNumber(12345)).toBe('12\u202f345')
+    expect(formatNumber(99999)).toBe('99\u202f999')
+    expect(digitsOf([12, '+', 99999, '?'])).toBe(5)
+  })
+})
+
+describe('reviews cross between the level-5 and mastery plans (Phase 22)', () => {
+  it('a level-5 skill is still practised in a mastery session, and a big one after a step back', async () => {
+    const { reviewQuestion } = await import('./generators')
+    const { seededRandom } = await import('@/lib/random')
+    for (const skill of ['word:add', 'two-step:within20', 'add:within20']) {
+      const q = reviewQuestion(skill, 5, new Set(), seededRandom(5), undefined, 3)
+      expect(q?.skill).toBe(skill)
+      expect(q?.review).toBe(true)
+    }
+    for (const skill of ['add:big', 'sub:big']) {
+      const q = reviewQuestion(skill, 5, new Set(), seededRandom(5), undefined, 0)
+      expect(q?.skill).toBe(skill)
+      expect(q?.mastery).toBe(1)
+    }
+  })
+
+  it('a garden session at a mastery step serves a level-5 plant', async () => {
+    const { planSession } = await import('./generators')
+    const { seededRandom } = await import('@/lib/random')
+    const qs = planSession(
+      5,
+      seededRandom(9),
+      [{ skill: 'word:add', level: 5, avoid: [], chosen: true }],
+      { mastery: 3 },
+    )
+    expect(qs.filter((q) => q.skill === 'word:add').length).toBeGreaterThan(0)
+  })
+})

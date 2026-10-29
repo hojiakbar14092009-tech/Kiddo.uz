@@ -1,3 +1,4 @@
+import { digitsOf, formatNumber } from './format'
 import clsx from 'clsx'
 import type { MathObject } from '@/features/math/generators'
 import { Img3D } from '@/features/learn/Img3D'
@@ -123,12 +124,17 @@ export function OptionFace({ option, object }: { option: LabOption; object: Math
     )
   }
   if (option.show === 'dots') return <DotsNumber value={Number(option.value)} />
+  const digits = digitsOf([option.value])
   return (
     <span
       aria-hidden="true"
-      className="font-display text-5xl font-extrabold tabular-nums sm:text-6xl short:text-4xl"
+      className={clsx(
+        'max-w-full font-display font-extrabold break-all tabular-nums',
+        // big numbers (mastery): smaller digits, so the card on a 320 px phone holds them
+        digits >= 4 ? 'text-3xl sm:text-5xl short:text-2xl' : 'text-5xl sm:text-6xl short:text-4xl',
+      )}
     >
-      {option.value}
+      {typeof option.value === 'number' ? formatNumber(option.value) : option.value}
     </span>
   )
 }
@@ -141,15 +147,22 @@ function TokenView({ token }: { token: Token | Sign }) {
       </span>
     )
   }
-  return <span>{token === '-' ? '−' : token}</span>
+  return (
+    <span>{token === '-' ? '−' : typeof token === 'number' ? formatNumber(token) : token}</span>
+  )
 }
 
 /** A written example in big digits, e.g. "3 + ? = 5". */
 export function EquationView({ tokens }: { tokens: readonly Token[] }) {
+  const digits = digitsOf(tokens)
   return (
     <p
       data-testid="lab-equation"
-      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center font-display text-5xl font-extrabold tabular-nums sm:text-7xl short:text-4xl"
+      className={clsx(
+        'flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center font-display font-extrabold tabular-nums',
+        // big numbers (mastery) get smaller digits, so a 320 px phone fits them
+        digits >= 4 ? 'text-4xl sm:text-6xl short:text-3xl' : 'text-5xl sm:text-7xl short:text-4xl',
+      )}
     >
       {tokens.map((token, i) => (
         <TokenView key={i} token={token} />
@@ -298,9 +311,45 @@ export function NumberLine({
   )
 }
 
-/** The picture of the help: counted objects or the number line. */
+/**
+ * Big numbers in columns (mastery): ones under ones, tens under tens. It shows
+ * how to work it out, never the result.
+ */
+function ColumnsHelp({ a, b, op }: { a: number; b: number; op: '+' | '-' }) {
+  const width = Math.max(String(a).length, String(b).length)
+  const digits = (n: number) => String(n).padStart(width, ' ').split('')
+  const row = (cells: string[], sign: string) => (
+    <>
+      <span className="w-5 text-center text-ink-soft sm:w-6">{sign}</span>
+      {cells.map((d, i) => (
+        <span key={i} className="w-6 text-center sm:w-8">
+          {d.trim()}
+        </span>
+      ))}
+    </>
+  )
+  return (
+    <div
+      role="img"
+      aria-label={`${a} ${op === '+' ? '+' : '−'} ${b} = ?`}
+      className="inline-grid rounded-card bg-surface p-3 font-display text-2xl font-extrabold tabular-nums sm:text-3xl"
+      style={{ gridTemplateColumns: `repeat(${width + 1}, auto)` }}
+    >
+      {row(digits(a), '')}
+      {row(digits(b), op === '+' ? '+' : '−')}
+      <span className="col-span-full my-1 h-1 rounded-full bg-ink" aria-hidden="true" />
+      {row(
+        Array.from({ length: width }, () => '?'),
+        '=',
+      )}
+    </div>
+  )
+}
+
+/** The picture of the help: counted objects, the number line or big numbers in columns. */
 export function HelpPicture({ visual, object }: { visual: HelpVisual; object: MathObject }) {
   if (visual.type === 'line') return <NumberLine {...visual} />
+  if (visual.type === 'columns') return <ColumnsHelp a={visual.a} b={visual.b} op={visual.op} />
   const groups = visual.groups
   const firsts = groups.map((_, i) =>
     visual.continued ? 1 + groups.slice(0, i).reduce((sum, n) => sum + n, 0) : 1,

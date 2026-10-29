@@ -200,3 +200,84 @@ test.describe('a small phone (320×568)', () => {
     })
   }
 })
+
+test.describe('no maximum age (Phase 22), on a small phone', () => {
+  test.use({ viewport: { width: 320, height: 568 } })
+
+  test('a 40-year-old learner gets the profile, a mastery step and big numbers that fit', async ({
+    page,
+  }) => {
+    test.setTimeout(180_000)
+    // a constant Math.random: the grown-ups question is 3 × 3
+    await seedRandom(page, 0)
+    await page.goto('/')
+    await page.getByRole('button', { name: 'O‘zbekcha' }).click()
+    await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
+    await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
+    await page.getByRole('button', { name: '9', exact: true }).click()
+    await page.getByRole('button', { name: 'Tekshirish' }).click()
+    await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
+    await page.getByRole('textbox', { name: 'Ismi' }).fill('Dilshod')
+    const born = new Date()
+    born.setFullYear(born.getFullYear() - 40)
+    await page.getByLabel(/^Tug‘ilgan kuni/).fill(born.toISOString().slice(0, 10))
+    await page.getByRole('button', { name: 'Saqlash' }).click()
+    await expect(page.getByRole('button', { name: 'Dilshod profilini tahrirlash' })).toBeVisible()
+    await page.getByRole('button', { name: 'Bolalarga' }).click()
+    await page.getByRole('button', { name: /Dilshod/ }).click()
+
+    await page.goto('/math-lab')
+    await expect(page.getByTestId('lab-level').first()).toHaveAttribute('data-mastery', '3')
+    await page.getByTestId('lab-start').click()
+    await passMathExample(page, 0)
+    const question = page.getByTestId('lab-question')
+    await expect(question).toHaveAttribute('data-level', '5')
+    await fitsPhone(page)
+
+    // a whole session, every answer right
+    for (let step = 0; step < 6; step += 1) {
+      await passMathExample(page, step)
+      await expect(question).toHaveAttribute('data-step', String(step))
+      await answerRight(page)
+    }
+    await expect(page.getByTestId('lab-result')).toBeVisible({ timeout: 5_000 })
+
+    // many sessions later (saved as the app saves it): mastery 11, numbers up to 99 999
+    await page.evaluate(() => {
+      const family = JSON.parse(localStorage.getItem('kiddo.family')!)
+      const id = family.state.activeChildId as string
+      const universe = JSON.parse(localStorage.getItem('kiddo.universe')!)
+      const child = universe.state.byChild[id]
+      child.strands = {
+        ...child.strands,
+        number: { level: 5, mastery: 11, streak: 0, runs: 30, independent: 180, total: 180 },
+      }
+      localStorage.setItem('kiddo.universe', JSON.stringify(universe))
+    })
+    await page.goto('/math-lab')
+    await expect(page.getByTestId('lab-level').first()).toHaveAttribute('data-mastery', '11')
+    await page.getByTestId('lab-start').click()
+    await passMathExample(page, 0)
+    const tokens = await page.getByTestId('lab-equation').locator(':scope > span').allTextContents()
+    const biggest = Math.max(...tokens.map((t) => Number(t.replace(/\D/g, '')) || 0))
+    expect(biggest).toBeGreaterThanOrEqual(10_000)
+    await fitsPhone(page)
+    // two slips: the help shows the numbers in columns, and it fits too
+    const answer = await question.getAttribute('data-answer')
+    for (const card of (await question.getByRole('button').all()).slice(0, 3)) {
+      if ((await card.getAttribute('aria-label')) === answer) continue
+      if (await card.isEnabled()) await card.click()
+    }
+    const columns = page.getByRole('img', { name: /= \?$/ })
+    await expect(columns.first()).toBeVisible()
+    await fitsPhone(page)
+  })
+})
+
+/** Nothing pushes the page sideways, and every answer card shows its whole number. */
+async function fitsPhone(page: Page) {
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+  for (const card of await page.getByTestId('lab-question').getByRole('button').all()) {
+    expect(await card.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true)
+  }
+}

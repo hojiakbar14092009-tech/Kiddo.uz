@@ -1,4 +1,4 @@
-import { levelOf, MOVE_AFTER } from '@/domain/learner/profile'
+import { levelOf, masteryOf, MOVE_AFTER } from '@/domain/learner/profile'
 import type { ChallengeLevel, LearnerStrands } from '@/domain/learner/profile'
 import { ACHIEVEMENTS } from '@/domain/universe/achievements'
 import type { UniverseChild } from '@/domain/universe/store'
@@ -222,6 +222,8 @@ export interface StrandRow {
    * age default is ever shown as if it were measured. Never set for art.
    */
   level: ChallengeLevel | null
+  /** Mastery steps above level 5 (0 below it or when not measured); no ceiling. */
+  mastery: number
   /** First answers right without help, 0–1 (null: no scored questions, e.g. drawing). */
   accuracy: number | null
   /** Questions behind `accuracy`. */
@@ -278,6 +280,7 @@ export function skillRows(input: {
       strand,
       runs,
       level: measured ? levelOf(input.strands, strand, input.age) : null,
+      mastery: measured ? masteryOf(input.strands, strand, input.age) : 0,
       accuracy: answered > 0 ? right / answered : null,
       answered,
       scoredRuns,

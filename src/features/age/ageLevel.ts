@@ -12,11 +12,13 @@ export type AgeLevel = (typeof AGE_LEVELS)[number]
 export const MIN_AGE: AgeLevel = 4
 export const MAX_AGE: AgeLevel = 6
 /**
- * The oldest a child profile can be. No learning ceiling: the age bands
- * (domain/adaptive) only shape the presentation and the starting level; an
- * older child gets every game (level 6) and the work their answers show.
+ * No maximum age (Phase 22): the birth date is the only age source and any
+ * learner from 4 up can have a profile. The age bands (domain/adaptive) only
+ * shape the presentation and the starting point; an older learner gets every
+ * game (level 6) and the work their answers show, with no ceiling (mastery).
+ * The earliest birth date accepted only guards against typing errors.
  */
-export const MAX_PROFILE_AGE = 18
+export const EARLIEST_BIRTH_DATE = '1900-01-01'
 /** Without a profile (guest play) everything is open. */
 export const GUEST_LEVEL: AgeLevel = 6
 
@@ -121,11 +123,10 @@ export function daysUntil(day: string, today: string): number {
   return Math.max(0, Math.round(diff / 86_400_000))
 }
 
-/** Can a child of this birth date be added? From 4, with no learning ceiling (up to 18). */
+/** Can a learner of this birth date be added? From 4, with no maximum age. */
 export function isAllowedBirthDate(birthDate: string, today: string): boolean {
-  if (!isValidDay(birthDate)) return false
-  const age = ageOn(birthDate, today)
-  return age >= MIN_AGE && age <= MAX_PROFILE_AGE
+  if (!isValidDay(birthDate) || birthDate < EARLIEST_BIRTH_DATE) return false
+  return ageOn(birthDate, today) >= MIN_AGE
 }
 
 export function isGameOpen(game: GameType, level: AgeLevel): boolean {

@@ -349,6 +349,7 @@ const row = (
   strand,
   runs: 5,
   level: null,
+  mastery: 0,
   accuracy,
   answered: 20,
   scoredRuns: 5,

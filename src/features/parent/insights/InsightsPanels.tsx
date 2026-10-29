@@ -39,7 +39,9 @@ function StrandItem({ row, t }: { row: StrandRow; t: TFunction }) {
       className="flex flex-col gap-1 rounded-2xl border-2 border-line px-4 py-3"
     >
       <span className="font-display text-lg font-bold">{strandName(t, row.strand)}</span>
-      {row.level !== null && <span className="font-semibold">{levelWord(t, row.level)}</span>}
+      {row.level !== null && (
+        <span className="font-semibold">{levelWord(t, row.level, row.mastery)}</span>
+      )}
       <span className="text-sm text-ink-soft">
         {row.accuracy === null
           ? t(
@@ -302,7 +304,7 @@ export function PracticePanel({
               <span>
                 <span className="font-semibold">{strandName(t, row.strand)}</span>
                 <span className="text-ink-soft">
-                  {row.level !== null && ` · ${levelWord(t, row.level)}`}
+                  {row.level !== null && ` · ${levelWord(t, row.level, row.mastery)}`}
                   {row.accuracy !== null &&
                     ` · ${t('parent.insights.skills.accuracy', { percent: percent(row.accuracy), count: row.answered })}`}
                 </span>

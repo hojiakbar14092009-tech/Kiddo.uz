@@ -214,3 +214,26 @@ describe('Math Lab page', () => {
     await waitForNext(before)
   })
 })
+
+describe('Math Lab with no maximum age (Phase 22)', () => {
+  beforeEach(() => {
+    useSettingsStore.setState({ language: 'uz' })
+    useUniverseStore.setState({ byChild: {} })
+  })
+
+  it('a 30-year-old learner starts above level 5, with big numbers and the mastery shown', async () => {
+    childOfAge(30)
+    const { user } = await renderRoute('/math-lab')
+    const chip = screen.getAllByTestId('lab-level')[0]!
+    expect(chip).toHaveTextContent('5-daraja · ustalik 3')
+    await user.click(screen.getByTestId('lab-start'))
+    const q = question()
+    expect(q).toHaveAttribute('data-level', '5')
+    // mastery 3: numbers up to 200, written as an equation
+    const numbers = [...screen.getByTestId('lab-equation').children]
+      .map((token) => Number(token.textContent))
+      .filter((n) => Number.isFinite(n) && n > 0)
+    expect(Math.max(...numbers)).toBeGreaterThan(20)
+    expect(Math.max(...numbers)).toBeLessThanOrEqual(200)
+  })
+})

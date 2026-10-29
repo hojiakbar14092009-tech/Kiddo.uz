@@ -18,6 +18,12 @@ export type ChallengeLevel = 1 | 2 | 3 | 4 | 5
 export interface StrandState {
   /** Current level; missing means "start from age". */
   level: ChallengeLevel
+  /**
+   * Mastery steps above the top level (Phase 22): 0 until level 5 is mastered,
+   * then one more for every two strong runs in a row, with no ceiling; two
+   * weak runs take one back before the level itself moves down.
+   */
+  mastery?: number
   /** Strong (+n) or weak (−n) runs in a row at this level. */
   streak: number
   runs: number
@@ -36,6 +42,39 @@ export const MOVE_AFTER = 2
 
 export function clampLevel(n: number): ChallengeLevel {
   return Math.min(MAX_CHALLENGE, Math.max(MIN_CHALLENGE, Math.round(n))) as ChallengeLevel
+}
+
+/** A guard against corrupt saves only: far beyond any real progress (two strong runs a step). */
+export const MAX_MASTERY = 10_000
+
+/**
+ * Where mastery starts for an age (DOB is the only age source): teenagers and
+ * adults begin above level 5, so the work is not childish; their answers decide
+ * from there, both ways.
+ */
+export function startMastery(age: number | null): number {
+  if (age === null || age < 12) return 0
+  if (age < 15) return 1
+  if (age < 18) return 2
+  return 3
+}
+
+/** Mastery steps of one strand state (0 below the top level). */
+export function stateMastery(stored: StrandState | undefined, age: number | null): number {
+  if (!stored || stored.runs < MOVE_AFTER)
+    return startLevel(age) === MAX_CHALLENGE ? startMastery(age) : 0
+  if (stateLevel(stored, age) < MAX_CHALLENGE) return 0
+  const m = Math.floor(Number(stored.mastery))
+  // a corrupt or absurd save never reaches the generators
+  return Number.isFinite(m) && m > 0 ? Math.min(m, MAX_MASTERY) : 0
+}
+
+export function masteryOf(
+  strands: LearnerStrands | undefined,
+  strand: Strand,
+  age: number | null,
+): number {
+  return stateMastery(strands?.[strand], age)
 }
 
 /** Where a strand starts for an age (years; null = guest). */
@@ -84,6 +123,7 @@ export function applyRun(
 ): StrandState {
   const fresh: StrandState = {
     level: startLevel(age),
+    mastery: startLevel(age) === MAX_CHALLENGE ? startMastery(age) : 0,
     streak: 0,
     runs: 0,
     independent: 0,
@@ -94,6 +134,7 @@ export function applyRun(
         ...fresh,
         ...previous,
         level: stateLevel(previous, age),
+        mastery: stateMastery(previous, age),
         streak: Number(previous.streak) || 0,
         runs: Number(previous.runs) || 0,
       }
@@ -108,8 +149,16 @@ export function applyRun(
         ? Math.min(0, base.streak) - 1
         : 0
   let level = base.level
+  let mastery = base.mastery ?? 0
   if (streak >= MOVE_AFTER && level < MAX_CHALLENGE) {
     level = clampLevel(level + 1)
+    streak = 0
+  } else if (streak >= MOVE_AFTER) {
+    // the top level is mastered: one more mastery step, with no ceiling
+    mastery = Math.min(MAX_MASTERY, mastery + 1)
+    streak = 0
+  } else if (streak <= -MOVE_AFTER && mastery > 0) {
+    mastery -= 1
     streak = 0
   } else if (streak <= -MOVE_AFTER && level > MIN_CHALLENGE) {
     level = clampLevel(level - 1)
@@ -117,6 +166,7 @@ export function applyRun(
   }
   return {
     level,
+    mastery: level === MAX_CHALLENGE ? mastery : 0,
     streak,
     runs: base.runs + 1,
     independent: base.independent + independent,

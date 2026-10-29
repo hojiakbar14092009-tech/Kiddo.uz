@@ -283,6 +283,7 @@ export const uz = {
         confident: 'Ishonchli',
         strong: 'Kuchli',
         advanced: 'Ilg‘or',
+        mastery: '{{word}} · ustalik {{step}}',
       },
       strands: {
         letters: 'Harflar',
@@ -474,7 +475,7 @@ export const uz = {
       age: 'Yoshi',
       birthDate: 'Tug‘ilgan kuni',
       birthDateHint: 'Kiddo 4 yoshdan. Mashqlar yoshga emas, bolaning javoblariga moslashadi.',
-      birthDateError: 'Tug‘ilgan kunni kiriting: bola 4 yoshdan 18 yoshgacha bo‘lishi kerak.',
+      birthDateError: 'Tug‘ilgan kunni kiriting: o‘quvchi kamida 4 yoshda bo‘lishi kerak.',
       ageLevel: 'Yoshi: {{count}}. {{level}} yoshli bolalar uchun o‘yinlar ochiq.',
       ageAll: 'Yoshi: {{count}}. Barcha o‘yinlar ochiq; qiyinlik javoblarga qarab tanlanadi.',
       gender: 'Jinsi',
@@ -892,6 +893,7 @@ export const uz = {
     intro: 'Sanaymiz, qo‘shamiz, ayiramiz. Topshiriqlar har safar senga moslashadi!',
     start: 'Boshlash',
     level: '{{level}}-daraja',
+    levelMastery: '{{level}}-daraja · ustalik {{step}}',
     classic: 'Qo‘shishni bosqichma-bosqich o‘rganish',
     objects: {
       apple: 'olma',
@@ -932,6 +934,10 @@ export const uz = {
       equal: 'teng',
     },
     help: {
+      columnsAdd:
+        'Birlarni birlarga, o‘nlarni o‘nlarga qo‘sh. 10 dan oshsa, keyingi xonaga 1 o‘tadi.',
+      columnsSub:
+        'Birlardan birlarni, o‘nlardan o‘nlarni ayir. Yetmasa, keyingi xonadan 1 o‘nlik olinadi.',
       count: 'Kel, birga sanaymiz: har biriga bittadan son aytamiz.',
       oneMore: 'Bittaga ko‘paysa, keyingi son bo‘ladi: {{n}}, keyin {{next}}.',
       oneLess: 'Bittaga kamaysa, oldingi son bo‘ladi: {{n}} sonidan oldin {{next}} keladi.',
@@ -962,6 +968,8 @@ export const uz = {
   tutor: {
     title: 'Kiddo maslahati',
     clue: {
+      'place-value':
+        'O‘nliklarga qara: bitta xonada adashdik. Birlarni va o‘nlarni alohida hisobla.',
       'off-by-one': 'Juda yaqin! Yana bir marta sekin sanab ko‘r.',
       'off-by-more': 'Hali emas. Bittadan qaytadan sanab chiq.',
       'wrong-operation': 'Belgiga qara: qo‘shamizmi yoki ayiramizmi?',
@@ -1315,6 +1323,8 @@ export const uz = {
       'math-compare-numbers': 'Sonlarni taqqoslash',
       'math-add-within5': '5 gacha qo‘shish',
       'math-add-within10': '10 gacha qo‘shish',
+      'math-add-big': 'Katta sonlarni qo‘shish',
+      'math-sub-big': 'Katta sonlarni ayirish',
       'math-add-within20': '20 gacha qo‘shish',
       'math-sub-within10': '10 gacha ayirish',
       'math-sub-within20': '20 gacha ayirish',
