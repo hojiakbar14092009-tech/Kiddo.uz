@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from '@testing-library/react'
+import { act, fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useUniverseStore } from '@/domain/universe'
 import { birthDateForAge } from '@/features/age/ageLevel'
@@ -112,6 +112,24 @@ describe('Shadow Lab', () => {
     expect(document.querySelectorAll('[data-control]')).toHaveLength(4)
     await solve(user, 'multi', 0)
     expect(screen.getByTestId('shadow-puzzle')).toHaveAttribute('data-mode', 'views')
-    expect(screen.getAllByRole('figure')).toHaveLength(3)
+    // taught first: a solid that is not an answer (cylinder here), from all three sides
+    const example = screen.getByTestId('shadow-views-example')
+    expect(example).toHaveTextContent('Avval misol. Silindr')
+    expect(within(example).getAllByRole('figure')).toHaveLength(3)
+    expect(screen.getAllByRole('figure')).toHaveLength(6)
+  })
+
+  it('another child becoming active mid-run starts over, so no one is paid for another’s run', async () => {
+    seedChild(5)
+    const { user } = await renderRoute('/shadow-lab')
+    await user.click(screen.getByTestId('shadow-start'))
+    expect(screen.queryByTestId('shadow-start')).toBeNull()
+    act(() =>
+      useFamilyStore.setState((state) => ({
+        children: [...state.children, { ...state.children[0]!, id: 'c2', name: 'Vali' }],
+        activeChildId: 'c2',
+      })),
+    )
+    expect(screen.getByTestId('shadow-start')).toBeInTheDocument()
   })
 })

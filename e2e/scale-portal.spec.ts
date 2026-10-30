@@ -88,7 +88,7 @@ test('the rail answers the keyboard, and Next takes the focus after a jump', asy
   await page.goto('/scale-portal')
   await expect(page.locator('[data-splash]')).toHaveCount(0, { timeout: 30_000 })
   await page.getByRole('button', { name: 'Erkin kezish' }).click()
-  const rail = page.getByRole('slider', { name: 'Masshtab relsi' })
+  const rail = page.getByRole('slider', { name: 'Masshtab chizig‘i' })
   await rail.focus()
   for (let press = 0; press < 30; press += 1) await page.keyboard.press('ArrowRight')
   // 30 small steps take the camera from the blood cell past the ant

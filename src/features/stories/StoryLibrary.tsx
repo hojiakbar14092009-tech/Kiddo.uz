@@ -65,7 +65,7 @@ export function StoryLibrary() {
               >
                 <span
                   aria-hidden="true"
-                  className="relative flex size-20 shrink-0 items-center justify-center rounded-tile bg-sky-soft p-2 min-[480px]:h-28 min-[480px]:w-full sm:h-32 short:size-14! short:p-1"
+                  className="relative flex size-[min(5rem,22vw)] shrink-0 items-center justify-center rounded-tile bg-sky-soft p-2 min-[480px]:h-28 min-[480px]:w-full sm:h-32 short:size-14! short:p-1"
                 >
                   <Img3D
                     name={story.cover}
@@ -87,7 +87,7 @@ export function StoryLibrary() {
                   )}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="font-display text-xl leading-tight font-extrabold sm:text-2xl short:text-base">
+                  <span className="font-display text-xl leading-tight font-extrabold [overflow-wrap:anywhere] hyphens-auto sm:text-2xl short:text-base">
                     {text.title}
                   </span>
                   <span className="text-sm leading-snug text-ink-soft sm:text-base short:hidden">

@@ -1591,7 +1591,7 @@ export const en: Translation = {
       go: 'Go learn',
     },
     mascot: {
-      empty: 'All calm here. Let’s learn something new!',
+      empty: 'No seeds yet. Let’s learn something new!',
       seeds: 'The seeds are waiting to be practised. Pick one!',
       growing: 'Your garden is growing! Keep going.',
       bloom: 'Everything is in bloom! Well done.',
@@ -1653,11 +1653,12 @@ export const en: Translation = {
       "I'm Astro! Let's travel from something tiny all the way to our whole galaxy. Guess before every portal!",
     start: 'Start the journey',
     explore: 'Explore freely',
-    exploreHint: 'Slide the rail and look wherever you like.',
+    exploreHint: 'Slide along the line and look wherever you like.',
     stageLabel: 'You are looking at: {{name}}',
-    rail: 'Scale rail',
+    rail: 'Size line',
     small: 'Small',
     big: 'Big',
+    sizeNow: 'Now: {{size}}',
     progress: 'Portal {{n}} of {{total}}',
     stops: {
       cell: {
@@ -1671,7 +1672,7 @@ export const en: Translation = {
       child: { name: 'Child', fact: "That's you! You can compare everything with yourself." },
       tower: {
         name: 'Tashkent Tower',
-        fact: 'Tashkent Tower is 375 metres tall: like many children standing on each other.',
+        fact: 'Tashkent Tower is 375 metres tall: as if many children stood on each other’s shoulders.',
       },
       city: {
         name: 'Big city',
@@ -1793,6 +1794,7 @@ export const en: Translation = {
         title: 'Guess from the views',
         task: 'Whose shadows are these?',
         why: 'One solid looks different from each side: a cone is a triangle from the front and a circle from above.',
+        example: 'First an example. {{solid}} from the front, from above and from the side:',
       },
       build: {
         title: 'Build from pieces',

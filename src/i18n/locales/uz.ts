@@ -1600,7 +1600,7 @@ export const uz = {
       go: 'O‘rganishga',
     },
     mascot: {
-      empty: 'Bog‘ tinch. Kel, yangi narsa o‘rganamiz!',
+      empty: 'Hozircha urug‘ yo‘q. Kel, yangi narsa o‘rganamiz!',
       seeds: 'Urug‘lar mashqni kutyapti. Birini tanla!',
       growing: 'Bog‘ing o‘syapti! Davom et.',
       bloom: 'Hammasi gulladi! Sen zo‘rsan.',
@@ -1662,11 +1662,12 @@ export const uz = {
       'Men Astro! Birga sayohat qilamiz: juda kichik narsadan boshlab, butun galaktikagacha. Har bir portal oldidan taxmin qil!',
     start: 'Sayohatni boshlash',
     explore: 'Erkin kezish',
-    exploreHint: 'Relsni sur va istagan joyingga boq.',
+    exploreHint: 'Chiziqni sur va istagan joyingga boq.',
     stageLabel: 'Hozir ko‘rinayotgani: {{name}}',
-    rail: 'Masshtab relsi',
+    rail: 'Masshtab chizig‘i',
     small: 'Kichik',
     big: 'Katta',
+    sizeNow: 'Hozir: {{size}}',
     progress: '{{n}} / {{total}} portal',
     stops: {
       cell: {
@@ -1746,7 +1747,7 @@ export const uz = {
     title: 'Soya laboratoriyasi',
     cardText: 'Lumi bilan: chiroq va buyumni sur, soyani kerakli shaklga keltir.',
     intro:
-      'Men Lumi! Soya qayerga tushishi chiroqqa, buyumga va masofaga bog‘liq. Keling, sinab ko‘ramiz!',
+      'Men Lumi! Soya qayerga tushishi chiroqqa, buyumga va masofaga bog‘liq. Kel, sinab ko‘ramiz!',
     learn:
       'Soya buyum shakliga, chiroq qayerdaligiga, buyum qanday burilganiga va chiroqdan qancha uzoqligiga bog‘liq.',
     start: 'Boshlash',
@@ -1805,6 +1806,7 @@ export const uz = {
         title: 'Ko‘rinishdan top',
         task: 'Bu soyalar qaysi jismniki?',
         why: 'Bitta jism turli tomondan turlicha ko‘rinadi: konus oldidan uchburchak, yuqoridan doira.',
+        example: 'Avval misol. {{solid}} oldidan, yuqoridan va yonidan:',
       },
       build: {
         title: 'Bo‘laklardan yasa',

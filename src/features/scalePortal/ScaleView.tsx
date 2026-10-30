@@ -172,7 +172,7 @@ export function ScaleView({
           <span>{t('scalePortal.small')}</span>
           {detail !== 'compare' && (
             <span className="text-center tabular-nums" data-testid="scale-size">
-              {sizeText(t, nearest, detail, language)}
+              {t('scalePortal.sizeNow', { size: sizeText(t, nearest, detail, language) })}
             </span>
           )}
           <span>{t('scalePortal.big')}</span>

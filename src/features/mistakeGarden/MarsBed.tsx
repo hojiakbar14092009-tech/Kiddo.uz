@@ -32,7 +32,7 @@ export function MarsBed() {
   const picture = (
     <span className="flex size-24 shrink-0 items-end justify-center rounded-card bg-oops-soft pb-1.5 sm:size-28">
       <Img3D
-        name={planted ? MARS_LOOK[Math.min(stage, PLANT_STAGES)]! : 'garden-house'}
+        name={planted ? MARS_LOOK[Math.min(stage, PLANT_STAGES)]! : 'rocket'}
         className={planted ? 'size-[80%]' : 'size-[70%] opacity-50'}
         eager
       />

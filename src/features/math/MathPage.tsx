@@ -123,7 +123,7 @@ function Menu({
                     : 'bg-surface/60 opacity-60 shadow-[0_4px_0_var(--color-line)]',
                 )}
               >
-                <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-sky-soft">
+                <span className="flex size-[min(4rem,18vw)] shrink-0 items-center justify-center rounded-2xl bg-sky-soft">
                   {level === 4 ? (
                     <Img3D name={OBJECTS[index % OBJECTS.length]!} className="size-12" eager />
                   ) : (
@@ -133,10 +133,10 @@ function Menu({
                   )}
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  <span className="font-display text-xl font-bold">
+                  <span className="font-display text-xl font-bold [overflow-wrap:anywhere] hyphens-auto">
                     {index + 1}. {copy.stageTitle[stage.id]}
                   </span>
-                  <span className="text-base text-ink-soft">
+                  <span className="text-base text-ink-soft [overflow-wrap:anywhere]">
                     {done ? `✓ ${copy.taught}` : open ? copy.learn : `🔒 ${copy.locked}`}
                   </span>
                 </span>

@@ -14,6 +14,9 @@
 - **Checking** (`check.ts`): overlap (IoU on a fixed 64 × 64 grid) ≥ 0.72 / 0.80 / 0.85 by depth;
   builds by exact pieces; a miss gets a hint naming the control and the +/− direction; after three
   misses Lumi can show it (then not independent). Sliders with +/− buttons (touch, mouse, keyboard).
+- The intro shows the first mission's scene (wall + map, computed) under the Start button (Phase 36), so the
+  lab is not an empty page before it starts. If the active child changes mid-run the lab returns to
+  its intro, so a reward always goes to the child who played (same in the Scale Portal).
 - Soft shadow edge only when `mascotQuality()` is 'high'. A finished mission → `emitActivity`
   (science strand, `oncePerDay`).
 - Follow-ups: two-clue detective for the older band, aria-valuetext on the sliders, a side inset for

@@ -65,7 +65,7 @@ export function JourneyPath({ plan }: { plan: DailyPlanState }) {
                       glow ? { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } : undefined
                     }
                     className={clsx(
-                      'relative flex size-24 items-center justify-center rounded-full border-4 text-5xl transition-transform group-active:translate-y-1 sm:size-32 sm:text-6xl',
+                      'relative flex size-[min(6rem,26vw)] items-center justify-center rounded-full border-4 text-5xl transition-transform group-active:translate-y-1 sm:size-32 sm:text-6xl',
                       STOP_CLASSES[step.status],
                     )}
                   >
@@ -79,14 +79,14 @@ export function JourneyPath({ plan }: { plan: DailyPlanState }) {
                       </span>
                     )}
                   </motion.span>
-                  <span className="text-center font-display text-base leading-tight font-bold sm:text-xl">
+                  <span className="text-center font-display text-base leading-tight font-bold [overflow-wrap:anywhere] hyphens-auto sm:text-xl">
                     {title}
                   </span>
                 </Link>
                 <span
                   aria-hidden="true"
                   className={clsx(
-                    'rounded-full px-3 py-0.5 text-sm font-semibold sm:text-base',
+                    'rounded-full px-3 py-0.5 text-center text-sm font-semibold [overflow-wrap:anywhere] sm:text-base',
                     step.status === 'done' && 'bg-primary-soft text-primary-ink',
                     step.status === 'next' && 'bg-coin-soft text-ink',
                     step.status === 'later' && 'text-ink-soft',

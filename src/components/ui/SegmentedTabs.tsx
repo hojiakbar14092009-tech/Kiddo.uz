@@ -77,7 +77,7 @@ export function SegmentedTabs<T extends string>({
               'inline-flex items-center justify-center rounded-full font-display font-bold whitespace-nowrap transition-colors',
               always
                 ? 'h-12 flex-none snap-start gap-2 px-4 text-base sm:h-14 sm:px-5 sm:text-lg'
-                : 'h-14 min-w-14 flex-1 px-3 text-xl sm:min-w-28 sm:flex-none sm:px-5',
+                : 'h-14 min-w-[44px] flex-1 px-3 text-xl sm:min-w-28 sm:flex-none sm:px-5',
               selected ? 'bg-primary text-white' : 'text-ink',
               always && !selected && 'bg-surface shadow-press-sm lg:bg-transparent lg:shadow-none',
             )}

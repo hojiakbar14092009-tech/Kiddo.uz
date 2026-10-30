@@ -78,7 +78,7 @@ describe('Scale Portal', () => {
     expect(screen.getByTestId('scale-stop')).toHaveAttribute('data-stop', 'ant')
   })
 
-  it('finishes once through central progression; the result counts first-try guesses', async () => {
+  it('finishes once through central progression; guesses are shown, never graded', async () => {
     seedChild(8)
     const { user } = await renderRoute('/scale-portal')
     expect(screen.getByTestId('scale-rail')).toHaveAttribute('data-detail', 'ratio')
@@ -88,8 +88,12 @@ describe('Scale Portal', () => {
     const child = useUniverseStore.getState().byChild.c1!
     expect(child.processed).toHaveLength(1)
     expect(child.stats.byStrand.space).toBe(1)
+    // the guesses come before the sizes are shown: never graded, so the run is an
+    // exploration (one star) and the space strand does not move
+    expect(child.best['scale-portal']).toBe(1)
+    expect(child.strands?.space).toBeUndefined()
     // the rail is free to explore after the journey; exploring pays nothing
-    const rail = screen.getByRole('slider', { name: 'Masshtab relsi' })
+    const rail = screen.getByRole('slider', { name: 'Masshtab chizig‘i' })
     expect(rail).toBeEnabled()
   })
 
@@ -111,7 +115,7 @@ describe('Scale Portal', () => {
     seedChild(9)
     const { user } = await renderRoute('/scale-portal')
     await user.click(screen.getByRole('button', { name: 'Erkin kezish' }))
-    const rail = screen.getByRole('slider', { name: 'Masshtab relsi' })
+    const rail = screen.getByRole('slider', { name: 'Masshtab chizig‘i' })
     expect(rail).toBeEnabled()
     // fireEvent: a range input changes by value
     const { fireEvent } = await import('@testing-library/react')

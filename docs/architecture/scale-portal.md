@@ -18,4 +18,8 @@
 - **Gameplay**: a guess before every portal (`questions.ts`, deterministic, the right value's place
   varies), the jump, then the comparison; a finished journey goes through `emitActivity` (space
   strand, `oncePerDay`); exploring pays nothing.
+- **Predict, then see (Phase 36)**: a guess comes before the size is shown, so it is never graded. The
+  child sees how many guesses came true, but the run is reported as an exploration (`evidence: 'learn'`,
+  `total: 0`: one star for finishing, no strand move, nothing in the parent's "getting stronger").
+  The size under the line reads "Now: …" (the place nearest the slider).
 - Follow-up: "near/far" questions for 3–6.

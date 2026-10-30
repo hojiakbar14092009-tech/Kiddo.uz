@@ -637,3 +637,22 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   Critic REJECT (H1: mastered ignored a returned difficulty) → fixed → ACCEPT; its follow-up Medium (name in both
   mastered and practice) and Lows (trendNone promise, damaged entries) fixed. Known Low: `now` frozen while the page
   stays open overnight (pre-existing). Next: Phase 36 (contract line 2843; draft e2e/release-matrix.spec.ts in scratchpad).
+
+## Phase 36 — COMPLETE (2026-10-30) – docs/architecture/release-qa.md
+
+- Release matrix `e2e/release-matrix.spec.ts` (@matrix, tablet project): 13 child routes × 9 viewports (ru) — no sideways
+  scroll / off-screen controls / raw keys; 150 % and 200 % text; uz + en raw-key pass; 10-round heavy-route cycle (no
+  canvas / interval / DOM growth). Large-text fixes: rem sizes capped by vw (JourneyPath, StoryLibrary, MathPage, Garden
+  modes, SegmentedTabs touch floor 44px) + `[overflow-wrap:anywhere]` on narrow card titles (shared Button unchanged).
+- Critic fixes: Scale Portal guesses never graded (`evidence: 'learn'`, total 0 → 1 star, no strand); Shadow Lab views
+  taught with a worked example (a solid that is not an option); labs return to intro when the active child changes;
+  SplashScreen restores prior `inert` and reads reduced motion once; Shadow Lab intro scene preview; Mars bed rocket;
+  "Hozir:" size label; uz/en "size line" wording; ru/en tower fact; garden empty bubble.
+- Future PRO price preserved inert: `src/features/pro/futurePrices.ts` (24,990 / 238,990; test proves nothing reads it).
+- Verification: format/lint/typecheck PASS; unit 1359/1359; build PASS; SQL ALL-SQL-ASSERTIONS-PASSED (338 assertion
+  lines, local PG 16); full e2e 237 passed / 17 skipped (tablet-only matrix) / 0 failed (56.6 min) + targeted rerun after
+  the Critic fixes 32/32 (scale-portal, shadow-lab, garden, journey, release-matrix). Critic panel: technical (Architect/Security/Performance/A11y/3D) ACCEPT; product (Product/Educational/
+  Early Childhood/Older Learner/Parent UX/Visual/Localization) REJECT (H: graded guesses) → fixed → ACCEPT.
+- Release follow-ups (non-blocking): age fit of the home plan and Math start for 8+; harder parent gate (e.g. 23 × 7);
+  rest-hours greeting vs plan; empty shop at 0 coins; first-screen JS 320/340 KB; apply migrations 0014 + 0015;
+  record new voice phrases; Scale Portal near/far for 3–6; Shadow Lab two-clue detective; admin cloud session re-check.

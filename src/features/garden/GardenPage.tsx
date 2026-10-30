@@ -423,8 +423,10 @@ function ModePicker({ onPick }: { onPick: (mode: LearnMode) => void }) {
             data-testid={`garden-mode-${mode}`}
             className="flex items-center gap-4 rounded-[32px] bg-surface p-5 text-left shadow-[0_7px_0_var(--color-line)] transition-transform active:translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-col sm:text-center"
           >
-            <Img3D name={icon} className="size-20 sm:size-28" eager />
-            <span className="font-display text-2xl font-bold">{t(label)}</span>
+            <Img3D name={icon} className="size-[min(5rem,20vw)] shrink-0 sm:size-28" eager />
+            <span className="min-w-0 font-display text-2xl font-bold [overflow-wrap:anywhere]">
+              {t(label)}
+            </span>
           </button>
         ))}
       </div>

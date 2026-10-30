@@ -31,7 +31,7 @@ import {
   type Scene,
 } from './puzzles'
 import { SOLID_PICTURES } from './solidPictures'
-import { viewOf } from './solids'
+import { SOLID_IDS, VIEWS, viewOf, type SolidId } from './solids'
 import { SideMap, WallView } from './views'
 
 /** After this many misses Lumi offers to show the answer (then it does not count as independent). */
@@ -61,6 +61,13 @@ export function ShadowLabPage() {
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
   const [runId, setRunId] = useState(newId)
   const [solved, setSolved] = useState(0)
+  // another child became active (e.g. in another tab): this run was theirs, start over
+  // so a reward always goes to the child who played it
+  const [runChild, setRunChild] = useState(childKey)
+  if (runChild !== childKey) {
+    setRunChild(childKey)
+    setPhase({ kind: 'intro' })
+  }
   const heading = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => reset, [reset])
@@ -118,6 +125,26 @@ export function ShadowLabPage() {
             <Button onClick={start} data-testid="shadow-start">
               {t('shadowLab.start')}
             </Button>
+            {/* the lab before it starts: the first mission's object, its light and the shadow it throws */}
+            {(mission[0]?.mode === 'match' || mission[0]?.mode === 'light') && (
+              <div
+                className="grid w-full max-w-3xl gap-3 sm:grid-cols-[2fr_1fr]"
+                data-testid="shadow-preview"
+              >
+                <WallView
+                  shadows={[sceneShadow(mission[0].shape, mission[0].start)]}
+                  soft={soft}
+                  label={t('shadowLab.wallLabel')}
+                  className="w-full rounded-card shadow-press"
+                />
+                <SideMap
+                  scene={mission[0].start}
+                  shape={SHAPES[mission[0].shape]}
+                  label={t('shadowLab.mapLabel')}
+                  className="w-full rounded-card"
+                />
+              </div>
+            )}
           </section>
         )}
 
@@ -376,6 +403,13 @@ function PuzzleRun({
 
       {puzzle.mode === 'views' && (
         <>
+          {/* taught first: a worked example with a solid that is not one of the answers */}
+          {!done && (
+            <ViewsExample
+              solid={SOLID_IDS.find((id) => !puzzle.options.includes(id)) ?? 'sphere'}
+              soft={soft}
+            />
+          )}
           <div className="flex flex-wrap justify-center gap-3">
             {puzzle.views.map((view) => (
               <figure key={view} className="flex w-36 flex-col items-center gap-1 sm:w-44">
@@ -569,5 +603,33 @@ function Choices({
         </button>
       ))}
     </div>
+  )
+}
+
+/** One solid seen from the front, from above and from the side, named, before the question. */
+function ViewsExample({ solid, soft }: { solid: SolidId; soft: boolean }) {
+  const { t } = useTranslation()
+  return (
+    <section
+      className="flex flex-col items-center gap-2 rounded-card bg-sky-soft p-3 text-center"
+      data-testid="shadow-views-example"
+    >
+      <p className="max-w-prose text-base font-semibold">
+        {t('shadowLab.modes.views.example', { solid: t(`shadowLab.solids.${solid}`) })}
+      </p>
+      <div className="flex flex-wrap justify-center gap-2">
+        {VIEWS.map((view) => (
+          <figure key={view} className="flex w-20 flex-col items-center gap-1 sm:w-24">
+            <WallView
+              shadows={[viewOf(solid, view).map(([x, y]) => [x * 1.8, y * 1.8] as const)]}
+              soft={soft}
+              label={`${t(`shadowLab.solids.${solid}`)}: ${t(`shadowLab.views.${view}`)}`}
+              className="w-full rounded-card"
+            />
+            <figcaption className="text-sm">{t(`shadowLab.views.${view}`)}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
   )
 }

@@ -23,11 +23,13 @@ export function SplashScreen() {
   const reduceMotion = useReducedMotion() ?? false
   const [visible, setVisible] = useState(() => !shownThisLaunch)
   const layer = useRef<HTMLDivElement>(null)
+  // read once: a later change of the setting must not restart the timer (the 4 s cap)
+  const reducedAtStart = useRef(reduceMotion)
 
   useEffect(() => {
     shownThisLaunch = true
     if (!visible) return undefined
-    const timer = setTimeout(() => setVisible(false), reduceMotion ? REDUCED_MS : SHOW_MS)
+    const timer = setTimeout(() => setVisible(false), reducedAtStart.current ? REDUCED_MS : SHOW_MS)
     // a key skips it too (Escape, Enter, Space), as a tap does
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
@@ -41,13 +43,17 @@ export function SplashScreen() {
     const others = [...(layer.current?.parentElement?.children ?? [])].filter(
       (node): node is HTMLElement => node instanceof HTMLElement && node !== layer.current,
     )
+    // what was already inert (a dialog behind, say) stays so afterwards
+    const before = others.map((node) => node.inert)
     for (const node of others) node.inert = true
     return () => {
       clearTimeout(timer)
       document.removeEventListener('keydown', onKey)
-      for (const node of others) node.inert = false
+      others.forEach((node, index) => {
+        node.inert = before[index] ?? false
+      })
     }
-  }, [visible, reduceMotion])
+  }, [visible])
 
   return (
     <AnimatePresence>

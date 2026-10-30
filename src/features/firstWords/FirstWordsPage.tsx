@@ -56,7 +56,11 @@ function Menu({ language, onPick }: { language: Language; onPick: (mode: LearnMo
         <h2 className="font-display text-2xl font-extrabold sm:text-3xl">{copy.choose}</h2>
         <div className="grid w-full gap-4 sm:grid-cols-2">
           <div className="flex flex-col items-center gap-2">
-            <Button className="w-full" onClick={() => onPick('learn')} data-testid="words-learn">
+            <Button
+              className="w-full [overflow-wrap:anywhere]"
+              onClick={() => onPick('learn')}
+              data-testid="words-learn"
+            >
               {t('learn.learnMode')}
             </Button>
             <p className="text-ink-soft">{copy.learnHint}</p>
@@ -64,7 +68,7 @@ function Menu({ language, onPick }: { language: Language; onPick: (mode: LearnMo
           <div className="flex flex-col items-center gap-2">
             <Button
               variant="coin"
-              className="w-full"
+              className="w-full [overflow-wrap:anywhere]"
               onClick={() => onPick('test')}
               data-testid="words-test"
             >

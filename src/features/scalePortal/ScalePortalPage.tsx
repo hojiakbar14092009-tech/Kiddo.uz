@@ -51,6 +51,13 @@ export function ScalePortalPage() {
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
   const [runId, setRunId] = useState(newId)
   const [right, setRight] = useState(0)
+  // another child became active (e.g. in another tab): this run was theirs, start over
+  // so a reward always goes to the child who played it
+  const [runChild, setRunChild] = useState(childKey)
+  if (runChild !== childKey) {
+    setRunChild(childKey)
+    setPhase({ kind: 'intro' })
+  }
   const heading = useRef<HTMLHeadingElement>(null)
   const nextButton = useRef<HTMLButtonElement>(null)
   const alive = useRef(true)
@@ -105,11 +112,14 @@ export function ScalePortalPage() {
       childKey,
       activity: SCALE_ACTIVITY,
       strand: 'space',
-      // a memorised replay counts for the strand once a day (stars only for a better result)
+      // predict, then see: the guesses come before the sizes are shown, so they are
+      // never graded. A finished journey is an exploration (one star, like a creative
+      // run): no strand moves and nothing reaches the parent's "getting stronger".
       oncePerDay: true,
-      correct: right,
-      total: JUMPS,
-      independent: right,
+      evidence: 'learn',
+      correct: 0,
+      total: 0,
+      independent: 0,
     })
     react('celebrate', { text: t('scalePortal.doneTitle'), emoji: '🌌' })
     setPhase({ kind: 'done', award, right })
