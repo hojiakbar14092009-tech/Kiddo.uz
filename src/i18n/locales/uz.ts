@@ -1493,6 +1493,16 @@ export const uz = {
     comingSoonText: 'Bu olam hali tayyorlanmoqda.',
     best: 'Eng yaxshi natija: {{count}} / 3 yulduz',
     notPlayed: 'Hali o‘ynalmagan',
+    stages: {
+      new: 'Yangi olam',
+      explorer: 'Kashfiyotchi',
+      expert: 'Bilimdon',
+      master: 'Olam ustasi',
+    },
+    stageStars: 'Bu olamda: {{have}} / {{max}} yulduz',
+    stageNext: 'Keyingi bosqichgacha: {{count}} yulduz',
+    stageNews: '{{name}}: {{stage}} — yangi bosqich!',
+    stageUp: 'Yangi bosqich!',
     worldLabel: '{{name}}: {{state}}',
   },
   collection: {

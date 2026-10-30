@@ -508,3 +508,15 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   (surprised → happy pose) in the shop and at the robot's feet (`PetCompanion`). `HeartIcon`. uz/ru/en `shop.petBond*`.
 - Tests: bond.test.ts, PetBridge.test.tsx, progressStore + ShopPage tests, e2e/pet-shop.spec.ts. Critic: ACCEPT
   (Critical 0 / High 0); its Medium (Russian wording) and Lows (aria days left, clock-ahead, toast text test) fixed.
+
+## World Card Evolution (Phase 28) – docs/architecture/world-cards.md
+
+- Original Phase 28 contract text was lost to compaction; scope defined from the phase name.
+- `domain/universe/worldStage.ts`: stage new → explorer (1 star) → expert (half the world's max) → master (all 3★),
+  from the world's activities' best stars; `starsToNextStage`. WorldStop: frame/chip/badge (medal, crown) per stage,
+  "stars in this world" + "to next stage" on unlocked worlds only; `data-stage`, testids `card-stage`, `card-stage-up`.
+- AdventurePage (keyed by child): one-time "new stage" (pill + pop, reduced motion off) from
+  `ChildProgress.worldStages` (only raised, `markWorldStages`); one sr-only page-level status 400 ms after mount.
+  Road measuring selects only `:scope > ol > li[data-testid^="world-"]` (inner testids must not start with `world-`).
+- Tests: worldStage.test.ts, adventure.test.tsx, e2e/world-cards.spec.ts. Critic: REJECT (road selector High) →
+  fixed → ACCEPT (Critical 0 / High 0).

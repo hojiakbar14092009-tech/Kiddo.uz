@@ -2,7 +2,7 @@ import { screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { emitActivity, grantResource, useUniverseStore } from '@/domain/universe'
 import { useFamilyStore } from '@/store/familyStore'
-import { GUEST_KEY } from '@/store/progressStore'
+import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
 import { cellFor, roadPath } from './mapLayout'
@@ -11,6 +11,7 @@ beforeEach(() => {
   useSettingsStore.setState({ language: 'uz' })
   useFamilyStore.setState({ children: [], activeChildId: null })
   useUniverseStore.setState({ byChild: {} })
+  useProgressStore.setState({ byChild: {} })
 })
 
 describe('Adventure Map', () => {
@@ -98,5 +99,30 @@ describe('map layout', () => {
     // along row 0, the turn out to the right, along row 1
     expect(path.match(/[QC] /g)).toEqual(['Q ', 'C ', 'Q '])
     expect(path).toContain('C 570 60 570 360 450 360')
+  })
+
+  it('a world card evolves with the world’s stars and shows a new stage once', async () => {
+    emitActivity({
+      id: 'run-1',
+      childKey: GUEST_KEY,
+      activity: 'math:6',
+      strand: 'number',
+      correct: 5,
+      total: 5,
+      independent: 5,
+    })
+    const first = await renderRoute('/adventure')
+    const ocean = screen.getByTestId('world-ocean')
+    expect(ocean).toHaveAttribute('data-stage', 'explorer')
+    expect(within(ocean).getByTestId('card-stage')).toHaveTextContent('Kashfiyotchi')
+    expect(within(ocean).getByTestId('card-stage-up')).toHaveTextContent('Yangi bosqich!')
+    expect(await screen.findByText('Okean: Kashfiyotchi — yangi bosqich!')).toBeInTheDocument()
+    expect(screen.getByTestId('world-forest')).toHaveAttribute('data-stage', 'new')
+    expect(useProgressStore.getState().byChild[GUEST_KEY]?.worldStages).toMatchObject({ ocean: 1 })
+    first.unmount()
+
+    // seen once: the next visit shows the stage without the news
+    await renderRoute('/adventure')
+    expect(within(screen.getByTestId('world-ocean')).queryByTestId('card-stage-up')).toBeNull()
   })
 })

@@ -1488,6 +1488,16 @@ export const ru: Translation = {
     comingSoonText: 'Этот мир ещё готовится.',
     best: 'Лучший результат: {{count}} / 3 звезды',
     notPlayed: 'Ещё не играли',
+    stages: {
+      new: 'Новый мир',
+      explorer: 'Исследователь',
+      expert: 'Знаток',
+      master: 'Мастер мира',
+    },
+    stageStars: 'Звёзд в этом мире: {{have}} / {{max}}',
+    stageNext: 'Звёзд до следующей ступени: {{count}}',
+    stageNews: '{{name}}: {{stage}} — новая ступень!',
+    stageUp: 'Новая ступень!',
     worldLabel: '{{name}}: {{state}}',
   },
   collection: {

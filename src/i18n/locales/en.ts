@@ -1491,6 +1491,16 @@ export const en: Translation = {
     comingSoonText: 'This world is still being built.',
     best: 'Best result: {{count}} / 3 stars',
     notPlayed: 'Not played yet',
+    stages: {
+      new: 'New world',
+      explorer: 'Explorer',
+      expert: 'Expert',
+      master: 'World master',
+    },
+    stageStars: 'In this world: {{have}} of {{max}} stars',
+    stageNext: 'Stars to the next stage: {{count}}',
+    stageNews: '{{name}}: {{stage}} — a new stage!',
+    stageUp: 'New stage!',
     worldLabel: '{{name}}: {{state}}',
   },
   collection: {

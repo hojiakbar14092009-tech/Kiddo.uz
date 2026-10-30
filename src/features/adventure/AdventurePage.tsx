@@ -1,10 +1,12 @@
 import { JourneyCard } from '@/features/city/JourneyCard'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
 import { Screen } from '@/components/layout/Screen'
 import { ResourceIcon } from '@/components/reward/ResourceIcon'
-import { useAdventure, useResources } from '@/domain/universe'
+import { stageIndex, useAdventure, useResources, worldStage } from '@/domain/universe'
+import { useChildKey, useProgressStore } from '@/store/progressStore'
+import { tDynamic } from '@/lib/tDynamic'
 import { cellFor, roadPath, useMapColumns } from './mapLayout'
 import { WorldStop } from './WorldStop'
 
@@ -14,6 +16,12 @@ import { WorldStop } from './WorldStop'
  * activity stays reachable from the city at any time.
  */
 export function AdventurePage() {
+  // a different child (profiles switched) gets their own map and their own news
+  const childKey = useChildKey()
+  return <AdventureMap key={childKey} childKey={childKey} />
+}
+
+function AdventureMap({ childKey }: { childKey: string }) {
   const { t } = useTranslation()
   const worlds = useAdventure()
   const stars = useResources().star ?? 0
@@ -21,13 +29,50 @@ export function AdventurePage() {
   const mapRef = useRef<HTMLDivElement>(null)
   const [road, setRoad] = useState({ path: '', width: 1, height: 1 })
 
+  // World Card Evolution: a card whose stage rose since the child last saw the map is shown
+  // off this once (remembered per child; the stages never drop, stars are never spent)
+  const markWorldStages = useProgressStore((state) => state.markWorldStages)
+  const stages = Object.fromEntries(
+    worlds.map((world) => [world.id, stageIndex(worldStage(world))]),
+  )
+  const [fresh] = useState(() => {
+    const seen = useProgressStore.getState().byChild[childKey]?.worldStages ?? {}
+    return new Set(
+      Object.entries(stages)
+        .filter(([id, stage]) => stage > (seen[id] ?? 0))
+        .map(([id]) => id),
+    )
+  })
+  const stageKey = JSON.stringify(stages)
+  useEffect(() => {
+    markWorldStages(childKey, JSON.parse(stageKey) as Record<string, number>)
+  }, [childKey, markWorldStages, stageKey])
+  // one announcement for the new stages, put in the live region after it is on the page
+  const news = worlds
+    .filter((world) => fresh.has(world.id))
+    .map((world) =>
+      t('adventure.stageNews', {
+        name: tDynamic(t, world.nameKey),
+        stage: t(`adventure.stages.${worldStage(world)}`),
+      }),
+    )
+    .join(' ')
+  const [said, setSaid] = useState('')
+  useEffect(() => {
+    if (!news) return undefined
+    const timer = window.setTimeout(() => setSaid(news), 400)
+    return () => window.clearTimeout(timer)
+  }, [news])
+
   // the road follows the cards as they are laid out (and again when they resize)
   useLayoutEffect(() => {
     const map = mapRef.current
     if (!map) return undefined
     const measure = () => {
       const box = map.getBoundingClientRect()
-      const cards = [...map.querySelectorAll<HTMLElement>('[data-testid^="world-"]')]
+      const cards = [
+        ...map.querySelectorAll<HTMLElement>(':scope > ol > li[data-testid^="world-"]'),
+      ]
       const points = cards.map((card, index) => {
         const rect = card.getBoundingClientRect()
         return {
@@ -65,6 +110,10 @@ export function AdventurePage() {
         <p className="max-w-xl text-lg text-ink-soft">{t('adventure.hint')}</p>
       </div>
 
+      <p role="status" className="sr-only" data-testid="stage-news">
+        {said}
+      </p>
+
       <div ref={mapRef} className="relative w-full max-w-5xl">
         {road.path && (
           <svg
@@ -101,6 +150,7 @@ export function AdventurePage() {
                 key={world.id}
                 world={world}
                 stars={stars}
+                fresh={fresh.has(world.id)}
                 className={swing}
                 style={{ gridRow: cell.row + 1, gridColumn: cell.col + 1 }}
               />

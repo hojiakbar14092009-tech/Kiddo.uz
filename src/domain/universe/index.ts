@@ -91,6 +91,14 @@ export {
 } from './adventure'
 export { learnActivity, taskActivity } from './wiring'
 export {
+  stageIndex,
+  starsToNextStage,
+  WORLD_STAGES,
+  worldStage,
+  worldStars,
+  type WorldStage,
+} from './worldStage'
+export {
   appendMistake,
   appendRecentRun,
   MAX_MISTAKES,
