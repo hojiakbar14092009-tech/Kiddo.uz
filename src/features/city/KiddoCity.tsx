@@ -70,6 +70,7 @@ export function KiddoCity() {
     tiles.push(
       <BuildingTile
         key={building.id}
+        buildingId={building.id}
         name={tDynamic(t, building.nameKey)}
         icon3d={building.icon3d}
         route={building.route}

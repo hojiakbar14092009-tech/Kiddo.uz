@@ -60,7 +60,7 @@ describe('Kiddo City', () => {
       '/adventure',
     )
     expect(screen.getByRole('link', { name: 'Matematika shahri' })).toHaveAccessibleDescription(
-      '1-daraja',
+      'Kichik maktab, 1-daraja',
     )
   })
 
@@ -96,7 +96,7 @@ describe('Kiddo City', () => {
     expect(universeChild(GUEST_KEY).balances.crystal).toBe(1)
     expect(await screen.findByText('Matematika shahri endi 2-darajada!')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Matematika shahri' })).toHaveAccessibleDescription(
-      '2-daraja',
+      'Matematika maktabi, 2-daraja',
     )
 
     // level 3 costs 2 crystals and needs 10 stars collected
@@ -120,7 +120,7 @@ describe('Kiddo City', () => {
       screen.queryByRole('button', { name: 'Matematika shahri: kattalashtirish' }),
     ).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Matematika shahri' })).toHaveAccessibleDescription(
-      '1-daraja',
+      'Kichik maktab, 1-daraja',
     )
   })
 

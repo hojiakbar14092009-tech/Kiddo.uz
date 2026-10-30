@@ -1,0 +1,65 @@
+# Contract gap backlog (Phases 20–29 vs .claude/kiddo-contract-phase20-36.md)
+
+Audit 2026-10-30 after the full contract was restored. Fix before the Phase 36 release gate.
+Status per line: OPEN / DONE <commit>.
+
+## P20 — compliant (10 codes + tests, demo indicator, TTS free in demo, Pro UI hidden).
+
+## P21 Learn before play
+
+- OPEN 2 Opening = completing: LetterPage marks met on open (useEffect); LessonDeck/Math intro mark on plain next. Need a meaningful interaction.
+- OPEN 11 Feelings `/feelings/:kind` quizzes before teaching (FeelingsRun) → LessonDeck first.
+- OPEN 3 No prerequisite routing: RequireAge/GamePage silently Navigate home → explain + "learn first".
+- OPEN 1 LessonDefinition contract + step types (explain/show/listen/trace/guided-choice/assessment); lessons.ts only ids.
+- OPEN 5 LetterIntro: add sound button + short trace step.
+- OPEN 8 Dino: era + habitat not taught.
+- OPEN 9 Uzbekistan: partial-labels tier, tap-region → spoken name.
+- OPEN 10 Stories vocabulary step; Science Lab predict → observe step.
+- OPEN 7 Vocabulary recall step; OPEN 6 Writing lines→curves→letters→words sets.
+
+## P22 Age + mastery
+
+- OPEN 4 Age bands lock content (GAME_MIN_LEVEL, EXAM_MIN_LEVEL, NUMBER_LIMIT) — §17 says bands are not access restrictions.
+- OPEN 18 Representative profile tests (4, 6 strong, 8, 11, 14 new, 17 exp.) + birthday band change preserves progress.
+- OPEN 16 familyStore today() local vs tashkentDay; Feb-29 ageOn rule mismatch.
+- OPEN 13 AGE_BANDS '4-6' → '3-4','5-6' (min age 4 is product decision).
+- OPEN 12 Learn sections use useAgeLevel `level === N` branches (17 sites), 14-year-old capped at level 6 → resolver.
+- OPEN 14 Visual maturity separate from difficulty (AgeTheme only 4/5/6; 16+ gets preschool theme).
+- OPEN 15 Older new user placement probe.
+- OPEN 17 Mastery content tiers beyond Math Lab.
+
+## P23 Parent center + homework
+
+- OPEN 5 Homework statuses Assigned/Started/Completed/Needs more practice.
+- OPEN 6 Planet homework: topic + lesson→practice→assessment, count only that.
+- OPEN 10 E2E: parent→A planet homework→A completes→parent sees→B unaffected.
+- OPEN 9 Parent first view sections (Farzandim, Bugungi holat, O‘rganayotgan mavzular, Kuchayib borayotgan, Mashq kerak, Uyga vazifalar, Yutuqlar, Faoliyat tarixi).
+- OPEN 7 Registry: alphabet, trace, science, reading entries. OPEN 8 letter groups + pronunciation.
+
+## P24 Profile + birthday
+
+- OPEN 11 Photo: extension check, min/max dimensions; crop/reposition.
+- OPEN 12 Curated BIRTHDAY_ELIGIBLE pet subset.
+
+## P25 Onboarding
+
+- OPEN 2 Per-profile onboarding count (full → minimal → none); currently global settings flag (§15).
+- OPEN 1 Contextual coach marks on real UI (data-tour anchors: cards, lesson start, answer, back, coins, homework).
+- OPEN 3 Age adaptation (young: voice/mascot; older: concise). OPEN 4 Use MascotFigure (3D) not 2D Robot.
+
+## P26 Mascots
+
+- OPEN 14 One heavy 3D mascot active per context (LanguagePage has two). OPEN 13 listening state wired.
+
+## P27 Pets (contract: species-specific motion, preview, birthday registry, perf)
+
+- DONE (see commit) Species motion (features/pets/motion.ts), off-screen pause (useInView), weak-device still.
+- NOTE sprites are flat images: tail/ear/wing parts cannot move separately (transform-only motion).
+
+## P28 World cards
+
+- DONE (see commit) City building cards: config-driven architecture/light/ground scene per level (src/features/city/scene), named stages for 8 buildings, 1.2 s grow-in.
+
+## P29 Sound
+
+- OPEN Families tap/confirm/back/soft error/discovery/level-up beyond progress cues; TTS ducking (UI cues must not fight narration); rapid-tap throttle on click; mute.

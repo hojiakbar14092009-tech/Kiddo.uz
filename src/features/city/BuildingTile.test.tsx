@@ -27,8 +27,8 @@ const pictures = (el: HTMLElement) => el.querySelectorAll('img').length
 describe('building levels look different, not only by stars', () => {
   it('each level adds to the plot, and the top level gets a gold frame', () => {
     const tiles = [0, 1, 2, 3].map(tile)
-    // the house itself plus the plot's plants (and the top level's sparkle)
-    expect(tiles.map(pictures)).toEqual([1, 2, 3, 5])
+    // the house itself plus the plot's plants (the drawn scene adds the rest)
+    expect(tiles.map(pictures)).toEqual([1, 2, 3, 4])
     const top = tiles[3]!.querySelector('a')!
     expect(top).toHaveAttribute('data-level', '4')
     expect(top.className).toContain('ring-coin')

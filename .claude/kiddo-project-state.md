@@ -530,3 +530,12 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   unlock/heart follow it. No cue before the first user activation. `SoundBridge` (AppShell): reward ledger + domain
   events of the active child only (penalty/pro-gift/admin quiet). PetBridge → heart; Adventure new stage → unlock.
   Parent settings: preview buttons per cue. Critic: ACCEPT; its Mediums (overlap with the chime, no gesture) fixed.
+
+## Contract restored (2026-10-30)
+
+- Full contract: `.claude/kiddo-contract-phase20-36.md` (authoritative, prettier-ignored). Gap list: `.claude/kiddo-gap-backlog.md`.
+- P28 redone per contract: City building cards (`src/features/city/scene/{looks.ts,BuildingScene.tsx}`) draw sky/light,
+  skyline, per-style architecture, ground and lamps per level; 8 named stages `city.stages.<id>.<0-3>`. The
+  Adventure-map world stages (worldStage.ts) stay as an extra.
+- P27 patched: species idle motion `features/pets/motion.ts`, paused off screen / weak device / reduced motion.
+- jsdom IntersectionObserver stub in src/test/setup.ts (all visible).

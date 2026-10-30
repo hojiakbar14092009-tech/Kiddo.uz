@@ -6,3 +6,4 @@ scripts/voices/phrases.json
 src/services/audio/voiceManifest.json
 public/audio
 dist-production
+.claude/kiddo-contract-phase20-36.md

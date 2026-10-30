@@ -5,9 +5,15 @@ import { Link } from 'react-router-dom'
 import { ArrowUpIcon, LockIcon, StarIcon } from '@/components/icons'
 import { Img3D } from '@/components/ui/Img3D'
 import { RewardBurst } from '@/components/ui/RewardBurst'
+import { tDynamic } from '@/lib/tDynamic'
+import { BuildingScene } from './scene/BuildingScene'
+import { NAMED_STAGES } from './scene/looks'
 
-/** The picture grows a little with every level. */
-const ART_SIZE = ['size-[62%]', 'size-[70%]', 'size-[78%]', 'size-[86%]'] as const
+/**
+ * The building's own picture: big on the bare plot of level 1; from level 2 on it
+ * stands in front of the drawn architecture (BuildingScene) as the place's emblem.
+ */
+const ART_SIZE = ['size-[62%]', 'size-[34%]', 'size-[32%]', 'size-[30%]'] as const
 
 /**
  * What the plot looks like at each level (domain level 0–3), so a child sees
@@ -50,6 +56,8 @@ function lookFor(level: number): LevelLook {
 }
 
 export interface BuildingTileProps {
+  /** The domain building (its architecture and level names); omitted for extra places. */
+  buildingId?: string
   name: string
   icon3d: string
   route: string
@@ -75,6 +83,7 @@ export interface BuildingTileProps {
  * a round upgrade button.
  */
 export function BuildingTile({
+  buildingId,
   name,
   icon3d,
   route,
@@ -92,6 +101,13 @@ export function BuildingTile({
   const hasLevels = level !== undefined && maxLevel !== undefined && !locked
   const current = level ?? 0
   const look = hasLevels ? lookFor(current) : LEVEL_LOOK[0]!
+  const levelText =
+    current >= (maxLevel ?? 0) ? t('city.maxLevel') : t('city.level', { level: current + 1 })
+  // the named stage (Small School … Grand Mathematics City), read with its level
+  const stageName =
+    hasLevels && buildingId && NAMED_STAGES.has(buildingId)
+      ? tDynamic(t, `city.stages.${buildingId}.${current}`)
+      : null
   const art = (
     <Img3D
       name={icon3d}
@@ -122,11 +138,15 @@ export function BuildingTile({
             tint,
           )}
         >
-          {/* the ground the house stands on; it gets greener as the house grows */}
-          <span
-            className={clsx('absolute inset-x-0 bottom-0 h-[22%] rounded-b-tile', look.ground)}
-          />
-          {look.sparkle && (
+          {hasLevels ? (
+            // the drawn world of this level: light, skyline, architecture, ground (Phase 28)
+            <BuildingScene buildingId={buildingId} level={current} celebrate={celebrate} />
+          ) : (
+            <span
+              className={clsx('absolute inset-x-0 bottom-0 h-[22%] rounded-b-tile', look.ground)}
+            />
+          )}
+          {look.sparkle && !hasLevels && (
             <Img3D name="sparkles" className="absolute top-[6%] right-[8%] size-[22%] opacity-90" />
           )}
           {look.left.length > 0 && (
@@ -173,16 +193,18 @@ export function BuildingTile({
           </span>
         )}
         {hasLevels && (
-          <span
-            id={levelId}
-            // read as the link's description, not as part of its name
-            aria-hidden="true"
-            className="rounded-full bg-cream px-2.5 py-0.5 text-sm font-semibold text-ink-soft"
-          >
-            {current >= (maxLevel ?? 0)
-              ? t('city.maxLevel')
-              : t('city.level', { level: current + 1 })}
-          </span>
+          <>
+            {/* the description read with the link: the stage's name and the level */}
+            <span id={levelId} hidden>
+              {stageName ? `${stageName}, ${levelText}` : levelText}
+            </span>
+            <span
+              aria-hidden="true"
+              className="rounded-2xl bg-cream px-2.5 py-0.5 text-center text-sm leading-tight font-semibold text-ink-soft"
+            >
+              {stageName ?? levelText}
+            </span>
+          </>
         )}
       </Link>
       {onUpgrade && (
