@@ -25,12 +25,16 @@ import {
  * published as an event, rewards stay with the universe rules.
  */
 
-export const AGE_BANDS = ['4-6', '7-9', '10-12', '13-15', '16+'] as const
+/** Contract §17: adaptation bands, never access restrictions and no upper cap. */
+export const AGE_BANDS = ['3-4', '5-6', '7-9', '10-12', '13-15', '16+'] as const
 export type AgeBand = (typeof AGE_BANDS)[number]
 
-/** Presentation guidance by age; never a ceiling. A guest (null) is treated as young. */
+/** Presentation guidance by age; never a ceiling. A guest (null) is treated as 5–6. */
 export function ageBand(age: number | null): AgeBand {
-  if (age === null || age <= 6) return '4-6'
+  // a guest, or an unreadable birth date, gets the young middle band
+  if (age === null || !Number.isFinite(age)) return '5-6'
+  if (age <= 4) return '3-4'
+  if (age <= 6) return '5-6'
   if (age <= 9) return '7-9'
   if (age <= 12) return '10-12'
   if (age <= 15) return '13-15'
@@ -122,14 +126,19 @@ export interface AdaptivePlan {
 
 const AIDS_ORDER: readonly Aids[] = ['minimal', 'partial', 'full']
 
+/** The two preschool bands (3–4, 5–6): full pictures, simple words. */
+export function isYoungBand(band: AgeBand): boolean {
+  return band === '3-4' || band === '5-6'
+}
+
 function bandAids(band: AgeBand): Aids {
-  if (band === '4-6') return 'full'
+  if (isYoungBand(band)) return 'full'
   if (band === '7-9') return 'partial'
   return 'minimal'
 }
 
 function bandVocabulary(band: AgeBand): Vocabulary {
-  if (band === '4-6') return 'simple'
+  if (isYoungBand(band)) return 'simple'
   if (band === '7-9' || band === '10-12') return 'standard'
   return 'rich'
 }

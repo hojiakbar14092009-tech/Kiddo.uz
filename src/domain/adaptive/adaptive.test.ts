@@ -39,9 +39,11 @@ function plan(over: Partial<AdaptiveInput>) {
 
 describe('AdaptiveLearningService', () => {
   it('age bands are guidance with no ceiling', () => {
-    expect([4, 6, 7, 9, 10, 12, 13, 15, 16, 40].map(ageBand)).toEqual([
-      '4-6',
-      '4-6',
+    expect([3, 4, 5, 6, 7, 9, 10, 12, 13, 15, 16, 40].map(ageBand)).toEqual([
+      '3-4',
+      '3-4',
+      '5-6',
+      '5-6',
       '7-9',
       '7-9',
       '10-12',
@@ -51,7 +53,8 @@ describe('AdaptiveLearningService', () => {
       '16+',
       '16+',
     ])
-    expect(ageBand(null)).toBe('4-6')
+    expect(ageBand(null)).toBe('5-6')
+    expect(ageBand(Number.NaN)).toBe('5-6')
   })
 
   it('A: a new child starts from the age band, with its presentation', () => {
@@ -62,7 +65,9 @@ describe('AdaptiveLearningService', () => {
       vocabulary: 'simple',
       options: 3,
       weight: 0,
+      band: '3-4',
     })
+    expect(plan({ age: 6 })).toMatchObject({ band: '5-6', aids: 'full', vocabulary: 'simple' })
     expect(young.reasons).toEqual(['age-start'])
     const teen = plan({ age: 14 })
     expect(teen).toMatchObject({ band: '13-15', aids: 'minimal', vocabulary: 'rich', options: 4 })

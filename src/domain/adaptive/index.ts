@@ -3,6 +3,7 @@ export {
   AGE_BANDS,
   adaptivePlan,
   ageBand,
+  isYoungBand,
   hintShare,
   numberMaxFor,
   skillsOf,

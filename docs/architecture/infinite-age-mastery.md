@@ -5,8 +5,13 @@
 - The birth date is the only age source (`familyStore` → `childAge`). A profile can be added for any learner
   from 4 years old; there is no upper limit (`isAllowedBirthDate`: a real date, on or after
   `EARLIEST_BIRTH_DATE` = 1900-01-01 only to catch typing errors, and at least 4 years ago).
-- Age shapes presentation (age bands in `domain/adaptive`: 4-6, 7-9, 10-12, 13-15, 16+) and where a strand
-  starts; it never caps what can be learned.
+- Age shapes presentation (age bands in `domain/adaptive`: 3-4, 5-6, 7-9, 10-12, 13-15, 16+; a guest or an
+  unreadable birth date counts as 5-6) and where a strand starts; it never caps what can be learned.
+- Nothing is locked by age: every game, number, tale and the big test (mastery only) is open; an age only
+  suggests ("5 yoshdan tavsiya") and orders suggestions. Ages count by the Tashkent day (`lib/dates`).
+- Difficulty and visual maturity are separate: `data-age` (4/5/6) on `<html>` is the young presentation
+  level, `data-band` the look by real age. From 10 a calm plain page; from 13 the plain system face (with the Uzbek ʻ), smaller corners
+  and flatter shadows. The Home badge shows the real age, never the level.
 
 ## Mastery above level 5 (`domain/learner/profile.ts`)
 

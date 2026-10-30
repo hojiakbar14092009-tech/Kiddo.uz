@@ -5,7 +5,7 @@ import { CheckIcon } from '@/components/icons'
 import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
-import { ageBand } from '@/domain/adaptive'
+import { ageBand, isYoungBand } from '@/domain/adaptive'
 import { useMainQuest } from '@/domain/universe/progression'
 import { childAge, useActiveChild } from '@/store/familyStore'
 import { onIdle } from '@/lib/onIdle'
@@ -24,7 +24,7 @@ export function JourneyCard() {
   const { view: journey, main } = useMainQuest()
   const child = useActiveChild()
   // the youngest see the short title (and what is missing); from 7 on also how
-  const young = ageBand(child ? childAge(child) : null) === '4-6'
+  const young = isYoungBand(ageBand(child ? childAge(child) : null))
   const current = journey.steps.find((step) => step.status === 'current')
   const needs = main?.needs ?? []
   const nextRoute = main?.route

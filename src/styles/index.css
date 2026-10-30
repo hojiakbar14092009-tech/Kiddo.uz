@@ -57,6 +57,7 @@
 
   --color-highlight: #d93d78;
   --color-sky: #7cc4f5;
+  --color-focus: #1f6fd1;
   --color-sky-soft: #ddeefc;
   --color-lilac-soft: #eee6fb;
   /* full-screen media (the ad player) */
@@ -153,7 +154,8 @@
   }
 
   :focus-visible {
-    outline: 4px solid var(--color-sky);
+    /* 3:1 against every page colour (WCAG 1.4.11) */
+    outline: 4px solid var(--color-focus);
     outline-offset: 3px;
   }
 
@@ -215,6 +217,77 @@ html[data-age='6'] body {
     linear-gradient(#dfe8f7 1px, transparent 1px),
     linear-gradient(90deg, #dfe8f7 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+/*
+ * Visual maturity by real age (data-band), separate from difficulty: from 10
+ * the squared workbook paper and candy colours give way to a calm, plain page;
+ * a beginner of 14 still gets easy work, never a preschool look.
+ */
+html[data-band='10-12'],
+html[data-band='13-15'],
+html[data-band='16+'] {
+  /* a guard: an older learner is never data-age='4' (112.5%) */
+  font-size: 100%;
+  --color-cream: #f5f6f8;
+  --color-muted: #eceef2;
+  --color-line: #dde1e8;
+  --color-line-strong: #c8ced8;
+  --color-ink: #1f2633;
+  --color-ink-soft: #4a5466;
+  --color-primary: #3b5bcc;
+  --color-primary-shadow: #2a429a;
+  --color-primary-soft: #e3e9fb;
+  --color-primary-ink: #263f94;
+  --color-lilac-soft: #e9e7f6;
+}
+
+html[data-band='10-12'] body,
+html[data-band='13-15'] body,
+html[data-band='16+'] body {
+  background-color: var(--color-cream);
+  background-image: none;
+}
+
+/*
+ * From 13 the toy shapes go too: a plainer typeface, regular body weight,
+ * smaller corners and flatter press shadows (a teen beginner gets easy work in
+ * a grown-up look). Touch targets keep their size.
+ */
+html[data-band='13-15'],
+html[data-band='16+'] {
+  /* the okina face first: it carries the Uzbek ʻ; then a plain system face */
+  --font-display: 'Kiddo Okina Display', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --radius-tile: 12px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+}
+
+/* Tailwind copies shadow values into each utility, so the flatter press is set on the utilities */
+html[data-band='13-15'] .shadow-press-sm,
+html[data-band='16+'] .shadow-press-sm {
+  --tw-shadow: 0 2px 0 var(--tw-shadow-color, var(--color-line));
+}
+html[data-band='13-15'] .shadow-press,
+html[data-band='16+'] .shadow-press {
+  --tw-shadow: 0 3px 0 var(--tw-shadow-color, var(--color-line));
+}
+html[data-band='13-15'] .shadow-press-lg,
+html[data-band='16+'] .shadow-press-lg {
+  --tw-shadow: 0 4px 0 var(--tw-shadow-color, var(--color-line));
+}
+html[data-band='13-15'] .shadow-press-primary,
+html[data-band='16+'] .shadow-press-primary {
+  --tw-shadow: 0 3px 0 var(--tw-shadow-color, var(--color-primary-shadow));
+}
+html[data-band='13-15'] .shadow-press-coin,
+html[data-band='16+'] .shadow-press-coin {
+  --tw-shadow: 0 3px 0 var(--tw-shadow-color, var(--color-coin-shadow));
+}
+
+html[data-band='13-15'] body,
+html[data-band='16+'] body {
+  font-weight: 500;
 }
 
 /* The 2D robot glows green after a right answer (a mistake gets no colour: no shame). */

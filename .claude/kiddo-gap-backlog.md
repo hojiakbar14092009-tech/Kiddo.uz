@@ -22,9 +22,9 @@ Status per line: OPEN / DONE <commit>.
 - DONE (P22 age-locks commit) 4 No age locks: games, numbers 1–10, exam (mastery only), tales open at any age; age = calm "N yoshdan tavsiya"; birthday = new suggestions (gift, not padlock); parents may assign any game.
 - OPEN 18 Representative profile tests (4, 6 strong, 8, 11, 14 new, 17 exp.) + birthday band change preserves progress.
 - DONE (P22 tashkent commit) 16 Ages count by the Tashkent day (store, ChildForm, birthday, server agree); 29 Feb turns older on the 28th in non-leap years; shared isLeapYear.
-- OPEN 13 AGE_BANDS '4-6' → '3-4','5-6' (min age 4 is product decision).
+- DONE (P22 bands commit) 13 AGE_BANDS 3-4/5-6/7-9/10-12/13-15/16+ (guest/NaN → 5-6), isYoungBand.
 - OPEN 12 Learn sections use useAgeLevel `level === N` branches (17 sites), 14-year-old capped at level 6 → resolver.
-- OPEN 14 Visual maturity separate from difficulty (AgeTheme only 4/5/6; 16+ gets preschool theme).
+- DONE (P22 bands commit) 14 Visual maturity separate: data-band on <html>; 10+ calm plain page; 13+ system face (okina kept), small corners, flat press shadows; Home badge = real age; focus ring 3:1.
 - OPEN 15 Older new user placement probe.
 - OPEN 17 Mastery content tiers beyond Math Lab.
 

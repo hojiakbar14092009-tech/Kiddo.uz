@@ -16,7 +16,13 @@ import { birthdayWeekYear, tashkentDay } from '@/features/birthday/birthday'
 import { tDynamic } from '@/lib/tDynamic'
 import { CoachMarks } from '@/features/onboarding/CoachMarks'
 import { BirthdayCelebration } from '@/features/birthday/BirthdayCelebration'
-import { useActiveChild, useAgeLevel, useFamilyStore, useMascotModel } from '@/store/familyStore'
+import {
+  childAge,
+  useActiveChild,
+  useAgeLevel,
+  useFamilyStore,
+  useMascotModel,
+} from '@/store/familyStore'
 import { GAME_MIN_LEVEL, isGameSuggested } from '@/features/age/ageLevel'
 import { AppIcon, type AppIconName } from '@/features/age/AppIcon'
 import { UnlockCelebration } from '@/features/age/UnlockCelebration'
@@ -108,14 +114,15 @@ export function HomePage() {
           !reduceMotion && 'min-h-32 sm:min-h-40 short:min-h-28',
         )}
       >
-        {child && (
+        {child && Number.isFinite(childAge(child)) && (
           <span
             className={clsx(
               'rounded-full bg-surface px-4 py-1 font-display text-lg font-bold text-primary-ink shadow-press-sm transition-opacity duration-300',
               greetingInStage && 'opacity-0',
             )}
           >
-            {t('age.badge', { age: level })}
+            {/* the child's real age, never the difficulty level (Phase 22) */}
+            {t('age.badge', { age: childAge(child) })}
           </span>
         )}
       </div>

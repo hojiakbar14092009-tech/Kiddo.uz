@@ -556,3 +556,4 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 
 - P22 gap 4 (age locks removed): RequireAge deleted; isGameOpen→isGameSuggested; NUMBER_LIMIT/EXAM_MIN_LEVEL/age.lockedAt/lockedSay/exam/learn.lockedAge removed; unlocksAt→suggestedAt; talesFor {open, later}. Critic REJECT (C1 pro text, H1 padlock wording, H2 tales lock) → fixed → ACCEPT. Units 1247, e2e 62/62 (kiddo, homework, birthday, responsive, tours, adaptive).
 - P22 gap 16: tashkentDay moved to lib/dates (+isLeapYear); familyStore today() and ChildForm use it; ageOn 29 Feb rule = birthdayIn; birthdayFor removed. Critic REJECT (ChildForm local day) → fixed → ACCEPT. Units 1248, e2e birthday+parent 6/6.
+- P22 gaps 13+14: bands split, data-band visual maturity (CSS overrides utilities' --tw-shadow), badge real age, --color-focus. Critic REJECT (badge level, palette-only) → fixed → ACCEPT (+ shadow/okina follow-ups). Units 1258, e2e 56/56 incl. new e2e/age-look.spec.ts.
