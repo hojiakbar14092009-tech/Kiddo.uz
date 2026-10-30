@@ -1,9 +1,10 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { birthDateForAge } from '@/features/age/ageLevel'
+import { uz } from '@/i18n/locales/uz'
 import { dayKey } from '@/features/tasks/rules'
 import { renderRoute } from '@/test/renderRoute'
 
@@ -64,7 +65,7 @@ describe('Home', () => {
     expect(screen.getByText('1 / 3 vazifa bajarildi')).toBeInTheDocument()
   })
 
-  it('locks games for older children and opens them on the birthday', async () => {
+  it('only suggests by age: every game and the big test open at four (Phase 22)', async () => {
     const lola = useFamilyStore
       .getState()
       .addChild({ name: 'Lola', birthDate: birthDateForAge(4, dayKey()), gender: 'girl' })
@@ -75,17 +76,29 @@ describe('Home', () => {
     useFamilyStore.getState().setActiveChild(lola.id)
     const { router, user } = await renderRoute('/home')
     expect(screen.getByText('0 / 2 vazifa bajarildi')).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /Harfni top — 5 yoshda ochiladi/ }),
-    ).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: /6 yoshda ochiladi/ })).toHaveLength(2)
+    // games suggested for older children are playable links with a calm note
+    expect(screen.getByRole('link', { name: /Harfni top/ })).toHaveAttribute(
+      'href',
+      '/tasks/find-letter',
+    )
+    expect(screen.getByRole('link', { name: /Harfni top/ })).toHaveTextContent('5 yoshdan tavsiya')
+    expect(screen.getByText('6 yoshdan tavsiya')).toBeInTheDocument()
+    // the big test is open too: it waits for the letters, not a birthday
+    expect(screen.getByRole('link', { name: /Katta sinov/ })).toHaveAttribute('href', '/exam')
+    expect(screen.getByRole('link', { name: /Katta sinov/ })).not.toHaveTextContent('🔒')
+    expect(screen.queryByText(/yoshda ochiladi/)).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-    // A locked game cannot be opened by its address either.
-    await act(() => router.navigate('/tasks/trace'))
-    await waitFor(() => expect(router.state.location.pathname).toBe('/home'))
+    // the addresses work at four as well: a game, a number past 5, an older tale
+    for (const path of ['/tasks/trace', '/alphabet/num-9', '/learn/tales/seed-sunflower']) {
+      await act(() => router.navigate(path))
+      expect(router.state.location.pathname).toBe(path)
+    }
+    await act(() => router.navigate('/alphabet?tab=numbers'))
+    expect(await screen.findByRole('button', { name: /^10 — / })).toBeInTheDocument()
+    await act(() => router.navigate('/home'))
 
-    // A year later the child is five: the celebration shows and the game opens.
+    // A year later the child is five: the celebration shows the new suggestions.
     useFamilyStore.getState().updateChild(lola.id, { celebratedLevel: 4 })
     useFamilyStore.setState((state) => ({
       children: state.children.map((child) => ({
@@ -95,6 +108,11 @@ describe('Home', () => {
     }))
     const dialog = await screen.findByRole('dialog', { name: /Endi 5 yoshdasan/ })
     expect(dialog).toHaveTextContent('Harfni top')
+    // a birthday suggests; it never says something "opened"
+    expect(dialog).toHaveTextContent('tavsiya qilamiz')
+    expect(dialog).not.toHaveTextContent(/ochildi|Katta sinov/)
+    // the PRO party keeps its own words
+    expect(uz.pro.celebrateText).toMatch(/robot gapiradi/)
     await user.click(screen.getByRole('button', { name: 'Zo‘r, o‘ynaymiz!' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(useFamilyStore.getState().children[0]?.celebratedLevel).toBe(5)

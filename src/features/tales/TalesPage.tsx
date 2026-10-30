@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
-import { LockIcon } from '@/components/icons'
 import type { Language } from '@/content/languages'
 import { Img3D } from '@/features/learn/Img3D'
 import { LearnShell } from '@/features/learn/LearnShell'
@@ -35,7 +34,7 @@ function TaleList({ language, level }: { language: Language; level: AgeLevel }) 
   const { t } = useTranslation()
   const { react } = useMascot()
   const ui = TALES_UI[language]
-  const { open, locked } = talesFor(level)
+  const { open, later } = talesFor(level)
   const own = open.filter((tale) => tale.age === level)
   const younger = open.filter((tale) => tale.age < level)
 
@@ -62,33 +61,25 @@ function TaleList({ language, level }: { language: Language; level: AgeLevel }) 
           </div>
         </>
       )}
-      {locked.length > 0 && (
-        <ul className={grid}>
-          {locked.map((tale) => (
-            <li
-              key={tale.id}
-              className="flex flex-col items-center gap-2 rounded-[32px] bg-surface/60 p-4 text-center opacity-70"
-            >
-              <Img3D name={tale.cover} className="size-20 grayscale" />
-              <span className="font-display text-lg font-bold">
-                {taleText(language, tale.id).title}
-              </span>
-              <span className="inline-flex items-center gap-1 text-sm font-bold text-ink-soft">
-                <LockIcon size={16} />
-                {t('learn.lockedAge', { age: tale.age })}
-              </span>
-            </li>
-          ))}
-        </ul>
+      {later.length > 0 && (
+        <>
+          <h3 className="font-display text-xl font-bold text-ink-soft">{ui.older}</h3>
+          <div className={grid}>
+            {later.map((tale) => (
+              <TaleCard key={tale.id} tale={tale} language={language} />
+            ))}
+          </div>
+        </>
       )}
     </LearnShell>
   )
 }
 
-function TaleRoute({ language, level }: { language: Language; level: AgeLevel }) {
+function TaleRoute({ language }: { language: Language }) {
   const { taleId = '' } = useParams()
   const tale = taleById(taleId)
-  if (!tale || tale.age > level) return <Navigate to="/learn/tales" replace />
+  // every tale opens at any age; only an unknown one leads back
+  if (!tale) return <Navigate to="/learn/tales" replace />
   return <TaleView key={`${tale.id}-${language}`} tale={tale} language={language} />
 }
 
@@ -99,7 +90,7 @@ export function TalesPage() {
   return (
     <Routes>
       <Route index element={<TaleList language={language} level={level} />} />
-      <Route path=":taleId" element={<TaleRoute language={language} level={level} />} />
+      <Route path=":taleId" element={<TaleRoute language={language} />} />
       <Route path="*" element={<Navigate to="/learn/tales" replace />} />
     </Routes>
   )

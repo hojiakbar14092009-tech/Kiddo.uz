@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { findLetter } from '@/content/alphabet'
 import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
-import { isGameOpen } from '@/features/age/ageLevel'
+import { isGameSuggested } from '@/features/age/ageLevel'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { GAME_TYPES, type GameType } from '@/features/tasks/games'
 import { playableLetters } from '@/features/tasks/playableLetters'
@@ -44,10 +44,12 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
   const [added, setAdded] = useState(false)
   const childLanguage = useLanguage()
   const [language, setLanguage] = useState<Language>(childLanguage)
-  // Only games open for the child’s age can be set as homework.
-  const openGames = GAME_TYPES.filter((type) => isGameOpen(type, levelOfChild(child)))
-  const [chosenGame, setGame] = useState<GameType>(openGames[0] ?? 'find-picture')
-  const game = openGames.includes(chosenGame) ? chosenGame : (openGames[0] ?? 'find-picture')
+  // Every game can be set; the ones suggested for the child’s age come first.
+  const level = levelOfChild(child)
+  const games = [...GAME_TYPES].sort(
+    (a, b) => Number(!isGameSuggested(a, level)) - Number(!isGameSuggested(b, level)),
+  )
+  const [game, setGame] = useState<GameType>(games[0]!)
   const [letters, setLetters] = useState<string[]>([])
   const homeworks = child.homeworks ?? []
   const progress = useProgress(child.id)
@@ -174,7 +176,7 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
         />
         <ChoiceChips
           label={t('parent.homework.game')}
-          options={openGames.map((value) => ({
+          options={games.map((value) => ({
             value,
             label: `${GAME_META[value].emoji} ${t(GAME_META[value].titleKey)}`,
           }))}

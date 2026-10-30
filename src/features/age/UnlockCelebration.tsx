@@ -9,19 +9,19 @@ import { GAME_META } from '@/features/tasks/gameMeta'
 import { AppIcon } from './AppIcon'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { levelOfChild, useActiveChild, useFamilyStore } from '@/store/familyStore'
-import { AGE_LEVELS, unlocksAt, type Unlock } from './ageLevel'
+import { AGE_LEVELS, suggestedAt, type Suggestion } from './ageLevel'
 
 // `TFunction`, not `ReturnType<typeof useTranslation>['t']`: the latter is too deep for tsc
 // once the translations grow (TS2589).
-function unlockLabel(unlock: Unlock, t: TFunction) {
-  if (unlock === 'numbers') return t('age.numbers')
-  if (unlock === 'exam') return t('age.exam')
-  return t(GAME_META[unlock].titleKey)
+function suggestionLabel(item: Suggestion, t: TFunction) {
+  if (item === 'numbers') return t('age.numbers')
+  return t(GAME_META[item].titleKey)
 }
 
 /**
- * On the birthday that reaches a new age, the locked games open with a little
- * party: the padlock springs open in a burst of stars and the new games fly in.
+ * On the birthday that reaches a new age, a little party: a present pops open
+ * in a burst of stars and the games now suggested fly in. Nothing was locked
+ * before (Phase 22, §17); the birthday only changes what is suggested.
  */
 export function UnlockCelebration() {
   const child = useActiveChild()
@@ -44,7 +44,7 @@ function Celebration({ childId, from, to }: CelebrationProps) {
   const { sayText } = useSpeaker()
   const button = useRef<HTMLButtonElement>(null)
 
-  const unlocks = AGE_LEVELS.filter((level) => level > from && level <= to).flatMap(unlocksAt)
+  const unlocks = AGE_LEVELS.filter((level) => level > from && level <= to).flatMap(suggestedAt)
   const title = t('age.celebrateTitle', { age: to })
 
   useEffect(() => {
@@ -65,13 +65,13 @@ function Celebration({ childId, from, to }: CelebrationProps) {
       testId="unlock-celebration"
       media={
         <RewardBurst kind="stars" pieces={10}>
-          <Padlock reduceMotion={reduceMotion} />
+          <GiftBox reduceMotion={reduceMotion} />
         </RewardBurst>
       }
     >
       <ul className="flex w-full flex-col gap-2">
         {unlocks.map((unlock, index) => {
-          const text = unlockLabel(unlock, t)
+          const text = suggestionLabel(unlock, t)
           return (
             <motion.li
               key={unlock}
@@ -93,32 +93,35 @@ function Celebration({ childId, from, to }: CelebrationProps) {
   )
 }
 
-/** A padlock whose shackle springs open. */
-function Padlock({ reduceMotion }: { reduceMotion: boolean }) {
+/** A present whose lid pops up: a birthday brings new suggestions, nothing was locked. */
+function GiftBox({ reduceMotion }: { reduceMotion: boolean }) {
   return (
     <motion.svg
       viewBox="0 0 100 110"
       className="size-28 overflow-visible"
       aria-hidden="true"
       initial={reduceMotion ? false : { rotate: 0 }}
-      animate={reduceMotion ? undefined : { rotate: [0, -8, 8, -6, 6, 0] }}
+      animate={reduceMotion ? undefined : { rotate: [0, -6, 6, -4, 4, 0] }}
       transition={{ duration: 0.6, delay: 0.2 }}
     >
-      <motion.path
-        d="M28 50 V34 a22 22 0 0 1 44 0 V50"
-        fill="none"
-        stroke="var(--color-ink-soft)"
-        strokeWidth="10"
-        strokeLinecap="round"
-        // framer-motion pivots SVG parts on their own box: 1/1 is the right foot
-        style={{ originX: 1, originY: 1 }}
-        initial={reduceMotion ? { rotate: 35, y: -10 } : { rotate: 0, y: 0 }}
-        animate={{ rotate: 35, y: -10 }}
+      <rect x="16" y="52" width="68" height="52" rx="10" fill="var(--color-coin)" />
+      <rect x="45" y="52" width="10" height="52" fill="var(--color-primary)" />
+      <motion.g
+        initial={reduceMotion ? { y: -14, rotate: -10 } : { y: 0, rotate: 0 }}
+        animate={{ y: -14, rotate: -10 }}
+        style={{ originX: 0, originY: 1 }}
         transition={{ delay: 0.8, type: 'spring', stiffness: 260, damping: 10 }}
-      />
-      <rect x="14" y="48" width="72" height="56" rx="16" fill="var(--color-coin)" />
-      <circle cx="50" cy="72" r="8" fill="var(--color-ink)" />
-      <rect x="46" y="74" width="8" height="16" rx="4" fill="var(--color-ink)" />
+      >
+        <rect x="10" y="38" width="80" height="16" rx="6" fill="var(--color-coin)" />
+        <rect x="45" y="38" width="10" height="16" fill="var(--color-primary)" />
+        <path
+          d="M50 38 C40 22 26 28 34 36 M50 38 C60 22 74 28 66 36"
+          fill="none"
+          stroke="var(--color-primary)"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+      </motion.g>
     </motion.svg>
   )
 }

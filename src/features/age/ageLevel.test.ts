@@ -4,9 +4,9 @@ import {
   birthDateForAge,
   daysUntil,
   isAllowedBirthDate,
-  isGameOpen,
+  isGameSuggested,
   levelForAge,
-  unlocksAt,
+  suggestedAt,
 } from './ageLevel'
 
 describe('age levels', () => {
@@ -43,13 +43,14 @@ describe('age levels', () => {
     expect(isAllowedBirthDate('2021-02-30', today)).toBe(false)
   })
 
-  it('opens games by age', () => {
-    expect(isGameOpen('find-picture', 4)).toBe(true)
-    expect(isGameOpen('find-letter', 4)).toBe(false)
-    expect(isGameOpen('trace', 5)).toBe(false)
-    expect(isGameOpen('trace', 6)).toBe(true)
-    expect(unlocksAt(5)).toEqual(['find-letter', 'numbers'])
-    expect(unlocksAt(6)).toEqual(['trace', 'exam'])
+  it('suggests games by age (a hint, never a lock)', () => {
+    expect(isGameSuggested('find-picture', 4)).toBe(true)
+    expect(isGameSuggested('find-letter', 4)).toBe(false)
+    expect(isGameSuggested('trace', 5)).toBe(false)
+    expect(isGameSuggested('trace', 6)).toBe(true)
+    expect(suggestedAt(5)).toEqual(['find-letter', 'numbers'])
+    // the big test opens by mastery, never by a birthday
+    expect(suggestedAt(6)).toEqual(['trace'])
   })
 
   it('counts the days to a birthday', () => {

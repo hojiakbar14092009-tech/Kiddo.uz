@@ -1,9 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
-import { isGameOpen } from '@/features/age/ageLevel'
 import {
   isActivityHomework,
   isLetterHomework,
-  levelOfChild,
   useActiveChild,
   type ActivityHomework,
   type Homework,
@@ -20,15 +18,10 @@ const NONE: Homework[] = []
 export function usePendingHomework(): LetterHomework[] {
   const child = useActiveChild()
   const language = useLanguage()
-  const level = levelOfChild(child ?? null)
   const list = child?.homeworks ?? NONE
   return list.filter(
     (homework): homework is LetterHomework =>
-      isLetterHomework(homework) &&
-      !homework.completedAt &&
-      homework.language === language &&
-      // A game for an older child (e.g. after the birthday was corrected) waits until it opens.
-      isGameOpen(homework.game, level),
+      isLetterHomework(homework) && !homework.completedAt && homework.language === language,
   )
 }
 

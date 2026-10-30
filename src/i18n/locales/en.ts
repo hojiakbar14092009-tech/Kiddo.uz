@@ -844,13 +844,11 @@ export const en: Translation = {
   },
   age: {
     badge: 'Age {{age}}',
-    lockedAt: 'Opens at age {{age}}',
-    lockedSay: 'This game opens when you turn {{age}}!',
+    suggestedFrom: 'Suggested from age {{age}}',
     celebrateTitle: 'Hooray! You are {{age}} now!',
-    celebrateText: 'New games are open:',
+    celebrateText: 'New games picked for you:',
     celebrateOk: 'Yay, let’s play!',
     numbers: 'Numbers 6 to 10',
-    exam: 'Big test',
   },
   learnFirst: {
     checkPicture: 'Picture: {{title}}',
@@ -953,7 +951,6 @@ export const en: Translation = {
       'No internet. Your results are kept; pictures and sounds not loaded yet will come later.',
     retry: 'Have another go!',
     correct: 'Right!',
-    lockedAge: 'Opens at age {{age}}',
     parent: {
       title: 'New sections: results',
       empty: 'Your child has not started the new sections yet.',

@@ -19,7 +19,7 @@ Status per line: OPEN / DONE <commit>.
 
 ## P22 Age + mastery
 
-- OPEN 4 Age bands lock content (GAME_MIN_LEVEL, EXAM_MIN_LEVEL, NUMBER_LIMIT) — §17 says bands are not access restrictions.
+- DONE (P22 age-locks commit) 4 No age locks: games, numbers 1–10, exam (mastery only), tales open at any age; age = calm "N yoshdan tavsiya"; birthday = new suggestions (gift, not padlock); parents may assign any game.
 - OPEN 18 Representative profile tests (4, 6 strong, 8, 11, 14 new, 17 exp.) + birthday band change preserves progress.
 - OPEN 16 familyStore today() local vs tashkentDay; Feb-29 ageOn rule mismatch.
 - OPEN 13 AGE_BANDS '4-6' → '3-4','5-6' (min age 4 is product decision).

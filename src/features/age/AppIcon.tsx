@@ -11,7 +11,6 @@ export type AppIconName =
   | 'numbers'
   | 'shop'
   | 'exam'
-  | 'lock'
   | 'homework'
   | 'rest'
 
@@ -131,13 +130,6 @@ const SCHOOL_ICONS: Record<AppIconName, ReactNode> = {
       <path d="M15 7h18v10a9 9 0 0 1-18 0z" fill={ACCENT} />
       <path d="M15 11H8a6 6 0 0 0 7 8M33 11h7a6 6 0 0 1-7 8" />
       <path d="M24 26v7M16 41h16l-2-8H18z" fill={FILL} />
-    </>
-  ),
-  lock: (
-    <>
-      <path d="M15 21v-6a9 9 0 0 1 18 0v6" />
-      <rect x="9" y="21" width="30" height="21" rx="6" fill={ACCENT} />
-      <path d="M24 29v5" />
     </>
   ),
   homework: (

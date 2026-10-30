@@ -580,13 +580,13 @@ export function taleText(language: Language, id: string): TaleText {
 }
 
 /**
- * Tales a child can open: their own age and younger. A guest counts as 6, so
- * everything is open; an older tale shows when it unlocks.
+ * Every tale is open at any age (Phase 22, §17). The child's own age comes
+ * first, then younger ones; tales for older children are listed after, open too.
  */
-export function talesFor(level: AgeLevel): { open: TaleSpec[]; locked: TaleSpec[] } {
+export function talesFor(level: AgeLevel): { open: TaleSpec[]; later: TaleSpec[] } {
   const own = TALES.filter((tale) => tale.age === level)
   const younger = TALES.filter((tale) => tale.age < level).sort((a, b) => b.age - a.age)
-  return { open: [...own, ...younger], locked: TALES.filter((tale) => tale.age > level) }
+  return { open: [...own, ...younger], later: TALES.filter((tale) => tale.age > level) }
 }
 
 /** Every line read aloud in a scene: the story, then the task's question. */

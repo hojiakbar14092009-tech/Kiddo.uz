@@ -1,6 +1,4 @@
 import { Navigate, useParams } from 'react-router-dom'
-import { isGameOpen } from '@/features/age/ageLevel'
-import { useAgeLevel } from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
 import { CoachMarks } from '@/features/onboarding/CoachMarks'
 import { ChoiceGame } from './ChoiceGame'
@@ -12,9 +10,8 @@ import { TraceGame } from './TraceGame'
 export function GamePage() {
   const { type } = useParams()
   const language = useLanguage()
-  const level = useAgeLevel()
-  // Unknown games, and games for older children, lead back home.
-  if (!isGameType(type) || !isGameOpen(type, level)) return <Navigate to="/home" replace />
+  // Unknown games lead back home; every game is open at any age.
+  if (!isGameType(type)) return <Navigate to="/home" replace />
 
   const key = `${type}-${language}`
   const game = isChoiceGame(type) ? (

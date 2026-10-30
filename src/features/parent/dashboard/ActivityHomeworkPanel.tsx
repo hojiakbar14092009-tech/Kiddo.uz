@@ -13,7 +13,6 @@ import type { ActivityNameKey } from '@/features/parent/insights/activityNames'
 import { childAge, levelOfChild, useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { ChoiceChips } from './ChoiceChips'
 import { homeworkActivity } from '@/features/homework/activityHomework'
-import { isGameOpen } from '@/features/age/ageLevel'
 import { topicLabel, topicsFor } from '@/features/homework/topics'
 import { useLanguage } from '@/store/settingsStore'
 import { Panel } from './Panel'
@@ -27,12 +26,11 @@ export function ActivityHomeworkPanel({ child }: { child: ChildProfile }) {
   const { t } = useTranslation()
   const assign = useFamilyStore((state) => state.assignActivityHomework)
   const age = childAge(child)
-  // activities that suit the age first; nothing is hidden by age
   const level = levelOfChild(child)
-  // a letter game is offered only once it is open for this child
-  const activities = HOMEWORK_ACTIVITIES.filter(
-    (item) => !item.game || isGameOpen(item.game, level),
-  ).sort((a, b) => Number(a.fromAge > age) - Number(b.fromAge > age))
+  // activities that suit the age first; nothing is hidden by age
+  const activities = [...HOMEWORK_ACTIVITIES].sort(
+    (a, b) => Number(a.fromAge > age) - Number(b.fromAge > age),
+  )
   const [target, setTarget] = useState<ActivityNameKey>(activities[0]!.key)
   const [times, setTimes] = useState(2)
   const today = dayKey()

@@ -1,9 +1,9 @@
 import type { GameType } from '@/features/tasks/games'
 
 /*
- * Kiddo is made for children aged 4 to 6. Every age has its own set of games and
- * difficulty; what belongs to an older age stays locked and opens by itself on the
- * birthday that reaches it.
+ * Every age shapes how the games are presented (answers shown, pairs, today's
+ * plan) and which games are suggested first. Nothing is locked by age
+ * (Phase 22, §17): an age only suggests; a younger child may play anything.
  */
 
 export const AGE_LEVELS = [4, 5, 6] as const
@@ -22,17 +22,14 @@ export const EARLIEST_BIRTH_DATE = '1900-01-01'
 /** Without a profile (guest play) everything is open. */
 export const GUEST_LEVEL: AgeLevel = 6
 
-/** The youngest age each game is open for. */
+/** The age from which each game is suggested (never a lock). */
 export const GAME_MIN_LEVEL: Record<GameType, AgeLevel> = {
   'find-picture': 4,
   memory: 4,
   'find-letter': 5,
   trace: 6,
 }
-export const EXAM_MIN_LEVEL: AgeLevel = 6
-
-/** Numbers a child can open: 1–5 at four, 1–10 from five. */
-export const NUMBER_LIMIT: Record<AgeLevel, number> = { 4: 5, 5: 10, 6: 10 }
+/** The age from which 6–10 are suggested; every number is open to everyone. */
 export const NUMBERS_FULL_LEVEL: AgeLevel = 5
 
 /** How many answers a choice game shows: fewer for younger children. */
@@ -52,16 +49,15 @@ export const DAILY_PLANS: Record<AgeLevel, readonly GameType[]> = {
   6: ['find-letter', 'find-picture', 'trace'],
 }
 
-/** What opens on reaching an age, for the birthday celebration. */
-export type Unlock = GameType | 'exam' | 'numbers'
+/** What is newly suggested on reaching an age, for the birthday celebration. */
+export type Suggestion = GameType | 'numbers'
 
-export function unlocksAt(level: AgeLevel): Unlock[] {
+export function suggestedAt(level: AgeLevel): Suggestion[] {
   const games = (Object.keys(GAME_MIN_LEVEL) as GameType[]).filter(
     (game) => GAME_MIN_LEVEL[game] === level,
   )
-  const extra: Unlock[] = []
+  const extra: Suggestion[] = []
   if (level === NUMBERS_FULL_LEVEL) extra.push('numbers')
-  if (level === EXAM_MIN_LEVEL) extra.push('exam')
   return [...games, ...extra]
 }
 
@@ -129,6 +125,7 @@ export function isAllowedBirthDate(birthDate: string, today: string): boolean {
   return ageOn(birthDate, today) >= MIN_AGE
 }
 
-export function isGameOpen(game: GameType, level: AgeLevel): boolean {
+/** Is this game suggested at this age yet? Only a hint: every game can be played. */
+export function isGameSuggested(game: GameType, level: AgeLevel): boolean {
   return level >= GAME_MIN_LEVEL[game]
 }

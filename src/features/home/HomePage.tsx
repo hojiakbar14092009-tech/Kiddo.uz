@@ -17,12 +17,12 @@ import { tDynamic } from '@/lib/tDynamic'
 import { CoachMarks } from '@/features/onboarding/CoachMarks'
 import { BirthdayCelebration } from '@/features/birthday/BirthdayCelebration'
 import { useActiveChild, useAgeLevel, useFamilyStore, useMascotModel } from '@/store/familyStore'
-import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
+import { GAME_MIN_LEVEL, isGameSuggested } from '@/features/age/ageLevel'
 import { AppIcon, type AppIconName } from '@/features/age/AppIcon'
 import { UnlockCelebration } from '@/features/age/UnlockCelebration'
 import { GAME_TYPES } from '@/features/tasks/games'
 import { useSpeaker } from '@/services/audio/useSpeaker'
-import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'framer-motion'
 import clsx from 'clsx'
 import { useState } from 'react'
 import { useProgress, useWearing } from '@/store/progressStore'
@@ -46,7 +46,8 @@ export function HomePage() {
   const wearing = useWearing()
   const { sayText: sayHello } = useSpeaker()
   const plan = dailyPlanState(results, dayKey(), level)
-  const lockedGames = GAME_TYPES.filter((game) => !isGameOpen(game, level))
+  // games suggested from an older age: playable now, with a calm note
+  const laterGames = GAME_TYPES.filter((game) => !isGameSuggested(game, level))
   const homeworks = usePendingHomework()
   const activityHomeworks = usePendingActivityHomework()
   const language = useLanguage()
@@ -162,29 +163,28 @@ export function HomePage() {
             icon="memory"
             tone="lilac"
           />
-          {lockedGames.map((game) => (
-            <LockedCard
+          {laterGames.map((game) => (
+            <ActivityCard
               key={game}
+              to={`/tasks/${game}`}
               label={t(GAME_META[game].titleKey)}
               icon={game}
-              age={GAME_MIN_LEVEL[game]}
+              tone="girl"
+              detail={t('age.suggestedFrom', { age: GAME_MIN_LEVEL[game] })}
             />
           ))}
-          {level >= EXAM_MIN_LEVEL ? (
-            <ActivityCard
-              to="/exam"
-              label={t('journey.finalTest')}
-              icon="exam"
-              tone="sky"
-              detail={
-                examUnlocked
-                  ? t('home.examReady')
-                  : `🔒 ${t('exam.progress', { learned: exam.learned, total: exam.total })}`
-              }
-            />
-          ) : (
-            <LockedCard label={t('journey.finalTest')} icon="exam" age={EXAM_MIN_LEVEL} />
-          )}
+          {/* open at any age: the test itself waits until the letters are learned */}
+          <ActivityCard
+            to="/exam"
+            label={t('journey.finalTest')}
+            icon="exam"
+            tone="sky"
+            detail={
+              examUnlocked
+                ? t('home.examReady')
+                : `⭐ ${t('exam.progress', { learned: exam.learned, total: exam.total })}`
+            }
+          />
         </ul>
       </section>
 
@@ -246,47 +246,6 @@ function ActivityCard({ to, label, icon, tone, detail }: ActivityCardProps) {
         </span>
         {detail && <span className="text-center text-sm text-ink-soft sm:text-base">{detail}</span>}
       </Link>
-    </li>
-  )
-}
-
-/** A game for an older child: greyed, with a padlock and the age it opens at. */
-function LockedCard({ label, icon, age }: { label: string; icon: AppIconName; age: AgeLevel }) {
-  const { t } = useTranslation()
-  const { sayText } = useSpeaker()
-  const shake = useAnimationControls()
-  const lockedAt = t('age.lockedAt', { age })
-
-  const tap = () => {
-    void shake.start({ x: [0, -10, 9, -6, 4, 0], transition: { duration: 0.45 } })
-    void sayText(t('age.lockedSay', { age }))
-  }
-
-  return (
-    <li data-roam="home">
-      <motion.button
-        type="button"
-        animate={shake}
-        onClick={tap}
-        aria-label={`${label} — ${lockedAt}`}
-        className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-[28px] border-[3px] border-dashed border-line-strong bg-surface/60 p-3 sm:gap-3 sm:p-5"
-      >
-        <span
-          aria-hidden="true"
-          className="relative flex size-20 items-center justify-center rounded-3xl bg-cream text-4xl sm:size-28 sm:text-5xl"
-        >
-          <AppIcon name={icon} className="size-[70%] opacity-40 grayscale" />
-          <span className="absolute -right-2 -bottom-2 flex size-10 items-center justify-center rounded-full bg-coin text-xl shadow-[0_3px_0_var(--color-coin-shadow)] sm:size-12 sm:text-2xl">
-            <AppIcon name="lock" className="size-[70%]" />
-          </span>
-        </span>
-        <span className="text-center font-display text-lg leading-tight font-bold text-ink-soft sm:text-2xl">
-          {label}
-        </span>
-        <span className="text-center text-sm font-semibold text-ink-soft sm:text-base">
-          {lockedAt}
-        </span>
-      </motion.button>
     </li>
   )
 }

@@ -553,3 +553,5 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   (runsOnDay all kinds, learningNow 14 days, gettingStronger own recent vs earlier, ≥5 answers, +0.1).
 - P21 patched: letter met only via LetterCheck (decoy.ts); LessonDeck ends with a guided check (`check` pair,
   `thumb`, spoken question, Start after it); feelings lessons per tier (feelingsLessonPlan.ts) before faces/scenes/kindness.
+
+- P22 gap 4 (age locks removed): RequireAge deleted; isGameOpen→isGameSuggested; NUMBER_LIMIT/EXAM_MIN_LEVEL/age.lockedAt/lockedSay/exam/learn.lockedAge removed; unlocksAt→suggestedAt; talesFor {open, later}. Critic REJECT (C1 pro text, H1 padlock wording, H2 tales lock) → fixed → ACCEPT. Units 1247, e2e 62/62 (kiddo, homework, birthday, responsive, tours, adaptive).

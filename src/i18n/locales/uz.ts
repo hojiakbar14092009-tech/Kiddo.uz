@@ -848,13 +848,11 @@ export const uz = {
   },
   age: {
     badge: '{{age}} yosh',
-    lockedAt: '{{age}} yoshda ochiladi',
-    lockedSay: '{{age}} yoshga to‘lganingda bu o‘yin ochiladi!',
+    suggestedFrom: '{{age}} yoshdan tavsiya',
     celebrateTitle: 'Tabriklaymiz! Endi {{age}} yoshdasan!',
-    celebrateText: 'Yangi o‘yinlar ochildi:',
+    celebrateText: 'Endi senga yangi o‘yinlarni tavsiya qilamiz:',
     celebrateOk: 'Zo‘r, o‘ynaymiz!',
     numbers: '6 dan 10 gacha sonlar',
-    exam: 'Katta sinov',
   },
   learnFirst: {
     checkPicture: 'Rasm: {{title}}',
@@ -955,7 +953,6 @@ export const uz = {
     offline: 'Internet yo‘q. Natijalar saqlanadi; ochilmagan rasm va ovozlar keyin yuklanadi.',
     retry: 'Yana bir urinib ko‘r!',
     correct: 'To‘g‘ri!',
-    lockedAge: '{{age}} yoshda ochiladi',
     parent: {
       title: 'Yangi bo‘limlar natijalari',
       empty: 'Farzandingiz yangi bo‘limlarni hali boshlamagan.',

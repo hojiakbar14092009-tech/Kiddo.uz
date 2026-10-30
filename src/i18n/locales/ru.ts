@@ -847,13 +847,11 @@ export const ru: Translation = {
   },
   age: {
     badge: 'Возраст {{age}}',
-    lockedAt: 'Откроется в {{age}} лет',
-    lockedSay: 'Эта игра откроется, когда тебе будет {{age}} лет!',
+    suggestedFrom: 'Советуем с {{age}} лет',
     celebrateTitle: 'Поздравляем! Тебе уже {{age}} лет!',
-    celebrateText: 'Открылись новые игры:',
+    celebrateText: 'Теперь советуем тебе новые игры:',
     celebrateOk: 'Ура, играем!',
     numbers: 'Числа от 6 до 10',
-    exam: 'Большая проверка',
   },
   learnFirst: {
     checkPicture: 'Картинка: {{title}}',
@@ -951,7 +949,6 @@ export const ru: Translation = {
     offline: 'Нет интернета. Результаты сохранятся; незагруженные картинки и звуки появятся позже.',
     retry: 'Попробуй ещё раз!',
     correct: 'Верно!',
-    lockedAge: 'Откроется в {{age}} лет',
     parent: {
       title: 'Результаты новых разделов',
       empty: 'Ребёнок ещё не начинал новые разделы.',

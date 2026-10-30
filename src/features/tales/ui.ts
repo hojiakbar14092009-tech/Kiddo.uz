@@ -5,6 +5,7 @@ export interface TalesUi {
   intro: string
   forAge: (age: number) => string
   younger: string
+  older: string
   scene: (current: number, total: number) => string
   prev: string
   next: string
@@ -29,6 +30,7 @@ export const TALES_UI: Record<Language, TalesUi> = {
     intro: 'Qaysi ertakni o‘qiymiz?',
     forAge: (age) => `${age} yosh`,
     younger: 'Kichkintoylar uchun ham',
+    older: 'Kattaroqlar uchun ham',
     scene: (current, total) => `${current}/${total}-sahna`,
     prev: 'Oldingi sahna',
     next: 'Keyingi sahna',
@@ -51,6 +53,7 @@ export const TALES_UI: Record<Language, TalesUi> = {
     intro: 'Какую сказку почитаем?',
     forAge: (age) => `${age} лет`,
     younger: 'И для малышей',
+    older: 'И для ребят постарше',
     scene: (current, total) => `Сцена ${current} из ${total}`,
     prev: 'Предыдущая сцена',
     next: 'Следующая сцена',
@@ -73,6 +76,7 @@ export const TALES_UI: Record<Language, TalesUi> = {
     intro: 'Which tale shall we read?',
     forAge: (age) => `Age ${age}`,
     younger: 'For little ones too',
+    older: 'For older children too',
     scene: (current, total) => `Scene ${current} of ${total}`,
     prev: 'Previous scene',
     next: 'Next scene',

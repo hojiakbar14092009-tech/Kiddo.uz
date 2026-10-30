@@ -11,8 +11,6 @@ import { useLanguage } from '@/store/settingsStore'
 import { LetterTile } from './LetterTile'
 import { paletteFor } from './letterPalette'
 import { NumberTile } from './NumberTile'
-import { NUMBER_LIMIT, NUMBERS_FULL_LEVEL } from '@/features/age/ageLevel'
-import { useAgeLevel } from '@/store/familyStore'
 
 export type AlphabetTab = 'letters' | 'numbers'
 
@@ -28,7 +26,6 @@ export function AlphabetPage() {
   const tab: AlphabetTab = params.get('tab') === 'numbers' ? 'numbers' : 'letters'
   const learnedLetters = new Set(learned[language] ?? [])
   const { letters } = getAlphabet(language)
-  const numberLimit = NUMBER_LIMIT[useAgeLevel()]
 
   const selectTab = (next: AlphabetTab) =>
     setParams(next === 'numbers' ? { tab: 'numbers' } : {}, { replace: true })
@@ -75,8 +72,6 @@ export function AlphabetPage() {
                   entry={entry}
                   word={entry.words[language]}
                   palette={paletteFor(index)}
-                  locked={entry.value > numberLimit}
-                  lockedLabel={t('age.lockedAt', { age: NUMBERS_FULL_LEVEL })}
                   onSelect={() => navigate(`/alphabet/${entry.id}`)}
                 />
               </li>

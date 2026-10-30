@@ -111,7 +111,7 @@ describe('tales content', () => {
 
   it('shows a child the tales of their age and younger ones', () => {
     expect(talesFor(4).open.every((tale) => tale.age === 4)).toBe(true)
-    expect(talesFor(4).locked).toHaveLength(6)
+    expect(talesFor(4).later).toHaveLength(6)
     expect(talesFor(5).open.map((tale) => tale.age)).toEqual([5, 5, 5, 4, 4, 4])
     expect(talesFor(6).open).toHaveLength(9)
   })
