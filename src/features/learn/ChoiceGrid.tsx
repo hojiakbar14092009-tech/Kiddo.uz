@@ -61,6 +61,7 @@ export function ChoiceGrid({
             key={choice.id}
             type="button"
             aria-label={choice.label}
+            data-choice={choice.id}
             data-status={status}
             aria-disabled={status === 'wrong' || status === 'removed' || disabled}
             onClick={() =>

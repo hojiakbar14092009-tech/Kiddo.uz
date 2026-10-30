@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
-import { useAgeLevel } from '@/store/familyStore'
+import { ageProfile } from '@/domain/adaptive'
+import { childAge, useActiveChild } from '@/store/familyStore'
 
 export type AppIconName =
   | 'find-letter'
@@ -20,13 +21,14 @@ interface AppIconProps {
 }
 
 /**
- * One icon, two looks. Four-year-olds get glossy, toy-like pictures; children of
+ * One icon, two looks (visual maturity of the age profile). Four-year-olds get glossy, toy-like pictures; children of
  * five and six get calmer two-tone drawings, closer to a school workbook, but still
  * round and friendly.
  */
 export function AppIcon({ name, className }: AppIconProps) {
-  const level = useAgeLevel()
-  if (level === 4) {
+  // a look, so it follows visual maturity (the age profile), not difficulty
+  const child = useActiveChild()
+  if (child && ageProfile(childAge(child)).visual === 'toy') {
     return (
       <img
         src={`/icons/play/${name}.svg`}

@@ -49,3 +49,28 @@ export async function passMathExample(page: Page, step?: number) {
     await expect(question).toBeVisible()
   }
 }
+
+/**
+ * The Math Lab placement (Phase 22) of a new learner aged 7 or more: answers
+ * every probe right (the start lands at the top: level 5 and two mastery
+ * steps) and goes on into the session.
+ */
+export async function passPlacementAllRight(page: Page) {
+  await page.getByTestId('placement-start').click()
+  const probe = page.getByTestId('placement-question')
+  const done = page.getByTestId('placement-done')
+  await expect(probe.or(done)).toBeVisible()
+  while (await probe.isVisible()) {
+    const answer = await probe.getAttribute('data-answer')
+    const before = `${await probe.getAttribute('data-rung')}|${await probe.getAttribute('data-attempt')}`
+    await probe.locator(`[data-choice="${answer}"]`).click()
+    await expect
+      .poll(async () =>
+        (await done.isVisible())
+          ? 'done'
+          : `${await probe.getAttribute('data-rung')}|${await probe.getAttribute('data-attempt')}`,
+      )
+      .not.toBe(before)
+  }
+  await page.getByTestId('placement-go').click()
+}

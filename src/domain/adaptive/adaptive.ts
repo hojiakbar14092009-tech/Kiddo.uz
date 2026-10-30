@@ -1,5 +1,14 @@
 import { stateLevel, type ChallengeLevel, type StrandState } from '@/domain/learner/profile'
 import {
+  AGE_BANDS,
+  AGE_PROFILES,
+  ageBand,
+  isYoungBand,
+  type AgeBand,
+  type Aids,
+  type Vocabulary,
+} from './ageProfile'
+import {
   dueReviews,
   isActive,
   MEMORY_POLICY,
@@ -25,25 +34,9 @@ import {
  * published as an event, rewards stay with the universe rules.
  */
 
-/** Contract §17: adaptation bands, never access restrictions and no upper cap. */
-export const AGE_BANDS = ['3-4', '5-6', '7-9', '10-12', '13-15', '16+'] as const
-export type AgeBand = (typeof AGE_BANDS)[number]
+export { AGE_BANDS, ageBand, isYoungBand, type AgeBand, type Aids, type Vocabulary }
 
-/** Presentation guidance by age; never a ceiling. A guest (null) is treated as 5–6. */
-export function ageBand(age: number | null): AgeBand {
-  // a guest, or an unreadable birth date, gets the young middle band
-  if (age === null || !Number.isFinite(age)) return '5-6'
-  if (age <= 4) return '3-4'
-  if (age <= 6) return '5-6'
-  if (age <= 9) return '7-9'
-  if (age <= 12) return '10-12'
-  if (age <= 15) return '13-15'
-  return '16+'
-}
-
-export type Aids = 'full' | 'partial' | 'minimal'
 export type HintTiming = 'picture-first' | 'step-by-step'
-export type Vocabulary = 'simple' | 'standard' | 'rich'
 export type Explanation = 'show' | 'short' | 'why'
 
 /** Why the plan looks like this (shown to parents in plain words; never a trait). */
@@ -126,21 +119,13 @@ export interface AdaptivePlan {
 
 const AIDS_ORDER: readonly Aids[] = ['minimal', 'partial', 'full']
 
-/** The two preschool bands (3–4, 5–6): full pictures, simple words. */
-export function isYoungBand(band: AgeBand): boolean {
-  return band === '3-4' || band === '5-6'
-}
-
+/** The age profile's default help and words (domain/adaptive/ageProfile). */
 function bandAids(band: AgeBand): Aids {
-  if (isYoungBand(band)) return 'full'
-  if (band === '7-9') return 'partial'
-  return 'minimal'
+  return AGE_PROFILES.find((profile) => profile.id === band)!.defaultScaffolding
 }
 
 function bandVocabulary(band: AgeBand): Vocabulary {
-  if (isYoungBand(band)) return 'simple'
-  if (band === '7-9' || band === '10-12') return 'standard'
-  return 'rich'
+  return AGE_PROFILES.find((profile) => profile.id === band)!.vocabulary
 }
 
 function shiftAids(aids: Aids, by: number): Aids {

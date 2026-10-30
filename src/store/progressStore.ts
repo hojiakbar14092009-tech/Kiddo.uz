@@ -16,10 +16,20 @@ import {
 } from '@/domain/rewards/rewardStore'
 import { coinsFor, DAILY_BONUS } from '@/domain/rewards/rules'
 import { clearLearningMemory } from '@/domain/learningMemory/store'
-import { clearUniverseChild, emitActivity } from '@/domain/universe/store'
+import type { EvidenceKind } from '@/domain/learner/evidence'
+import { atCurrentLevel, clearUniverseChild, emitActivity } from '@/domain/universe/store'
 import { taskActivity } from '@/domain/universe/wiring'
 import { useFamilyStore } from './familyStore'
 import { newId } from '@/lib/id'
+
+/** What kind of progression evidence each game is (domain/learner/evidence). */
+const TASK_EVIDENCE: Record<TaskResult['type'], EvidenceKind> = {
+  'find-letter': 'practice',
+  'find-picture': 'practice',
+  memory: 'practice',
+  trace: 'tracing',
+  exam: 'exam',
+}
 
 /** Every kind of finished activity that earns coins. */
 export type TaskType = GameType | 'exam'
@@ -235,7 +245,10 @@ export const useProgressStore = create<ProgressState>()(
           }
         }
         // Stars, crystals and achievements: counted once per result id.
-        emitActivity(taskActivity(childKey, result, ROUNDS_PER_TASK))
+        // the choice and memory games are practice at the strand's level (content tier);
+        // tracing (hand precision) and the exam are their own kinds (EVIDENCE_POLICY)
+        const activity = taskActivity(childKey, result, ROUNDS_PER_TASK)
+        emitActivity(atCurrentLevel(activity, TASK_EVIDENCE[result.type]))
         return outcome
       },
 

@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { ageProfile } from '@/domain/adaptive'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useReducedMotion } from 'framer-motion'
@@ -89,7 +90,8 @@ function Tour({
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion() ?? false
   const child = useActiveChild()
-  const young = !child || childAge(child) <= 6
+  // the age profile decides: the youngest get the speaking guide (narration 'full')
+  const young = ageProfile(child ? childAge(child) : null).narration === 'full'
   const { sayText } = useSpeaker()
   // only the steps whose thing is on this page right now
   const [shown] = useState(() => steps.filter((step) => findAnchor(step) !== null))

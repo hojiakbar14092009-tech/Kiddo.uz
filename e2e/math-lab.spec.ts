@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { passMathExample } from './lesson.ts'
+import { passMathExample, passPlacementAllRight } from './lesson.ts'
 
 /**
  * A repeatable Math.random. `0` is constant (the parent gate then asks 3 × 3);
@@ -231,8 +231,13 @@ test.describe('no maximum age (Phase 22), on a small phone', () => {
     await page.getByRole('button', { name: /Dilshod/ }).click()
 
     await page.goto('/math-lab')
-    await expect(page.getByTestId('lab-level').first()).toHaveAttribute('data-mastery', '3')
-    await page.getByTestId('lab-start').click()
+    // a new grown-up learner first finds their start: all right → level 5, mastery 2
+    await passPlacementAllRight(page)
+    const start = await page.evaluate(() => {
+      const id = JSON.parse(localStorage.getItem('kiddo.family')!).state.activeChildId as string
+      return JSON.parse(localStorage.getItem('kiddo.universe')!).state.byChild[id].strands.number
+    })
+    expect(start).toMatchObject({ level: 5, mastery: 2, placed: true })
     await passMathExample(page, 0)
     const question = page.getByTestId('lab-question')
     await expect(question).toHaveAttribute('data-level', '5')

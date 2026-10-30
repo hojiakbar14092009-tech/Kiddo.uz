@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/Button'
 import { LearnShell } from '@/features/learn/LearnShell'
 import { stagesTaught, useLearnChild } from '@/features/learn/learnStore'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
-import { useAgeLevel } from '@/store/familyStore'
+import { useContentTier } from '@/domain/adaptive'
+import { SECTION_STRAND } from '@/domain/universe/wiring'
 import { exhibitFor, LESSONS, lessonsFor, type AgeLevel, type BodyId } from './content'
 import { ObjectCard, SpaceLesson } from './Lesson'
 import { testCount } from './questions'
@@ -25,7 +26,7 @@ type View =
 
 /** The Koinot section: lessons by age, a short check and the solar system up close. */
 export function SpacePage() {
-  const level = useAgeLevel() as AgeLevel
+  const level = useContentTier(SECTION_STRAND.space) as AgeLevel
   // the questions are written in one language: a new language starts the screen again in it
   const language = useSpaceLanguage()
   // a homework link (?lesson=5-1) opens that lesson first: teach, then the check

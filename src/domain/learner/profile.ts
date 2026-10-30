@@ -1,10 +1,12 @@
+import { priorLevel, priorMastery } from '@/domain/adaptive/ageProfile'
 import type { Strand } from '@/domain/universe/types'
 
 /*
  * LearnerProfile (docs/architecture/universe.md §4). Pure logic, no store.
  *
  * Every strand has a challenge level 1–5. Age only picks where a strand starts
- * (4 → 1, 5 → 2, 6 → 3, 7–9 → 4, 10+ → 5, guest → 2); after that the child's own results move it:
+ * (the age profile's prior: 4 → 1, 5 → 2, 6 → 3, 7–9 → 4, 10+ → 5, guest → 2;
+ * a placement replaces it); after that the child's own results move it:
  * two strong runs in a row at a level → one level up, two weak runs in a row →
  * one level down (never below 1, never announced as failure). Age never locks
  * anything: a strong four-year-old reaches level 5, a struggling six-year-old
@@ -30,6 +32,11 @@ export interface StrandState {
   /** Independent answers / questions over every run. */
   independent: number
   total: number
+  /**
+   * Set by a placement (placement.ts): the level and mastery came from the
+   * learner's own answers, so they hold from the first run (not the age prior).
+   */
+  placed?: boolean
 }
 
 export type LearnerStrands = Partial<Record<Strand, StrandState>>
@@ -48,21 +55,17 @@ export function clampLevel(n: number): ChallengeLevel {
 export const MAX_MASTERY = 10_000
 
 /**
- * Where mastery starts for an age (DOB is the only age source): teenagers and
- * adults begin above level 5, so the work is not childish; their answers decide
- * from there, both ways.
+ * Where mastery starts for an age before any evidence: the age profile's
+ * prior (domain/adaptive/ageProfile). A placement or the learner's runs
+ * replace it, both ways.
  */
 export function startMastery(age: number | null): number {
-  if (age === null || age < 12) return 0
-  if (age < 15) return 1
-  if (age < 18) return 2
-  return 3
+  return priorMastery(age)
 }
 
 /** Mastery steps of one strand state (0 below the top level). */
 export function stateMastery(stored: StrandState | undefined, age: number | null): number {
-  if (!stored || stored.runs < MOVE_AFTER)
-    return startLevel(age) === MAX_CHALLENGE ? startMastery(age) : 0
+  if (!stored || !settled(stored)) return startLevel(age) === MAX_CHALLENGE ? startMastery(age) : 0
   if (stateLevel(stored, age) < MAX_CHALLENGE) return 0
   const m = Math.floor(Number(stored.mastery))
   // a corrupt or absurd save never reaches the generators
@@ -77,16 +80,18 @@ export function masteryOf(
   return stateMastery(strands?.[strand], age)
 }
 
-/** Where a strand starts for an age (years; null = guest). */
+/**
+ * Where a strand starts for an age (years; null = guest): the age profile's
+ * prior (domain/adaptive/ageProfile). A placement replaces it; the learner's
+ * answers decide from there.
+ */
 export function startLevel(age: number | null): ChallengeLevel {
-  // A guest is probably young and is never saved: start gently.
-  if (age === null) return 2
-  if (age <= 4) return 1
-  if (age === 5) return 2
-  if (age === 6) return 3
-  // older children start higher (age bands 7–9, 10+); their answers decide from there
-  if (age <= 9) return 4
-  return 5
+  return priorLevel(age)
+}
+
+/** Did the learner's own answers (runs, or a placement) set this strand? */
+function settled(stored: StrandState): boolean {
+  return stored.runs >= MOVE_AFTER || stored.placed === true
 }
 
 export function levelOf(
@@ -101,7 +106,7 @@ export function levelOf(
 export function stateLevel(stored: StrandState | undefined, age: number | null): ChallengeLevel {
   // Until a level has moved (fewer than two runs), the age still decides, so a
   // corrected birthday re-seeds the strand. Stored values are never trusted raw.
-  if (!stored || stored.runs < MOVE_AFTER) return startLevel(age)
+  if (!stored || !settled(stored)) return startLevel(age)
   return clampLevel(Number(stored.level) || startLevel(age))
 }
 
@@ -171,6 +176,8 @@ export function applyRun(
     runs: base.runs + 1,
     independent: base.independent + independent,
     total: base.total + total,
+    // a placed start stays the learner's own after the first run
+    ...(previous?.placed === true ? { placed: true } : {}),
   }
 }
 

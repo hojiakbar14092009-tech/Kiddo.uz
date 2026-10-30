@@ -10,7 +10,8 @@ import { orderOf } from '@/features/learn/review'
 import type { LearnMode } from '@/features/learn/session'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import { useLearnSession, type FinishedSession } from '@/features/learn/useLearnSession'
-import { useAgeLevel } from '@/store/familyStore'
+import { useContentTier } from '@/domain/adaptive'
+import { SECTION_STRAND } from '@/domain/universe/wiring'
 import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { COPY } from './copy'
@@ -27,7 +28,7 @@ import { useStable } from './useStable'
  */
 export function HelpMascotPage() {
   const language = useLanguage()
-  const level = useAgeLevel() as Level
+  const level = useContentTier(SECTION_STRAND.help) as Level
   const [run, setRun] = useState<{ mode: LearnMode; key: number } | null>(null)
 
   if (!run) return <Menu language={language} onPick={(mode) => setRun({ mode, key: 1 })} />

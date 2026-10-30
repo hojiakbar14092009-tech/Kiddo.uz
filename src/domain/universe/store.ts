@@ -13,7 +13,9 @@ import {
   newTiers,
   type UniverseStats,
 } from './achievements'
-import { applyRun, childAgeFor, levelOf, type LearnerStrands } from '@/domain/learner/profile'
+import { childAgeFor, levelOf, type LearnerStrands } from '@/domain/learner/profile'
+import { applyEvidence, type EvidenceKind } from '@/domain/learner/evidence'
+import { placedState, type Placement } from '@/domain/learner/placement'
 import { getSkillMemory } from '@/domain/learningMemory/store'
 import { isActive } from '@/domain/learningMemory/memory'
 import {
@@ -454,7 +456,10 @@ export function localDay(date: Date = new Date()): string {
  * stars (improvement only), crystals, parts, scrolls, and any achievement
  * tiers reached. Returns the award, or zeros when this id was counted before.
  */
-/** Moves the strand only for an adaptive run played at the child's current level. */
+/**
+ * Moves the strand only for a run played at the child's current level, and
+ * only as far as its kind of evidence may (domain/learner/evidence).
+ */
 function adaptStrands(
   strands: LearnerStrands | undefined,
   e: ActivityCompleted,
@@ -462,8 +467,21 @@ function adaptStrands(
 ): LearnerStrands | undefined {
   if (e.level === undefined) return strands
   const age = childAgeFor(childKey)
-  if (e.level !== levelOf(strands, e.strand, age)) return strands
-  return { ...strands, [e.strand]: applyRun(strands?.[e.strand], e, age) }
+  const level = levelOf(strands, e.strand, age)
+  if (e.level !== level) return strands
+  const next = applyEvidence(strands?.[e.strand], e, age, e.evidence ?? 'assessment', level)
+  return next ? { ...strands, [e.strand]: next } : strands
+}
+
+/**
+ * A run of a screen whose items follow the strand's content tier, marked
+ * with its kind of evidence and the strand's current level; what it may move
+ * is decided by EVIDENCE_POLICY (practice: within levels 1–3, never mastery).
+ */
+export function atCurrentLevel(e: ActivityCompleted, evidence: EvidenceKind): ActivityCompleted {
+  if (!e.childKey) return e
+  const level = levelOf(universeChild(e.childKey).strands, e.strand, childAgeFor(e.childKey))
+  return { ...e, level, evidence }
 }
 
 export function emitActivity(e: ActivityCompleted): AwardSummary {
@@ -546,6 +564,21 @@ export function emitActivity(e: ActivityCompleted): AwardSummary {
     }
   }
   return award
+}
+
+/**
+ * Writes a placement (domain/learner/placement) as the strand's start, once:
+ * only a strand the learner has not played yet (no run, not placed). Returns
+ * whether it was written; a second call, or one after a run, changes nothing.
+ */
+export function placeStrand(childKey: string, strand: Strand, placement: Placement): boolean {
+  const existing = universeChild(childKey).strands?.[strand]
+  if (!childKey || (existing && (existing.runs > 0 || existing.placed === true))) return false
+  update(childKey, (child) => ({
+    ...child,
+    strands: { ...child.strands, [strand]: placedState(placement) },
+  }))
+  return true
 }
 
 /** What a run earned when it was counted (null: unknown or too old). */

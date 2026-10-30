@@ -1,7 +1,9 @@
 /*
  * Shared types of the Kiddo Universe (docs/architecture/universe.md).
- * A leaf module: no imports, so every universe file and every store can use it.
+ * A leaf module at run time: type-only imports, so every universe file and
+ * every store can use it.
  */
+import type { EvidenceKind } from '@/domain/learner/evidence'
 
 export const RESOURCE_IDS = ['star', 'crystal', 'seed', 'part', 'scroll', 'key'] as const
 export type ResourceId = (typeof RESOURCE_IDS)[number]
@@ -59,6 +61,11 @@ export interface ActivityCompleted {
    * it, and only a run at the child's current level moves the LearnerProfile.
    */
   level?: number
+  /**
+   * What kind of evidence the run is (domain/learner EVIDENCE_POLICY decides
+   * what it may move). Missing: an assessment (an adaptive run at its level).
+   */
+  evidence?: EvidenceKind
   /**
    * A repeatable activity (a story read again): only its first run of the
    * day counts for the achievements and moves the LearnerProfile; later runs

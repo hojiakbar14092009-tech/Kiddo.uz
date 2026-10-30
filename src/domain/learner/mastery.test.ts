@@ -64,16 +64,14 @@ describe('mastery above level 5', () => {
     expect(stateMastery({ ...old, mastery: 1e300 }, 8)).toBe(MAX_MASTERY)
   })
 
-  it('the birth date is the only age source, and any age has a place to start', () => {
-    expect(startMastery(null)).toBe(0)
-    expect(startMastery(6)).toBe(0)
-    expect(startMastery(12)).toBe(1)
-    expect(startMastery(15)).toBe(2)
-    expect(startMastery(30)).toBe(3)
-    expect(startMastery(80)).toBe(3)
-    // a fresh strand of an adult starts above level 5 until their answers decide
-    expect(masteryOf(undefined, 'number', 30)).toBe(3)
+  it('age is never taken for mastery: steps above level 5 are earned (Phase 22)', () => {
+    for (const age of [null, 6, 12, 15, 30, 80]) expect(startMastery(age)).toBe(0)
+    // a fresh strand of an adult starts at the top level, with no mastery claimed
+    expect(masteryOf(undefined, 'number', 30)).toBe(0)
+    // two weak runs: one level down (nothing to give back above it)
     const after = play(undefined, [weak, weak], 30)
-    expect(stateMastery(after, 30)).toBe(2)
+    expect(after?.level).toBe(4)
+    // two strong runs at level 5 earn the first step
+    expect(stateMastery(play(undefined, [strong, strong], 30), 30)).toBe(1)
   })
 })

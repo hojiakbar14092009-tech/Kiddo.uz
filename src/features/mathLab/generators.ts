@@ -962,6 +962,11 @@ export interface SessionShape {
   options?: number
   /** Mastery steps above level 5 (domain/learner): bigger numbers, no ceiling. */
   mastery?: number
+  /**
+   * No basket drag (an older learner at levels 1–2, age profile beyond 5–6):
+   * the same level's other kinds take its place.
+   */
+  noDrag?: boolean
 }
 
 /**
@@ -981,8 +986,12 @@ export function planSession(
   const used = new Set<string>()
   const out: LabQuestion[] = []
   const mastery = level === 5 ? Math.max(0, Math.floor(shape.mastery ?? 0)) : 0
-  for (let index = 0; index < count; index += 1) {
-    const q = makeQuestion(level, index, rng, used, shape.options, mastery)
+  for (let index = 0, kind = 0; index < count; index += 1, kind += 1) {
+    let q = makeQuestion(level, kind, rng, used, shape.options, mastery)
+    while (shape.noDrag && q.kind === 'drag') {
+      kind += 1
+      q = makeQuestion(level, kind, rng, used, shape.options, mastery)
+    }
     used.add(q.id)
     out.push(q)
   }

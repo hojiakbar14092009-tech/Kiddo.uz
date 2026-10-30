@@ -1073,6 +1073,17 @@ export const uz = {
     level: '{{level}}-daraja',
     levelMastery: '{{level}}-daraja · ustalik {{step}}',
     classic: 'Qo‘shishni bosqichma-bosqich o‘rganish',
+    placement: {
+      title: 'Qayerdan boshlashni birga topamiz',
+      intro:
+        'Bir nechta qisqa savol. Bu sinov emas: javoblaring senga mos joyni topishga yordam beradi.',
+      start: 'Boshladik',
+      step: '{{current}}-savol, jami {{total}} tagacha',
+      notSure: 'Hali bilmayman',
+      doneTitle: 'Tayyor! Boshlash joyi topildi',
+      doneText: 'Topshiriqlar senga moslandi. Ular javoblaringga qarab yana o‘zgarib boradi.',
+      go: 'Mashqni boshlash',
+    },
     objects: {
       apple: 'olma',
       pear: 'nok',

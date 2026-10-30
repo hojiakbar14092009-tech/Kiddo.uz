@@ -5,7 +5,8 @@ import type { Language } from '@/content/languages'
 import { Img3D } from '@/features/learn/Img3D'
 import { LearnShell } from '@/features/learn/LearnShell'
 import { useMascot } from '@/features/mascot/useMascot'
-import { useAgeLevel } from '@/store/familyStore'
+import { useContentTier } from '@/domain/adaptive'
+import { SECTION_STRAND } from '@/domain/universe/wiring'
 import { useLanguage } from '@/store/settingsStore'
 import { taleById, taleText, talesFor, type AgeLevel, type TaleSpec } from './content'
 import { TaleView } from './TaleView'
@@ -86,7 +87,7 @@ function TaleRoute({ language }: { language: Language }) {
 /** «Ertaklar»: short 3D tales for the child’s age, with a little check at the end. */
 export function TalesPage() {
   const language = useLanguage()
-  const level = useAgeLevel()
+  const level = useContentTier(SECTION_STRAND.tales)
   return (
     <Routes>
       <Route index element={<TaleList language={language} level={level} />} />

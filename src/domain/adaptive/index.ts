@@ -17,4 +17,18 @@ export {
   type HintTiming,
   type Vocabulary,
 } from './adaptive'
-export { useAdaptivePlan, useChildPlan } from './hooks'
+export { useAdaptivePlan, useChildPlan, useContentTier } from './hooks'
+export {
+  AGE_PROFILES,
+  ageProfile,
+  contentTier,
+  GUEST_BAND,
+  GUEST_TIER,
+  offersPlacement,
+  priorLevel,
+  type AgeProfile,
+  type ContentTier,
+  type InteractionDensity,
+  type Narration,
+  type VisualMaturity,
+} from './ageProfile'

@@ -11,7 +11,8 @@ import { LearnShell } from '@/features/learn/LearnShell'
 import { stagesTaught, useLearnChild, useLearnStore } from '@/features/learn/learnStore'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import { useLearnSession, type FinishedSession } from '@/features/learn/useLearnSession'
-import { useAgeLevel } from '@/store/familyStore'
+import { useContentTier } from '@/domain/adaptive'
+import { SECTION_STRAND } from '@/domain/universe/wiring'
 import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { COPY, groupLabel, helpText, numberQuestion, pictureQuestion } from './content'
@@ -36,7 +37,7 @@ type View =
  * short check made only of what was taught.
  */
 export function MathPage() {
-  const level = useAgeLevel()
+  const level = useContentTier(SECTION_STRAND.math)
   const [view, setView] = useState<View>({ kind: 'menu' })
   const [run, setRun] = useState(0)
   const next = () => {

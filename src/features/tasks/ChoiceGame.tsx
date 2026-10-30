@@ -6,7 +6,8 @@ import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import type { MistakeDetail } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
-import { useAgeLevel } from '@/store/familyStore'
+import { useContentTier } from '@/domain/adaptive'
+import { TASK_STRAND } from '@/domain/universe/wiring'
 import { OPTION_COUNT } from '@/features/age/ageLevel'
 import { ROUNDS_PER_TASK } from './rules'
 import type { ChoiceGameType } from './games'
@@ -42,7 +43,7 @@ export function ChoiceGame({ type }: { type: ChoiceGameType }) {
   const language = useLanguage()
   const learner = useLearner(type)
   const finish = useFinishTask(type)
-  const optionCount = OPTION_COUNT[useAgeLevel()][type]
+  const optionCount = OPTION_COUNT[useContentTier(TASK_STRAND[type])][type]
   // Learn Before Play: a letter the child has not learned or met yet is shown before it is asked
   const unmet = useUnmetLetters(type, learner)
   // Rounds are drawn once when the game starts; progress updates must not reshuffle them.

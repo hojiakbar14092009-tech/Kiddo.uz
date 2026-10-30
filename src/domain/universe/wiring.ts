@@ -10,7 +10,7 @@ import type { ActivityCompleted, Strand } from './types'
 type TaskKind = 'find-letter' | 'find-picture' | 'memory' | 'trace' | 'exam'
 type LearnSection = 'words' | 'help' | 'tales' | 'space' | 'math' | 'garden'
 
-const TASK_STRAND: Record<TaskKind, Strand> = {
+export const TASK_STRAND: Record<TaskKind, Strand> = {
   'find-letter': 'letters',
   'find-picture': 'letters',
   trace: 'letters',
@@ -18,7 +18,7 @@ const TASK_STRAND: Record<TaskKind, Strand> = {
   memory: 'logic',
 }
 
-const SECTION_STRAND: Record<LearnSection, Strand> = {
+export const SECTION_STRAND: Record<LearnSection, Strand> = {
   words: 'reading',
   math: 'number',
   space: 'space',

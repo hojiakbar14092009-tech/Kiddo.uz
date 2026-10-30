@@ -18,8 +18,8 @@
 - Every strand keeps its challenge level 1–5. At level 5 a strand also has `mastery` (0, 1, 2, …, no ceiling).
 - Two strong runs in a row at level 5 → one mastery step up. Two weak runs in a row → one mastery step down
   first; only at mastery 0 does the level go down. Below level 5 mastery is always 0.
-- Start (until two runs have been played): `startMastery(age)` — under 12: 0, 12–14: 1, 15–17: 2, 18+: 3, only
-  when the age also starts the strand at level 5. Then the learner's own answers decide, both ways.
+- Start (until two runs have been played): `startMastery(age)` = 0 at every age (Phase 22: age is never
+  taken for mastery); a placement or the learner's own answers decide, both ways.
 - Stored values are never trusted raw (`stateMastery`: non-numbers and negatives read as 0; an old save
   without the field reads as 0). Deterministic, no AI.
 - Reviews and garden practice of the big-number skills are made at the session's mastery step.
@@ -38,3 +38,38 @@
   languages). The level chip shows "5-daraja · ustalik m"; a mastery step up is praised like a level up.
 - Parents: the skills panel shows the level word plus "ustalik m".
 - Other strands keep level-5 content for now; their mastery is still tracked and shown to parents.
+
+## One adaptation layer (Phase 22)
+
+```text
+birth date (Tashkent day) → childAge
+        ↓
+ageProfile(age)            domain/adaptive/ageProfile.ts — the only age table:
+        ↓                  band, visual maturity, default help, words, narration,
+        ↓                  density, prior level/mastery, placement offered
+visual maturity            AgeTheme (data-band), AppIcon, CoachMarks voice
+        ↓
+strand level + mastery     domain/learner/profile.ts — starts at the prior or a
+        ↑                  placement, then two runs in a row move it (no ceiling)
+evidence                   runs (independent share), hints, mistakes, reviews
+        ↓
+adaptivePlan / useContentTier(strand)   what a screen shows
+```
+
+- Screens never compare ages: Learn sections and letter games ask `useContentTier(strand)` (level 1 → tier 4,
+  2 → 5, 3+ → 6; a guest keeps tier 6). Their finished runs are reported at the strand's level
+  (`atCurrentLevel`), so a strong learner's items grow and a struggling one's ease, two runs at a time.
+  `useAgeLevel` is left only for age suggestions, today's plan and the look; `centralized.test.ts` keeps it so.
+- Placement (`domain/learner/placement.ts`): a new learner from 7 (`AgeProfile.placement`) starts the Math
+  Lab with fixed items, easy to hard (levels 2, 4, 5, 5 + mastery 2). An item not answered on their own
+  ("Hali bilmayman", wrong, hinted) gets a second item of the same step (two such chances in all, six items
+  at most); a step missed twice ends it. Start: 1 / 3 / 4 / 5 / 5 + mastery 2. Neutral words, no level chip,
+  no score; written once (`placeStrand`), deterministic (fixed items and seeds); held from the first run.
+  Older learners at levels 1–2 get counting and adding, not the basket game (`noDrag`).
+- Age is never taken for mastery: `priorMastery` is 0 at every age; steps above level 5 are earned.
+- Tier runs (`atCurrentLevel`): practice runs of Learn sections and the choice/memory games move their
+  strand only up to level 3 (tier 6 is the top young tier) and never mastery; learn-mode sessions, tracing
+  and the exam are not tier evidence.
+- The `placed` flag lives with the strands in the local universe store (strands are not cloud-synced).
+- A birthday changes the band and look only; strands with two or more runs (or a placement) keep their
+  level and mastery (`ageTransition.test.tsx`).

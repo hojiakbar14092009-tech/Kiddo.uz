@@ -4,7 +4,9 @@ import { EMPTY_UNIVERSE_CHILD, useUniverseStore } from '@/domain/universe/store'
 import type { Strand } from '@/domain/universe/types'
 import { childAge, useActiveChild } from '@/store/familyStore'
 import { useChildKey } from '@/store/progressStore'
+import { useChallengeLevel } from '@/domain/learner/hooks'
 import { adaptivePlan, skillsOf, type AdaptivePlan } from './adaptive'
+import { contentTier, GUEST_TIER, type ContentTier } from './ageProfile'
 
 /**
  * The adaptive plan of one child for one strand. The clock is read once when
@@ -39,4 +41,15 @@ export function useAdaptivePlan(strand: Strand, namespace: string): AdaptivePlan
   const childKey = useChildKey()
   const child = useActiveChild()
   return useChildPlan(childKey, child ? childAge(child) : null, strand, namespace)
+}
+
+/**
+ * The content tier of a strand for the active child (the one resolver every
+ * learning screen asks, instead of its own age rule): the strand's level,
+ * which starts at the age prior or a placement and then follows mastery.
+ */
+export function useContentTier(strand: Strand): ContentTier {
+  const child = useActiveChild()
+  const level = useChallengeLevel(strand)
+  return child ? contentTier(level) : GUEST_TIER
 }

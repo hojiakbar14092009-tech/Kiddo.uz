@@ -24,7 +24,8 @@ import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 import { Picture } from '@/components/ui/Picture'
 import { MEMORY_PAIRS } from '@/features/age/ageLevel'
-import { useAgeLevel } from '@/store/familyStore'
+import { useContentTier } from '@/domain/adaptive'
+import { TASK_STRAND } from '@/domain/universe/wiring'
 
 const HIDE_DELAY_MS = 1100
 const FINISH_DELAY_MS = 1600
@@ -34,7 +35,7 @@ export function MemoryGame() {
   const { t } = useTranslation()
   const language = useLanguage()
   const learner = useLearner('memory')
-  const level = useAgeLevel()
+  const level = useContentTier(TASK_STRAND.memory)
   const reduceMotion = useReducedMotion() ?? false
   const { react, reset } = useMascot()
   const { sayText, sayLetter, speaking } = useSpeaker()

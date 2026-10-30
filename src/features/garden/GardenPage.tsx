@@ -13,7 +13,8 @@ import { orderOf } from '@/features/learn/review'
 import type { LearnMode } from '@/features/learn/session'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
 import { useLearnSession, type FinishedSession } from '@/features/learn/useLearnSession'
-import { useAgeLevel } from '@/store/familyStore'
+import { useContentTier } from '@/domain/adaptive'
+import { SECTION_STRAND } from '@/domain/universe/wiring'
 import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { itemName, taskPrompt } from './content'
@@ -434,7 +435,7 @@ function ModePicker({ onPick }: { onPick: (mode: LearnMode) => void }) {
 /** «Bog‘da top»: find things in a garden, with help that comes in small steps. */
 export function GardenPage() {
   const language = useLanguage()
-  const level = useAgeLevel()
+  const level = useContentTier(SECTION_STRAND.garden)
   const [mode, setMode] = useState<LearnMode | null>(null)
   const [round, setRound] = useState(0)
   if (!mode) return <ModePicker onPick={setMode} />

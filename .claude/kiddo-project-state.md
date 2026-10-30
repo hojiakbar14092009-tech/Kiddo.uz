@@ -557,3 +557,16 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - P22 gap 4 (age locks removed): RequireAge deleted; isGameOpen→isGameSuggested; NUMBER_LIMIT/EXAM_MIN_LEVEL/age.lockedAt/lockedSay/exam/learn.lockedAge removed; unlocksAt→suggestedAt; talesFor {open, later}. Critic REJECT (C1 pro text, H1 padlock wording, H2 tales lock) → fixed → ACCEPT. Units 1247, e2e 62/62 (kiddo, homework, birthday, responsive, tours, adaptive).
 - P22 gap 16: tashkentDay moved to lib/dates (+isLeapYear); familyStore today() and ChildForm use it; ageOn 29 Feb rule = birthdayIn; birthdayFor removed. Critic REJECT (ChildForm local day) → fixed → ACCEPT. Units 1248, e2e birthday+parent 6/6.
 - P22 gaps 13+14: bands split, data-band visual maturity (CSS overrides utilities' --tw-shadow), badge real age, --color-focus. Critic REJECT (badge level, palette-only) → fixed → ACCEPT (+ shadow/okina follow-ups). Units 1258, e2e 56/56 incl. new e2e/age-look.spec.ts.
+- P22 finish: AgeProfile table domain/adaptive/ageProfile.ts (bands, visual, scaffolding, narration, density, priorLevel/priorMastery, placement); useContentTier(strand) for Learn/letter screens (SECTION_STRAND/TASK_STRAND), runs reported atCurrentLevel; placement domain/learner/placement.ts + mathLab/placement.ts + LabPlacement (placeStrand, StrandState.placed); tests profiles.test.ts, centralized.test.ts (guard), ageTransition.test.tsx, e2e age-look placement. ChoiceGrid buttons carry data-choice.
+
+## Phase 22 — COMPLETE (2026-10-30)
+
+- Final architecture: run evidence kind is explicit (`domain/learner/evidence.ts` EVIDENCE_POLICY: assessment moves
+  level+mastery; practice moves level 1–3 only, no promotion or half-step from 3; learn/tracing/exam/placement move
+  nothing); one age policy table (ageProfile.ts); placement per child, written once (`placed`).
+- Verification: format PASS, lint PASS, typecheck PASS, unit 1288/1288, build PASS, browser 66/66 (age-look, math-lab,
+  adaptive, kiddo, tours, homework, garden, journey; 4 e2e updated for placement via `passPlacementAllRight`),
+  Critic Critical 0 / High 0.
+- Known non-blocking (Low): a middling practice run at level 3 keeps an assessment streak earned before it (cannot
+  promote, no mastery, per child).
+- Next: Phase 30 (Sticker + Medal + Prestige).

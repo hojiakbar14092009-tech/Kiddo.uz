@@ -12,8 +12,19 @@ import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { Button } from '@/components/ui/Button'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { StepDots } from '@/components/ui/Progress'
-import { useAdaptivePlan } from '@/domain/adaptive'
-import { useChallengeLevel, useMastery, type ChallengeLevel } from '@/domain/learner'
+import { isYoungBand, offersPlacement, useAdaptivePlan } from '@/domain/adaptive'
+import {
+  getChallengeLevel,
+  masteryOf,
+  nextItem,
+  PLACEMENT_RETRIES,
+  PLACEMENT_RUNGS,
+  placementOf,
+  useChallengeLevel,
+  useMastery,
+  type ChallengeLevel,
+  type PlacementAnswer,
+} from '@/domain/learner'
 import {
   getChildMemory,
   getSkillMemory,
@@ -23,7 +34,7 @@ import {
 } from '@/domain/learningMemory'
 import { aiWorthAsking, buildTutorRequest, nextHint } from '@/domain/tutor'
 import { emitActivity, type AwardSummary } from '@/domain/universe'
-import { emitUniverse } from '@/domain/universe/store'
+import { emitUniverse, placeStrand, useUniverseStore } from '@/domain/universe/store'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
 import { HelpButton } from '@/features/learn/HelpButton'
 import { Img3D } from '@/features/learn/Img3D'
@@ -39,6 +50,7 @@ import { TutorPanel } from '@/features/tutor/TutorPanel'
 import { useTutorReply } from '@/features/tutor/useTutorReply'
 import { tDynamic } from '@/lib/tDynamic'
 import { newId } from '@/lib/id'
+import { childAge, useActiveChild, useFamilyStore } from '@/store/familyStore'
 import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { BasketTask } from './BasketTask'
@@ -53,6 +65,7 @@ import {
 import { mathSkillLessonId } from '@/domain/learning'
 import { hasSeenLesson, useLearnChild, useLearnStore } from '@/features/learn/learnStore'
 import { HelpPicture, OptionFace, SceneView } from './parts'
+import { placementQuestion } from './placement'
 import { labActivity, labSummary, type LabSummary } from './result'
 import { helpText, optionLabel, promptText } from './text'
 import { cardToRemove, isSymbolic, labSkillKey, solutionText, tutorItem } from './tutor'
@@ -69,15 +82,39 @@ const NEXT_DELAY_MS = 1100
  * next session. A level is never lowered out loud and never locked by age.
  */
 export function MathLabPage() {
+  // another child is another lab (their own level and placement)
+  return <MathLab key={useChildKey()} />
+}
+
+function MathLab() {
   const level = useChallengeLevel('number')
   const mastery = useMastery('number')
   const practice = usePracticeSkill()
+  const child = useActiveChild()
+  const childKey = useChildKey()
+  const stored = useUniverseStore((s) => s.byChild[childKey]?.strands?.number)
+  // an older learner new to the lab: a short placement instead of the age prior
+  const [placing, setPlacing] = useState(
+    () =>
+      offersPlacement(child ? childAge(child) : null) &&
+      (!stored || (stored.runs === 0 && stored.placed !== true)),
+  )
   const [run, setRun] = useState<{
     count: number
     level: ChallengeLevel
     mastery: number
   } | null>(null)
 
+  if (!run && placing) {
+    return (
+      <LabPlacement
+        onDone={() => {
+          setPlacing(false)
+          setRun({ count: 1, level: currentLevel(childKey), mastery: currentMastery(childKey) })
+        }}
+      />
+    )
+  }
   if (!run) return <LabStart level={level} onStart={() => setRun({ count: 1, level, mastery })} />
   return (
     <LabSession
@@ -143,9 +180,12 @@ function LabFrame({
   help,
   hideMascotShort = false,
   compact = false,
+  hideLevel = false,
   children,
 }: {
   level: ChallengeLevel
+  /** No level chip (the placement: nothing is rated before the start is found). */
+  hideLevel?: boolean
   /** The mastery step shown next to the level (above level 5; 0 below). */
   mastery: number
   /** A phone held sideways: no robot (the screen says the same in big letters). */
@@ -179,7 +219,11 @@ function LabFrame({
         <TitleTopBar
           title={title}
           back="/home"
-          extra={<LevelChip level={level} mastery={mastery} className="max-[479px]:hidden" />}
+          extra={
+            hideLevel ? undefined : (
+              <LevelChip level={level} mastery={mastery} className="max-[479px]:hidden" />
+            )
+          }
         />
       }
       className={clsx('gap-3 px-4 py-3 sm:gap-5 sm:px-8 sm:py-5', SHORT_SCREEN.page)}
@@ -223,7 +267,7 @@ function LabFrame({
             label={t('learn.question', { current: step.current + 1, total: step.total })}
           />
         )}
-        <LevelChip level={level} mastery={mastery} className="min-[480px]:hidden" />
+        {!hideLevel && <LevelChip level={level} mastery={mastery} className="min-[480px]:hidden" />}
       </div>
       {children}
     </Screen>
@@ -272,6 +316,148 @@ function LabStart({ level, onStart }: { level: ChallengeLevel; onStart: () => vo
             {t('mathLab.classic')}
           </LinkButton>
         </div>
+      </section>
+    </LabFrame>
+  )
+}
+
+// ------------------------------------------------------------------ placement
+
+/** The strand's level and mastery right now (read after a placement was written). */
+function currentLevel(childKey: string): ChallengeLevel {
+  const child = useFamilyStore.getState().children.find((item) => item.id === childKey)
+  return getChallengeLevel(childKey, 'number', child ? childAge(child) : null)
+}
+
+function currentMastery(childKey: string): number {
+  const child = useFamilyStore.getState().children.find((item) => item.id === childKey)
+  return masteryOf(
+    useUniverseStore.getState().byChild[childKey]?.strands,
+    'number',
+    child ? childAge(child) : null,
+  )
+}
+
+/**
+ * "Let's find the best place to start": a few fixed items, easy to hard; an
+ * item not answered on their own gets a second one of the same step, and a
+ * step missed twice ends it. No right/wrong marks, no level and no score: the
+ * answers only choose the start (domain/learner/placement), written once.
+ * Focus moves to each new heading, which the screen reader then reads.
+ */
+function LabPlacement({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation()
+  const language = useLanguage()
+  const childKey = useChildKey()
+  const [phase, setPhase] = useState<'intro' | 'ask' | 'done'>('intro')
+  const [answers, setAnswers] = useState<PlacementAnswer[]>([])
+  const item = nextItem(answers)
+  const itemKey = item ? `${item.rung}-${item.attempt}` : null
+  const q = useMemo(
+    () => (item ? placementQuestion(item.rung, item.attempt) : null),
+    // the item is fully named by its key
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [itemKey],
+  )
+  const heading = useRef<HTMLHeadingElement>(null)
+  const started = useRef(false)
+
+  // a new step (or the end): focus its heading, so keyboard and screen reader follow
+  useEffect(() => {
+    if (!started.current) {
+      started.current = true
+      return
+    }
+    heading.current?.focus()
+  }, [phase, itemKey])
+
+  const record = (independent: boolean) => {
+    if (!item) return
+    const next = [...answers, { rung: item.rung, independent }]
+    setAnswers(next)
+    if (nextItem(next) === null) {
+      placeStrand(childKey, 'number', placementOf(next))
+      setPhase('done')
+    }
+  }
+
+  if (phase !== 'ask' || !q || !item) {
+    const done = phase === 'done'
+    const title = t(done ? 'mathLab.placement.doneTitle' : 'mathLab.placement.title')
+    const text = t(done ? 'mathLab.placement.doneText' : 'mathLab.placement.intro')
+    return (
+      <LabFrame level={1} mastery={0} hideLevel speak={[title, text]}>
+        <section
+          data-testid={done ? 'placement-done' : 'placement-intro'}
+          aria-labelledby="placement-title"
+          className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-panel bg-surface p-5 text-center shadow-press-lg sm:p-8"
+        >
+          <h2
+            id="placement-title"
+            ref={heading}
+            tabIndex={-1}
+            className="font-display text-2xl font-extrabold outline-none sm:text-3xl"
+          >
+            {title}
+          </h2>
+          <p className="text-lg text-ink-soft">{text}</p>
+          <Button
+            data-testid={done ? 'placement-go' : 'placement-start'}
+            onClick={done ? onDone : () => setPhase('ask')}
+          >
+            {t(done ? 'mathLab.placement.go' : 'mathLab.placement.start')}
+          </Button>
+        </section>
+      </LabFrame>
+    )
+  }
+
+  const prompt = promptText(t, language, q)
+  const choices = q.options.map((option) => ({
+    id: option.id,
+    label: optionLabel(t, language, q, option),
+    content: <OptionFace option={option} object={q.object} />,
+  }))
+  return (
+    <LabFrame level={1} mastery={0} hideLevel speak={[prompt]}>
+      <section
+        key={itemKey}
+        data-testid="placement-question"
+        data-rung={item.rung}
+        data-attempt={item.attempt}
+        data-answer={q.answer}
+        aria-labelledby="placement-prompt"
+        className="mx-auto flex w-full max-w-4xl flex-col items-center gap-4 sm:gap-6"
+      >
+        <p className="text-base font-semibold text-ink-soft">
+          {t('mathLab.placement.step', {
+            current: answers.length + 1,
+            total: PLACEMENT_RUNGS.length + PLACEMENT_RETRIES,
+          })}
+        </p>
+        <h2
+          id="placement-prompt"
+          ref={heading}
+          tabIndex={-1}
+          className="text-center font-display text-2xl leading-tight font-extrabold outline-none sm:text-3xl"
+        >
+          {prompt}
+        </h2>
+        <SceneView scene={q.scene} object={q.object} />
+        <ChoiceGrid
+          choices={choices}
+          onChoose={(id) => record(isRight(q, id))}
+          className="max-w-2xl"
+          cardClassName="min-h-24"
+        />
+        <Button
+          variant="soft"
+          size="md"
+          data-testid="placement-not-sure"
+          onClick={() => record(false)}
+        >
+          {t('mathLab.placement.notSure')}
+        </Button>
       </section>
     </LabFrame>
   )
@@ -359,6 +545,8 @@ function LabSession({
       {
         options: plan.options,
         mastery,
+        // an older learner at the foundations: counting and adding, not the basket game
+        noDrag: !isYoungBand(plan.band),
       },
     ),
   )

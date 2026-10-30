@@ -1,3 +1,4 @@
+import { contentTier, priorLevel } from '@/domain/adaptive/ageProfile'
 import type { GameType } from '@/features/tasks/games'
 import { isLeapYear } from '@/lib/dates'
 
@@ -92,10 +93,14 @@ export function ageOn(birthDate: string, today: string): number {
   return age
 }
 
+/**
+ * The young presentation tier of an age before any evidence: the age
+ * profile's prior level as a content tier (domain/adaptive/ageProfile), so
+ * age has one source. Used for age suggestions, the daily plan and the age
+ * look; learning screens ask `useContentTier(strand)`, which follows mastery.
+ */
 export function levelForAge(age: number): AgeLevel {
-  if (age <= MIN_AGE) return MIN_AGE
-  if (age >= MAX_AGE) return MAX_AGE
-  return age as AgeLevel
+  return contentTier(priorLevel(age))
 }
 
 /** A birth date that makes the child `age` on `today` (used to migrate old profiles). */

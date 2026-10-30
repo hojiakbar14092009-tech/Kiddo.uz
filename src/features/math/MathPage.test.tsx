@@ -2,6 +2,7 @@ import { act, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { birthDateForAge } from '@/features/age/ageLevel'
 import { getLearnChild, stagesTaught, useLearnStore } from '@/features/learn/learnStore'
+import { useUniverseStore } from '@/domain/universe/store'
 import { useFamilyStore } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
@@ -54,6 +55,8 @@ describe('Matematika page', () => {
     useSettingsStore.setState({ language: 'uz' })
     useLearnStore.setState({ byChild: {} })
     useProgressStore.setState({ byChild: {} })
+    // the 'number' strand moves with each finished session (content tier): a fresh child per test
+    useUniverseStore.setState({ byChild: {} })
   })
 
   it('age 4: count by tapping (never twice), learn a stage, then a 3-question picture check', async () => {

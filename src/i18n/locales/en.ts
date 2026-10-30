@@ -1068,6 +1068,16 @@ export const en: Translation = {
     level: 'Level {{level}}',
     levelMastery: 'Level {{level}} · mastery {{step}}',
     classic: 'Learn adding step by step',
+    placement: {
+      title: 'Let’s find the best place to start',
+      intro: 'A few short questions. This is not a test: your answers help us find where to begin.',
+      start: 'Let’s go',
+      step: 'Question {{current}} of up to {{total}}',
+      notSure: 'I don’t know yet',
+      doneTitle: 'All set! We found your starting point',
+      doneText: 'The tasks now fit you, and they keep adjusting as you answer.',
+      go: 'Start practising',
+    },
     objects: {
       apple: 'apples',
       pear: 'pears',

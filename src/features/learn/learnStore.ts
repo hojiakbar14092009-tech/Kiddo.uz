@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { Language } from '@/content/languages'
 import { grantReward, wasRewarded } from '@/domain/rewards/rewardStore'
 import { sessionCoins } from '@/domain/rewards/rules'
-import { emitActivity } from '@/domain/universe/store'
+import { atCurrentLevel, emitActivity } from '@/domain/universe/store'
 import { learnActivity } from '@/domain/universe/wiring'
 import { useChildKey } from '@/store/progressStore'
 import type { AnswerRecord, LearnMode, SessionSummary } from './session'
@@ -191,7 +191,10 @@ export const useLearnStore = create<LearnState>()(
           }
         })
         // Stars, crystals, scrolls and achievements: counted once per session id.
-        emitActivity(learnActivity(childKey, record))
+        // practice is evidence at the strand's level (its items follow the content tier);
+        // a learn session (being taught, with help) is marked as such and moves nothing
+        const activity = learnActivity(childKey, record)
+        emitActivity(atCurrentLevel(activity, record.mode === 'learn' ? 'learn' : 'practice'))
         return entry.coins
       },
 

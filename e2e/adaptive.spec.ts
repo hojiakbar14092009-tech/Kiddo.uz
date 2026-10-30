@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { passMathExample } from './lesson.ts'
+import { passMathExample, passPlacementAllRight } from './lesson.ts'
 
 /*
  * Phase 15 QA: age is a starting point, not a ceiling. A parent adds a
@@ -51,8 +51,8 @@ test('a ten-year-old: no age ceiling, focus explained to the parent, Math Lab st
   await expect(page.getByRole('heading', { name: 'Salom, Doniyor!' })).toBeVisible()
   await page.getByRole('link', { name: 'Matematika shahri', exact: true }).click()
   await expect(page).toHaveURL(/\/math-lab$/)
-  await expect(page.getByTestId('lab-level').first()).toContainText('5')
-  await page.getByTestId('lab-start').click()
+  // a new learner of 7 or more first finds their start (Phase 22): all right → the top
+  await passPlacementAllRight(page)
   await passMathExample(page)
   const question = page.getByTestId('lab-question')
   await expect(question).toHaveAttribute('data-level', '5')

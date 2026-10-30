@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useUniverseStore } from '@/domain/universe'
+import { EMPTY_UNIVERSE_CHILD } from '@/domain/universe/store'
 import { birthDateForAge } from '@/features/age/ageLevel'
 import { useFamilyStore } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
@@ -221,19 +222,71 @@ describe('Math Lab with no maximum age (Phase 22)', () => {
     useUniverseStore.setState({ byChild: {} })
   })
 
-  it('a 30-year-old learner starts above level 5, with big numbers and the mastery shown', async () => {
+  it('a new 30-year-old is placed by a short probe, not by age: all on their own → level 5, mastery 2', async () => {
     childOfAge(30)
     const { user } = await renderRoute('/math-lab')
-    const chip = screen.getAllByTestId('lab-level')[0]!
-    expect(chip).toHaveTextContent('5-daraja · ustalik 3')
-    await user.click(screen.getByTestId('lab-start'))
-    const q = question()
-    expect(q).toHaveAttribute('data-level', '5')
-    // mastery 3: numbers up to 200, written as an equation
+    // neutral words, no score: "let's find the best place to start"
+    expect(screen.getByTestId('placement-intro')).toHaveTextContent(
+      'Qayerdan boshlashni birga topamiz',
+    )
+    expect(screen.queryByTestId('lab-start')).not.toBeInTheDocument()
+    await user.click(screen.getByTestId('placement-start'))
+    const rungs: string[] = []
+    while (screen.queryByTestId('placement-question')) {
+      const probe = screen.getByTestId('placement-question')
+      rungs.push(probe.dataset.rung!)
+      const answer = probe.dataset.answer!
+      await user.click(probe.querySelector(`[data-choice="${answer}"]`)!)
+    }
+    expect(rungs).toEqual(['easy', 'medium', 'hard', 'stretch'])
+    expect(screen.getByTestId('placement-done')).toBeInTheDocument()
+    const strand = useUniverseStore.getState().byChild.kid?.strands?.number
+    expect(strand).toMatchObject({ level: 5, mastery: 2, placed: true, runs: 0 })
+    await user.click(screen.getByTestId('placement-go'))
+    expect(question()).toHaveAttribute('data-level', '5')
+    // big numbers (mastery 2), written as an equation
     const numbers = [...screen.getByTestId('lab-equation').children]
       .map((token) => Number(token.textContent))
       .filter((n) => Number.isFinite(n) && n > 0)
     expect(Math.max(...numbers)).toBeGreaterThan(20)
-    expect(Math.max(...numbers)).toBeLessThanOrEqual(200)
+  })
+
+  it('a new 14-year-old who is not sure yet starts at the foundations, without a score', async () => {
+    childOfAge(14)
+    const { user } = await renderRoute('/math-lab')
+    await user.click(screen.getByTestId('placement-start'))
+    // one "I don't know yet" is not decisive: a second item of the same step comes
+    await user.click(screen.getByTestId('placement-not-sure'))
+    expect(screen.getByTestId('placement-question')).toHaveAttribute('data-attempt', '1')
+    expect(screen.getByTestId('placement-question')).toHaveAttribute('data-rung', 'easy')
+    // focus follows to the new item's heading
+    expect(document.activeElement).toHaveAttribute('id', 'placement-prompt')
+    expect(screen.queryByTestId('lab-level')).not.toBeInTheDocument()
+    await user.click(screen.getByTestId('placement-not-sure'))
+    expect(screen.getByTestId('placement-done')).toHaveTextContent('Tayyor!')
+    expect(screen.getByTestId('placement-done')).not.toHaveTextContent(/daraja|past|xato/i)
+    expect(useUniverseStore.getState().byChild.kid?.strands?.number).toMatchObject({
+      level: 1,
+      placed: true,
+    })
+    await user.click(screen.getByTestId('placement-go'))
+    expect(question()).toHaveAttribute('data-level', '1')
+    // the foundations without the basket game (that is for the youngest)
+    expect(question()).not.toHaveAttribute('data-kind', 'drag')
+  })
+
+  it('a learner who already played is never placed again', async () => {
+    childOfAge(14)
+    useUniverseStore.setState({
+      byChild: {
+        kid: {
+          ...EMPTY_UNIVERSE_CHILD,
+          strands: { number: { level: 3, streak: 0, runs: 4, independent: 10, total: 20 } },
+        },
+      },
+    })
+    await renderRoute('/math-lab')
+    expect(screen.queryByTestId('placement-intro')).not.toBeInTheDocument()
+    expect(screen.getByTestId('lab-start')).toBeInTheDocument()
   })
 })
