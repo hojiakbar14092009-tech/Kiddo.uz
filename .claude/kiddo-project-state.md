@@ -549,3 +549,5 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - P23 patched: `features/homework/status.ts` (assigned/started/completed/practice; score kept on the homework),
   planet homework `ActivityHomework.topic` (Space lesson stage; `features/homework/topics.ts`; card → /learn/space?lesson=;
   focused SpaceTest stage `focus-<stage>`; `countsFor(target, activity, topic)`), e2e two-child planet flow.
+- P23 first view: `parent/dashboard/GlanceSection.tsx` (8 cards: Farzandim … Faoliyat tarixi) + `glance.ts`
+  (runsOnDay all kinds, learningNow 14 days, gettingStronger own recent vs earlier, ≥5 answers, +0.1).

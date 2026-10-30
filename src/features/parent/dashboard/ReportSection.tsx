@@ -23,6 +23,7 @@ import { LearnResultsPanel } from './LearnResultsPanel'
 import { FocusPanel } from '../insights/FocusPanel'
 import { MemoryPanel } from '../insights/MemoryPanel'
 import { Panel } from './Panel'
+import { GlanceSection } from './GlanceSection'
 
 /** Today, the week and the letters that need practice – for one child. */
 export function ReportSection({ child }: { child: ChildProfile }) {
@@ -51,6 +52,8 @@ export function ReportSection({ child }: { child: ChildProfile }) {
 
   return (
     <div className="grid gap-5 lg:grid-flow-row-dense lg:grid-cols-2">
+      {/* the first view: the questions a parent asks first, each linked to its details below */}
+      <GlanceSection child={child} insights={insights} />
       <Panel title={t('parent.report.today')} className="lg:col-span-2">
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((stat) => (
