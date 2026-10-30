@@ -21,7 +21,7 @@ Status per line: OPEN / DONE <commit>.
 
 - DONE (P22 age-locks commit) 4 No age locks: games, numbers 1–10, exam (mastery only), tales open at any age; age = calm "N yoshdan tavsiya"; birthday = new suggestions (gift, not padlock); parents may assign any game.
 - OPEN 18 Representative profile tests (4, 6 strong, 8, 11, 14 new, 17 exp.) + birthday band change preserves progress.
-- OPEN 16 familyStore today() local vs tashkentDay; Feb-29 ageOn rule mismatch.
+- DONE (P22 tashkent commit) 16 Ages count by the Tashkent day (store, ChildForm, birthday, server agree); 29 Feb turns older on the 28th in non-leap years; shared isLeapYear.
 - OPEN 13 AGE_BANDS '4-6' → '3-4','5-6' (min age 4 is product decision).
 - OPEN 12 Learn sections use useAgeLevel `level === N` branches (17 sites), 14-year-old capped at level 6 → resolver.
 - OPEN 14 Visual maturity separate from difficulty (AgeTheme only 4/5/6; 16+ gets preschool theme).

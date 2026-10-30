@@ -1,4 +1,5 @@
 import type { GameType } from '@/features/tasks/games'
+import { isLeapYear } from '@/lib/dates'
 
 /*
  * Every age shapes how the games are presented (answers shown, pairs, today's
@@ -84,7 +85,10 @@ export function ageOn(birthDate: string, today: string): number {
   const now = parts(today)
   if (!born || !now) return 0
   let age = now[0] - born[0]
-  if (now[1] < born[1] || (now[1] === born[1] && now[2] < born[2])) age -= 1
+  // someone born on 29 February has their birthday on the 28th in other years,
+  // the same day the birthday party is held (birthday.ts birthdayIn)
+  const bornDay = born[1] === 2 && born[2] === 29 && !isLeapYear(now[0]) ? 28 : born[2]
+  if (now[1] < born[1] || (now[1] === born[1] && now[2] < bornDay)) age -= 1
   return age
 }
 
@@ -101,13 +105,6 @@ export function birthDateForAge(age: number, today: string): string {
   // 29 February does not exist in most years.
   const day = String(now[1] === 2 && now[2] === 29 ? 28 : now[2]).padStart(2, '0')
   return `${now[0] - age}-${month}-${day}`
-}
-
-/** The day a child reaches `level`, e.g. their fifth birthday. */
-export function birthdayFor(birthDate: string, level: AgeLevel): string {
-  const born = parts(birthDate)
-  if (!born) return birthDate
-  return `${born[0] + level}-${String(born[1]).padStart(2, '0')}-${String(born[2]).padStart(2, '0')}`
 }
 
 /** Whole days from `today` until `day` (0 when it has passed). */

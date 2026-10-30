@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   ageOn,
   birthDateForAge,
@@ -8,12 +8,42 @@ import {
   levelForAge,
   suggestedAt,
 } from './ageLevel'
+import { birthdayIn } from '@/features/birthday/birthday'
+import { childAge, levelOfChild, useFamilyStore } from '@/store/familyStore'
 
 describe('age levels', () => {
   it('counts full years, turning older on the birthday itself', () => {
     expect(ageOn('2021-10-18', '2026-10-17')).toBe(4)
     expect(ageOn('2021-10-18', '2026-10-18')).toBe(5)
-    expect(ageOn('2020-02-29', '2026-02-28')).toBe(5)
+    // born on 29 February: older on the 28th in other years, the party's day
+    expect(ageOn('2020-02-29', '2026-02-27')).toBe(5)
+    expect(ageOn('2020-02-29', '2026-02-28')).toBe(6)
+    expect(birthdayIn('2020-02-29', 2026)).toBe('2026-02-28')
+    // in a leap year the 29th itself; 2100 is not a leap year
+    expect(ageOn('2020-02-29', '2028-02-29')).toBe(8)
+    expect(ageOn('2096-02-29', '2100-02-28')).toBe(4)
+  })
+
+  it('counts the age by the Tashkent day, like the birthday party, in any device zone', () => {
+    const zone = process.env.TZ
+    try {
+      // the device is in New York: 22:00 UTC on 9 May is still the 9th there,
+      // but already 10 May, the birthday, in Tashkent
+      process.env.TZ = 'America/New_York'
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2026-05-09T22:00:00Z'))
+      const child = useFamilyStore
+        .getState()
+        .addChild({ name: 'Bek', birthDate: '2020-05-10', gender: 'boy' })
+      expect(childAge(child)).toBe(6)
+      expect(levelOfChild(child)).toBe(6)
+      expect(child.celebratedLevel).toBe(6)
+    } finally {
+      vi.useRealTimers()
+      if (zone === undefined) delete process.env.TZ
+      else process.env.TZ = zone
+      useFamilyStore.setState({ children: [], activeChildId: null })
+    }
   })
 
   it('keeps every child between level 4 and 6', () => {

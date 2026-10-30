@@ -11,7 +11,7 @@ import {
   EARLIEST_BIRTH_DATE,
   MIN_AGE,
 } from '@/features/age/ageLevel'
-import { dayKey } from '@/features/tasks/rules'
+import { tashkentDay } from '@/lib/dates'
 import {
   DAILY_LIMIT_OPTIONS,
   DEFAULT_DAILY_LIMIT_MINUTES,
@@ -48,7 +48,8 @@ interface ChildFormProps {
 export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
   const { t } = useTranslation()
   const [name, setName] = useState(initial?.name ?? '')
-  const [today] = useState(() => dayKey())
+  // the same day the store, the birthday and the server count ages by
+  const [today] = useState(() => tashkentDay())
   const [birthDate, setBirthDate] = useState(initial?.birthDate ?? '')
   const [birthError, setBirthError] = useState(false)
   // From 4, no maximum age: born on or before (today − 4 years)

@@ -555,3 +555,4 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   `thumb`, spoken question, Start after it); feelings lessons per tier (feelingsLessonPlan.ts) before faces/scenes/kindness.
 
 - P22 gap 4 (age locks removed): RequireAge deleted; isGameOpen→isGameSuggested; NUMBER_LIMIT/EXAM_MIN_LEVEL/age.lockedAt/lockedSay/exam/learn.lockedAge removed; unlocksAt→suggestedAt; talesFor {open, later}. Critic REJECT (C1 pro text, H1 padlock wording, H2 tales lock) → fixed → ACCEPT. Units 1247, e2e 62/62 (kiddo, homework, birthday, responsive, tours, adaptive).
+- P22 gap 16: tashkentDay moved to lib/dates (+isLeapYear); familyStore today() and ChildForm use it; ageOn 29 Feb rule = birthdayIn; birthdayFor removed. Critic REJECT (ChildForm local day) → fixed → ACCEPT. Units 1248, e2e birthday+parent 6/6.

@@ -8,6 +8,7 @@ import {
 import { setAgeResolver } from '@/domain/learner/profile'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { tashkentDay } from '@/lib/dates'
 import type { Language } from '@/content/languages'
 import type { GameType } from '@/features/tasks/games'
 import { clearChildRewards } from '@/domain/rewards/rewardStore'
@@ -154,11 +155,9 @@ interface FamilyState {
   completeHomework: (childId: string, homeworkId: string, mistakes: number) => void
 }
 
+/** Ages count by the Tashkent day, the same day the birthday party uses. */
 function today(): string {
-  const date = new Date()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${date.getFullYear()}-${month}-${day}`
+  return tashkentDay()
 }
 
 function createId(): string {

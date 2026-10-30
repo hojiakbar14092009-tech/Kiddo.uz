@@ -1,4 +1,5 @@
 import { grantReward, wasRewarded } from '@/domain/rewards'
+import { isLeapYear } from '@/lib/dates'
 import { PET_IDS, type PetId } from '@/features/pets/pets'
 import { useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
@@ -19,18 +20,8 @@ export const BIRTHDAY_WEEK_DAYS = 7
 export const birthdayRef = (year: number, pet?: PetId | null) =>
   pet ? `birthday|${year}|${pet}` : `birthday|${year}`
 
-/**
- * Today in Tashkent (YYYY-MM-DD): the birthday week is counted the way the
- * server counts it, whatever the device's time zone.
- */
-export function tashkentDay(now: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Tashkent',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(now)
-}
+/** Today in Tashkent: the birthday week, like the age, counts by it (lib/dates). */
+export { tashkentDay } from '@/lib/dates'
 
 /**
  * Was this year's gift already given (the ledger, which outlives a lost
@@ -52,8 +43,7 @@ function utcDay(day: string): number {
 /** The birthday in a year (YYYY-MM-DD); 29 February is the 28th in other years. */
 export function birthdayIn(birthDate: string, year: number): string {
   const [, m, d] = birthDate.split('-').map(Number) as [number, number, number]
-  const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
-  const day = m === 2 && d === 29 && !leap ? 28 : d
+  const day = m === 2 && d === 29 && !isLeapYear(year) ? 28 : d
   return `${year}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
