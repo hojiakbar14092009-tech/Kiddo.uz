@@ -1,6 +1,13 @@
 import { fireEvent, render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { SPECIES_MOTION } from './motion'
 import { PetSprite } from './PetSprite'
+
+const weak = vi.hoisted(() => ({ value: false }))
+vi.mock('./motion', async (original) => ({
+  ...(await original<typeof import('./motion')>()),
+  weakDevice: () => weak.value,
+}))
 
 const sources = (container: HTMLElement) =>
   [...container.querySelectorAll('img')].map((img) => img.getAttribute('src'))
@@ -42,5 +49,18 @@ describe('PetSprite loads only the poses it can show', () => {
   it('without motion it loads only the pose on screen', () => {
     const { container } = render(<PetSprite pet="hamster" lively={false} />)
     expect(sources(container)).toEqual(['/pets/hamster/happy.webp'])
+  })
+
+  it('each species moves in its own way; a weak device keeps the pet still', () => {
+    const motions = Object.values(SPECIES_MOTION).map((motion) => JSON.stringify(motion.animate))
+    expect(new Set(motions).size).toBe(motions.length)
+    expect(SPECIES_MOTION.bunny.animate.y).toContain(-16) // a real hop
+    const { container, unmount } = render(<PetSprite pet="bunny" />)
+    expect(container.querySelector('[data-motion]')).toHaveAttribute('data-motion', 'bunny')
+    unmount()
+    weak.value = true
+    const still = render(<PetSprite pet="bunny" />)
+    expect(still.container.querySelector('[data-motion]')).toHaveAttribute('data-motion', 'still')
+    weak.value = false
   })
 })

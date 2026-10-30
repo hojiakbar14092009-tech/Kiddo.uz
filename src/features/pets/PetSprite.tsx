@@ -1,7 +1,8 @@
 import clsx from 'clsx'
-import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import { onIdle } from '@/lib/onIdle'
+import { SPECIES_MOTION, weakDevice } from './motion'
 import { petFrame, PET_EMOTIONS, type PetEmotion, type PetId } from './pets'
 
 /** The poses the idle loop moves through (loaded up front, so it never flickers). */
@@ -31,8 +32,9 @@ interface PetSpriteProps {
 }
 
 /**
- * A pet drawn in six poses. It breathes (a soft squash and stretch), hops now
- * and then and switches between happy, shy and surprised poses on its own.
+ * A pet drawn in six poses. It moves in its own species' way (motion.ts) and
+ * switches between happy, shy and surprised poses on its own; it rests off
+ * screen, on weak devices and with reduced motion.
  */
 export function PetSprite({
   pet,
@@ -43,7 +45,13 @@ export function PetSprite({
 }: PetSpriteProps) {
   const reduceMotion = useReducedMotion() ?? false
   const [step, setStep] = useState(0)
-  const animate = lively && !reduceMotion
+  const [weak] = useState(weakDevice)
+  const box = useRef<HTMLSpanElement>(null)
+  // off screen (a long shop list, a scrolled page) the pet rests: no work for the browser
+  const inView = useInView(box, { margin: '80px' })
+  const animate = lively && !reduceMotion && !weak
+  const moving = animate && inView
+  const species = SPECIES_MOTION[pet]
   const shown = emotion ?? IDLE[step % IDLE.length]![0]
   // Only the poses this sprite can show are loaded: the fixed one, or the idle loop's
   // three (all six with `warm`, once the page is idle); a pose stays mounted once shown.
@@ -62,21 +70,19 @@ export function PetSprite({
   if (visible !== shown && loaded.includes(shown)) setVisible(shown)
 
   useEffect(() => {
-    if (emotion || !animate) return undefined
+    if (emotion || !moving) return undefined
     const timer = setTimeout(() => setStep((current) => current + 1), IDLE[step % IDLE.length]![1])
     return () => clearTimeout(timer)
-  }, [animate, emotion, step])
+  }, [moving, emotion, step])
 
   return (
     <motion.span
+      ref={box}
       className={clsx('relative inline-block aspect-square', className)}
-      animate={
-        animate
-          ? { scaleY: [1, 0.94, 1.03, 1], scaleX: [1, 1.04, 0.98, 1], y: [0, 0, -6, 0] }
-          : undefined
-      }
-      transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-      style={{ originY: 1 }}
+      data-motion={moving ? pet : 'still'}
+      animate={moving ? species.animate : { x: 0, y: 0, rotate: 0, scaleX: 1, scaleY: 1 }}
+      transition={moving ? species.transition : { duration: 0.3 }}
+      style={{ originY: species.originY }}
     >
       {poses.map((pose) => (
         <img

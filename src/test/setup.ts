@@ -70,3 +70,25 @@ MotionGlobalConfig.skipAnimations = true
 // jsdom has no canvas; behave like a browser without 2D/WebGL support.
 HTMLCanvasElement.prototype.getContext = (() =>
   null) as typeof HTMLCanvasElement.prototype.getContext
+
+// jsdom has no IntersectionObserver: everything counts as on screen (framer-motion useInView)
+if (typeof globalThis.IntersectionObserver === 'undefined') {
+  class Visible {
+    private readonly callback: IntersectionObserverCallback
+    constructor(callback: IntersectionObserverCallback) {
+      this.callback = callback
+    }
+    observe(target: Element) {
+      this.callback(
+        [{ isIntersecting: true, target } as IntersectionObserverEntry],
+        this as unknown as IntersectionObserver,
+      )
+    }
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return []
+    }
+  }
+  globalThis.IntersectionObserver = Visible as unknown as typeof IntersectionObserver
+}
