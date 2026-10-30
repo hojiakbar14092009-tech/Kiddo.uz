@@ -11,9 +11,12 @@ vi.mock('./synth', () => ({ audio: () => ctx, playTone }))
 const {
   cueNotes,
   noteSuccessSound,
+  playBack,
+  playConfirm,
   playCue,
   queueCue,
   resetCueQueue,
+  setNarrating,
   SOUND_CUES,
   stepHz,
   strongestCue,
@@ -104,6 +107,50 @@ describe('sound language', () => {
     })
     playCue('unlock')
     expect(playTone).toHaveBeenCalled()
+  })
+
+  it('never talks over Kiddo’s voice: small cues wait, big ones play softly', () => {
+    setNarrating(true)
+    playCue('coin')
+    playCue('back')
+    expect(playTone).not.toHaveBeenCalled()
+    playCue('levelUp')
+    expect(playTone).toHaveBeenCalledTimes(cueNotes('levelUp').length * 2)
+    setNarrating(false)
+  })
+
+  it('frequent sounds are quieter and shorter than rare ones', () => {
+    const loudness = (cue: (typeof SOUND_CUES)[number]) =>
+      Math.max(...cueNotes(cue).map((n) => n.gain ?? 1))
+    const length = (cue: (typeof SOUND_CUES)[number]) =>
+      Math.max(...cueNotes(cue).map((n) => n.at + n.duration))
+    for (const small of ['back', 'confirm', 'spend'] as const) {
+      expect(loudness(small)).toBeLessThan(loudness('unlock'))
+      expect(length(small)).toBeLessThan(length('levelUp'))
+    }
+  })
+
+  it('the child’s own tap still answers under the voice, softly', () => {
+    setNarrating(true)
+    playBack()
+    expect(playTone).toHaveBeenCalledTimes(cueNotes('back').length * 2)
+    setNarrating(false)
+  })
+
+  it('coins spent right after a confirmation stay quiet (one sound for one choice)', () => {
+    vi.useFakeTimers()
+    playConfirm()
+    playTone.mockReset()
+    queueCue('spend')
+    vi.advanceTimersByTime(200)
+    expect(playTone).not.toHaveBeenCalled()
+  })
+
+  it('fast back taps make one sound', () => {
+    playBack()
+    playBack()
+    playBack()
+    expect(playTone).toHaveBeenCalledTimes(cueNotes('back').length * 2)
   })
 
   it('is silent at volume 0', () => {

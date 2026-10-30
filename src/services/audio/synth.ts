@@ -1,19 +1,31 @@
+import { Howler } from 'howler'
+
 /*
  * The app's small synthesizer (Web Audio, no sound files): the pets' voices
- * and the sound language (Phase 29) are both made with it.
+ * and the sound language (Phase 29) are both made with it. It plays through
+ * the one audio context of the app — Howler's, which also plays the clicks,
+ * chimes and recorded voice — so there is never a second context to unlock.
  */
 
 let context: AudioContext | null = null
 
 export function audio(): AudioContext | null {
   if (typeof window === 'undefined') return null
-  const Ctor =
-    window.AudioContext ??
-    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-  if (!Ctor) return null
-  context ??= new Ctor()
-  if (context.state === 'suspended') void context.resume()
+  if (!context) {
+    // Howler makes its context on first use; asking for the volume sets it up
+    Howler.autoSuspend = false
+    if (!Howler.ctx) Howler.volume(Howler.volume())
+    context = Howler.usingWebAudio && Howler.ctx ? Howler.ctx : null
+  }
+  if (!context) return null
+  // 'interrupted': iOS paused it (a call, the lock screen); both resume on use
+  if ((context.state as string) !== 'running') void context.resume()
   return context
+}
+
+/** Test helper: forget the context. */
+export function resetAudio(): void {
+  context = null
 }
 
 export interface Tone {

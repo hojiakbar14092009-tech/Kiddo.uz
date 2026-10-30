@@ -147,6 +147,7 @@ export function ExamPage() {
               <Button
                 variant="soft"
                 icon={<HomeIcon size={26} />}
+                data-sound="back"
                 onClick={() => navigate('/home')}
               >
                 {t('reward.home')}
@@ -205,7 +206,7 @@ function ExamResult({
         <CertificateCard name={name} language={language} correct={correct} passedAt={passedAt} />
       )}
       <div className="flex flex-wrap justify-center gap-4">
-        <Button variant="soft" icon={<HomeIcon size={26} />} onClick={onHome}>
+        <Button variant="soft" icon={<HomeIcon size={26} />} data-sound="back" onClick={onHome}>
           {t('reward.home')}
         </Button>
         {!passed && onAgain && <Button onClick={onAgain}>{t('exam.again')}</Button>}

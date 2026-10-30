@@ -654,6 +654,10 @@ export const ru: Translation = {
         heart: 'Дружба',
         unlock: 'Новый мир',
         spend: 'Трата',
+        levelUp: 'Новый уровень',
+        discovery: 'Открытие',
+        confirm: 'Подтверждение',
+        back: 'Назад',
       },
       testSound: 'Проверить звук',
       voiceNote:

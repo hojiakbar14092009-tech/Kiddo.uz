@@ -229,7 +229,7 @@ function PetBuyDialog({
         <Button variant="soft" onClick={onCancel}>
           {t('shop.no')}
         </Button>
-        <Button ref={yes} variant="coin" onClick={onConfirm}>
+        <Button ref={yes} variant="coin" data-sound="confirm" onClick={onConfirm}>
           {t('shop.yes')}
         </Button>
       </div>

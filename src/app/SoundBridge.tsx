@@ -34,13 +34,18 @@ export function SoundBridge() {
           else if (event.entry.amount > 0) cue = event.entry.resource === 'star' ? 'star' : 'coin'
           break
         case 'plant.grew':
-        case 'skill.mastered':
           cue = 'grow'
+          break
+        case 'skill.mastered':
+        case 'building.upgraded':
+          cue = 'levelUp'
+          break
+        case 'artifact.discovered':
+          cue = 'discovery'
           break
         case 'world.unlocked':
         case 'achievement.reached':
         case 'quest.claimed':
-        case 'building.upgraded':
           cue = 'unlock'
           break
         default:

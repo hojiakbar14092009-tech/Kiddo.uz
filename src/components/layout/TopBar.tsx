@@ -48,7 +48,12 @@ export function TopBar({ start, showHome = true, showCoins = true }: TopBarProps
       )}
     >
       {showHome && (
-        <IconButton label={t('common.home')} tone="primary" onClick={() => navigate('/home')}>
+        <IconButton
+          label={t('common.home')}
+          tone="primary"
+          data-sound="back"
+          onClick={() => navigate('/home')}
+        >
           <HomeIcon size={28} />
         </IconButton>
       )}

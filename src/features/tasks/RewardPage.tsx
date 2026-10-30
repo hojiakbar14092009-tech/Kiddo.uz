@@ -114,7 +114,12 @@ function RewardContent({ taskType, outcome }: RewardState) {
 
       <div className="mt-2 flex flex-wrap justify-center gap-4">
         <BackToGarden />
-        <Button variant="soft" icon={<HomeIcon size={26} />} onClick={() => navigate('/home')}>
+        <Button
+          variant="soft"
+          icon={<HomeIcon size={26} />}
+          data-sound="back"
+          onClick={() => navigate('/home')}
+        >
           {t('reward.home')}
         </Button>
         {isGameType(taskType) && (

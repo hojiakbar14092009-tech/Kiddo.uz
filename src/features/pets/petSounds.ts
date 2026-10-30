@@ -1,3 +1,4 @@
+import { tapGain } from '@/services/audio/soundLanguage'
 import { audio, playTone } from '@/services/audio/synth'
 import { useSettingsStore } from '@/store/settingsStore'
 import type { PetId } from './pets'
@@ -101,13 +102,30 @@ const VOICES: Record<PetId, (ctx: AudioContext, out: AudioNode) => void> = {
   },
 }
 
-/** Plays the pet's own sound at the app's volume (free for everyone: it is not speech). */
+/** Taps on a pet closer together than this make one sound (no stacked meows). */
+const PET_GAP_MS = 400
+let lastPet = -Infinity
+
+/**
+ * Plays the pet's own sound at the app's volume (free for everyone: it is not
+ * speech), as loud as the other sounds of the app — softer under Kiddo's voice.
+ */
 export function playPetSound(pet: PetId): void {
   const volume = useSettingsStore.getState().volume
+  if (volume <= 0) return
+  const now = performance.now()
+  if (now - lastPet < PET_GAP_MS) return
   const ctx = audio()
-  if (!ctx || volume <= 0) return
+  if (!ctx) return
+  lastPet = now
   const out = ctx.createGain()
-  out.gain.value = volume
+  out.gain.value = volume * tapGain()
   out.connect(ctx.destination)
   VOICES[pet](ctx, out)
+  setTimeout(() => out.disconnect(), 1500)
+}
+
+/** Test helper: forget the last tap. */
+export function resetPetSounds(): void {
+  lastPet = -Infinity
 }

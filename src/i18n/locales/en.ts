@@ -651,6 +651,10 @@ export const en: Translation = {
         heart: 'Friendship',
         unlock: 'New world',
         spend: 'Spending',
+        levelUp: 'Level up',
+        discovery: 'Discovery',
+        confirm: 'Confirm',
+        back: 'Back',
       },
       testSound: 'Play a test sound',
       voiceNote:

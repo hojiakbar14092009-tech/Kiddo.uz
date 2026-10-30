@@ -226,6 +226,7 @@ export function DinoDetail({ id }: { id: DinoId }) {
             <p className="text-lg text-ink-soft">{text.explore.lockedText}</p>
             <LinkButton
               to={`${DINO_ROOT}/explore`}
+              data-sound="back"
               variant="soft"
               size="md"
               icon={<ChevronLeftIcon size={24} />}
@@ -295,6 +296,7 @@ export function DinoDetail({ id }: { id: DinoId }) {
           </ul>
           <LinkButton
             to={`${DINO_ROOT}/explore`}
+            data-sound="back"
             variant="soft"
             size="md"
             className="self-start"

@@ -33,6 +33,7 @@ export function ErrorScreen({ updating = false }: { updating?: boolean }) {
           </button>
           <a
             href="/home"
+            data-sound="back"
             className="inline-flex min-h-14 items-center rounded-full bg-surface px-7 font-display text-xl font-bold text-ink shadow-press"
           >
             {t('common.home')}

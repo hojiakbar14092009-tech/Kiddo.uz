@@ -32,7 +32,16 @@ describe('SoundBridge', () => {
     } as unknown as Event)
     publish({ type: 'world.unlocked', childKey: 'guest', id: 'ocean' })
     publish({ type: 'plant.grew', childKey: 'guest', plot: 'p', stage: 2 })
-    expect(queueCue.mock.calls.map(([cue]) => cue)).toEqual(['star', 'spend', 'unlock', 'grow'])
+    publish({ type: 'building.upgraded', childKey: 'guest', id: 'math-land', level: 2 })
+    publish({ type: 'artifact.discovered', childKey: 'guest', id: 'a' })
+    expect(queueCue.mock.calls.map(([cue]) => cue)).toEqual([
+      'star',
+      'spend',
+      'unlock',
+      'grow',
+      'levelUp',
+      'discovery',
+    ])
   })
 
   it('stays quiet for another profile and for events that are not progress', () => {

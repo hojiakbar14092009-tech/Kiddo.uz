@@ -653,6 +653,10 @@ export const uz = {
         heart: 'Do‘stlik',
         unlock: 'Yangi olam',
         spend: 'Sarflash',
+        levelUp: 'Yangi daraja',
+        discovery: 'Kashfiyot',
+        confirm: 'Tasdiqlash',
+        back: 'Orqaga',
       },
       testSound: 'Tekshirib eshitish',
       voiceNote:

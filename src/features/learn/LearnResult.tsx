@@ -76,6 +76,7 @@ export function LearnResult({ result, onAgain }: { result: FinishedSession; onAg
         </Button>
         <Link
           to="/home"
+          data-sound="back"
           className="inline-flex min-h-14 items-center gap-2 rounded-full bg-surface px-6 font-display text-xl font-bold shadow-press"
         >
           <HomeIcon size={24} />

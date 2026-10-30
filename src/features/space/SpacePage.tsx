@@ -189,7 +189,13 @@ function ObjectScreen({ id, onBack }: { id: BodyId; onBack: () => void }) {
     <LearnShell title={text.objects[id].name} themeClassName="learn-space">
       <div className="flex flex-col items-center gap-5">
         <ObjectCard id={id} lines={text.objects[id].facts} />
-        <Button variant="soft" size="md" icon={<ChevronLeftIcon size={24} />} onClick={onBack}>
+        <Button
+          variant="soft"
+          size="md"
+          data-sound="back"
+          icon={<ChevronLeftIcon size={24} />}
+          onClick={onBack}
+        >
           {text.ui.exhibit}
         </Button>
       </div>

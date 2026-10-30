@@ -77,6 +77,7 @@ function NumberScreen({ index }: { index: number }) {
           start={
             <Link
               to="/alphabet?tab=numbers"
+              data-sound="back"
               aria-label={t('number.backToNumbers')}
               className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-line-strong bg-surface text-lg sm:h-14 sm:w-auto sm:gap-1 sm:pr-5 sm:pl-3"
             >

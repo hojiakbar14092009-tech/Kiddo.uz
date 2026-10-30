@@ -539,3 +539,6 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   Adventure-map world stages (worldStage.ts) stay as an extra.
 - P27 patched: species idle motion `features/pets/motion.ts`, paused off screen / weak device / reduced motion.
 - jsdom IntersectionObserver stub in src/test/setup.ts (all visible).
+- P29 patched: one AudioContext (synth.ts uses Howler.ctx, autoSuspend off); cues + levelUp/discovery/confirm/back;
+  `setNarrating` (audioManager 'speaking'): small cues dropped, tap-initiated cues/clicks/pets ducked; throttles
+  (click 70 ms, back 250 ms, pet 400 ms); `data-sound="back"|"confirm"` read by InterfaceSounds.

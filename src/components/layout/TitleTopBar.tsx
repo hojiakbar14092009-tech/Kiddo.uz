@@ -33,6 +33,7 @@ export function TitleTopBar({
           {showBack && (
             <IconButton
               label={t('common.back')}
+              data-sound="back"
               onClick={() => (back ? navigate(back) : navigate(-1))}
             >
               <ChevronLeftIcon size={28} />

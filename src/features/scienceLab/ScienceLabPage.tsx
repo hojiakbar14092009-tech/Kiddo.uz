@@ -218,7 +218,9 @@ export function ScienceLabPage() {
             <Button variant="soft" onClick={start}>
               {t('scienceLab.again')}
             </Button>
-            <LinkButton to="/home">{t('scienceLab.back')}</LinkButton>
+            <LinkButton to="/home" data-sound="back">
+              {t('scienceLab.back')}
+            </LinkButton>
           </div>
         </>
       )}

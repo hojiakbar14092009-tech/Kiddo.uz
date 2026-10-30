@@ -53,6 +53,7 @@ export function ParentShell({
         >
           <button
             type="button"
+            data-sound="back"
             onClick={backToChildren}
             className="inline-flex min-h-12 shrink-0 items-center gap-1 rounded-full bg-primary-soft pr-4 pl-2 font-display font-bold whitespace-nowrap text-primary-ink"
           >

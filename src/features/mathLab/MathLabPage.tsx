@@ -852,7 +852,13 @@ function LabResult({
           <Button variant="coin" size="md" onClick={onAgain} data-testid="lab-again">
             {t('learn.again')}
           </Button>
-          <LinkButton to="/home" variant="soft" size="md" icon={<HomeIcon size={24} />}>
+          <LinkButton
+            to="/home"
+            data-sound="back"
+            variant="soft"
+            size="md"
+            icon={<HomeIcon size={24} />}
+          >
             {t('mathLab.result.home')}
           </LinkButton>
         </div>

@@ -7,7 +7,7 @@ import { useFamilyStore } from '@/store/familyStore'
 import { planSpeech, type SpeechPart, type VoiceClip } from './voiceLibrary'
 import { resolveClips, voiceMode } from './voiceSource'
 import { requestTts } from './remoteTts'
-import { noteSuccessSound } from './soundLanguage'
+import { noteSuccessSound, setNarrating } from './soundLanguage'
 
 export type UiSound = 'click' | 'success' | 'soft'
 
@@ -78,7 +78,8 @@ class AudioManager {
       howl = new Howl({ src: [UI_SOUND_URLS[sound]], preload: true })
       this.uiSounds.set(sound, howl)
     }
-    howl.volume(volume)
+    // a tap during Kiddo's voice still answers, but softly under it
+    howl.volume(this.status === 'speaking' ? volume * 0.35 : volume)
     howl.play()
   }
 
@@ -266,6 +267,7 @@ class AudioManager {
   private setStatus(status: SpeechStatus) {
     if (status === this.status) return
     this.status = status
+    setNarrating(status === 'speaking')
     this.listeners.forEach((listener) => listener(status))
   }
 

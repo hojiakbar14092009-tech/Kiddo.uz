@@ -62,4 +62,4 @@ Status per line: OPEN / DONE <commit>.
 
 ## P29 Sound
 
-- OPEN Families tap/confirm/back/soft error/discovery/level-up beyond progress cues; TTS ducking (UI cues must not fight narration); rapid-tap throttle on click; mute.
+- DONE (see commit) Families back/confirm/levelUp/discovery; one AudioContext (synth on Howler.ctx); narration: small cues silent, taps/pets/clicks ducked; tap/back/pet throttles; data-sound="back" on home/back controls.

@@ -65,6 +65,7 @@ export function LetterPage() {
           start={
             <Link
               to="/alphabet"
+              data-sound="back"
               className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-line-strong bg-surface text-lg sm:h-14 sm:w-auto sm:gap-1 sm:pr-5 sm:pl-3"
             >
               <ChevronLeftIcon />

@@ -43,6 +43,7 @@ function StoryLocked({ story }: { story: StorySpec }) {
           <p className="text-lg leading-snug text-ink-soft short:text-base">{ui.lockedText}</p>
           <LinkButton
             to={STORIES_ROOT}
+            data-sound="back"
             variant="soft"
             size="md"
             icon={<ChevronLeftIcon size={24} />}
