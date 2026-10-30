@@ -12,7 +12,10 @@ import type { ChildInsights } from '../insights/useChildInsights'
 import { runName, strandName } from '../insights/insightText'
 import { tDynamic } from '@/lib/tDynamic'
 import { formatDayMonth } from '@/lib/dates'
-import { gettingStronger, learningNow, runsOnDay } from './glance'
+import { useGarden } from '@/domain/garden/hooks'
+import { useChildMemory } from '@/domain/learningMemory/store'
+import { parentSkillNameKey } from '../insights/skillLabel'
+import { activityTrend, gettingStronger, learningNow, recentlyMastered, runsOnDay } from './glance'
 
 /*
  * Parent Center 2.0 first view (full contract): the answers a parent looks
@@ -93,6 +96,22 @@ export function GlanceSection({
   const todayRuns = runsOnDay(insights.runs, dayKey())
   const learning = learningNow(insights.runs, now)
   const stronger = gettingStronger(insights.runs, now)
+  const memory = useChildMemory(child.id)
+  // one line per name: several maths skills share a family name ("Adding"), and a
+  // name still being practised is not also "mastered" (as in the memory panel)
+  const memoryRecent = recentlyMastered(memory.skills, now)
+  const practising = new Set(
+    memoryRecent.practising.map((skill) => tDynamic(t, parentSkillNameKey(skill))),
+  )
+  const mastered = [
+    ...new Map(
+      memoryRecent.mastered
+        .map((skill) => [tDynamic(t, parentSkillNameKey(skill)), skill] as const)
+        .filter(([name]) => !practising.has(name)),
+    ).entries(),
+  ].slice(0, 3)
+  const garden = useGarden(child.id).summary
+  const trend = activityTrend(insights.runs, now)
   const lastRuns = [...insights.runs].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 3)
   const medals = insights.medals
 
@@ -165,6 +184,20 @@ export function GlanceSection({
           )}
         </Card>
 
+        <Card title={t('parent.glance.mastered')} href="#memory" testId="glance-mastered">
+          {mastered.length === 0 ? (
+            <Quiet>{t('parent.glance.masteredNone')}</Quiet>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {mastered.map(([name, skill]) => (
+                <li key={skill} className="font-semibold">
+                  {name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
         <Card title={t('parent.glance.practice')} href="#practice" testId="glance-practice">
           {insights.suggestions.length === 0 ? (
             <Quiet>{t('parent.glance.practiceNone')}</Quiet>
@@ -203,6 +236,19 @@ export function GlanceSection({
           )}
         </Card>
 
+        <Card title={t('parent.glance.garden')} href="#memory" testId="glance-garden">
+          {garden.total === 0 ? (
+            <Quiet>{t('parent.glance.gardenNone')}</Quiet>
+          ) : (
+            <>
+              <p>{t('parent.glance.gardenGrowing', { count: garden.growing })}</p>
+              <p className="text-ink-soft">
+                {t('parent.glance.gardenBloom', { count: garden.bloom })}
+              </p>
+            </>
+          )}
+        </Card>
+
         <Card
           title={t('parent.glance.achievements')}
           href="#medals-city"
@@ -220,6 +266,19 @@ export function GlanceSection({
               </p>
               <p className="text-ink-soft">
                 {t('parent.glance.stickers', { count: progress.stickers.length })}
+              </p>
+            </>
+          )}
+        </Card>
+
+        <Card title={t('parent.glance.trend')} href="#this-week" testId="glance-trend">
+          {trend.direction === 'none' ? (
+            <Quiet>{t('parent.glance.trendNone')}</Quiet>
+          ) : (
+            <>
+              <p>{t(`parent.glance.trend_${trend.direction}`)}</p>
+              <p className="text-ink-soft tabular-nums">
+                {t('parent.glance.trendDays', { now: trend.thisWeek, before: trend.lastWeek })}
               </p>
             </>
           )}

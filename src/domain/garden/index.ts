@@ -3,6 +3,7 @@ export {
   gardenAreas,
   gardenPlants,
   gardenSummary,
+  isUsableMemory,
   nextStep,
   PLANT_FAMILIES,
   PLANT_HUES,

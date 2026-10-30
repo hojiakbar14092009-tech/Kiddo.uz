@@ -1,3 +1,5 @@
+import { isUsableMemory } from '@/domain/garden/garden'
+import { memorySummary, type SkillMemory } from '@/domain/learningMemory/memory'
 import type { Strand } from '@/domain/universe/types'
 import type { PlayedRun } from '../insights/insights'
 import { dayKey } from '@/features/tasks/rules'
@@ -62,4 +64,54 @@ export function gettingStronger(runs: readonly PlayedRun[], now: Date, limit = 3
     .sort((a, b) => b.rise - a.rise)
     .slice(0, limit)
     .map((item) => item.strand)
+}
+
+/**
+ * Skills the child recently made their own (Phase 35), from the learning
+ * memory's own parent summary (`memorySummary`): a difficulty that came right
+ * with practice, or a skill mastered, in the last two weeks — never one that
+ * is being practised again now. Skill keys, most recently practised first, with
+ * the skills still being practised (a parent name in both lists is not mastered).
+ */
+export function recentlyMastered(
+  skills: Readonly<Record<string, SkillMemory>>,
+  now: Date,
+): { mastered: string[]; practising: string[] } {
+  // damaged or older saved entries are skipped, never break the dashboard
+  const usable = Object.fromEntries(
+    Object.entries(skills).filter(([, memory]) => isUsableMemory(memory)),
+  )
+  const summary = memorySummary(usable, now.toISOString(), RECENT_DAYS)
+  return {
+    mastered: summary.improved.map((item) => item.skill),
+    practising: summary.needsPractice.map((item) => item.skill),
+  }
+}
+
+/** Days with play in the last 7 days and the 7 days before (the child against their own past). */
+export interface ActivityTrend {
+  thisWeek: number
+  lastWeek: number
+  /** 'none': too little play to speak of a trend (never guessed). */
+  direction: 'more' | 'same' | 'less' | 'none'
+}
+
+/** At least this many active days over the two weeks before a trend is named. */
+export const MIN_TREND_DAYS = 3
+
+export function activityTrend(runs: readonly PlayedRun[], now: Date): ActivityTrend {
+  const thisWeek = new Set<string>()
+  const lastWeek = new Set<string>()
+  const end = now.getTime()
+  for (const run of runs) {
+    const ago = end - new Date(run.at).getTime()
+    if (ago < 0) continue
+    if (ago < 7 * DAY_MS) thisWeek.add(dayKey(new Date(run.at)))
+    else if (ago < 14 * DAY_MS) lastWeek.add(dayKey(new Date(run.at)))
+  }
+  const a = thisWeek.size
+  const b = lastWeek.size
+  // a trend needs play in both weeks and enough of it; otherwise say so
+  if (b === 0 || a + b < MIN_TREND_DAYS) return { thisWeek: a, lastWeek: b, direction: 'none' }
+  return { thisWeek: a, lastWeek: b, direction: a > b ? 'more' : a < b ? 'less' : 'same' }
 }

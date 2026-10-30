@@ -625,3 +625,15 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   check.ts (IoU tolerance, hints), views.tsx (wall + true top map), ShadowLabPage (emitActivity science, oncePerDay).
 - Verification: format/lint/typecheck PASS, unit 1348/1348, build PASS, browser shadow-lab 4/4; Critic REJECT (mirrored
   map) → fixed → ACCEPT (Critical 0 / High 0). Follow-ups in the doc. Next: Phase 35.
+
+## Phase 35 — COMPLETE (2026-10-30) – docs/architecture/parent-intelligence.md
+
+- Parent first view (GlanceSection): + Recently mastered (`recentlyMastered` = `memorySummary(…,14)`: resolved or
+  masteredAt in 14 days, never a skill confirmed/improving again; labels deduped; a name still in needsPractice is
+  not listed; damaged entries skipped via shared `isUsableMemory`), Practice garden (useGarden counts), Activity
+  trend (`activityTrend`: active days, last 7 vs the 7 before; named only with play in both and ≥ 3 days).
+  Order: child, today, learning, stronger, mastered, practice, homework, garden, achievements, trend, history.
+- Verification: format/lint/typecheck PASS, unit 1356/1356, build PASS, browser parent-dashboard + homework 8/8;
+  Critic REJECT (H1: mastered ignored a returned difficulty) → fixed → ACCEPT; its follow-up Medium (name in both
+  mastered and practice) and Lows (trendNone promise, damaged entries) fixed. Known Low: `now` frozen while the page
+  stays open overnight (pre-existing). Next: Phase 36 (contract line 2843; draft e2e/release-matrix.spec.ts in scratchpad).

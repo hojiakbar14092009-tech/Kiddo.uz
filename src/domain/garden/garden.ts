@@ -137,7 +137,7 @@ export function gardenPlants(
 ): GardenPlant[] {
   const rows: { since: string; plant: GardenPlant }[] = []
   for (const memory of Object.values(skills)) {
-    if (!isUsable(memory)) continue
+    if (!isUsableMemory(memory)) continue
     const stage = gardenStage(memory)
     if (stage === 'none') continue
     rows.push({
@@ -165,7 +165,7 @@ export function gardenPlants(
 }
 
 /** Saved memory from an older or damaged state never breaks the garden: such a skill is skipped. */
-function isUsable(memory: SkillMemory | undefined): memory is SkillMemory {
+export function isUsableMemory(memory: SkillMemory | undefined): memory is SkillMemory {
   return (
     typeof memory === 'object' &&
     memory !== null &&
