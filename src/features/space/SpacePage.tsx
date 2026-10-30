@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, ChevronLeftIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
@@ -18,7 +19,8 @@ import './space.css'
 type View =
   | { name: 'menu' }
   | { name: 'lesson'; stage: string }
-  | { name: 'test' }
+  /** `focus`: a homework's own lesson — its check asks only about that lesson. */
+  | { name: 'test'; focus?: string }
   | { name: 'object'; id: BodyId }
 
 /** The Koinot section: lessons by age, a short check and the solar system up close. */
@@ -26,7 +28,15 @@ export function SpacePage() {
   const level = useAgeLevel() as AgeLevel
   // the questions are written in one language: a new language starts the screen again in it
   const language = useSpaceLanguage()
-  const [view, setView] = useState<View>({ name: 'menu' })
+  // a homework link (?lesson=5-1) opens that lesson first: teach, then the check
+  const [params] = useSearchParams()
+  const [view, setView] = useState<View>(() => {
+    const stage = params.get('lesson')
+    return stage && LESSONS.some((item) => item.stage === stage)
+      ? { name: 'lesson', stage }
+      : { name: 'menu' }
+  })
+  const [focus] = useState(() => params.get('lesson'))
   // a fresh run every time (new questions, a new session)
   const [run, setRun] = useState(0)
   const open = (next: View) => {
@@ -44,7 +54,9 @@ export function SpacePage() {
           key={`${run}-${language}`}
           lesson={lesson}
           onExit={toMenu}
-          onTest={() => open({ name: 'test' })}
+          onTest={() =>
+            open({ name: 'test', focus: focus === lesson.stage ? lesson.stage : undefined })
+          }
         />
       )
     }
@@ -54,7 +66,8 @@ export function SpacePage() {
       <SpaceTest
         key={`${run}-${language}`}
         level={level}
-        onAgain={() => open({ name: 'test' })}
+        focus={view.focus}
+        onAgain={() => open({ name: 'test', focus: view.focus })}
         onExit={toMenu}
       />
     )

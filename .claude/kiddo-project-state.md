@@ -546,3 +546,6 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   per child `ChildProfile.tours` (guest: settings.guestTours): 0 full, 1 brief, then none; counted when shown;
   young (≤6) voice + mascot, older short lines; waits for splash/dialogs/greeting/speech and its first anchor;
   parent replay → resetTours. e2e seam localStorage `kiddo.e2e.tours`='off' (onboarded.json + after clear()).
+- P23 patched: `features/homework/status.ts` (assigned/started/completed/practice; score kept on the homework),
+  planet homework `ActivityHomework.topic` (Space lesson stage; `features/homework/topics.ts`; card → /learn/space?lesson=;
+  focused SpaceTest stage `focus-<stage>`; `countsFor(target, activity, topic)`), e2e two-child planet flow.

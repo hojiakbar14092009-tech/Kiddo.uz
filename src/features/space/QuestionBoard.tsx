@@ -82,6 +82,8 @@ export function QuestionBoard({
   return (
     <section
       aria-labelledby={`q-${question.id}`}
+      data-testid="space-question"
+      data-answer={text.objects[question.correct].name}
       className="flex flex-col items-center gap-4 sm:gap-6"
     >
       <h2 id={`q-${question.id}`} className="space-prompt">

@@ -1,5 +1,6 @@
 import type { ActivityNameKey } from '@/features/parent/insights/activityNames'
 import {
+  acceptsTopic,
   cleanHomeworkInput,
   countsFor,
   homeworkActivity,
@@ -61,6 +62,13 @@ export interface ActivityHomework {
   /** A short word from the parent, shown to the child. */
   note: string
   mistakes: null
+  /**
+   * One lesson of the activity (Space: a planet lesson stage, e.g. '5-1'): the child is
+   * taken to that lesson first, and only its own check counts (Phase 23 planet homework).
+   */
+  topic?: string
+  /** Answers given on the child's own / asked, over the counted runs (kept for the status). */
+  score?: { independent: number; total: number }
 }
 
 export type Homework = LetterHomework | ActivityHomework
@@ -79,6 +87,7 @@ export interface NewActivityHomework {
   times: number
   dueDay?: string | null
   note?: string
+  topic?: string | null
 }
 
 export interface ChildProfile {
@@ -132,7 +141,13 @@ interface FamilyState {
    * A finished run of `activity` (its run id `runId`): counts once for every
    * open activity homework of this child it fits. Returns the homework ids it finished.
    */
-  recordHomeworkRun: (childId: string, runId: string, activity: string, at?: string) => string[]
+  recordHomeworkRun: (
+    childId: string,
+    runId: string,
+    activity: string,
+    at?: string,
+    result?: { independent: number; total: number },
+  ) => string[]
   removeHomework: (childId: string, homeworkId: string) => void
   /** Removes the finished ones from the list. */
   clearDoneHomework: (childId: string) => void
@@ -260,6 +275,9 @@ export const useFamilyStore = create<FamilyState>()(
                       dueDay: clean.dueDay,
                       note: clean.note,
                       mistakes: null,
+                      ...(input.topic && acceptsTopic(input.target, input.topic)
+                        ? { topic: input.topic }
+                        : {}),
                     },
                   ],
                 }
@@ -268,7 +286,7 @@ export const useFamilyStore = create<FamilyState>()(
         }))
       },
 
-      recordHomeworkRun: (childId, runId, activity, at) => {
+      recordHomeworkRun: (childId, runId, activity, at, result) => {
         const finished: string[] = []
         set((state) => {
           let changed = false
@@ -281,7 +299,7 @@ export const useFamilyStore = create<FamilyState>()(
                 homework.runs.includes(runId) ||
                 // a run from before the homework was given never counts for it
                 (at !== undefined && at < homework.assignedAt) ||
-                !countsFor(homework.target, activity)
+                !countsFor(homework.target, activity, homework.topic)
               ) {
                 return homework
               }
@@ -289,7 +307,18 @@ export const useFamilyStore = create<FamilyState>()(
               const runs = [...homework.runs, runId]
               const done = runs.length >= homework.times
               if (done) finished.push(homework.id)
-              return { ...homework, runs, completedAt: done ? new Date().toISOString() : null }
+              const score = result
+                ? {
+                    independent: (homework.score?.independent ?? 0) + result.independent,
+                    total: (homework.score?.total ?? 0) + result.total,
+                  }
+                : homework.score
+              return {
+                ...homework,
+                runs,
+                completedAt: done ? new Date().toISOString() : null,
+                ...(score ? { score } : {}),
+              }
             })
             return { ...child, homeworks }
           })

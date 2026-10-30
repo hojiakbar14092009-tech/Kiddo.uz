@@ -10,8 +10,10 @@ import {
   MAX_HOMEWORK_TIMES,
 } from '@/features/homework/activityHomework'
 import type { ActivityNameKey } from '@/features/parent/insights/activityNames'
-import { childAge, useFamilyStore, type ChildProfile } from '@/store/familyStore'
+import { childAge, levelOfChild, useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { ChoiceChips } from './ChoiceChips'
+import { topicLabel, topicsFor } from '@/features/homework/topics'
+import { useLanguage } from '@/store/settingsStore'
 import { Panel } from './Panel'
 
 /**
@@ -33,9 +35,17 @@ export function ActivityHomeworkPanel({ child }: { child: ChildProfile }) {
   const [dueDay, setDueDay] = useState('')
   const [note, setNote] = useState('')
   const [added, setAdded] = useState(false)
+  // a single lesson (a planet lesson in Space), or any of them
+  const language = useLanguage()
+  const level = levelOfChild(child)
+  const topics = [...topicsFor(target)].sort(
+    (a, b) => Number(a.level !== level) - Number(b.level !== level),
+  )
+  const [topic, setTopic] = useState('')
+  const chosenTopic = topics.some((item) => item.id === topic) ? topic : ''
 
   const submit = () => {
-    assign(child.id, { target, times, dueDay: dueDay || null, note })
+    assign(child.id, { target, times, dueDay: dueDay || null, note, topic: chosenTopic || null })
     setNote('')
     setDueDay('')
     setAdded(true)
@@ -72,6 +82,23 @@ export function ActivityHomeworkPanel({ child }: { child: ChildProfile }) {
           ))}
         </div>
       </fieldset>
+      {topics.length > 0 && (
+        <ChoiceChips
+          label={t('parent.homework.activity.topic')}
+          options={[
+            { value: '', label: t('parent.homework.activity.anyTopic') },
+            ...topics.map((item) => ({
+              value: item.id,
+              label: `${topicLabel(target, item.id, language)} · ${t('parent.homework.activity.topicAge', { age: item.level })}`,
+            })),
+          ]}
+          value={chosenTopic}
+          onChange={(next) => {
+            setTopic(next)
+            setAdded(false)
+          }}
+        />
+      )}
       <ChoiceChips
         label={t('parent.homework.activity.times')}
         options={Array.from({ length: MAX_HOMEWORK_TIMES }, (_, i) => ({

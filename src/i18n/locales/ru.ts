@@ -583,6 +583,12 @@ export const ru: Translation = {
       noHomework: 'Открытых заданий нет',
     },
     homework: {
+      status: {
+        assigned: 'Задано',
+        started: 'Начато',
+        completed: 'Выполнено',
+        practice: 'Полезно ещё потренироваться',
+      },
       current: 'Домашние задания',
       summary: 'Ждут: {{pending}}, выполнено: {{done}}',
       clearDone: 'Убрать выполненные',
@@ -599,6 +605,9 @@ export const ru: Translation = {
       letters: 'Буквы ({{count}}/{{max}})',
       assign: 'Задать: {{name}}',
       activity: {
+        topic: 'Какой урок (необязательно)',
+        anyTopic: 'Любой урок',
+        topicAge: '{{age}}+ лет',
         assign: 'Дать занятие: {{name}}',
         title: 'Задание: занятие',
         intro:

@@ -582,6 +582,12 @@ export const uz = {
       noHomework: 'Ochiq uy vazifasi yo‘q',
     },
     homework: {
+      status: {
+        assigned: 'Berildi',
+        started: 'Boshlandi',
+        completed: 'Bajarildi',
+        practice: 'Yana biroz mashq foydali',
+      },
       current: 'Uy vazifalari',
       summary: '{{pending}} ta kutilmoqda, {{done}} ta bajarilgan',
       clearDone: 'Bajarilganlarni tozalash',
@@ -598,6 +604,9 @@ export const uz = {
       letters: 'Harflar ({{count}}/{{max}})',
       assign: '{{name}}ga berish',
       activity: {
+        topic: 'Qaysi dars (ixtiyoriy)',
+        anyTopic: 'Istalgan dars',
+        topicAge: '{{age}} yosh',
         assign: 'Mashg‘ulotni {{name}}ga berish',
         title: 'Mashg‘ulot vazifasi',
         intro:

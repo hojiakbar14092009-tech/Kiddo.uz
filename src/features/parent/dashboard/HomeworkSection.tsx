@@ -10,6 +10,9 @@ import { GAME_TYPES, type GameType } from '@/features/tasks/games'
 import { playableLetters } from '@/features/tasks/playableLetters'
 import { dayKey } from '@/features/tasks/rules'
 import { isOverdue } from '@/features/homework/activityHomework'
+import { homeworkStatus, type HomeworkStatus } from '@/features/homework/status'
+import { topicLabel } from '@/features/homework/topics'
+import { useUniverseStore } from '@/domain/universe'
 import { tDynamic } from '@/lib/tDynamic'
 import {
   isActivityHomework,
@@ -45,6 +48,8 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
   const [letters, setLetters] = useState<string[]>([])
   const homeworks = child.homeworks ?? []
   const today = dayKey()
+  // how the counted runs went (for "more practice will help")
+  const recent = useUniverseStore((state) => state.byChild[child.id]?.recent)
   // unfinished first (oldest first), then the finished ones (newest first)
   const pending = homeworks.filter((homework) => !homework.completedAt)
   const done = homeworks
@@ -105,6 +110,7 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
                     </>
                   )}
                   <div className="flex flex-wrap items-center gap-2">
+                    <StatusChip status={homeworkStatus(homework, recent)} />
                     <span
                       className={clsx(
                         'rounded-full px-3 py-1 text-sm font-semibold',
@@ -221,14 +227,37 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
   )
 }
 
+const STATUS_TONE: Record<HomeworkStatus, string> = {
+  assigned: 'bg-surface text-ink-soft border-2 border-line-strong',
+  started: 'bg-sky-soft text-ink',
+  completed: 'bg-primary-soft text-primary-ink',
+  practice: 'bg-lilac-soft text-ink',
+}
+
+/** Assigned → Started → Completed, or a kind "more practice will help". */
+function StatusChip({ status }: { status: HomeworkStatus }) {
+  const { t } = useTranslation()
+  return (
+    <span
+      data-testid="hw-status"
+      data-status={status}
+      className={clsx('rounded-full px-3 py-1 text-sm font-bold', STATUS_TONE[status])}
+    >
+      {t(`parent.homework.status.${status}`)}
+    </span>
+  )
+}
+
 /** One activity homework in the parent's list: what, how far, by when, the note. */
 function ActivityHomeworkLine({ homework, today }: { homework: ActivityHomework; today: string }) {
   const { t } = useTranslation()
+  const language = useLanguage()
   const overdue = isOverdue(homework, today)
   return (
     <>
       <p className="font-display text-xl font-extrabold">
         {tDynamic(t, `parent.insights.names.${homework.target}`)}
+        {homework.topic && `: ${topicLabel(homework.target, homework.topic, language)}`}
       </p>
       <p data-testid="hw-progress">
         {t('parent.homework.activity.progress', {

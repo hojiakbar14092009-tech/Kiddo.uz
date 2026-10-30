@@ -582,6 +582,12 @@ export const en: Translation = {
       noHomework: 'No open homework',
     },
     homework: {
+      status: {
+        assigned: 'Assigned',
+        started: 'Started',
+        completed: 'Completed',
+        practice: 'More practice will help',
+      },
       current: 'Homework',
       summary: '{{pending}} waiting, {{done}} done',
       clearDone: 'Clear finished',
@@ -598,6 +604,9 @@ export const en: Translation = {
       letters: 'Letters ({{count}}/{{max}})',
       assign: 'Give to {{name}}',
       activity: {
+        topic: 'Which lesson (optional)',
+        anyTopic: 'Any lesson',
+        topicAge: 'age {{age}}',
         assign: 'Give the activity to {{name}}',
         title: 'Activity homework',
         intro:

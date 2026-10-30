@@ -94,3 +94,113 @@ test('activity homework: given by the parent, played by the child, counted by it
   await solveGate(page)
   await expect(page.getByTestId('hw-progress')).toHaveText(/1 \/ 1/)
 })
+
+/*
+ * The contract's homework flow with two children: the parent gives Child A a
+ * planet lesson; A is taken to that lesson first, then its own short check;
+ * the parent sees it completed; Child B has nothing.
+ */
+test('planet homework: Child A learns the lesson, then its check; the parent sees it; Child B is untouched', async ({
+  page,
+}) => {
+  test.setTimeout(180_000)
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return
+    sessionStorage.setItem('seeded', '1')
+    const put = (key: string, state: unknown, version: number) =>
+      localStorage.setItem(key, JSON.stringify({ state, version }))
+    put('kiddo.settings', { language: 'uz', volume: 0, onboarded: true, guestTours: {} }, 2)
+    const born = new Date()
+    born.setFullYear(born.getFullYear() - 5)
+    born.setDate(born.getDate() - 30)
+    const child = (id: string, name: string) => ({
+      id,
+      name,
+      birthDate: born.toISOString().slice(0, 10),
+      celebratedLevel: 5,
+      gender: 'girl',
+      mascot: 'girl',
+      dailyLimitMinutes: 600,
+      createdAt: new Date().toISOString(),
+      homeworks: [],
+      birthdayGifts: [born.getFullYear() + 5],
+    })
+    put(
+      'kiddo.family',
+      { children: [child('kid-a', 'Aziza'), child('kid-b', 'Bobur')], activeChildId: 'kid-a' },
+      3,
+    )
+  })
+
+  // parent: Aziza → Space → the lesson "Earth, Mars, Saturn" → once
+  await page.goto('/parent/dashboard?tab=homework')
+  await solveGate(page)
+  // the parent's demo session (no cloud account in this build)
+  const demo = page.getByRole('button', { name: 'Demo rejimda kirish' })
+  const children = page.getByRole('group', { name: 'Bolani tanlang' })
+  await expect(demo.or(children)).toBeVisible()
+  if (await demo.isVisible()) {
+    await demo.click()
+    await page.goto('/parent/dashboard?tab=homework')
+    await solveGate(page)
+  }
+  await page
+    .getByRole('group', { name: 'Bolani tanlang' })
+    .getByRole('button', { name: /Aziza/ })
+    .click()
+  await page.getByTestId('hw-activity-space').click()
+  await page.getByRole('radio', { name: /^Yer, Mars, Saturn/ }).click()
+  await page.getByRole('radio', { name: '1 marta' }).click()
+  await page.getByTestId('hw-activity-assign').click()
+  const item = page.getByTestId('hw-item').filter({ hasText: 'Yer, Mars, Saturn' })
+  await expect(item).toBeVisible()
+  await expect(item.getByTestId('hw-status')).toHaveAttribute('data-status', 'assigned')
+
+  // child A: the card opens the lesson first (teach before the check)
+  await page.goto('/home')
+  const card = page.getByTestId('activity-homework')
+  await expect(card).toContainText('Yer, Mars, Saturn')
+  await card.click()
+  await expect(page).toHaveURL(/\/learn\/space\?lesson=5-1$/)
+  const startTest = page.getByRole('button', { name: 'Tekshiruvni boshlash' })
+  const next = page.getByRole('button', { name: 'Keyingisi' })
+  const practice = page.getByTestId('space-question')
+  // the lesson: cards, then guided questions, then the way to its check
+  for (let i = 0; i < 16 && !(await startTest.isVisible()); i += 1) {
+    await expect(startTest.or(next).or(practice).first()).toBeVisible()
+    if (await startTest.isVisible()) break
+    if (await practice.isVisible()) {
+      const answer = (await practice.getAttribute('data-answer'))!
+      await practice.getByRole('button', { name: answer, exact: true }).click()
+      await page.waitForTimeout(1400)
+    } else await next.click()
+  }
+  await startTest.click()
+  // its own check: only Earth, Mars and Saturn are asked
+  const question = page.getByTestId('space-question')
+  const score = page.getByTestId('learn-score')
+  for (let i = 0; i < 6 && !(await score.isVisible()); i += 1) {
+    await expect(question.or(score)).toBeVisible()
+    if (await score.isVisible()) break
+    const answer = (await question.getAttribute('data-answer'))!
+    expect(['Yer', 'Mars', 'Saturn']).toContain(answer)
+    await question.getByRole('button', { name: answer, exact: true }).click()
+    await page.waitForTimeout(1400)
+  }
+  await expect(score).toBeVisible({ timeout: 10_000 })
+
+  // the parent sees it done
+  await page.goto('/parent/dashboard?tab=homework')
+  await solveGate(page)
+  await page
+    .getByRole('group', { name: 'Bolani tanlang' })
+    .getByRole('button', { name: /Aziza/ })
+    .click()
+  await expect(item.getByTestId('hw-status')).toHaveAttribute('data-status', 'completed')
+  // Bobur: no homework at all
+  await page
+    .getByRole('group', { name: 'Bolani tanlang' })
+    .getByRole('button', { name: /Bobur/ })
+    .click()
+  await expect(page.getByTestId('hw-item')).toHaveCount(0)
+})

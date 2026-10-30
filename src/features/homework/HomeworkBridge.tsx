@@ -22,9 +22,19 @@ export function HomeworkBridge() {
     window.addEventListener('storage', onStorage)
     const stop = subscribeDomainEvents((event) => {
       if (event.type !== 'activity.completed') return
+      // how the run went (answers on the child's own of all asked), kept for the status
+      const run = (universeChild(event.childKey).recent ?? []).find(
+        (item) => item.id === event.activityId,
+      )
       const finished = useFamilyStore
         .getState()
-        .recordHomeworkRun(event.childKey, event.activityId, event.activity)
+        .recordHomeworkRun(
+          event.childKey,
+          event.activityId,
+          event.activity,
+          undefined,
+          run ? { independent: run.independent, total: run.total } : undefined,
+        )
       if (finished.length > 0) toast(i18n.t('home.homeworkDone'), 'success')
     })
     return () => {
@@ -50,6 +60,11 @@ function reconcileHomework() {
     const runs = [...(universeChild(child.id).recent ?? [])]
       .filter((run) => run.at >= since)
       .sort((a, b) => a.at.localeCompare(b.at))
-    for (const run of runs) recordHomeworkRun(child.id, run.id, run.activity, run.at)
+    for (const run of runs) {
+      recordHomeworkRun(child.id, run.id, run.activity, run.at, {
+        independent: run.independent,
+        total: run.total,
+      })
+    }
   }
 }

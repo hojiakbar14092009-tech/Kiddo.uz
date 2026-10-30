@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { ChevronRightIcon } from '@/components/icons'
 import { AppIcon } from '@/features/age/AppIcon'
-import { homeworkActivity } from '@/features/homework/activityHomework'
+import { homeworkActivity, homeworkRoute } from '@/features/homework/activityHomework'
+import { topicLabel } from '@/features/homework/topics'
+import { useLanguage } from '@/store/settingsStore'
 import { tDynamic } from '@/lib/tDynamic'
 import type { ActivityHomework } from '@/store/familyStore'
 
@@ -12,15 +14,20 @@ import type { ActivityHomework } from '@/store/familyStore'
  */
 export function ActivityHomeworkCard({ homework }: { homework: ActivityHomework }) {
   const { t } = useTranslation()
+  const language = useLanguage()
   const activity = homeworkActivity(homework.target)
   if (!activity) return null
-  const name = tDynamic(t, `parent.insights.names.${homework.target}`)
+  const base = tDynamic(t, `parent.insights.names.${homework.target}`)
+  // a planet homework names its lesson: "Space: Earth, Mars, Saturn"
+  const name = homework.topic
+    ? `${base}: ${topicLabel(homework.target, homework.topic, language)}`
+    : base
   const done = Math.min(homework.runs.length, homework.times)
   const left = homework.times - done
 
   return (
     <Link
-      to={activity.route}
+      to={homeworkRoute(activity, homework.topic)}
       data-testid="activity-homework"
       data-target={homework.target}
       aria-label={[t('home.activityHomeworkLabel', { name, count: left }), homework.note]

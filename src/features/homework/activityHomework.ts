@@ -43,8 +43,30 @@ export function homeworkActivity(key: string): HomeworkActivity | undefined {
   return HOMEWORK_ACTIVITIES.find((item) => item.key === key)
 }
 
-/** Does a finished run (its activity id string) count for this homework target? */
-export function countsFor(target: ActivityNameKey, activity: string): boolean {
+/** Activities a single lesson of which can be given (their lesson ids look like `5-1`). */
+const TOPIC_TARGETS: ReadonlySet<string> = new Set(['space'])
+
+/** A topic the store accepts: only for activities with lessons, a short lesson id. */
+export function acceptsTopic(target: string, topic: string): boolean {
+  return TOPIC_TARGETS.has(target) && /^[0-9]{1,2}(-[0-9]{1,2})?$/.test(topic)
+}
+
+/** The stage a topic homework's own check is saved under (e.g. `space:focus-5-1`). */
+export function focusStage(topic: string): string {
+  return `focus-${topic}`
+}
+
+/** Where a homework opens: its topic's lesson first, when it has one. */
+export function homeworkRoute(item: HomeworkActivity, topic?: string): string {
+  return topic ? `${item.route}?lesson=${encodeURIComponent(topic)}` : item.route
+}
+
+/**
+ * Does a finished run (its activity id string) count for this homework target?
+ * With a topic, only the check of that very lesson counts.
+ */
+export function countsFor(target: ActivityNameKey, activity: string, topic?: string): boolean {
+  if (topic && !activity.endsWith(`:${focusStage(topic)}`)) return false
   const name = activityName(activity).key
   if (name === target) return true
   // the feelings games all count for "Feelings"
