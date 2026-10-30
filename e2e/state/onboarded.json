@@ -7,6 +7,10 @@
         {
           "name": "kiddo.settings",
           "value": "{\"state\":{\"language\":null,\"volume\":0.8,\"onboarded\":true},\"version\":2}"
+        },
+        {
+          "name": "kiddo.e2e.tours",
+          "value": "off"
         }
       ]
     },
@@ -16,6 +20,10 @@
         {
           "name": "kiddo.settings",
           "value": "{\"state\":{\"language\":null,\"volume\":0.8,\"onboarded\":true},\"version\":2}"
+        },
+        {
+          "name": "kiddo.e2e.tours",
+          "value": "off"
         }
       ]
     }

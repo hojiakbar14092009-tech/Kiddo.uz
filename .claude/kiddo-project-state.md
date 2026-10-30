@@ -542,3 +542,7 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - P29 patched: one AudioContext (synth.ts uses Howler.ctx, autoSuspend off); cues + levelUp/discovery/confirm/back;
   `setNarrating` (audioManager 'speaking'): small cues dropped, tap-initiated cues/clicks/pets ducked; throttles
   (click 70 ms, back 250 ms, pet 400 ms); `data-sound="back"|"confirm"` read by InterfaceSounds.
+- P25 redone: coach marks on the real UI (`features/onboarding/{tour.ts,CoachMarks.tsx}`), tours home/play/reward,
+  per child `ChildProfile.tours` (guest: settings.guestTours): 0 full, 1 brief, then none; counted when shown;
+  young (≤6) voice + mascot, older short lines; waits for splash/dialogs/greeting/speech and its first anchor;
+  parent replay → resetTours. e2e seam localStorage `kiddo.e2e.tours`='off' (onboarded.json + after clear()).

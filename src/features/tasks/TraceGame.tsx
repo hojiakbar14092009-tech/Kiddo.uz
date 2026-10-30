@@ -101,7 +101,10 @@ export function TraceGame() {
       hint={{ kind: 'write', letter }}
       struggling={mistakes.some((mistake) => mistake.targetId === letter.id)}
     >
-      <div className="flex flex-1 flex-col items-center justify-center gap-5 short:flex-row">
+      <div
+        data-tour="answer"
+        className="flex flex-1 flex-col items-center justify-center gap-5 short:flex-row"
+      >
         <TraceCanvas
           key={letter.id}
           ref={canvas}

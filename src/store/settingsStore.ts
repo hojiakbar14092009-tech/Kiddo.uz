@@ -12,6 +12,9 @@ interface SettingsState {
   /** The welcome tour (Phase 25) was seen or skipped on this device. */
   onboarded: boolean
   setOnboarded: (done: boolean) => void
+  /** The guided tours seen by a guest (no profile); a profile keeps its own (ChildProfile.tours). */
+  guestTours: Partial<Record<string, number>>
+  setGuestTours: (tours: Partial<Record<string, number>>) => void
 }
 
 export const DEFAULT_VOLUME = 0.8
@@ -25,6 +28,8 @@ export const useSettingsStore = create<SettingsState>()(
       setVolume: (volume) => set({ volume: Math.min(1, Math.max(0, volume)) }),
       onboarded: false,
       setOnboarded: (done) => set({ onboarded: done }),
+      guestTours: {},
+      setGuestTours: (tours) => set({ guestTours: tours }),
     }),
     {
       name: 'kiddo.settings',

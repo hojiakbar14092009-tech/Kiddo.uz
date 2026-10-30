@@ -27,6 +27,7 @@ async function sixYearOld(page: Page, { pro = false } = {}) {
     if (sessionStorage.getItem('seeded')) return
     sessionStorage.setItem('seeded', '1')
     localStorage.clear()
+    localStorage.setItem('kiddo.e2e.tours', 'off')
     const put = (key: string, state: unknown, version = 1) =>
       localStorage.setItem(key, JSON.stringify({ state, version }))
     put('kiddo.settings', { language: 'ru', volume: 0.8 })

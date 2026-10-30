@@ -60,6 +60,7 @@ async function seed(page: Page, data: Seed) {
     if (sessionStorage.getItem('seeded')) return
     sessionStorage.setItem('seeded', '1')
     localStorage.clear()
+    localStorage.setItem('kiddo.e2e.tours', 'off')
     Math.random = () => 0
     const put = (key: string, state: unknown, version = 1) =>
       localStorage.setItem(key, JSON.stringify({ state, version }))

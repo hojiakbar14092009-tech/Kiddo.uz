@@ -7,6 +7,7 @@ import { playCue, SOUND_CUES } from '@/services/audio/soundLanguage'
 import { isSupabaseConfigured } from '@/services/supabase/client'
 import { useParentGateStore, useParentStore } from '@/store/parentStore'
 import { useLanguage, useSettingsStore } from '@/store/settingsStore'
+import { resetTours } from '@/features/onboarding/tour'
 import { AiTutorPanel } from './AiTutorPanel'
 import { ChoiceChips } from './ChoiceChips'
 import { Panel } from './Panel'
@@ -79,6 +80,8 @@ export function SettingsSection() {
           className="self-start"
           data-testid="replay-welcome"
           onClick={() => {
+            // the guided tours on Home and in games start over for this child too
+            resetTours()
             // the grown-ups' area closes first: Back from the tour never reopens it
             closeGate()
             navigate('/welcome', { replace: true })

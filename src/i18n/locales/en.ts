@@ -1543,6 +1543,70 @@ export const en: Translation = {
     again: 'Once more',
     back: 'To the city',
   },
+  tour: {
+    reminder: 'A quick reminder',
+    step: '{{current}} of {{total}}',
+    skip: 'Skip',
+    back: 'Back',
+    next: 'Next',
+    done: 'Got it!',
+    home: {
+      journey: {
+        title: 'The big adventure',
+        text: "Here is today's main journey. Tap the button and the adventure begins!",
+        short: 'Your main quest: tap to start.',
+      },
+      plan: {
+        title: "Today's plan",
+        text: 'Each circle is one game. Tap the next one: first we learn, then we play.',
+        short: "Today's games. Open the next one.",
+      },
+      homework: {
+        title: 'Homework',
+        text: 'Homework from your parents is here. Finish it and they will see!',
+        short: 'Homework from parents is here.',
+      },
+      coins: {
+        title: 'Coins',
+        text: 'You get coins for right answers. Spend them in the shop on clothes and pets.',
+        short: 'Coins: earned by answers, spent in the shop.',
+      },
+      city: {
+        title: 'Kiddo City',
+        text: 'Each building is a subject. The more you learn, the bigger and finer they grow.',
+        short: 'Buildings grow as you learn.',
+      },
+      parent: {
+        title: 'For grown-ups',
+        text: 'This door is for parents: reports and settings.',
+        short: 'Parent area: reports and settings.',
+      },
+    },
+    play: {
+      answer: {
+        title: 'Pick the answer',
+        text: 'Listen to the task and tap the right answer. A mistake is fine — we will try again!',
+        short: 'Tap an answer. A mistake shows a hint.',
+      },
+      back: {
+        title: 'Back home',
+        text: 'This little house button always takes you back home.',
+        short: 'The house button goes home.',
+      },
+    },
+    reward: {
+      earned: {
+        title: 'Your reward',
+        text: 'You earned these coins and stars yourself! Use them in the shop and to grow your city.',
+        short: 'Coins and stars: for the shop and your city.',
+      },
+      home: {
+        title: 'What next',
+        text: 'The house button takes you home, where new games are waiting.',
+        short: 'The house button goes home.',
+      },
+    },
+  },
   adventure: {
     title: 'Adventure Map',
     starsTotal: 'Stars collected: {{count}}',

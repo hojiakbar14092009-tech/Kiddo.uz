@@ -100,6 +100,11 @@ export interface ChildProfile {
   birthdayGifts?: number[]
   /** The child's photo (a small JPEG data URL made on this device; never synced). */
   photo?: string
+  /**
+   * How many times each guided tour (Phase 25 coach marks: 'home', 'play') was
+   * seen by this child: 0 full, 1 a short reminder, then none. On this device only.
+   */
+  tours?: Partial<Record<string, number>>
 }
 
 export type NewChild = Pick<ChildProfile, 'name' | 'birthDate' | 'gender'> &

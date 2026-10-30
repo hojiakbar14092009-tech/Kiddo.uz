@@ -14,6 +14,7 @@ import { ActivityHomeworkCard } from './ActivityHomeworkCard'
 import { homeLine } from '@/features/mascot/life'
 import { birthdayWeekYear, tashkentDay } from '@/features/birthday/birthday'
 import { tDynamic } from '@/lib/tDynamic'
+import { CoachMarks } from '@/features/onboarding/CoachMarks'
 import { BirthdayCelebration } from '@/features/birthday/BirthdayCelebration'
 import { useActiveChild, useAgeLevel, useFamilyStore, useMascotModel } from '@/store/familyStore'
 import { EXAM_MIN_LEVEL, GAME_MIN_LEVEL, isGameOpen, type AgeLevel } from '@/features/age/ageLevel'
@@ -119,7 +120,7 @@ export function HomePage() {
       </div>
 
       {homeworks.length + activityHomeworks.length > 0 && (
-        <ul className="flex w-full max-w-3xl flex-col gap-4">
+        <ul data-tour="homework" className="flex w-full max-w-3xl flex-col gap-4">
           {homeworks.map((homework) => (
             <li key={homework.id}>
               <HomeworkCard homework={homework} />
@@ -204,6 +205,8 @@ export function HomePage() {
         delayMs={900}
       />
       <UnlockCelebration />
+      {/* guided discovery on this very screen: per child, full once, then a reminder */}
+      <CoachMarks tour="home" delayMs={2500} />
       <BirthdayCelebration />
     </Screen>
   )

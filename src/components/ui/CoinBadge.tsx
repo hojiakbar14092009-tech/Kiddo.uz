@@ -11,6 +11,7 @@ export function CoinBadge({ amount }: CoinBadgeProps) {
   return (
     <div
       className="inline-flex h-10 items-center gap-1 rounded-full border-[3px] border-coin bg-surface pr-2.5 pl-1 sm:h-14 sm:gap-2 sm:pr-4 sm:pl-2"
+      data-testid="coin-counter"
       aria-label={`${t('common.coins')}: ${amount}`}
       role="status"
     >

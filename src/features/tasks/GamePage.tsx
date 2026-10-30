@@ -2,6 +2,7 @@ import { Navigate, useParams } from 'react-router-dom'
 import { isGameOpen } from '@/features/age/ageLevel'
 import { useAgeLevel } from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
+import { CoachMarks } from '@/features/onboarding/CoachMarks'
 import { ChoiceGame } from './ChoiceGame'
 import { isChoiceGame, isGameType } from './games'
 import { MemoryGame } from './MemoryGame'
@@ -16,7 +17,18 @@ export function GamePage() {
   if (!isGameType(type) || !isGameOpen(type, level)) return <Navigate to="/home" replace />
 
   const key = `${type}-${language}`
-  if (isChoiceGame(type)) return <ChoiceGame key={key} type={type} />
-  if (type === 'memory') return <MemoryGame key={key} />
-  return <TraceGame key={key} />
+  const game = isChoiceGame(type) ? (
+    <ChoiceGame key={key} type={type} />
+  ) : type === 'memory' ? (
+    <MemoryGame key={key} />
+  ) : (
+    <TraceGame key={key} />
+  )
+  return (
+    <>
+      {game}
+      {/* how to answer and how to get home, shown on the game itself (per child) */}
+      <CoachMarks tour="play" delayMs={1200} />
+    </>
+  )
 }

@@ -1545,6 +1545,70 @@ export const uz = {
     again: 'Yana bir marta',
     back: 'Shaharga',
   },
+  tour: {
+    reminder: 'Qisqa eslatma',
+    step: '{{current}} / {{total}}',
+    skip: 'O‘tkazib yuborish',
+    back: 'Orqaga',
+    next: 'Keyingisi',
+    done: 'Tushunarli!',
+    home: {
+      journey: {
+        title: 'Katta sarguzasht',
+        text: 'Bu yerda bugungi asosiy sayohating. Tugmani bos — sarguzasht boshlanadi!',
+        short: 'Asosiy topshiriq: bosib boshla.',
+      },
+      plan: {
+        title: 'Bugungi reja',
+        text: 'Har bir doira — bitta o‘yin. Navbatdagisini bos: avval o‘rganamiz, keyin o‘ynaymiz.',
+        short: 'Bugungi o‘yinlar. Navbatdagisini och.',
+      },
+      homework: {
+        title: 'Uyga vazifa',
+        text: 'Ota-onang bergan vazifa shu yerda. Bajarsang, ular ko‘radi!',
+        short: 'Ota-ona bergan vazifalar shu yerda.',
+      },
+      coins: {
+        title: 'Coinlar',
+        text: 'To‘g‘ri javoblar uchun coin olasan. Ular bilan do‘kondan kiyim va uy hayvoni olasan.',
+        short: 'Coinlar: javoblar uchun beriladi, do‘konda sarflanadi.',
+      },
+      city: {
+        title: 'Kiddo shahri',
+        text: 'Har bir bino — bir fan. O‘rgangan sari binolar katta va chiroyli bo‘lib boradi.',
+        short: 'Binolar o‘qishing bilan rivojlanadi.',
+      },
+      parent: {
+        title: 'Kattalar uchun',
+        text: 'Bu eshik ota-ona uchun. Hisobot va sozlamalar shu yerda.',
+        short: 'Ota-ona bo‘limi: hisobot va sozlamalar.',
+      },
+    },
+    play: {
+      answer: {
+        title: 'Javobni tanla',
+        text: 'Topshiriqni tingla va to‘g‘ri javobni bos. Xato bo‘lsa — qo‘rqma, yana urinib ko‘ramiz!',
+        short: 'Javobni bos. Xato bo‘lsa, maslahat chiqadi.',
+      },
+      back: {
+        title: 'Uyga qaytish',
+        text: 'Shu uycha tugmasi seni har doim bosh sahifaga qaytaradi.',
+        short: 'Uycha tugmasi — bosh sahifaga qaytish.',
+      },
+    },
+    reward: {
+      earned: {
+        title: 'Mukofoting',
+        text: 'Mana shu coin va yulduzlarni o‘zing ishlab topding! Ular bilan do‘kondan narsalar olasan va shahringni o‘stirasan.',
+        short: 'Topilgan coin va yulduzlar — do‘kon va shahar uchun.',
+      },
+      home: {
+        title: 'Davom etamiz',
+        text: 'Uycha tugmasi seni bosh sahifaga olib boradi — u yerda yangi o‘yinlar kutyapti.',
+        short: 'Uycha — bosh sahifaga qaytish.',
+      },
+    },
+  },
   adventure: {
     title: 'Sarguzashtlar xaritasi',
     starsTotal: 'Yig‘ilgan yulduzlar: {{count}}',

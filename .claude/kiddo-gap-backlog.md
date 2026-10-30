@@ -43,9 +43,9 @@ Status per line: OPEN / DONE <commit>.
 
 ## P25 Onboarding
 
-- OPEN 2 Per-profile onboarding count (full → minimal → none); currently global settings flag (§15).
-- OPEN 1 Contextual coach marks on real UI (data-tour anchors: cards, lesson start, answer, back, coins, homework).
-- OPEN 3 Age adaptation (young: voice/mascot; older: concise). OPEN 4 Use MascotFigure (3D) not 2D Robot.
+- DONE (P25 commit) 2 Per-profile onboarding count (full → minimal → none); currently global settings flag (§15).
+- DONE (P25 commit) 1 Contextual coach marks on real UI (data-tour anchors: cards, lesson start, answer, back, coins, homework).
+- DONE (P25 commit) 3 Age adaptation (young: voice/mascot; older: concise). OPEN 4 Use MascotFigure (3D) not 2D Robot.
 
 ## P26 Mascots
 

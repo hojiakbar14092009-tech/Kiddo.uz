@@ -56,6 +56,7 @@ export function SplashScreen() {
         <motion.div
           key="splash"
           role="presentation"
+          data-splash=""
           onClick={() => setVisible(false)}
           exit={{ opacity: 0, scale: 1.06, filter: 'blur(6px)' }}
           transition={{ duration: 0.45 }}

@@ -7,6 +7,7 @@ import { ChevronRightIcon, CoinIcon, HomeIcon, StarIcon } from '@/components/ico
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
 import { AwardLines } from '@/components/reward/AwardLines'
+import { CoachMarks } from '@/features/onboarding/CoachMarks'
 import { useAward } from '@/components/reward/useAward'
 import { Button } from '@/components/ui/Button'
 import { RewardBurst } from '@/components/ui/RewardBurst'
@@ -79,7 +80,7 @@ function RewardContent({ taskType, outcome }: RewardState) {
         </div>
       </RewardBurst>
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
+      <div data-tour="earned" className="flex flex-wrap items-center justify-center gap-3">
         <motion.div
           {...pop(0.9)}
           className="flex items-center gap-2 rounded-3xl border-[3px] border-coin bg-surface px-5 py-3"
@@ -111,6 +112,8 @@ function RewardContent({ taskType, outcome }: RewardState) {
       </div>
 
       <AwardLines award={award} />
+      {/* what was earned and where it goes, once per child */}
+      <CoachMarks tour="reward" delayMs={2200} />
 
       <div className="mt-2 flex flex-wrap justify-center gap-4">
         <BackToGarden />
@@ -118,6 +121,7 @@ function RewardContent({ taskType, outcome }: RewardState) {
           variant="soft"
           icon={<HomeIcon size={26} />}
           data-sound="back"
+          data-tour="reward-home"
           onClick={() => navigate('/home')}
         >
           {t('reward.home')}
