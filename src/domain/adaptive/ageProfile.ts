@@ -37,6 +37,13 @@ export type InteractionDensity = 'sparse' | 'standard' | 'dense'
  */
 export type ScaleDetail = 'compare' | 'ratio' | 'magnitude' | 'scientific'
 
+/**
+ * How spatial puzzles are built (Phase 34 Shadow Lab): one object and one
+ * light, then turning and moving the light, then several constraints at
+ * once and viewpoint reasoning.
+ */
+export type PuzzleDepth = 'simple' | 'spatial' | 'multi'
+
 export interface AgeProfile {
   id: AgeBand
   minAge: number
@@ -59,6 +66,7 @@ export interface AgeProfile {
    */
   placement: boolean
   scaleDetail: ScaleDetail
+  puzzleDepth: PuzzleDepth
 }
 
 export const AGE_PROFILES: readonly AgeProfile[] = [
@@ -74,6 +82,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     baseComplexity: 1,
     placement: false,
     scaleDetail: 'compare',
+    puzzleDepth: 'simple',
   },
   {
     id: '5-6',
@@ -88,6 +97,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     startByAge: { 6: 3 },
     placement: false,
     scaleDetail: 'compare',
+    puzzleDepth: 'simple',
   },
   {
     id: '7-9',
@@ -101,6 +111,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     baseComplexity: 4,
     placement: true,
     scaleDetail: 'ratio',
+    puzzleDepth: 'spatial',
   },
   {
     id: '10-12',
@@ -114,6 +125,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     baseComplexity: 5,
     placement: true,
     scaleDetail: 'magnitude',
+    puzzleDepth: 'multi',
   },
   {
     id: '13-15',
@@ -127,6 +139,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     baseComplexity: 5,
     placement: true,
     scaleDetail: 'scientific',
+    puzzleDepth: 'multi',
   },
   {
     id: '16+',
@@ -140,6 +153,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     baseComplexity: 5,
     placement: true,
     scaleDetail: 'scientific',
+    puzzleDepth: 'multi',
   },
 ]
 

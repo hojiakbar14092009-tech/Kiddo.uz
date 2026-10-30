@@ -33,6 +33,7 @@ export {
   type CharacterStyle,
   type ContentTier,
   type InteractionDensity,
+  type PuzzleDepth,
   type ScaleDetail,
   type Narration,
   type VisualMaturity,

@@ -181,6 +181,19 @@ function SpaceMenu({ level, onOpen }: { level: AgeLevel; onOpen: (view: View) =>
         </span>
       </Link>
 
+      {/* Phase 34: Lumi's shadow puzzles (light, objects and where shadows fall) */}
+      <Link
+        to="/shadow-lab"
+        className="space-panel flex items-center gap-4 p-5 text-left"
+        data-testid="shadow-lab-link"
+      >
+        <SpacePicture id="sun" className="size-16 shrink-0" />
+        <span className="min-w-0">
+          <span className="block font-display text-2xl font-extrabold">{t('shadowLab.title')}</span>
+          <span className="block text-base opacity-90">{t('shadowLab.cardText')}</span>
+        </span>
+      </Link>
+
       <section
         aria-labelledby="space-exhibit"
         className="space-panel flex flex-col gap-3 p-4 sm:p-6"

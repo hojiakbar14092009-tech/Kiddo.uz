@@ -618,3 +618,10 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Verification: format/lint/typecheck PASS, unit 1333/1333, build PASS, browser kiddo + scale-portal 28/28 then
   scale-portal 8/8 after fixes; Critic REJECT (rail keys, guessable distractors, step grading) → fixed → ACCEPT.
 - Follow-ups: near/far questions for 3–6; first-screen JS debt (Phase 32). Next: Phase 34.
+
+## Phase 34 — COMPLETE (2026-10-30) – docs/architecture/shadow-lab.md
+
+- `/shadow-lab` (Lumi): geometry.ts (central projection), solids.ts (views), puzzles.ts (5 modes × `AgeProfile.puzzleDepth`),
+  check.ts (IoU tolerance, hints), views.tsx (wall + true top map), ShadowLabPage (emitActivity science, oncePerDay).
+- Verification: format/lint/typecheck PASS, unit 1348/1348, build PASS, browser shadow-lab 4/4; Critic REJECT (mirrored
+  map) → fixed → ACCEPT (Critical 0 / High 0). Follow-ups in the doc. Next: Phase 35.

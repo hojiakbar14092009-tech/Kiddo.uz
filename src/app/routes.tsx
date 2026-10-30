@@ -77,6 +77,13 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/tales/TalesPage')).TalesPage,
                 }),
               },
+              // Shadow Lab (Phase 34): Lumi's shadow puzzles
+              {
+                path: '/shadow-lab',
+                lazy: async () => ({
+                  Component: (await import('@/features/shadowLab/ShadowLabPage')).ShadowLabPage,
+                }),
+              },
               // Scale Portal (Phase 33): Astro's journey from a cell to the galaxy
               {
                 path: '/scale-portal',
