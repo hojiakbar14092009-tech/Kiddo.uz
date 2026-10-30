@@ -1,14 +1,29 @@
-import { TIERS, type ResourceId, type Strand, type Tier } from './types'
+import { climbedOf, type LearnerStrands, type StrandState } from '@/domain/learner/profile'
+import { STRANDS, TIERS, type ResourceId, type Strand, type Tier } from './types'
 
 /*
  * Medals, data-driven. Each achievement watches one metric of the child's
  * universe stats and has three tiers. A tier is recorded once (the store
  * keeps the highest tier reached) and pays coins once through `grantReward`
  * (reason 'achievement', refId `${id}|${tier}`). Pure: no store imports.
+ *
+ * Two collections (Phase 30): the classic medals count what the child did;
+ * the Star Paths count how far the child's learning reached (the strand's
+ * level and mastery steps, measured by the LearnerProfile), so they cannot
+ * be farmed by repeating easy content.
  */
 
+export type MedalCollection = 'classic' | 'stars'
+
 export type AchievementMetric =
-  'activities' | 'stars' | 'crystals' | 'tales' | 'days' | `strand:${Strand}`
+  | 'activities'
+  | 'stars'
+  | 'crystals'
+  | 'tales'
+  | 'days'
+  | `strand:${Strand}`
+  | `path:${Strand}`
+  | 'paths'
 
 export interface AchievementDef {
   id: string
@@ -18,6 +33,7 @@ export interface AchievementDef {
   icon3d: string
   metric: AchievementMetric
   tiers: Record<Tier, number>
+  collection: MedalCollection
 }
 
 /** Coins paid when a tier is reached. */
@@ -30,6 +46,7 @@ function def(
   bronze: number,
   silver: number,
   gold: number,
+  collection: MedalCollection = 'classic',
 ): AchievementDef {
   return {
     id,
@@ -38,8 +55,20 @@ function def(
     icon3d,
     metric,
     tiers: { bronze, silver, gold },
+    collection,
   }
 }
+
+/*
+ * Star Paths: a path's value is how high the learner's own runs promoted the
+ * strand (`StrandState.climbed`: level, plus mastery steps above level 5).
+ * The age prior and a placement never count, only climbing above them: spark
+ * at level 4 (above the easy practice content, so only assessment reaches
+ * it), star at level 5, constellation at two mastery steps.
+ */
+const PATH = { bronze: 4, silver: 5, gold: 7 } as const
+/** Strands climbed at least this far (a spark) count for "many paths". */
+export const PATH_SPARK = PATH.bronze
 
 export const ACHIEVEMENTS: readonly AchievementDef[] = [
   def('first-steps', 'trophy', 'activities', 3, 25, 100),
@@ -54,7 +83,20 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
   def('explorer', 'rocket', 'strand:space', 3, 10, 30),
   def('scientist', 'seedling', 'strand:science', 3, 10, 30),
   def('artist', 'paintbrush', 'strand:art', 3, 10, 30),
+  def('number-path', 'ringed-planet', 'path:number', PATH.bronze, PATH.silver, PATH.gold, 'stars'),
+  def('word-path', 'parrot', 'path:language', PATH.bronze, PATH.silver, PATH.gold, 'stars'),
+  def('letter-path', 'feather', 'path:letters', PATH.bronze, PATH.silver, PATH.gold, 'stars'),
+  def('story-path', 'owl', 'path:reading', PATH.bronze, PATH.silver, PATH.gold, 'stars'),
+  def('nature-path', 'telescope', 'path:science', PATH.bronze, PATH.silver, PATH.gold, 'stars'),
+  def('heart-path', 'sun-face', 'path:social', PATH.bronze, PATH.silver, PATH.gold, 'stars'),
+  def('many-paths', 'shooting-star', 'paths', 2, 4, 6, 'stars'),
 ]
+
+/** What the medals read: the run counts and the LearnerProfile strands. */
+export interface MedalSource {
+  stats: UniverseStats
+  strands?: LearnerStrands
+}
 
 /** What the metrics read; the store keeps this per child. */
 export interface UniverseStats {
@@ -102,7 +144,17 @@ export function countRun(stats: UniverseStats, strand: Strand, day: string): Uni
   }
 }
 
-export function metricValue(stats: UniverseStats, metric: AchievementMetric): number {
+/** How high one strand was climbed by the learner's own runs (0: not yet). */
+export function pathValue(state: StrandState | undefined): number {
+  return climbedOf(state)
+}
+
+export function metricValue(source: MedalSource, metric: AchievementMetric): number {
+  const { stats } = source
+  if (metric === 'paths')
+    return STRANDS.filter((strand) => pathValue(source.strands?.[strand]) >= PATH_SPARK).length
+  if (metric.startsWith('path:'))
+    return pathValue(source.strands?.[metric.slice('path:'.length) as Strand])
   switch (metric) {
     case 'activities':
       return stats.activities
@@ -141,12 +193,12 @@ export function nextTarget(achievement: AchievementDef, tier: Tier | null): numb
  * as [id, tier] pairs in order.
  */
 export function newTiers(
-  stats: UniverseStats,
+  source: MedalSource,
   recorded: Readonly<Record<string, Tier>>,
 ): [string, Tier][] {
   const fresh: [string, Tier][] = []
   for (const achievement of ACHIEVEMENTS) {
-    const reached = tierRank(tierFor(achievement, metricValue(stats, achievement.metric)))
+    const reached = tierRank(tierFor(achievement, metricValue(source, achievement.metric)))
     for (let rank = tierRank(recorded[achievement.id]); rank < reached; rank++) {
       fresh.push([achievement.id, TIERS[rank]!])
     }

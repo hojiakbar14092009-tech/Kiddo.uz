@@ -1,6 +1,13 @@
 import { useMemo } from 'react'
 import { useChildKey } from '@/store/progressStore'
-import { ACHIEVEMENTS, metricValue, nextTarget, tierRank } from './achievements'
+import {
+  ACHIEVEMENTS,
+  metricValue,
+  nextTarget,
+  tierRank,
+  type MedalCollection,
+} from './achievements'
+import { stickerUnlocked, UNIVERSE_STICKERS, type UniverseStickerDef } from './stickers'
 import { EMPTY_BALANCES, EMPTY_UNIVERSE_CHILD, useUniverseStore } from './store'
 import type { ResourceId, Tier } from './types'
 
@@ -15,6 +22,7 @@ export interface AchievementView {
   titleKey: string
   descKey: string
   icon3d: string
+  collection: MedalCollection
   /** Highest tier recorded (null: none yet). */
   tier: Tier | null
   current: number
@@ -35,11 +43,28 @@ export function useAchievements(): AchievementView[] {
           titleKey: achievement.titleKey,
           descKey: achievement.descKey,
           icon3d: achievement.icon3d,
+          collection: achievement.collection,
           tier: tierRank(tier) > 0 ? tier : null,
-          current: metricValue(child.stats, achievement.metric),
+          current: metricValue(child, achievement.metric),
           next: nextTarget(achievement, tier),
         }
       }),
-    [child.achievements, child.stats],
+    [child],
+  )
+}
+
+/** The Kiddo Universe stickers of the active child, each unlocked or not (derived from medals). */
+export function useUniverseStickers(): { sticker: UniverseStickerDef; unlocked: boolean }[] {
+  const childKey = useChildKey()
+  const achievements = useUniverseStore(
+    (s) => s.byChild[childKey]?.achievements ?? EMPTY_UNIVERSE_CHILD.achievements,
+  )
+  return useMemo(
+    () =>
+      UNIVERSE_STICKERS.map((sticker) => ({
+        sticker,
+        unlocked: stickerUnlocked(sticker, achievements),
+      })),
+    [achievements],
   )
 }

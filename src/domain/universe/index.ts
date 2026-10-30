@@ -51,10 +51,19 @@ export {
   ART_RUNS_PER_DAY,
   countRun,
   parseAchievementKey,
+  pathValue,
   type AchievementDef,
   type AchievementMetric,
+  type MedalCollection,
 } from './achievements'
-export { useAchievements, useResources, type AchievementView } from './hooks'
+export {
+  stickersForTier,
+  stickerTitleKey,
+  stickerUnlocked,
+  UNIVERSE_STICKERS,
+  type UniverseStickerDef,
+} from './stickers'
+export { useAchievements, useResources, useUniverseStickers, type AchievementView } from './hooks'
 export {
   claimDailyQuest,
   dailyQuestState,

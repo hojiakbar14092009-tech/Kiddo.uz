@@ -430,7 +430,9 @@ export function medalsAndCity(
   child: Pick<UniverseChild, 'achievements' | 'buildings'> | undefined,
 ): MedalsAndCity {
   const medals: Record<Tier, number> = { bronze: 0, silver: 0, gold: 0 }
-  for (const achievement of ACHIEVEMENTS) {
+  // bronze/silver/gold name the classic medals; the Star Paths have their own steps
+  const classic = ACHIEVEMENTS.filter((achievement) => achievement.collection === 'classic')
+  for (const achievement of classic) {
     const tier = child?.achievements?.[achievement.id]
     if (tier === 'bronze' || tier === 'silver' || tier === 'gold') medals[tier] += 1
   }
@@ -447,7 +449,7 @@ export function medalsAndCity(
   return {
     medals,
     medalsTotal: medals.bronze + medals.silver + medals.gold,
-    medalsPossible: ACHIEVEMENTS.length,
+    medalsPossible: classic.length,
     buildings,
     upgrades: buildings.reduce((sum, item) => sum + item.level, 0),
   }

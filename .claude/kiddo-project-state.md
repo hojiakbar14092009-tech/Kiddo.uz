@@ -570,3 +570,18 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Known non-blocking (Low): a middling practice run at level 3 keeps an assessment streak earned before it (cannot
   promote, no mastery, per child).
 - Next: Phase 30 (Sticker + Medal + Prestige).
+
+## Phase 30 — COMPLETE (2026-10-30) – docs/architecture/rewards-prestige.md
+
+- Medals: `AchievementDef.collection` 'classic' | 'stars'. Star Paths (7: number/word/letter/story/nature/heart paths +
+  many-paths) read `StrandState.climbed` (raised only by a counted run promoting above `peak`; age prior, placement and
+  drop-and-reclimb pay nothing); spark 4 / star 5 / constellation 7. Parent insights count classic medals only.
+- Prestige: `features/collection/MedalBadge.tsx` per-tier silhouettes (disc → scalloped + ribbons → star-burst + laurels,
+  glow/shimmer; night tile → orbit → constellation, twinkle), CSS `.medal-*` off under reduced motion.
+- Stickers: `domain/universe/stickers.ts` 12 Kiddo Universe stickers derived from medal tiers (no state, idempotent,
+  per child); drawings `stickerDrawings.tsx`, die-cut `StickerArt`; Collection previews locked ones (silhouette + medal
+  step), `AwardLines` announces a newly opened sticker. Task-sticker album unchanged.
+- Verification: format/lint/typecheck PASS, unit 1304/1304, build PASS, browser 52/52 (collection-rewards, kiddo,
+  journey, adaptive, math-lab, quests) + 20/20 rerun after the peak fix; Critic REJECT (age prior paid) → fixed →
+  ACCEPT (Critical 0 / High 0), its follow-up Medium (drop-and-reclimb) fixed with `peak`.
+- Next: Phase 31.

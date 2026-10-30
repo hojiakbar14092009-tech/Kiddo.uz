@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { emitActivity, grantResource, useUniverseStore } from '@/domain/universe'
+import { EMPTY_UNIVERSE_CHILD } from '@/domain/universe/store'
 import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
@@ -56,5 +57,40 @@ describe('Collection', () => {
     expect(within(firstSteps).getByRole('progressbar')).toHaveAttribute('aria-valuemax', '25')
     expect(screen.getByTestId('medal-crystal-keeper')).toHaveTextContent('Bronza')
     expect(screen.getByTestId('medal-artist')).toHaveTextContent('Hali medal yo‘q')
+  })
+
+  it('shows the Star Paths and previews every Universe sticker before it opens', async () => {
+    await renderRoute('/collection')
+    const paths = screen.getByTestId('medals-stars')
+    expect(within(paths).getByRole('heading', { name: 'Yulduz yo‘llari' })).toBeInTheDocument()
+    expect(screen.getByTestId('medal-number-path')).toHaveTextContent('Yo‘l hali boshlanmagan')
+    expect(screen.getByTestId('medal-number-path')).toHaveTextContent('Keyingi bosqichgacha: 0 / 4')
+    const map = screen.getByTestId('ustick-discovery-map')
+    expect(map).toHaveAttribute('data-unlocked', 'false')
+    expect(map).toHaveTextContent('Kashfiyot xaritasi')
+    expect(map).toHaveTextContent('«Birinchi qadamlar»: Kumush')
+    expect(screen.getByTestId('universe-stickers-count')).toHaveTextContent('Ochilgan: 0 / 12')
+  })
+
+  it('a Star Path step changes the medal itself and opens its sticker', async () => {
+    useUniverseStore.setState({
+      byChild: {
+        [GUEST_KEY]: {
+          ...EMPTY_UNIVERSE_CHILD,
+          achievements: { 'number-path': 'gold', 'first-steps': 'silver' },
+        },
+      },
+    })
+    await renderRoute('/collection')
+    const medal = screen.getByTestId('medal-number-path')
+    expect(medal).toHaveAttribute('data-tier', 'gold')
+    expect(medal).toHaveTextContent('Yulduz turkumi')
+    expect(medal).toHaveTextContent('Butun yulduz turkumi yondi!')
+    expect(medal.querySelector('[data-medal-tier="gold"] .medal-glow')).not.toBeNull()
+    // a lower step has a different shape, not only another colour
+    expect(screen.getByTestId('medal-first-steps').querySelector('.medal-glow')).toBeNull()
+    expect(screen.getByTestId('ustick-discovery-map')).toHaveAttribute('data-unlocked', 'true')
+    expect(screen.getByTestId('ustick-discovery-map')).toHaveTextContent('Ochilgan')
+    expect(screen.getByTestId('universe-stickers-count')).toHaveTextContent('Ochilgan: 1 / 12')
   })
 })

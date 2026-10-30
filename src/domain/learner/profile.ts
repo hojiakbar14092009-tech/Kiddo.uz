@@ -37,6 +37,18 @@ export interface StrandState {
    * learner's own answers, so they hold from the first run (not the age prior).
    */
   placed?: boolean
+  /**
+   * The highest level + mastery steps this strand was promoted to by the
+   * learner's own runs (Phase 30 Star Paths). Never set by the age prior or a
+   * placement; kept when the level later drops.
+   */
+  climbed?: number
+  /**
+   * The highest height the strand ever held, its start (age prior or
+   * placement) included. A climb counts only above it, so dropping on purpose
+   * and climbing back to the start pays nothing.
+   */
+  peak?: number
 }
 
 export type LearnerStrands = Partial<Record<Strand, StrandState>>
@@ -178,7 +190,41 @@ export function applyRun(
     total: base.total + total,
     // a placed start stays the learner's own after the first run
     ...(previous?.placed === true ? { placed: true } : {}),
+    ...(climbedOf(previous) > 0 ? { climbed: climbedOf(previous) } : {}),
+    ...(heightValue(previous?.peak) > 0 ? { peak: heightValue(previous?.peak) } : {}),
   }
+}
+
+/** A stored height made safe (0 for missing or corrupt values). */
+function heightValue(raw: unknown): number {
+  const value = Math.floor(Number(raw))
+  return Number.isFinite(value) && value > 0 ? Math.min(value, MAX_CHALLENGE + MAX_MASTERY) : 0
+}
+
+/** Level + mastery steps of a strand state (what a Star Path measures). */
+export function heightOf(state: Pick<StrandState, 'level' | 'mastery'>): number {
+  return state.level + (state.level === MAX_CHALLENGE ? (state.mastery ?? 0) : 0)
+}
+
+/** The stored `climbed`, made safe (0 for missing or corrupt values). */
+export function climbedOf(state: StrandState | undefined): number {
+  return heightValue(state?.climbed)
+}
+
+/**
+ * Records a promotion: `next` after a run that was played at `before`'s
+ * height. Only a climb above the highest height the strand ever held (its
+ * start included) raises `climbed`.
+ */
+export function withClimb(
+  previous: StrandState | undefined,
+  next: StrandState,
+  before: number,
+): StrandState {
+  const height = heightOf(next)
+  const peak = Math.max(heightValue(previous?.peak), before)
+  const climbed = Math.max(climbedOf(previous), height > peak ? height : 0)
+  return { ...next, peak: Math.max(peak, height), ...(climbed > 0 ? { climbed } : {}) }
 }
 
 /** Overall accuracy of a strand, 0–1 (null before any question). */

@@ -447,3 +447,72 @@ html[data-band='16+'] body {
     animation-duration: 2.4s;
   }
 }
+
+/* Medals and Universe stickers (Phase 30): the top tier glows and shimmers slowly. */
+.medal-glow {
+  transform-origin: 50% 50%;
+  animation: medal-glow 3.2s ease-in-out infinite;
+}
+
+.medal-twinkle {
+  animation: medal-twinkle 2.6s ease-in-out infinite;
+}
+.medal-twinkle:nth-of-type(2n) {
+  animation-delay: 1.3s;
+}
+
+.medal-shimmer {
+  overflow: hidden;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgb(255 255 255 / 0.55) 50%,
+    transparent 65%
+  );
+  background-size: 300% 100%;
+  animation: medal-shimmer 5s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+}
+
+@keyframes medal-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes medal-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes medal-shimmer {
+  0%,
+  60% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .medal-glow,
+  .medal-twinkle,
+  .medal-shimmer {
+    animation: none;
+  }
+  .medal-shimmer {
+    display: none;
+  }
+}

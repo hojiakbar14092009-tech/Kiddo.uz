@@ -40,6 +40,26 @@ describe('AwardLines', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('names a Star Path step by its own name and announces the sticker it unlocks', () => {
+    render(
+      <AwardLines
+        award={{
+          stars: 0,
+          starGain: 0,
+          crystals: 0,
+          parts: 0,
+          scrolls: 0,
+          achievements: ['number-path|bronze', 'first-steps|silver'],
+        }}
+      />,
+    )
+    expect(screen.getByText('Yangi medal: Sonlar sayyorasi (Uchqun)')).toBeInTheDocument()
+    expect(screen.getByText('Yangi medal: Birinchi qadamlar (Kumush)')).toBeInTheDocument()
+    expect(screen.getByTestId('award-sticker-discovery-map')).toHaveTextContent(
+      'Yangi stiker: Kashfiyot xaritasi',
+    )
+  })
+
   it('shows nothing for a run that brought nothing new', () => {
     const { container } = render(
       <AwardLines

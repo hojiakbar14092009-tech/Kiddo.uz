@@ -13,7 +13,14 @@ import {
   newTiers,
   type UniverseStats,
 } from './achievements'
-import { childAgeFor, levelOf, type LearnerStrands } from '@/domain/learner/profile'
+import {
+  childAgeFor,
+  heightOf,
+  levelOf,
+  stateMastery,
+  withClimb,
+  type LearnerStrands,
+} from '@/domain/learner/profile'
 import { applyEvidence, type EvidenceKind } from '@/domain/learner/evidence'
 import { placedState, type Placement } from '@/domain/learner/placement'
 import { getSkillMemory } from '@/domain/learningMemory/store'
@@ -421,7 +428,7 @@ export function resourceHistory(childKey: string): readonly ResourceEntry[] {
  */
 export function checkAchievements(childKey: string): string[] {
   const child = universeChild(childKey)
-  const fresh = newTiers(child.stats, child.achievements)
+  const fresh = newTiers(child, child.achievements)
   if (fresh.length === 0) return []
   update(childKey, (latest) => {
     const achievements = { ...latest.achievements }
@@ -469,8 +476,12 @@ function adaptStrands(
   const age = childAgeFor(childKey)
   const level = levelOf(strands, e.strand, age)
   if (e.level !== level) return strands
-  const next = applyEvidence(strands?.[e.strand], e, age, e.evidence ?? 'assessment', level)
-  return next ? { ...strands, [e.strand]: next } : strands
+  const previous = strands?.[e.strand]
+  const next = applyEvidence(previous, e, age, e.evidence ?? 'assessment', level)
+  if (!next) return strands
+  // a promotion by the learner's own run is what the Star Paths count
+  const before = heightOf({ level, mastery: stateMastery(previous, age) })
+  return { ...strands, [e.strand]: withClimb(previous, next, before) }
 }
 
 /**

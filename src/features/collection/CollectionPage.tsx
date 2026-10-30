@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRightIcon } from '@/components/icons'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
@@ -6,10 +7,11 @@ import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { RESOURCE_TINT, SHOWN_RESOURCES, type ShownResource } from '@/components/reward/resources'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { LinkButton } from '@/components/ui/LinkButton'
-import { useAchievements, useResources } from '@/domain/universe'
+import { useAchievements, useResources, useUniverseStickers } from '@/domain/universe'
 import { StickerAlbum } from '@/features/shop/StickerAlbum'
 import { useProgress } from '@/store/progressStore'
 import { AchievementCard } from './AchievementCard'
+import { UniverseStickers } from './UniverseStickers'
 
 const SECTION_TITLE = 'font-display text-2xl font-extrabold sm:text-3xl'
 
@@ -22,7 +24,10 @@ export function CollectionPage() {
   const { t } = useTranslation()
   const balances = useResources()
   const achievements = useAchievements()
+  const universeStickers = useUniverseStickers()
   const { stickers } = useProgress()
+  const classic = achievements.filter((item) => item.collection === 'classic')
+  const starPaths = achievements.filter((item) => item.collection === 'stars')
   const empty =
     SHOWN_RESOURCES.every((resource) => (balances[resource] ?? 0) === 0) &&
     achievements.every((item) => item.tier === null) &&
@@ -68,11 +73,32 @@ export function CollectionPage() {
         <h2 id="medals-title" className={SECTION_TITLE}>
           {t('collection.achievements')}
         </h2>
-        <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-          {achievements.map((achievement) => (
+        <MedalGroup
+          id="classic"
+          title={t('collection.classicMedals')}
+          hint={t('collection.classicHint')}
+        >
+          {classic.map((achievement) => (
             <AchievementCard key={achievement.id} achievement={achievement} />
           ))}
-        </ul>
+        </MedalGroup>
+        <MedalGroup
+          id="stars"
+          title={t('collection.starPaths')}
+          hint={t('collection.starPathsHint')}
+        >
+          {starPaths.map((achievement) => (
+            <AchievementCard key={achievement.id} achievement={achievement} />
+          ))}
+        </MedalGroup>
+      </section>
+
+      <section
+        aria-labelledby="universe-stickers-title"
+        className="flex w-full max-w-5xl flex-col gap-4"
+        data-testid="universe-stickers"
+      >
+        <UniverseStickers items={universeStickers} />
       </section>
 
       <section
@@ -92,6 +118,35 @@ export function CollectionPage() {
         </LinkButton>
       </section>
     </Screen>
+  )
+}
+
+function MedalGroup({
+  id,
+  title,
+  hint,
+  children,
+}: {
+  id: string
+  title: string
+  hint: string
+  children: ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-3" data-testid={`medals-${id}`}>
+      <div className="flex flex-col gap-0.5">
+        <h3 id={`medals-${id}-title`} className="font-display text-xl font-extrabold sm:text-2xl">
+          {title}
+        </h3>
+        <p className="max-w-prose text-base leading-snug text-ink-soft">{hint}</p>
+      </div>
+      <ul
+        aria-labelledby={`medals-${id}-title`}
+        className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3"
+      >
+        {children}
+      </ul>
+    </div>
   )
 }
 

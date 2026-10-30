@@ -435,7 +435,7 @@ describe('medalsAndCity', () => {
     })
     expect(view.medals).toEqual({ bronze: 1, silver: 1, gold: 0 })
     expect(view.medalsTotal).toBe(2)
-    expect(view.medalsPossible).toBe(12)
+    expect(view.medalsPossible).toBe(12) // the classic medals (Star Paths are counted apart)
     expect(view.buildings.map((item) => [item.id, item.level])).toEqual([
       ['math-land', 2],
       ['garden', 1],

@@ -1,7 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import { MedalIcon } from '@/components/icons'
 import { RewardBurst } from '@/components/ui/RewardBurst'
-import { parseAchievementKey, type AwardSummary, type ResourceId } from '@/domain/universe'
+import {
+  parseAchievementKey,
+  stickersForTier,
+  stickerTitleKey,
+  type AwardSummary,
+  type ResourceId,
+} from '@/domain/universe'
+import { medalTierLabelKey } from '@/features/collection/medalLabels'
+import { StickerArt } from '@/features/collection/StickerArt'
 import { tDynamic } from '@/lib/tDynamic'
 import { ResourceIcon } from './ResourceIcon'
 import { RESOURCE_TINT } from './resources'
@@ -40,6 +48,7 @@ export function AwardLines({ award }: { award: AwardSummary | null }) {
   const medals = award.achievements
     .map(parseAchievementKey)
     .filter((medal): medal is NonNullable<typeof medal> => medal !== null)
+  const newStickers = medals.flatMap((medal) => stickersForTier(medal.id, medal.tier))
   if (lines.length === 0 && medals.length === 0) return null
 
   return (
@@ -70,8 +79,18 @@ export function AwardLines({ award }: { award: AwardSummary | null }) {
           <MedalIcon size={24} />
           {t('award.medal', {
             title: tDynamic(t, `universe.achievements.${medal.id}.title`),
-            tier: t(`collection.tiers.${medal.tier}`),
+            tier: tDynamic(t, medalTierLabelKey(medal.id, medal.tier)),
           })}
+        </p>
+      ))}
+      {newStickers.map((sticker) => (
+        <p
+          key={sticker.id}
+          data-testid={`award-sticker-${sticker.id}`}
+          className="flex items-center gap-2 text-lg font-bold text-primary-ink"
+        >
+          <StickerArt id={sticker.id} className="size-10" />
+          {t('award.sticker', { title: tDynamic(t, stickerTitleKey(sticker.id)) })}
         </p>
       ))}
     </div>
