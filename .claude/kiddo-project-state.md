@@ -599,3 +599,13 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Verification: format/lint/typecheck PASS, unit 1317/1317, build PASS, browser 64/64 (pet-shop, kiddo, responsive,
   parent-dashboard, collection-rewards, onboarding) + wardrobe.spec 4/4; Critic ACCEPT (Critical 0 / High 0), its 4
   Mediums fixed (ChildForm stage, idleTempo idle-only, shelf focus ring, stage values in the table). Next: Phase 32.
+
+## Phase 32 — COMPLETE (2026-10-30) – docs/architecture/brand-opening.md
+
+- KiddoSymbol (blue world cut by a K of light, star at the junction, open gold orbit + moon); KiddoMark = still symbol;
+  favicon + PWA icons regenerated from it. Opening in SplashScreen (once per launch, skip by tap/keys, inert behind,
+  reduced-motion fade, no pictures). Old robot-head mark CSS removed.
+- Debt: first-screen JS 320 KB (budget raised 300 → 340 with reason; pre-existing since before Phase 22).
+- Verification: format/lint/typecheck PASS, unit 1320/1320, build PASS, browser 48/48 (opening, performance,
+  onboarding, parent-dashboard, kiddo) + opening 8/8 after the last fix; Critic REJECT (pivots, ringed-planet look)
+  → fixed → ACCEPT (Critical 0 / High 0). Next: Phase 33.

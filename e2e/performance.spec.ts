@@ -8,11 +8,20 @@ import { expect, test, type Page, type Request } from '@playwright/test'
  * A budget may grow only with a reason written next to it.
  */
 const BUDGET_KB = {
-  /** All JavaScript of the first screen (about 10 % above the measured 271 KB). */
-  scripts: 300,
   /**
-   * All images of the first screen: splash pets + the city icons in view, so it
-   * grows with the screen (134 KB at 393×852, 169 KB on the test tablet; 617 KB before).
+   * All JavaScript of the first screen. Phase 12: 300 (about 10 % above the
+   * measured 271 KB). Raised to 340 on 2026-10-30 (Phase 32), with the reason:
+   * Phases 13–31 put the connected universe, Kiddo City scenes, the journey,
+   * homework, age profiles, rewards and the wardrobe on the everyday screens,
+   * measured at 312 KB before Phase 22 and 320 KB at Phase 31 (the test had
+   * not been run since). The new opening adds no pictures and removes the
+   * splash pets. three.js and the other languages stay out (checked below).
+   */
+  scripts: 340,
+  /**
+   * All images of the first screen: the city icons in view, so it grows with
+   * the screen (134 KB at 393×852, 169 KB on the test tablet incl. the splash
+   * pets of that time; 617 KB before). Since Phase 32 the opening is vector only.
    */
   images: 200,
 }
@@ -92,10 +101,8 @@ test.describe('the first screen', () => {
     const urls = loaded.map((item) => item.url)
     // one language's texts: the Russian and English chunks stay on the server
     expect(urls.filter((url) => /\/assets\/(ru|en)-[\w-]+\.js$/.test(url))).toEqual([])
-    // the splash pets show one pose each: not all six of every pet
-    const pets = urls.filter((url) => url.startsWith('/pets/'))
-    expect(pets.length).toBeLessThanOrEqual(4)
-    expect(pets.every((url) => url.endsWith('/happy.webp'))).toBe(true)
+    // the opening is vector only (Phase 32): it loads no pet or world pictures
+    expect(urls.filter((url) => url.startsWith('/pets/'))).toEqual([])
     // no sound before the child has touched anything
     expect(urls.filter((url) => url.endsWith('.mp3'))).toEqual([])
     // a weak device never downloads three.js
