@@ -138,6 +138,9 @@ export const ru: Translation = {
     backToNumbers: 'Назад к числам',
   },
   letter: {
+    check: 'Где буква {{letter}}? Нажми!',
+    checkDone: 'Верно, это она!',
+    checkAgain: 'Посмотри ещё раз — это другая буква.',
     model3d: '{{word}} — 3D-модель, крути пальцем',
     spin: 'Покрути',
     hint: 'Буква в слове выделена цветом',
@@ -853,6 +856,10 @@ export const ru: Translation = {
     exam: 'Большая проверка',
   },
   learnFirst: {
+    checkPicture: 'Картинка: {{title}}',
+    check: 'Помнишь? Где «{{title}}»?',
+    checkDone: 'Верно! Теперь можно играть.',
+    checkAgain: 'Посмотри ещё раз — это другое.',
     title: 'Сначала узнаём',
     step: 'Карточка {{current}} из {{total}}',
     next: 'Дальше',
@@ -963,6 +970,22 @@ export const ru: Translation = {
     praise: 'Молодец!',
   },
   feelings: {
+    lesson: {
+      kindness: {
+        share: {
+          title: 'Делиться',
+          text: 'Добрый ребёнок делится игрушкой или угощением с другом.',
+        },
+        help: {
+          title: 'Помогать',
+          text: 'Если кому-то трудно — упал или что-то уронил, — мы идём на помощь.',
+        },
+        words: {
+          title: 'Добрые слова',
+          text: '«Спасибо», «Пожалуйста», «Извини» — эти слова всех радуют.',
+        },
+      },
+    },
     title: 'Чувства',
     hubPrompt: 'Сегодня играем в чувства. С чего начнём?',
     kinds: {

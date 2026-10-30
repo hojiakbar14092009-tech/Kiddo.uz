@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Screen } from '@/components/layout/Screen'
 import { ACTIVITY_LESSONS } from '@/domain/learning'
-import { LessonDeck, type LessonCard } from '@/features/learn/LessonDeck'
+import { LessonDeck, type LessonCheck, type LessonCard } from '@/features/learn/LessonDeck'
 import { useLanguage } from '@/store/settingsStore'
 import { MotifArt, PictureView, TableItemArt } from './art'
 import {
@@ -92,11 +92,12 @@ function useUzLessonCards(kind: GameKind): LessonCard[] {
             art: (
               <div className="flex w-full flex-col items-center gap-2">
                 <LessonMap focus={id} />
-                <PictureView picture={CITIES[id].picture} className="size-16 short:hidden" />
+                <PictureView picture={CITIES[id].picture} className="size-16 short:size-10" />
               </div>
             ),
             title: CITIES[id].name[language],
             lines: [CITIES[id].clue[language]],
+            thumb: <PictureView picture={CITIES[id].picture} className="size-full" />,
           })),
         ]
       case 'table':
@@ -158,13 +159,24 @@ function useUzLessonCards(kind: GameKind): LessonCard[] {
   }, [kind, language, t])
 }
 
+/** The check at the end of each lesson: two clearly different things (the whole map is not one). */
+const CHECKS: Partial<Record<GameKind, LessonCheck>> = {
+  map: { ask: CITY_IDS[0]!, other: CITY_IDS[1]! },
+  patterns: { ask: MOTIF_IDS[0]!, other: MOTIF_IDS[1]! },
+}
+
 /** The game's lesson, on the game's own screen. */
 export function UzLesson({ kind, onDone }: { kind: GameKind; onDone: () => void }) {
   const cards = useUzLessonCards(kind)
   return (
     <Screen header={<GameHeader kind={kind} />}>
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-4 py-4 short:py-2">
-        <LessonDeck lessonId={GAME_LESSON[kind]} cards={cards} onDone={onDone} />
+        <LessonDeck
+          lessonId={GAME_LESSON[kind]}
+          cards={cards}
+          check={CHECKS[kind]}
+          onDone={onDone}
+        />
       </div>
     </Screen>
   )

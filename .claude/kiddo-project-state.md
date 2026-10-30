@@ -551,3 +551,5 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   focused SpaceTest stage `focus-<stage>`; `countsFor(target, activity, topic)`), e2e two-child planet flow.
 - P23 first view: `parent/dashboard/GlanceSection.tsx` (8 cards: Farzandim … Faoliyat tarixi) + `glance.ts`
   (runsOnDay all kinds, learningNow 14 days, gettingStronger own recent vs earlier, ≥5 answers, +0.1).
+- P21 patched: letter met only via LetterCheck (decoy.ts); LessonDeck ends with a guided check (`check` pair,
+  `thumb`, spoken question, Start after it); feelings lessons per tier (feelingsLessonPlan.ts) before faces/scenes/kindness.

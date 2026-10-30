@@ -7,8 +7,8 @@ Status per line: OPEN / DONE <commit>.
 
 ## P21 Learn before play
 
-- OPEN 2 Opening = completing: LetterPage marks met on open (useEffect); LessonDeck/Math intro mark on plain next. Need a meaningful interaction.
-- OPEN 11 Feelings `/feelings/:kind` quizzes before teaching (FeelingsRun) → LessonDeck first.
+- DONE (P21 commit) 2 Opening = completing: LetterPage marks met on open (useEffect); LessonDeck/Math intro mark on plain next. Need a meaningful interaction.
+- DONE (P21 commit) 11 Feelings `/feelings/:kind` quizzes before teaching (FeelingsRun) → LessonDeck first.
 - OPEN 3 No prerequisite routing: RequireAge/GamePage silently Navigate home → explain + "learn first".
 - OPEN 1 LessonDefinition contract + step types (explain/show/listen/trace/guided-choice/assessment); lessons.ts only ids.
 - OPEN 5 LetterIntro: add sound button + short trace step.

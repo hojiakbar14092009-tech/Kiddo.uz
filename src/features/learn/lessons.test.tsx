@@ -84,10 +84,33 @@ describe('the games teach first', () => {
     expect(screen.getByTestId('task-options')).toBeInTheDocument()
   })
 
-  it('opening a letter in the alphabet counts as meeting it', async () => {
+  it('a letter is met when the child finds it on its page, not just by opening the page', async () => {
     act(() => useFamilyStore.setState({ activeChildId: null }))
-    await renderRoute('/alphabet/b')
-    expect(hasSeenLesson(getLearnChild('guest'), letterLessonId('en', 'b'))).toBe(true)
+    const { user } = await renderRoute('/alphabet/b')
+    const met = () => hasSeenLesson(getLearnChild('guest'), letterLessonId('en', 'b'))
+    expect(met()).toBe(false)
+    // a wrong tap: look again, still not met
+    await user.click(screen.getByTestId('letter-check-other'))
+    expect(met()).toBe(false)
+    expect(screen.getByText('Look again — that is a different letter.')).toBeInTheDocument()
+    await user.click(screen.getByTestId('letter-check-right'))
+    expect(met()).toBe(true)
+    expect(screen.getByTestId('letter-check')).toHaveAttribute('data-met', 'true')
+  })
+
+  it('a lesson counts only after its short check: find the first card again', async () => {
+    act(() => useFamilyStore.setState({ activeChildId: null }))
+    const { user } = await renderRoute('/worlds/dino/dig')
+    while (screen.queryByTestId('lesson-next')) await user.click(screen.getByTestId('lesson-next'))
+    // the way to the game appears only after the check
+    expect(screen.queryByTestId('lesson-start')).toBeNull()
+    await user.click(screen.getByTestId('lesson-check-other'))
+    expect(screen.queryByTestId('lesson-start')).toBeNull()
+    expect(screen.getByText('Look again — that is a different one.')).toBeInTheDocument()
+    await user.click(screen.getByTestId('lesson-check-right'))
+    expect(screen.getByTestId('lesson-check')).toHaveAttribute('data-done', 'true')
+    await user.click(screen.getByTestId('lesson-start'))
+    expect(screen.getByTestId('dig-start')).toBeInTheDocument()
   })
 
   it('the fossil dig shares the dinosaur lesson (bones and who was longest)', async () => {

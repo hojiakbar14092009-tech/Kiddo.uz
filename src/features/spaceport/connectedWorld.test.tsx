@@ -173,6 +173,8 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     // Learn Before Play: what a plant needs is shown before the experiment asks
     expect(screen.getByTestId('lesson-deck')).toHaveAttribute('data-lesson', 'lab.plant')
     for (let card = 0; card < 3; card += 1) fireEvent.click(screen.getByTestId('lesson-next'))
+    // the lesson's short check: find the first card again
+    fireEvent.click(screen.getByTestId('lesson-check-right'))
     fireEvent.click(screen.getByTestId('lesson-start'))
     fireEvent.click(screen.getByTestId('lab-start'))
     fireEvent.click(screen.getByTestId('lab-option-milk'))

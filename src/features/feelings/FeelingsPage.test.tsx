@@ -7,6 +7,8 @@ import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
+import { useLearnStore } from '@/features/learn/learnStore'
+import { passLesson } from '@/test/lesson'
 import { FEELING_TEXT, FEELINGS, SITUATIONS, type ChoiceKind, type FeelingId } from './content'
 import { NEUTRAL_FILL } from './faceArt'
 
@@ -20,6 +22,7 @@ beforeEach(() => {
   useFamilyStore.setState({ children: [], activeChildId: null })
   useProgressStore.setState({ byChild: {} })
   useUniverseStore.setState({ byChild: {} })
+  useLearnStore.setState({ byChild: {} })
   vi.mocked(emitActivity).mockClear()
 })
 
@@ -84,6 +87,7 @@ describe('feelings section', () => {
 
   it('plays one face session kindly and counts it in the universe exactly once', async () => {
     const { user } = await renderRoute('/feelings/faces')
+    await passLesson(user)
     // a guest starts at level 2: the four basic feelings, three faces, four questions
     for (let question = 0; question < 4; question += 1) {
       const feeling = askedFeeling()
@@ -129,6 +133,7 @@ describe('feelings section', () => {
 
   it('explains every choice of a situation and praises the kindest one', async () => {
     const { user } = await renderRoute('/feelings/kindness')
+    await passLesson(user)
     expect(screen.getAllByText('What could you do?').length).toBeGreaterThan(1)
     const answers = within(screen.getByRole('group', { name: 'Answers' }))
     expect(answers.getAllByRole('button')).toHaveLength(2)
@@ -151,6 +156,7 @@ describe('feelings section', () => {
   it('from level 3 praises a kind idea and counts it as found on the first try', async () => {
     sixYearOld()
     const { user } = await renderRoute('/feelings/kindness')
+    await passLesson(user)
     for (let question = 0; question < 5; question += 1) {
       const buttons = within(screen.getByRole('group', { name: 'Answers' })).getAllByRole('button')
       expect(buttons).toHaveLength(3)
@@ -189,12 +195,24 @@ describe('feelings section', () => {
 
   it('from level 3 paints every face one colour', async () => {
     sixYearOld()
-    await renderRoute('/feelings/faces')
+    const { user } = await renderRoute('/feelings/faces')
+    await passLesson(user)
     const faces = within(screen.getByRole('group', { name: 'Answers' })).getAllByRole('button')
     expect(faces).toHaveLength(3)
     for (const face of faces) {
       expect(face.querySelector('svg[data-feeling] circle')).toHaveAttribute('fill', NEUTRAL_FILL)
     }
+  })
+
+  it('teaches the faces before the first game, only the first time', async () => {
+    const first = await renderRoute('/feelings/faces')
+    expect(screen.getByTestId('lesson-deck')).toHaveAttribute('data-lesson', 'feelings.faces.basic')
+    expect(screen.queryByTestId('feelings-option')).toBeNull()
+    await passLesson(first.user)
+    expect(screen.getAllByTestId('feelings-option').length).toBeGreaterThan(0)
+    first.unmount()
+    await renderRoute('/feelings/faces')
+    expect(screen.queryByTestId('lesson-deck')).toBeNull()
   })
 
   it('lets the child breathe without scoring anything', async () => {

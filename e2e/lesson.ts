@@ -11,6 +11,9 @@ export async function passLesson(page: Page) {
   await expect(page.getByTestId('lesson-deck')).toBeVisible()
   const next = page.getByTestId('lesson-next')
   while (await next.isVisible()) await next.click()
+  // the short check at the end: find the first card again
+  const right = page.getByTestId('lesson-check-right')
+  if (await right.isVisible()) await right.click()
   await page.getByTestId('lesson-start').click()
   await expect(page.getByTestId('lesson-deck')).toHaveCount(0)
 }

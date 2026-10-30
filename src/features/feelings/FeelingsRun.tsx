@@ -24,6 +24,9 @@ import { useLanguage } from '@/store/settingsStore'
 import { ChoicePicture } from './ChoicePicture'
 import { FEELING_TEXT } from './content'
 import { FeelingFace } from './FeelingFace'
+import { FeelingsLesson } from './FeelingsLesson'
+import { feelingsLessonId } from './feelingsLessonPlan'
+import { useLessonSeen } from '@/features/learn/learnStore'
 import {
   buildQuestions,
   feelingsActivity,
@@ -41,7 +44,22 @@ interface Reward {
 
 /** One run of a scored activity; "play again" starts a fresh one. */
 export function FeelingsRun({ kind }: { kind: ScoredKind }) {
+  const { t } = useTranslation()
   const [run, setRun] = useState(0)
+  const level = useChallengeLevel('social')
+  // Learn Before Play: the faces (or kind deeds) are shown first, the first time
+  // each level has its own lesson: new feelings are taught before they are asked
+  const seen = useLessonSeen(feelingsLessonId(kind, level))
+  const [learning, setLearning] = useState(!seen)
+  if (learning) {
+    return (
+      <Screen header={<TitleTopBar title={t(`feelings.kinds.${kind}`)} back="/feelings" />}>
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-4">
+          <FeelingsLesson kind={kind} level={level} onDone={() => setLearning(false)} />
+        </div>
+      </Screen>
+    )
+  }
   return <Run key={run} kind={kind} onAgain={() => setRun((n) => n + 1)} />
 }
 

@@ -136,6 +136,9 @@ export const uz = {
     backToNumbers: 'Sonlarga qaytish',
   },
   letter: {
+    check: '{{letter}} qaysi biri? Bosib top!',
+    checkDone: 'Barakalla, bu harfni taniding!',
+    checkAgain: 'Yana bir qara — bu boshqa harf.',
     model3d: '{{word}} — 3D rasm, barmog‘ing bilan aylantir',
     spin: 'Aylantir',
     hint: 'Harf so‘z ichida rangli bo‘lib turibdi',
@@ -854,6 +857,10 @@ export const uz = {
     exam: 'Katta sinov',
   },
   learnFirst: {
+    checkPicture: 'Rasm: {{title}}',
+    check: 'Eslaysanmi? «{{title}}» qaysi biri?',
+    checkDone: 'To‘g‘ri! Endi o‘ynasak bo‘ladi.',
+    checkAgain: 'Yana bir qara — bu boshqasi.',
     title: 'Avval o‘rganamiz',
     step: '{{current}}-karta, jami {{total}} ta',
     next: 'Keyingisi',
@@ -967,6 +974,22 @@ export const uz = {
     praise: 'Barakalla!',
   },
   feelings: {
+    lesson: {
+      kindness: {
+        share: {
+          title: 'Bo‘lishish',
+          text: 'Mehribon bola o‘yinchog‘ini yoki shirinligini do‘sti bilan bo‘lishadi.',
+        },
+        help: {
+          title: 'Yordam berish',
+          text: 'Kimdir qiynalsa — yiqilsa yoki narsasi tushib ketsa — yordamga boramiz.',
+        },
+        words: {
+          title: 'Yaxshi so‘zlar',
+          text: '«Rahmat», «Iltimos», «Kechirasan» — bu so‘zlar hammani xursand qiladi.',
+        },
+      },
+    },
     title: 'Tuyg‘ular',
     hubPrompt: 'Bugun tuyg‘ular haqida o‘ynaymiz. Nimadan boshlaymiz?',
     kinds: {

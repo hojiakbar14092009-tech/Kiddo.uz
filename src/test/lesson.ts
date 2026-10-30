@@ -5,6 +5,9 @@ import type { UserEvent } from '@testing-library/user-event'
 export async function passLesson(user: UserEvent) {
   await screen.findByTestId('lesson-deck')
   while (screen.queryByTestId('lesson-next')) await user.click(screen.getByTestId('lesson-next'))
+  // the short check at the end: find the first card again
+  const right = screen.queryByTestId('lesson-check-right')
+  if (right) await user.click(right)
   await user.click(screen.getByTestId('lesson-start'))
 }
 

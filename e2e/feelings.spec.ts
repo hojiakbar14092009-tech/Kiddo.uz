@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { passLesson } from './lesson.ts'
 
 /** The Emotions & Social Skills section, entered through Kiddo City's Friendship House. */
 
@@ -38,6 +39,8 @@ test('a child plays a feelings game from the Friendship House and gets a reward'
 
   await page.getByTestId('feelings-door-faces').click()
   await expect(page).toHaveURL(/\/feelings\/faces$/)
+  // first the faces are taught (and one is found again), then the game
+  await passLesson(page)
   // a guest starts at level 2: three faces to choose from
   await expect(page.getByTestId('feelings-option')).toHaveCount(3)
   await playRun(page)
@@ -53,6 +56,7 @@ test('“What could you do?” shows a picture for every idea and ends with a re
 }) => {
   await chooseUzbek(page)
   await page.goto('/feelings/kindness')
+  await passLesson(page)
   // a guest starts at level 2: two ideas, each with its own picture
   const options = page.getByTestId('feelings-option')
   await expect(options).toHaveCount(2)

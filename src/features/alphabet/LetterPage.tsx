@@ -10,7 +10,9 @@ import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { letterLessonId } from '@/domain/learning'
-import { useLearnStore } from '@/features/learn/learnStore'
+import { useLearnStore, useLessonSeen } from '@/features/learn/learnStore'
+import { LetterCheck } from './LetterCheck'
+import { decoyFor } from './decoy'
 import { useChildKey } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { HighlightedWord } from './HighlightedWord'
@@ -46,10 +48,10 @@ export function LetterPage() {
 
   useEffect(() => reset, [reset])
 
-  // Learn Before Play: a letter opened here is met; the letter games skip its introduction
-  useEffect(() => {
-    if (letter) markLesson(childKey, letterLessonId(language, letter.id))
-  }, [childKey, language, letter, markLesson])
+  // Learn Before Play: a letter is met once the child finds it (LetterCheck), not merely
+  // by opening its page; then the letter games skip its introduction
+  const lessonId = letter ? letterLessonId(language, letter.id) : ''
+  const met = useLessonSeen(lessonId)
 
   if (!letter) return <Navigate to="/alphabet" replace />
 
@@ -102,6 +104,16 @@ export function LetterPage() {
             <ListenButton
               onListen={() => void sayLetter(letter)}
               onLocked={() => react('locked')}
+            />
+            <LetterCheck
+              key={letter.id}
+              letter={letter}
+              other={decoyFor(letters, index)}
+              met={met}
+              onMet={() => {
+                markLesson(childKey, lessonId)
+                react('correct')
+              }}
             />
           </div>
         </div>

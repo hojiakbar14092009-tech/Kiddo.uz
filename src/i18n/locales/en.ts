@@ -138,6 +138,9 @@ export const en: Translation = {
     backToNumbers: 'Back to numbers',
   },
   letter: {
+    check: 'Which one is {{letter}}? Tap it!',
+    checkDone: 'Well done, you know this letter!',
+    checkAgain: 'Look again — that is a different letter.',
     model3d: '{{word}} — a 3D model, spin it with your finger',
     spin: 'Spin me',
     hint: 'The letter is coloured inside the word',
@@ -850,6 +853,10 @@ export const en: Translation = {
     exam: 'Big test',
   },
   learnFirst: {
+    checkPicture: 'Picture: {{title}}',
+    check: 'Remember? Which one is “{{title}}”?',
+    checkDone: 'Right! Now we can play.',
+    checkAgain: 'Look again — that is a different one.',
     title: 'First we learn',
     step: 'Card {{current}} of {{total}}',
     next: 'Next',
@@ -965,6 +972,19 @@ export const en: Translation = {
     praise: 'Well done!',
   },
   feelings: {
+    lesson: {
+      kindness: {
+        share: { title: 'Sharing', text: 'A kind child shares a toy or a treat with a friend.' },
+        help: {
+          title: 'Helping',
+          text: 'When someone has a hard time — falls or drops something — we go and help.',
+        },
+        words: {
+          title: 'Kind words',
+          text: '“Thank you”, “Please”, “Sorry” — these words make everyone glad.',
+        },
+      },
+    },
     title: 'Feelings',
     hubPrompt: 'Let’s play with feelings today. Where shall we start?',
     kinds: {
