@@ -12,6 +12,9 @@ import { dayKey } from '@/features/tasks/rules'
 import { isOverdue } from '@/features/homework/activityHomework'
 import { homeworkStatus, type HomeworkStatus } from '@/features/homework/status'
 import { topicLabel } from '@/features/homework/topics'
+import { letterGroup } from '@/features/homework/letterGroups'
+import { strugglingLetters } from '../report'
+import { useProgress } from '@/store/progressStore'
 import { useUniverseStore } from '@/domain/universe'
 import { tDynamic } from '@/lib/tDynamic'
 import {
@@ -47,6 +50,7 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
   const game = openGames.includes(chosenGame) ? chosenGame : (openGames[0] ?? 'find-picture')
   const [letters, setLetters] = useState<string[]>([])
   const homeworks = child.homeworks ?? []
+  const progress = useProgress(child.id)
   const today = dayKey()
   // how the counted runs went (for "more practice will help")
   const recent = useUniverseStore((state) => state.byChild[child.id]?.recent)
@@ -183,6 +187,35 @@ export function HomeworkSection({ child }: { child: ChildProfile }) {
             )
           }}
         />
+        <div className="flex flex-col gap-2" data-testid="hw-groups">
+          <span className="font-semibold">{t('parent.homework.groups.title')}</span>
+          <div className="flex flex-wrap gap-2">
+            {(['next', 'practice', 'vowels'] as const).map((group) => {
+              const ids = letterGroup(group, {
+                language,
+                playable: playableLetters(language, game),
+                learned: progress.learned[language] ?? [],
+                struggling: strugglingLetters(progress, language).map((entry) => entry.letterId),
+                max: MAX_HOMEWORK_LETTERS,
+              })
+              return (
+                <button
+                  key={group}
+                  type="button"
+                  disabled={ids.length === 0}
+                  onClick={() => {
+                    setLetters(ids)
+                    setAdded(false)
+                  }}
+                  data-testid={`hw-group-${group}`}
+                  className="min-h-11 rounded-full border-2 border-line-strong bg-surface px-4 font-semibold disabled:opacity-40"
+                >
+                  {t(`parent.homework.groups.${group}`)}
+                </button>
+              )
+            })}
+          </div>
+        </div>
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 font-semibold">
             {t('parent.homework.letters', { count: letters.length, max: MAX_HOMEWORK_LETTERS })}

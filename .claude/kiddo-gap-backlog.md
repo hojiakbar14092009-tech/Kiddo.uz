@@ -34,7 +34,7 @@ Status per line: OPEN / DONE <commit>.
 - DONE (P23 commit) 6 Planet homework: topic + lesson→practice→assessment, count only that.
 - DONE (P23 commit) 10 E2E: parent→A planet homework→A completes→parent sees→B unaffected.
 - DONE (P23 glance commit) 9 Parent first view sections (Farzandim, Bugungi holat, O‘rganayotgan mavzular, Kuchayib borayotgan, Mashq kerak, Uyga vazifalar, Yutuqlar, Faoliyat tarixi).
-- OPEN 7 Registry: alphabet, trace, science, reading entries. OPEN 8 letter groups + pronunciation.
+- DONE 7 Registry: findLetter/findPicture/traceLetters/traceNumbers (+ garden as science; Science Lab unlocks on the journey so it is not offered). DONE 8 letter groups (next/practice/vowels). DEFERRED pronunciation: no speaking game exists to build it on.
 
 ## P24 Profile + birthday
 

@@ -12,6 +12,8 @@ import {
 import type { ActivityNameKey } from '@/features/parent/insights/activityNames'
 import { childAge, levelOfChild, useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { ChoiceChips } from './ChoiceChips'
+import { homeworkActivity } from '@/features/homework/activityHomework'
+import { isGameOpen } from '@/features/age/ageLevel'
 import { topicLabel, topicsFor } from '@/features/homework/topics'
 import { useLanguage } from '@/store/settingsStore'
 import { Panel } from './Panel'
@@ -26,9 +28,11 @@ export function ActivityHomeworkPanel({ child }: { child: ChildProfile }) {
   const assign = useFamilyStore((state) => state.assignActivityHomework)
   const age = childAge(child)
   // activities that suit the age first; nothing is hidden by age
-  const activities = [...HOMEWORK_ACTIVITIES].sort(
-    (a, b) => Number(a.fromAge > age) - Number(b.fromAge > age),
-  )
+  const level = levelOfChild(child)
+  // a letter game is offered only once it is open for this child
+  const activities = HOMEWORK_ACTIVITIES.filter(
+    (item) => !item.game || isGameOpen(item.game, level),
+  ).sort((a, b) => Number(a.fromAge > age) - Number(b.fromAge > age))
   const [target, setTarget] = useState<ActivityNameKey>(activities[0]!.key)
   const [times, setTimes] = useState(2)
   const today = dayKey()
@@ -37,7 +41,6 @@ export function ActivityHomeworkPanel({ child }: { child: ChildProfile }) {
   const [added, setAdded] = useState(false)
   // a single lesson (a planet lesson in Space), or any of them
   const language = useLanguage()
-  const level = levelOfChild(child)
   const topics = [...topicsFor(target)].sort(
     (a, b) => Number(a.level !== level) - Number(b.level !== level),
   )
@@ -98,6 +101,9 @@ export function ActivityHomeworkPanel({ child }: { child: ChildProfile }) {
             setAdded(false)
           }}
         />
+      )}
+      {homeworkActivity(target)?.game && (
+        <p className="text-sm text-ink-soft">{t('parent.homework.activity.lettersElsewhere')}</p>
       )}
       <ChoiceChips
         label={t('parent.homework.activity.times')}

@@ -17,16 +17,30 @@ export interface HomeworkActivity {
   emoji: string
   /** Youngest age it makes sense for (only a suggestion order; nothing locks by age). */
   fromAge: number
+  /** The letter game behind it, when it is one (a parent sees only games open for the child). */
+  game?: 'find-letter' | 'find-picture' | 'trace'
 }
 
 /** What a parent can give, in the order shown (free activities only: homework never needs a purchase). */
 export const HOMEWORK_ACTIVITIES: readonly HomeworkActivity[] = [
+  // alphabet, reading, writing: the letter games (the letters the child is learning)
+  { key: 'findLetter', route: '/tasks/find-letter', emoji: '🅰️', fromAge: 5, game: 'find-letter' },
+  {
+    key: 'findPicture',
+    route: '/tasks/find-picture',
+    emoji: '📖',
+    fromAge: 4,
+    game: 'find-picture',
+  },
+  { key: 'traceLetters', route: '/tasks/trace', emoji: '✏️', fromAge: 6, game: 'trace' },
+  { key: 'traceNumbers', route: '/trace/numbers', emoji: '✍️', fromAge: 4 },
   { key: 'mathLab', route: '/math-lab', emoji: '🔢', fromAge: 4 },
   { key: 'math', route: '/learn/math', emoji: '➕', fromAge: 4 },
   { key: 'words', route: '/learn/words', emoji: '🔤', fromAge: 5 },
   { key: 'tale', route: '/learn/tales', emoji: '📖', fromAge: 4 },
   { key: 'story', route: '/stories', emoji: '📚', fromAge: 4 },
   { key: 'space', route: '/learn/space', emoji: '🪐', fromAge: 5 },
+  // science: the garden lessons (the Science Lab opens later, on the journey)
   { key: 'garden', route: '/learn/garden', emoji: '🌻', fromAge: 4 },
   { key: 'help', route: '/learn/help', emoji: '🤖', fromAge: 4 },
   { key: 'dinoQuiz', route: '/worlds/dino/quiz', emoji: '🦕', fromAge: 4 },

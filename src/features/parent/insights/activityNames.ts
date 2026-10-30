@@ -36,6 +36,7 @@ export type ActivityNameKey =
   | 'traceNumbers'
   | 'traceShapes'
   | 'studio'
+  | 'scienceLab'
   | 'other'
 
 export const ACTIVITY_NAME_KEYS: readonly ActivityNameKey[] = [
@@ -66,6 +67,7 @@ export const ACTIVITY_NAME_KEYS: readonly ActivityNameKey[] = [
   'traceNumbers',
   'traceShapes',
   'studio',
+  'scienceLab',
   'other',
 ]
 
@@ -158,6 +160,8 @@ export function activityName(activity: unknown): ActivityName {
       return { key: own(UZBEKISTAN, second) ?? 'uzbekistan' }
     case 'studio':
       return { key: 'studio' }
+    case 'science-lab':
+      return { key: 'scienceLab' }
     case 'trace':
       // `trace:number:7` / `trace:shape:circle` are the tracing pages,
       // `trace:uz` the letter tracing game.

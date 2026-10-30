@@ -438,6 +438,7 @@ export const en: Translation = {
         traceNumbers: 'Tracing numbers',
         traceShapes: 'Tracing shapes',
         studio: 'Creative Studio: a picture',
+        scienceLab: 'Science Lab: an experiment',
         other: 'Activity',
       },
       storyNamed: 'Story: {{title}}',
@@ -610,6 +611,12 @@ export const en: Translation = {
       noHomework: 'No open homework',
     },
     homework: {
+      groups: {
+        title: 'Quick pick',
+        next: 'Next new letters',
+        practice: 'Letters to practise',
+        vowels: 'Vowels (up to 5, new ones first)',
+      },
       status: {
         assigned: 'Assigned',
         started: 'Started',
@@ -634,6 +641,7 @@ export const en: Translation = {
       activity: {
         topic: 'Which lesson (optional)',
         anyTopic: 'Any lesson',
+        lettersElsewhere: 'For specific letters, use the letter homework below.',
         topicAge: 'age {{age}}',
         assign: 'Give the activity to {{name}}',
         title: 'Activity homework',

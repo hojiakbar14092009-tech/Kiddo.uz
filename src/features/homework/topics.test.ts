@@ -23,3 +23,23 @@ describe('planet homework (a topic of an activity)', () => {
     expect(countsFor('space', 'space:test-5')).toBe(true)
   })
 })
+
+describe('homework categories', () => {
+  it('alphabet, reading and writing are real letter games that count their own runs', async () => {
+    const { HOMEWORK_ACTIVITIES, countsFor } = await import('./activityHomework')
+    const keys = HOMEWORK_ACTIVITIES.map((item) => item.key)
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        'findLetter',
+        'findPicture',
+        'traceLetters',
+        'traceNumbers',
+        'space',
+        'garden',
+      ]),
+    )
+    expect(countsFor('findLetter', 'find-letter:uz')).toBe(true)
+    expect(countsFor('traceLetters', 'trace:ru')).toBe(true)
+    expect(countsFor('findPicture', 'find-letter:uz')).toBe(false)
+  })
+})

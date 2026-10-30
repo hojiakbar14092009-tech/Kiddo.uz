@@ -438,6 +438,7 @@ export const ru: Translation = {
         traceNumbers: 'Пишем цифры',
         traceShapes: 'Рисуем фигуры',
         studio: 'Творческая студия: рисунок',
+        scienceLab: 'Научная лаборатория: опыт',
         other: 'Занятие',
       },
       storyNamed: 'История: {{title}}',
@@ -611,6 +612,12 @@ export const ru: Translation = {
       noHomework: 'Открытых заданий нет',
     },
     homework: {
+      groups: {
+        title: 'Быстрый выбор',
+        next: 'Следующие новые буквы',
+        practice: 'Те, что стоит потренировать',
+        vowels: 'Гласные (до 5, сначала новые)',
+      },
       status: {
         assigned: 'Задано',
         started: 'Начато',
@@ -635,6 +642,7 @@ export const ru: Translation = {
       activity: {
         topic: 'Какой урок (необязательно)',
         anyTopic: 'Любой урок',
+        lettersElsewhere: 'Для конкретных букв используйте «Задание по буквам» ниже.',
         topicAge: '{{age}}+ лет',
         assign: 'Дать занятие: {{name}}',
         title: 'Задание: занятие',

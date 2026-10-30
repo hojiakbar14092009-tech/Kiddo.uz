@@ -438,6 +438,7 @@ export const uz = {
         traceNumbers: 'Raqamlarni chizish',
         traceShapes: 'Shakllarni chizish',
         studio: 'Ijod studiyasi: rasm',
+        scienceLab: 'Fan laboratoriyasi: tajriba',
         other: 'Mashg‘ulot',
       },
       storyNamed: 'Hikoya: {{title}}',
@@ -611,6 +612,12 @@ export const uz = {
       noHomework: 'Ochiq uy vazifasi yo‘q',
     },
     homework: {
+      groups: {
+        title: 'Tez tanlash',
+        next: 'Keyingi yangi harflar',
+        practice: 'Mashq kerak bo‘lganlar',
+        vowels: 'Unli harflar (5 tagacha, avval yangilari)',
+      },
       status: {
         assigned: 'Berildi',
         started: 'Boshlandi',
@@ -635,6 +642,8 @@ export const uz = {
       activity: {
         topic: 'Qaysi dars (ixtiyoriy)',
         anyTopic: 'Istalgan dars',
+        lettersElsewhere:
+          'Muayyan harflar uchun pastdagi «Harflar bo‘yicha vazifa»dan foydalaning.',
         topicAge: '{{age}} yosh',
         assign: 'Mashg‘ulotni {{name}}ga berish',
         title: 'Mashg‘ulot vazifasi',
