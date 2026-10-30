@@ -520,3 +520,13 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   Road measuring selects only `:scope > ol > li[data-testid^="world-"]` (inner testids must not start with `world-`).
 - Tests: worldStage.test.ts, adventure.test.tsx, e2e/world-cards.spec.ts. Critic: REJECT (road selector High) →
   fixed → ACCEPT (Critical 0 / High 0).
+
+## Sound language (Phase 29) – docs/architecture/sound-language.md
+
+- Original Phase 29 contract text was lost to compaction; scope defined from the phase name.
+- `services/audio/synth.ts` (Web Audio, shared with pet voices); `services/audio/soundLanguage.ts`: cues coin, star,
+  grow, heart, unlock, spend in C major pentatonic, one wooden timbre, < 1 s, app volume, all tiers. `queueCue`
+  gathers 150 ms → strongest; after the ui_success chime (`noteSuccessSound` from audioManager) small cues are quiet,
+  unlock/heart follow it. No cue before the first user activation. `SoundBridge` (AppShell): reward ledger + domain
+  events of the active child only (penalty/pro-gift/admin quiet). PetBridge → heart; Adventure new stage → unlock.
+  Parent settings: preview buttons per cue. Critic: ACCEPT; its Mediums (overlap with the chime, no gesture) fixed.

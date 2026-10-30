@@ -642,6 +642,16 @@ export const en: Translation = {
       welcomeReplay: 'Show the tour again',
       sound: 'Sound',
       volume: 'Volume',
+      cuesTitle: 'App sounds',
+      cuesHint: 'Every kind of success has its own short sound. Tap to listen.',
+      cues: {
+        coin: 'Coins',
+        star: 'Star',
+        grow: 'Growing',
+        heart: 'Friendship',
+        unlock: 'New world',
+        spend: 'Spending',
+      },
       testSound: 'Play a test sound',
       voiceNote:
         'The Uzbek voice is a temporary synthetic voice, not a native Uzbek voice: an open Kazakh speech model reads the Uzbek text, so the accent is not always Uzbek. It will be replaced when a real Uzbek voice is ready. The text is always shown on screen.',

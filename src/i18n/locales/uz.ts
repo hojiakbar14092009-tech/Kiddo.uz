@@ -644,6 +644,16 @@ export const uz = {
       welcomeReplay: 'Tanishuvni qayta ko‘rsatish',
       sound: 'Ovoz',
       volume: 'Balandligi',
+      cuesTitle: 'Ilova tovushlari',
+      cuesHint: 'Har bir yutuqning o‘z qisqa tovushi bor. Bosib eshitib ko‘ring.',
+      cues: {
+        coin: 'Coin',
+        star: 'Yulduz',
+        grow: 'O‘sish',
+        heart: 'Do‘stlik',
+        unlock: 'Yangi olam',
+        spend: 'Sarflash',
+      },
       testSound: 'Tekshirib eshitish',
       voiceNote:
         'O‘zbekcha ovoz vaqtinchalik sun’iy (sintez qilingan) ovoz, o‘zbek tilida so‘zlashuvchi odamning ovozi emas: o‘zbekcha matnni ochiq qozoqcha nutq modeli o‘qiydi, shuning uchun talaffuz ba’zan o‘zbekcha bo‘lmaydi. Haqiqiy o‘zbekcha ovoz tayyor bo‘lganda u almashtiriladi. Matn har doim ekranda ko‘rinadi.',

@@ -7,6 +7,7 @@ import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { stageIndex, useAdventure, useResources, worldStage } from '@/domain/universe'
 import { useChildKey, useProgressStore } from '@/store/progressStore'
 import { tDynamic } from '@/lib/tDynamic'
+import { queueCue } from '@/services/audio/soundLanguage'
 import { cellFor, roadPath, useMapColumns } from './mapLayout'
 import { WorldStop } from './WorldStop'
 
@@ -60,7 +61,10 @@ function AdventureMap({ childKey }: { childKey: string }) {
   const [said, setSaid] = useState('')
   useEffect(() => {
     if (!news) return undefined
-    const timer = window.setTimeout(() => setSaid(news), 400)
+    const timer = window.setTimeout(() => {
+      setSaid(news)
+      queueCue('unlock')
+    }, 400)
     return () => window.clearTimeout(timer)
   }, [news])
 

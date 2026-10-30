@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { subscribeDomainEvents } from '@/domain/universe/progression'
 import { toast } from '@/components/ui/toast'
+import { queueCue } from '@/services/audio/soundLanguage'
 import { dayKey } from '@/features/tasks/rules'
 import i18n from '@/i18n'
 import { useProgressStore } from '@/store/progressStore'
@@ -17,6 +18,7 @@ export function PetBridge() {
         if (event.type !== 'activity.completed') return
         const grew = useProgressStore.getState().recordPetDay(event.childKey, dayKey())
         if (!grew) return
+        queueCue('heart')
         const name = i18n.t(`shop.pets.${grew.pet}`)
         toast(i18n.t('shop.petBondUp', { name, count: grew.level }), 'success')
       }),

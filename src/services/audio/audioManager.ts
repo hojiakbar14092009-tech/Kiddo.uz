@@ -7,6 +7,7 @@ import { useFamilyStore } from '@/store/familyStore'
 import { planSpeech, type SpeechPart, type VoiceClip } from './voiceLibrary'
 import { resolveClips, voiceMode } from './voiceSource'
 import { requestTts } from './remoteTts'
+import { noteSuccessSound } from './soundLanguage'
 
 export type UiSound = 'click' | 'success' | 'soft'
 
@@ -71,6 +72,7 @@ class AudioManager {
   play(sound: UiSound): void {
     const volume = currentVolume()
     if (volume <= 0) return
+    if (sound === 'success') noteSuccessSound()
     let howl = this.uiSounds.get(sound)
     if (!howl) {
       howl = new Howl({ src: [UI_SOUND_URLS[sound]], preload: true })
