@@ -77,6 +77,14 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/tales/TalesPage')).TalesPage,
                 }),
               },
+              // Scale Portal (Phase 33): Astro's journey from a cell to the galaxy
+              {
+                path: '/scale-portal',
+                lazy: async () => ({
+                  Component: (await import('@/features/scalePortal/ScalePortalPage'))
+                    .ScalePortalPage,
+                }),
+              },
               // The Story Engine: longer picture stories with choices (Story Library in Kiddo City).
               ...['/stories', '/stories/:storyId'].map((path) => ({
                 path,

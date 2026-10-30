@@ -293,6 +293,7 @@ export const CONTEXT_ROUTES: readonly (readonly [prefix: string, context: Mascot
   ['/spaceport/mars', 'space'],
   ['/spaceport', 'workshop'],
   ['/learn/space', 'space'],
+  ['/scale-portal', 'space'],
   ['/worlds/dino', 'dinosaur'],
   ['/worlds/uzbekistan', 'uzbekistan'],
   ['/mistake-garden', 'garden'],

@@ -30,6 +30,13 @@ export type Narration = 'full' | 'prompted' | 'on-demand'
 /** How many things a screen shows at once. */
 export type InteractionDensity = 'sparse' | 'standard' | 'dense'
 
+/**
+ * How sizes and distances are spoken about (Phase 33 Scale Portal): pictures
+ * and bigger/smaller, then rough ratios with everyday units, then orders of
+ * magnitude, then scientific notation and AU / light-years.
+ */
+export type ScaleDetail = 'compare' | 'ratio' | 'magnitude' | 'scientific'
+
 export interface AgeProfile {
   id: AgeBand
   minAge: number
@@ -51,6 +58,7 @@ export interface AgeProfile {
    * is never taken for mastery.
    */
   placement: boolean
+  scaleDetail: ScaleDetail
 }
 
 export const AGE_PROFILES: readonly AgeProfile[] = [
@@ -65,6 +73,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     interactionDensity: 'sparse',
     baseComplexity: 1,
     placement: false,
+    scaleDetail: 'compare',
   },
   {
     id: '5-6',
@@ -78,6 +87,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     baseComplexity: 2,
     startByAge: { 6: 3 },
     placement: false,
+    scaleDetail: 'compare',
   },
   {
     id: '7-9',
@@ -90,6 +100,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     interactionDensity: 'standard',
     baseComplexity: 4,
     placement: true,
+    scaleDetail: 'ratio',
   },
   {
     id: '10-12',
@@ -102,6 +113,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     interactionDensity: 'standard',
     baseComplexity: 5,
     placement: true,
+    scaleDetail: 'magnitude',
   },
   {
     id: '13-15',
@@ -114,6 +126,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     interactionDensity: 'dense',
     baseComplexity: 5,
     placement: true,
+    scaleDetail: 'scientific',
   },
   {
     id: '16+',
@@ -126,6 +139,7 @@ export const AGE_PROFILES: readonly AgeProfile[] = [
     interactionDensity: 'dense',
     baseComplexity: 5,
     placement: true,
+    scaleDetail: 'scientific',
   },
 ]
 

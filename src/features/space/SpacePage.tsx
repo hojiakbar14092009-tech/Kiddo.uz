@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, ChevronLeftIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
@@ -165,6 +165,21 @@ function SpaceMenu({ level, onOpen }: { level: AgeLevel; onOpen: (view: View) =>
           {t('learn.startTest')}
         </Button>
       </section>
+
+      {/* Phase 33: the flagship scale journey with Astro */}
+      <Link
+        to="/scale-portal"
+        className="space-panel flex items-center gap-4 p-5 text-left"
+        data-testid="scale-portal-link"
+      >
+        <SpacePicture id="saturn" className="size-16 shrink-0" />
+        <span className="min-w-0">
+          <span className="block font-display text-2xl font-extrabold">
+            {t('scalePortal.card')}
+          </span>
+          <span className="block text-base opacity-90">{t('scalePortal.cardText')}</span>
+        </span>
+      </Link>
 
       <section
         aria-labelledby="space-exhibit"

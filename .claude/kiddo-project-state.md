@@ -609,3 +609,12 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Verification: format/lint/typecheck PASS, unit 1320/1320, build PASS, browser 48/48 (opening, performance,
   onboarding, parent-dashboard, kiddo) + opening 8/8 after the last fix; Critic REJECT (pivots, ringed-planet look)
   → fixed → ACCEPT (Critical 0 / High 0). Next: Phase 33.
+
+## Phase 33 — COMPLETE (2026-10-30) – docs/architecture/scale-portal.md
+
+- `/scale-portal`: scales.ts (sourced values), camera.ts (rail ↔ log camera, useCamera tween + cleanup), ScaleView (true-size
+  SVG layers, speck rings, sky), questions.ts (guess-first by `AgeProfile.scaleDetail`), describe.ts (units/notation),
+  ScalePortalPage (journey → emitActivity space, oncePerDay; explore free). Entry card on SpacePage.
+- Verification: format/lint/typecheck PASS, unit 1333/1333, build PASS, browser kiddo + scale-portal 28/28 then
+  scale-portal 8/8 after fixes; Critic REJECT (rail keys, guessable distractors, step grading) → fixed → ACCEPT.
+- Follow-ups: near/far questions for 3–6; first-screen JS debt (Phase 32). Next: Phase 34.
