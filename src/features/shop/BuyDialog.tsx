@@ -34,12 +34,7 @@ export function BuyDialog({ outfit, model, wearing, onConfirm, onCancel }: BuyDi
       onClose={onCancel}
       testId="buy-dialog"
       media={<Robot model={model} wearing={wearing} size={120} followPointer={false} />}
-      title={
-        <>
-          <span aria-hidden="true">{outfit.emoji} </span>
-          {t('shop.confirm', { name })}
-        </>
-      }
+      title={t('shop.confirm', { name })}
       description={<PriceLine price={outfit.price} />}
     >
       <div className="flex w-full flex-wrap justify-center gap-3">

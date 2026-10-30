@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
+import { characterStyle } from '@/domain/adaptive'
 import { Robot } from '@/features/mascot/Robot'
 import {
   ageOn,
@@ -170,7 +171,13 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
               onClick={() => setMascot(model)}
               className="flex flex-col items-center gap-1 rounded-3xl border-[3px] border-transparent bg-cream px-4 py-2 aria-checked:border-primary"
             >
-              <Robot model={model} size={72} followPointer={false} />
+              <Robot
+                model={model}
+                size={72}
+                followPointer={false}
+                // the robot of the child being entered (a guest's until a birth date is set)
+                character={characterStyle(age)}
+              />
               <span className="font-display font-bold">
                 {t(model === 'girl' ? 'parent.profiles.robotGirl' : 'parent.profiles.robotBoy')}
               </span>

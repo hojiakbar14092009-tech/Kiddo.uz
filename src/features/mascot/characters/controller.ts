@@ -38,6 +38,8 @@ export interface FrameInput {
   reducedMotion: boolean
   /** Calm pages (a lesson): slower idle, no glow pulse. */
   calm: boolean
+  /** The learner's character stage: speed of the idle loop (Phase 31; 1 = as authored). */
+  idleTempo?: number
 }
 
 export interface ModelStats {
@@ -147,8 +149,16 @@ export class MascotController {
     return this.activeClip
   }
 
+  /**
+   * Proportions for the learner's character stage (Phase 31): the head a
+   * little smaller on the body for older learners; never a taller model.
+   */
+  setHeadScale(scale: number): void {
+    if (this.head && Number.isFinite(scale) && scale > 0) this.head.scale.setScalar(scale)
+  }
+
   /** Shows what the director decided (a new serial starts the clip again). */
-  show(shown: Shown, input: Pick<FrameInput, 'reducedMotion' | 'calm'>): void {
+  show(shown: Shown, input: Pick<FrameInput, 'reducedMotion' | 'calm' | 'idleTempo'>): void {
     this.emotion = shown.emotion
     if (shown.serial === this.serial) return
     this.serial = shown.serial
@@ -160,7 +170,10 @@ export class MascotController {
     const speed =
       input.reducedMotion && idleLike
         ? 0
-        : this.def.personality.tempo * (input.calm && idleLike ? 0.75 : 1)
+        : this.def.personality.tempo *
+          (input.calm && idleLike ? 0.75 : 1) *
+          // the learner's stage slows only the resting loop, never talk or walk cycles
+          (name.startsWith('idle') ? (input.idleTempo ?? 1) : 1)
     if (next === this.active) {
       next.reset().setEffectiveTimeScale(speed).play()
       return

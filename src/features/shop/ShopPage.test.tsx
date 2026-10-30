@@ -1,6 +1,10 @@
 import { screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { birthDateForAge } from '@/features/age/ageLevel'
 import { STICKERS } from '@/features/stickers/stickers'
+import { tashkentDay } from '@/lib/dates'
+import { useFamilyStore } from '@/store/familyStore'
+import { OUTFITS } from './outfits'
 import { EMPTY_PROGRESS, GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
@@ -12,6 +16,7 @@ function guest() {
 describe('Shop', () => {
   beforeEach(() => {
     useSettingsStore.setState({ language: 'uz' })
+    useFamilyStore.setState({ children: [], activeChildId: null })
     useProgressStore.setState({
       byChild: { [GUEST_KEY]: { ...EMPTY_PROGRESS, coins: 20, stickers: [STICKERS[0]!.id] } },
     })
@@ -113,5 +118,58 @@ describe('Shop', () => {
     // pets not owned have no hearts
     expect(screen.getAllByTestId('pet-bond')).toHaveLength(1)
     expect(screen.getByText(/Har kuni birga o‘ynasang/)).toBeInTheDocument()
+  })
+
+  it("shows every item with its own picture, the stage's categories first, and filters by kind", async () => {
+    const { user } = await renderRoute('/shop')
+    const wardrobe = screen.getByTestId('wardrobe')
+    // a guest is young: bright colours, creative first
+    expect(wardrobe).toHaveAttribute('data-stage', 'young')
+    expect(within(wardrobe).getAllByRole('listitem')).toHaveLength(OUTFITS.length)
+    expect(within(wardrobe).getAllByRole('listitem')[0]).toHaveAttribute(
+      'data-category',
+      'creative',
+    )
+    expect(document.querySelector('[data-outfit-preview="doppi"]')).toHaveAttribute(
+      'data-tone',
+      'bright',
+    )
+    await user.click(screen.getByRole('button', { name: 'Milliy' }))
+    expect(screen.getByRole('button', { name: 'Milliy' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(wardrobe).getAllByRole('listitem')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Do‘ppi — Yana 5 coin' })).toBeInTheDocument()
+  })
+
+  it('a 14-year-old sees the same wardrobe in calm colours, smart and tech first', async () => {
+    const today = tashkentDay()
+    useFamilyStore.setState({
+      children: [
+        {
+          id: 'teen',
+          name: 'Teen',
+          birthDate: birthDateForAge(14, today),
+          celebratedLevel: 6,
+          gender: 'boy',
+          mascot: 'boy',
+          dailyLimitMinutes: 60,
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+      activeChildId: 'teen',
+    })
+    useProgressStore.setState({ byChild: { teen: { ...EMPTY_PROGRESS, coins: 20 } } })
+    await renderRoute('/shop')
+    const wardrobe = screen.getByTestId('wardrobe')
+    expect(wardrobe).toHaveAttribute('data-stage', 'older')
+    expect(within(wardrobe).getAllByRole('listitem')).toHaveLength(OUTFITS.length)
+    expect(within(wardrobe).getAllByRole('listitem')[0]).toHaveAttribute('data-category', 'smart')
+    // nothing is locked by gender or age: the flower and the crown are there too
+    expect(screen.getByRole('button', { name: 'Gul — 10 coin' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Toj — Yana 20 coin' })).toBeEnabled()
+    expect(document.querySelector('[data-outfit-preview="cap"]')).toHaveAttribute(
+      'data-tone',
+      'muted',
+    )
+    expect(document.querySelector('svg[data-stage]')).toHaveAttribute('data-stage', 'older')
   })
 })

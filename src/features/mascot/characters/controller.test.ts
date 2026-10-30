@@ -114,4 +114,26 @@ describe('MascotController', () => {
     c.dispose()
     expect(freed).toBe(true)
   })
+
+  it("the learner's stage slows only the resting loop and sets the head proportion", () => {
+    const model = fakeModel()
+    model.animations.push(new THREE.AnimationClip('talk', 1, []))
+    const c = new MascotController(MASCOTS.kidobot, model)
+    const active = () =>
+      (c as unknown as { active: THREE.AnimationAction }).active.getEffectiveTimeScale()
+    c.show(
+      { gesture: 'idle', emotion: 'neutral', priority: 0, serial: 1 },
+      { ...input, idleTempo: 0.8 },
+    )
+    expect(active()).toBeCloseTo(0.8)
+    c.show(
+      { gesture: 'talk', emotion: 'neutral', priority: 3, serial: 2 },
+      { ...input, idleTempo: 0.8 },
+    )
+    expect(active()).toBeCloseTo(1)
+    c.setHeadScale(0.9)
+    expect(c.root.getObjectByName('Head')!.scale.x).toBeCloseTo(0.9)
+    c.setHeadScale(Number.NaN)
+    expect(c.root.getObjectByName('Head')!.scale.x).toBeCloseTo(0.9)
+  })
 })

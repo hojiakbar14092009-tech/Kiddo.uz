@@ -4,6 +4,7 @@ import { lazy, Suspense, useContext, useEffect, useState } from 'react'
 import { UNSAFE_LocationContext } from 'react-router-dom'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useContent3DActive } from '@/components/three/content3d'
+import { useCharacterStyle } from '@/features/age/useCharacterStyle'
 import { onIdle } from '@/lib/onIdle'
 import {
   contextOf,
@@ -49,6 +50,8 @@ export function MascotFigure({ mascot: chosen, lively = false, ...input }: Masco
   const [failed, setFailed] = useState(false)
   const [ready, setReady] = useState(false)
   const reducedMotion = useReducedMotion() ?? false
+  const activeStyle = useCharacterStyle()
+  const character = input.character ?? activeStyle
   const contentIn3D = useContent3DActive()
   const [besideContent, setBesideContent] = useState(false)
   if (contentIn3D && !besideContent) setBesideContent(true)
@@ -96,6 +99,7 @@ export function MascotFigure({ mascot: chosen, lively = false, ...input }: Masco
             quality={mascotQuality()}
             palette={mascot === 'kidobot' ? PALETTES[input.model] : undefined}
             wearing={mascot === 'kidobot' ? input.wearing : undefined}
+            character={character}
             label={input.label}
             className={clsx('w-full', !ready && 'absolute inset-0 opacity-0')}
             onReady={() => setReady(true)}

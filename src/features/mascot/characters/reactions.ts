@@ -26,6 +26,11 @@ export interface ReactionState {
   /** Right answers in a row, recently (a streak earns a celebration). */
   streak: number
   reducedMotion: boolean
+  /**
+   * From the learner's character style (Phase 31, by real age): an older
+   * learner's mascot answers small moments with a composed gesture.
+   */
+  composedReactions?: boolean
 }
 
 const reaction = (
@@ -50,8 +55,25 @@ const wow = (critical = false): Performance =>
   })
 
 export function resolveReaction(signal: Signal, state: ReactionState): Performance | null {
-  const perf = resolve(signal, state)
+  const found = resolve(signal, state)
+  const perf = found && state.composedReactions ? composed(found) : found
   return perf && state.reducedMotion ? calm(perf, state.mascot) : perf
+}
+
+/** Older learners: small celebrations become an encouraging gesture; big moments stay. */
+export function composed(perf: Performance): Performance {
+  const small = perf.rank < 3
+  const gesture =
+    perf.gesture === 'jump'
+      ? 'nod'
+      : perf.gesture === 'celebrate' && small
+        ? 'encourage'
+        : perf.gesture
+  return {
+    ...perf,
+    gesture,
+    ...(perf.then ? { then: composed(perf.then) } : {}),
+  }
 }
 
 function resolve(signal: Signal, state: ReactionState): Performance | null {

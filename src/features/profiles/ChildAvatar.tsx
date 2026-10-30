@@ -1,6 +1,7 @@
 import clsx from 'clsx'
+import { characterStyle } from '@/domain/adaptive'
 import { Robot } from '@/features/mascot/Robot'
-import type { ChildProfile } from '@/store/familyStore'
+import { childAge, type ChildProfile } from '@/store/familyStore'
 import { isStoredPhoto } from './photo'
 import { useWearing } from '@/store/progressStore'
 
@@ -32,6 +33,8 @@ export function ChildAvatar({ child, size, className }: ChildAvatarProps) {
         <Robot
           model={child.mascot}
           wearing={wearing}
+          // each child's own robot, by their own age (not the active child's)
+          character={characterStyle(childAge(child))}
           size={Math.round(size * 0.78)}
           className="translate-y-[6%]"
         />

@@ -1,18 +1,20 @@
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, CoinIcon } from '@/components/icons'
-import type { Outfit } from './outfits'
-import { Picture } from '@/components/ui/Picture'
+import type { Outfit, OutfitTone } from './outfits'
+import { OutfitPreview } from './OutfitPreview'
 
 interface OutfitCardProps {
   outfit: Outfit
   owned: boolean
   worn: boolean
   coins: number
+  /** Colours of the learner's character stage (Phase 31). */
+  tone: OutfitTone
   onSelect: () => void
 }
 
-export function OutfitCard({ outfit, owned, worn, coins, onSelect }: OutfitCardProps) {
+export function OutfitCard({ outfit, owned, worn, coins, tone, onSelect }: OutfitCardProps) {
   const { t } = useTranslation()
   const name = t(`shop.items.${outfit.id}`)
   const affordable = coins >= outfit.price
@@ -41,12 +43,12 @@ export function OutfitCard({ outfit, owned, worn, coins, onSelect }: OutfitCardP
       <span
         aria-hidden="true"
         className={clsx(
-          'flex size-20 items-center justify-center rounded-full border-4 bg-white p-3 sm:size-24',
+          'flex size-20 items-center justify-center overflow-hidden rounded-full border-4 bg-white p-1 sm:size-24',
           owned ? 'border-primary-soft' : 'border-cream',
           !owned && !affordable && 'opacity-60',
         )}
       >
-        <Picture emoji={outfit.emoji} className="size-full" />
+        <OutfitPreview outfit={outfit} tone={tone} className="size-full" />
       </span>
       <span className="font-display text-xl font-bold first-letter:uppercase">{name}</span>
 

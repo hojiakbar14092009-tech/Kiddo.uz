@@ -71,16 +71,19 @@ describe('server building prices (0010) match the city', () => {
   })
 })
 
-describe('server shop prices (0009) match the shop', () => {
+describe('server shop prices (0009 + 0015) match the shop', () => {
   it('lists every outfit and pet at the price the app asks', async () => {
     const { default: balance } =
       await import('../../../supabase/migrations/0009_balance_authority.sql?raw')
+    const { default: wardrobe } =
+      await import('../../../supabase/migrations/0015_age_wardrobe.sql?raw')
     const { OUTFITS } = await import('@/features/shop/outfits')
     const { PET_IDS, PET_PRICE } = await import('@/features/pets/pets')
-    const seed =
+    const seedOf = (sql: string) =>
       /insert into public\.shop_items \(kind, item, price\) values([\s\S]*?)on conflict/.exec(
-        balance,
-      )?.[1]
+        sql,
+      )?.[1] ?? ''
+    const seed = seedOf(balance) + seedOf(wardrobe)
     const server = [...(seed ?? '').matchAll(/\('(outfit|pet)', '([a-z0-9-]+)', (\d+)\)/g)].map(
       (match) => `${match[1]}|${match[2]}|${match[3]}`,
     )

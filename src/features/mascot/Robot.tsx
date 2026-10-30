@@ -6,6 +6,8 @@ import {
   type TargetAndTransition,
 } from 'framer-motion'
 import { useEffect, useId, useRef, useState } from 'react'
+import type { CharacterStyle } from '@/domain/adaptive'
+import { useCharacterStyle } from '@/features/age/useCharacterStyle'
 import { randomBetween } from '@/lib/random'
 import type { MascotModel } from '@/store/familyStore'
 import type { Wearing } from '@/features/shop/outfits'
@@ -24,44 +26,50 @@ const EASE_IN_OUT = [0.42, 0, 0.58, 1] as const
 /** A soft spring with a little overshoot – reads as a living body, not a machine. */
 const LIMB_SPRING = { type: 'spring', stiffness: 110, damping: 11, mass: 0.9 } as const
 
-/** One-shot whole-body reactions, anchored at the feet. */
-const BODY_ACTIONS: Record<
-  'happy' | 'oops' | 'celebrate' | 'sleepy' | 'rest',
-  TargetAndTransition
-> = {
-  // anticipation (crouch) → jump → land with a squash → settle
-  happy: {
-    y: [0, 8, -34, 4, 0],
-    scaleX: [1, 1.06, 0.97, 1.03, 1],
-    scaleY: [1, 0.9, 1.05, 0.97, 1],
-    rotate: 0,
-    transition: { duration: 1.1, times: [0, 0.15, 0.5, 0.8, 1], ease: EASE_IN_OUT },
-  },
-  // a decaying head-shake of the whole body
-  oops: {
-    y: [0, 3, 0],
-    rotate: [0, -9, 7, -4, 2, 0],
-    scaleX: 1,
-    scaleY: 1,
-    transition: { duration: 1.2, ease: 'easeInOut' },
-  },
-  // a happy little dance: side-to-side sway with small hops
-  celebrate: {
-    y: [0, -10, 0, -10, 0],
-    rotate: [0, -6, 0, 6, 0],
-    scaleX: 1,
-    scaleY: 1,
-    transition: { duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
-  },
-  // sinks a little and leans, like a sleepy child
-  sleepy: {
-    y: 4,
-    rotate: -3,
-    scaleX: 1,
-    scaleY: 0.98,
-    transition: { duration: 1.2, ease: 'easeInOut' },
-  },
-  rest: { y: 0, rotate: 0, scaleX: 1, scaleY: 1, transition: { duration: 0.4 } },
+type BodyAction = 'happy' | 'oops' | 'celebrate' | 'sleepy' | 'rest'
+
+/**
+ * One-shot whole-body reactions, anchored at the feet. Their size follows the
+ * learner's character stage: a big bouncy jump for the youngest, a smaller,
+ * composed one for older learners (gesture, not a different robot).
+ */
+function bodyActions(style: CharacterStyle): Record<BodyAction, TargetAndTransition> {
+  const squash = style.reactionScale
+  return {
+    // anticipation (crouch) → jump → land with a squash → settle
+    happy: {
+      y: [0, 8 * squash, -style.jump, 4 * squash, 0],
+      scaleX: [1, 1 + 0.06 * squash, 1 - 0.03 * squash, 1 + 0.03 * squash, 1],
+      scaleY: [1, 1 - 0.1 * squash, 1 + 0.05 * squash, 1 - 0.03 * squash, 1],
+      rotate: 0,
+      transition: { duration: 1.1, times: [0, 0.15, 0.5, 0.8, 1], ease: EASE_IN_OUT },
+    },
+    // a decaying head-shake of the whole body
+    oops: {
+      y: [0, 3, 0],
+      rotate: [0, -9 * squash, 7 * squash, -4 * squash, 2 * squash, 0],
+      scaleX: 1,
+      scaleY: 1,
+      transition: { duration: 1.2, ease: 'easeInOut' },
+    },
+    // a happy little dance: side-to-side sway with small hops
+    celebrate: {
+      y: [0, -style.hop, 0, -style.hop, 0],
+      rotate: [0, -6 * squash, 0, 6 * squash, 0],
+      scaleX: 1,
+      scaleY: 1,
+      transition: { duration: 1.4, repeat: Infinity, ease: 'easeInOut' },
+    },
+    // sinks a little and leans, like a sleepy child
+    sleepy: {
+      y: 4,
+      rotate: -3,
+      scaleX: 1,
+      scaleY: 0.98,
+      transition: { duration: 1.2, ease: 'easeInOut' },
+    },
+    rest: { y: 0, rotate: 0, scaleX: 1, scaleY: 1, transition: { duration: 0.4 } },
+  }
 }
 
 const SHADOW_ACTIONS: Record<'happy' | 'rest', TargetAndTransition> = {
@@ -75,7 +83,7 @@ const SHADOW_ACTIONS: Record<'happy' | 'rest', TargetAndTransition> = {
 
 type ArmPose = { left: TargetAndTransition; right: TargetAndTransition }
 
-function armPose(mood: MascotMood, loops: boolean): ArmPose {
+function armPose(mood: MascotMood, loops: boolean, rest = 10): ArmPose {
   switch (mood) {
     case 'happy':
       return {
@@ -150,19 +158,20 @@ function armPose(mood: MascotMood, loops: boolean): ArmPose {
           : { rotate: -30, transition: LIMB_SPRING },
       }
     default:
+      // at rest: arms out and swinging (younger) or calm by the body (older)
       return {
         left: loops
           ? {
-              rotate: [8, 12, 8],
+              rotate: [rest - 2, rest + 2, rest - 2],
               transition: { duration: 3.6, repeat: Infinity, ease: 'easeInOut' },
             }
-          : { rotate: 10, transition: LIMB_SPRING },
+          : { rotate: rest, transition: LIMB_SPRING },
         right: loops
           ? {
-              rotate: [-8, -12, -8],
+              rotate: [-rest + 2, -rest - 2, -rest + 2],
               transition: { duration: 3.6, repeat: Infinity, ease: 'easeInOut', delay: 0.3 },
             }
-          : { rotate: -10, transition: LIMB_SPRING },
+          : { rotate: -rest, transition: LIMB_SPRING },
       }
   }
 }
@@ -180,6 +189,11 @@ export interface RobotProps {
   label?: string
   /** Clothes bought in the shop. */
   wearing?: Wearing
+  /**
+   * The character stage (Phase 31): posture, gesture, idle style, proportions
+   * and outfit colours. Defaults to the active child's (by real age).
+   */
+  character?: CharacterStyle
   className?: string
 }
 
@@ -197,8 +211,11 @@ export function Robot({
   followPointer = true,
   label = '',
   wearing,
+  character,
   className,
 }: RobotProps) {
+  const activeStyle = useCharacterStyle()
+  const style = character ?? activeStyle
   const reduceMotion = useReducedMotion() ?? false
   const loops = !reduceMotion
   const svgRef = useRef<SVGSVGElement>(null)
@@ -220,6 +237,7 @@ export function Robot({
   const shadow = useAnimationControls()
 
   useEffect(() => {
+    const BODY_ACTIONS = bodyActions(style)
     if (mood === 'happy' && loops) {
       void body.start(BODY_ACTIONS.happy)
       void shadow.start(SHADOW_ACTIONS.happy)
@@ -236,9 +254,9 @@ export function Robot({
       void body.start(BODY_ACTIONS.rest)
       void shadow.start(SHADOW_ACTIONS.rest)
     }
-  }, [mood, reactionKey, loops, body, shadow])
+  }, [mood, reactionKey, loops, body, shadow, style])
 
-  const arms = armPose(mood, loops)
+  const arms = armPose(mood, loops, style.armRest)
   const accentFill = `url(#${ids.accent})`
   const shellFill = `url(#${ids.shell})`
 
@@ -251,6 +269,7 @@ export function Robot({
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
       className={className}
       overflow="visible"
+      data-stage={style.stage}
     >
       <defs>
         <radialGradient id={ids.shell} cx="38%" cy="28%" r="78%">
@@ -284,7 +303,7 @@ export function Robot({
       <motion.g animate={body} style={{ transformOrigin: '100px 226px', transformBox: 'view-box' }}>
         {/* Breathing */}
         <motion.g
-          animate={loops ? { y: [0, -4, -1, 0] } : { y: 0 }}
+          animate={loops ? { y: [0, -style.breath, -style.breath / 4, 0] } : { y: 0 }}
           transition={{
             duration: breathSeconds,
             times: [0, 0.45, 0.8, 1],
@@ -376,80 +395,94 @@ export function Robot({
           <motion.g
             style={{ rotate: headTurn, transformOrigin: '100px 142px', transformBox: 'view-box' }}
           >
-            <motion.g
-              animate={loops ? { rotate: [-2, 2.5, -1, -2] } : { rotate: 0 }}
-              transition={{
-                duration: swaySeconds,
-                times: [0, 0.4, 0.75, 1],
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              style={{ transformOrigin: '100px 142px', transformBox: 'view-box' }}
-            >
-              <ellipse cx="32" cy="88" rx="14" ry="26" fill={accentFill} />
-              <ellipse cx="168" cy="88" rx="14" ry="26" fill={accentFill} />
+            {/* proportions: the head sits a little smaller on the body for older learners */}
+            <g transform={`translate(100 142) scale(${style.headScale}) translate(-100 -142)`}>
+              <motion.g
+                animate={
+                  loops
+                    ? {
+                        rotate: [
+                          style.headTilt - style.sway * 0.8,
+                          style.headTilt + style.sway,
+                          style.headTilt - style.sway * 0.4,
+                          style.headTilt - style.sway * 0.8,
+                        ],
+                      }
+                    : { rotate: style.headTilt }
+                }
+                transition={{
+                  duration: swaySeconds,
+                  times: [0, 0.4, 0.75, 1],
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                style={{ transformOrigin: '100px 142px', transformBox: 'view-box' }}
+              >
+                <ellipse cx="32" cy="88" rx="14" ry="26" fill={accentFill} />
+                <ellipse cx="168" cy="88" rx="14" ry="26" fill={accentFill} />
 
-              {model === 'boy' && (
-                <g>
-                  <rect x="97" y="10" width="6" height="22" rx="3" fill="#CFC8DD" />
-                  <motion.circle
-                    cx="100"
-                    cy="10"
-                    fill={accentFill}
-                    initial={{ r: 8 }}
-                    animate={loops ? { r: [7, 9, 7] } : { r: 8 }}
-                    transition={{ duration: 1.7, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                </g>
-              )}
+                {model === 'boy' && (
+                  <g>
+                    <rect x="97" y="10" width="6" height="22" rx="3" fill="#CFC8DD" />
+                    <motion.circle
+                      cx="100"
+                      cy="10"
+                      fill={accentFill}
+                      initial={{ r: 8 }}
+                      animate={loops ? { r: [7, 9, 7] } : { r: 8 }}
+                      transition={{ duration: 1.7, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                  </g>
+                )}
 
-              <rect
-                x="34"
-                y="26"
-                width="132"
-                height="118"
-                rx="56"
-                fill={shellFill}
-                stroke="#D9D3E4"
-                strokeWidth="1.5"
-              />
-              <ellipse cx="72" cy="38" rx="20" ry="6" fill="#FFFFFF" opacity="0.85" />
-              <HeadOutfit id={wearing?.head} />
-              <HeadOutfit id={wearing?.ear} />
+                <rect
+                  x="34"
+                  y="26"
+                  width="132"
+                  height="118"
+                  rx="56"
+                  fill={shellFill}
+                  stroke="#D9D3E4"
+                  strokeWidth="1.5"
+                />
+                <ellipse cx="72" cy="38" rx="20" ry="6" fill="#FFFFFF" opacity="0.85" />
+                <HeadOutfit id={wearing?.head} tone={style.tone} />
+                <HeadOutfit id={wearing?.ear} tone={style.tone} />
 
-              {model === 'girl' && (
-                <g>
-                  <path d="M138 34 L116 20 Q110 34 116 48 Z" fill={accentFill} />
-                  <path d="M138 34 L160 20 Q166 34 160 48 Z" fill={accentFill} />
-                  <circle cx="138" cy="34" r="7" fill={palette.accent[2]} />
-                </g>
-              )}
+                {model === 'girl' && (
+                  <g>
+                    <path d="M138 34 L116 20 Q110 34 116 48 Z" fill={accentFill} />
+                    <path d="M138 34 L160 20 Q166 34 160 48 Z" fill={accentFill} />
+                    <circle cx="138" cy="34" r="7" fill={palette.accent[2]} />
+                  </g>
+                )}
 
-              <rect x="50" y="48" width="100" height="80" rx="34" fill={`url(#${ids.visor})`} />
-              <path
-                d="M66 60 Q100 51 134 60"
-                stroke="#FFFFFF"
-                strokeOpacity="0.22"
-                strokeWidth="5"
-                fill="none"
-                strokeLinecap="round"
-              />
-              <ellipse cx="64" cy="108" rx="8" ry="5" fill={palette.glow} opacity="0.3" />
-              <ellipse cx="136" cy="108" rx="8" ry="5" fill={palette.glow} opacity="0.3" />
+                <rect x="50" y="48" width="100" height="80" rx="34" fill={`url(#${ids.visor})`} />
+                <path
+                  d="M66 60 Q100 51 134 60"
+                  stroke="#FFFFFF"
+                  strokeOpacity="0.22"
+                  strokeWidth="5"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                <ellipse cx="64" cy="108" rx="8" ry="5" fill={palette.glow} opacity="0.3" />
+                <ellipse cx="136" cy="108" rx="8" ry="5" fill={palette.glow} opacity="0.3" />
 
-              <RobotFace
-                mood={mood}
-                model={model}
-                glow={palette.glow}
-                eyesClosed={eyesClosed}
-                eyeX={eyeX}
-                eyeY={eyeY}
-                animateLoops={loops}
-              />
-              <FaceOutfit id={wearing?.face} />
-            </motion.g>
+                <RobotFace
+                  mood={mood}
+                  model={model}
+                  glow={palette.glow}
+                  eyesClosed={eyesClosed}
+                  eyeX={eyeX}
+                  eyeY={eyeY}
+                  animateLoops={loops}
+                />
+                <FaceOutfit id={wearing?.face} tone={style.tone} />
+              </motion.g>
+            </g>
           </motion.g>
-          <NeckOutfit id={wearing?.neck} />
+          <NeckOutfit id={wearing?.neck} tone={style.tone} />
         </motion.g>
       </motion.g>
     </svg>

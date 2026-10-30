@@ -14,13 +14,14 @@ import { useMascotModel } from '@/store/familyStore'
 import { useChildKey, useProgress, useProgressStore } from '@/store/progressStore'
 import { BuyDialog } from './BuyDialog'
 import { OutfitCard } from './OutfitCard'
-import { OUTFITS, type Outfit, type Wearing } from './outfits'
+import { useCharacterStyle } from '@/features/age/useCharacterStyle'
+import { OUTFIT_CATEGORIES, OUTFITS, type Outfit, type Wearing } from './outfits'
+import { wardrobe, type Shelf } from './wardrobe'
 import { StickerAlbum } from './StickerAlbum'
 import { PetsPanel } from '@/features/pets/PetsPanel'
 import type { PetId } from '@/features/pets/pets'
 
 type ShopTab = 'outfits' | 'pets' | 'stickers'
-
 /** `/shop`: spend coins on robot clothes, and look through the sticker album. */
 export function ShopPage() {
   const { t } = useTranslation()
@@ -34,6 +35,13 @@ export function ShopPage() {
   const tab: ShopTab = requested === 'stickers' || requested === 'pets' ? requested : 'outfits'
   const [pending, setPending] = useState<Outfit | null>(null)
   const model = useMascotModel()
+  const character = useCharacterStyle()
+  const [shelf, setShelf] = useState<Shelf>('all')
+  const shelves: Shelf[] = [
+    'all',
+    'for-you',
+    ...OUTFIT_CATEGORIES.filter((category) => OUTFITS.some((item) => item.category === category)),
+  ]
   // A pet on trial stands next to the robot before it is bought.
   const [previewPet, setPreviewPet] = useState<PetId | null>(null)
   const shownPet = tab === 'pets' && previewPet ? previewPet : undefined
@@ -168,19 +176,58 @@ export function ShopPage() {
               }}
             />
           ) : (
-            <ul className="grid w-full flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
-              {OUTFITS.map((outfit) => (
-                <li key={outfit.id} data-roam="shop">
-                  <OutfitCard
-                    outfit={outfit}
-                    owned={outfits.includes(outfit.id)}
-                    worn={wearing[outfit.slot] === outfit.id}
-                    coins={coins}
-                    onSelect={() => select(outfit)}
-                  />
-                </li>
-              ))}
-            </ul>
+            <div className="flex w-full min-w-0 flex-1 flex-col gap-3">
+              <div
+                role="group"
+                aria-label={t('shop.categoryFilter')}
+                data-testid="wardrobe-shelves"
+                // room for the focus ring inside the scrolling row
+                className="-mx-2 flex gap-2 overflow-x-auto p-2"
+              >
+                {shelves.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    aria-pressed={shelf === item}
+                    data-shelf={item}
+                    onClick={() => setShelf(item)}
+                    className={clsx(
+                      'min-h-11 shrink-0 rounded-full px-4 py-2 font-display text-base font-bold whitespace-nowrap',
+                      shelf === item
+                        ? 'bg-primary text-white'
+                        : 'bg-surface text-ink shadow-press-sm',
+                    )}
+                  >
+                    {item === 'all'
+                      ? t('shop.categoryAll')
+                      : item === 'for-you'
+                        ? t('shop.forYou')
+                        : t(`shop.categories.${item}`)}
+                  </button>
+                ))}
+              </div>
+              {shelf === 'for-you' && (
+                <p className="text-base text-ink-soft">{t('shop.forYouHint')}</p>
+              )}
+              <ul
+                className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3"
+                data-testid="wardrobe"
+                data-stage={character.stage}
+              >
+                {wardrobe(character.featured, shelf).map((outfit) => (
+                  <li key={outfit.id} data-roam="shop" data-category={outfit.category}>
+                    <OutfitCard
+                      outfit={outfit}
+                      owned={outfits.includes(outfit.id)}
+                      worn={wearing[outfit.slot] === outfit.id}
+                      coins={coins}
+                      tone={character.tone}
+                      onSelect={() => select(outfit)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       ) : (

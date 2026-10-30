@@ -585,3 +585,17 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   journey, adaptive, math-lab, quests) + 20/20 rerun after the peak fix; Critic REJECT (age prior paid) → fixed →
   ACCEPT (Critical 0 / High 0), its follow-up Medium (drop-and-reclimb) fixed with `peak`.
 - Next: Phase 31.
+
+## Phase 31 — COMPLETE (2026-10-30) – docs/architecture/age-wardrobe.md
+
+- `CHARACTER_STYLES` (ageProfile.ts): young/middle/older by real age only (`characterStyle(age)`,
+  `useCharacterStyle`); breath, sway, headTilt, armRest, jump/hop, reactionScale, headScale (1/0.95/0.9, never taller),
+  3D idleTempo (idle loops only) + idleCalm, composedReactions (small celebrations → encourage), outfit tone, featured.
+- Wardrobe: 18 items in 10 categories (`shop/outfits.ts`, doppi = traditional), no gender/age lock; `wardrobe.ts`
+  orders shelves by the stage; shelf filter + "for you"; `OutfitPreview` bust; `toneColor`/`outfitColors` bright/rich/
+  muted shared by 2D (`RobotOutfits`) and 3D (`outfits3d`). ChildAvatar/ChildForm use that child's own age.
+- Migration 0015_age_wardrobe.sql (12 new prices; owner applies before release, else server refuses those buys).
+- 3D outfit placement of the 12 new items checked by code only (no WebGL screenshot in this container).
+- Verification: format/lint/typecheck PASS, unit 1317/1317, build PASS, browser 64/64 (pet-shop, kiddo, responsive,
+  parent-dashboard, collection-rewards, onboarding) + wardrobe.spec 4/4; Critic ACCEPT (Critical 0 / High 0), its 4
+  Mediums fixed (ChildForm stage, idleTempo idle-only, shelf focus ring, stage values in the table). Next: Phase 32.

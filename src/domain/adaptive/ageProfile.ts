@@ -190,3 +190,106 @@ export function contentTier(level: Level): ContentTier {
 
 /** Guest play (no profile) shows the full young version, as it always has. */
 export const GUEST_TIER: ContentTier = 6
+
+/*
+ * Character maturity (Phase 31): how Kiddo's robot looks and moves for a
+ * learner's visual maturity — by real age only, never by level, so an
+ * advanced young learner keeps a young robot and an older beginner never gets
+ * a preschool one. One model, three variants of posture, gesture, idle style,
+ * proportions and outfit presentation; the robot is never just scaled taller.
+ */
+export type CharacterStage = 'young' | 'middle' | 'older'
+
+export interface CharacterStyle {
+  stage: CharacterStage
+  /** How outfit colours are shown (shop/outfits.ts OutfitTone). */
+  tone: 'bright' | 'rich' | 'muted'
+  /** Wardrobe categories shown first ("for you"); every item stays open. */
+  featured: readonly string[]
+  /** Breathing bob of the 2D robot, px. */
+  breath: number
+  /** Slow head sway, degrees. */
+  sway: number
+  /** Happy jump height, px. */
+  jump: number
+  /** Celebration hop height, px. */
+  hop: number
+  /** Arms at rest, degrees from the body (younger: out and playful). */
+  armRest: number
+  /** Head size against the body (younger: big-headed; older: closer to the body). */
+  headScale: number
+  /** Posture: a playful head tilt at rest (younger) or an upright head (older); degrees. */
+  headTilt: number
+  /** 3D: speed of the idle loop (1 = as authored). */
+  idleTempo: number
+  /** 3D: spontaneous idle gestures come this many times less often. */
+  idleCalm: number
+  /** How big a body reaction is (squash, shake, sway of a dance): 1 = full. */
+  reactionScale: number
+  /** Small celebrations become a calm encouraging gesture (big moments stay). */
+  composedReactions: boolean
+}
+
+export const CHARACTER_STYLES: Readonly<Record<CharacterStage, CharacterStyle>> = {
+  young: {
+    stage: 'young',
+    tone: 'bright',
+    featured: ['creative', 'casual', 'seasonal', 'space'],
+    breath: 4,
+    sway: 2.5,
+    jump: 34,
+    hop: 10,
+    armRest: 10,
+    headScale: 1,
+    headTilt: -3,
+    idleTempo: 1,
+    idleCalm: 1,
+    reactionScale: 1,
+    composedReactions: false,
+  },
+  middle: {
+    stage: 'middle',
+    tone: 'rich',
+    featured: ['sport', 'explorer', 'science', 'space'],
+    breath: 3,
+    sway: 1.6,
+    jump: 24,
+    hop: 7,
+    armRest: 7,
+    headScale: 0.95,
+    headTilt: -1.5,
+    idleTempo: 0.9,
+    idleCalm: 1.3,
+    reactionScale: 0.75,
+    composedReactions: false,
+  },
+  older: {
+    stage: 'older',
+    tone: 'muted',
+    featured: ['smart', 'tech', 'traditional', 'casual'],
+    breath: 2,
+    sway: 0.8,
+    jump: 14,
+    hop: 4,
+    armRest: 4,
+    headScale: 0.9,
+    headTilt: 0,
+    idleTempo: 0.8,
+    idleCalm: 1.7,
+    reactionScale: 0.5,
+    composedReactions: true,
+  },
+}
+
+const STAGE_OF: Readonly<Record<VisualMaturity, CharacterStage>> = {
+  toy: 'young',
+  garden: 'young',
+  workbook: 'middle',
+  calm: 'older',
+  grown: 'older',
+}
+
+/** The robot's style for a real age (null = guest, presented as 5–6). */
+export function characterStyle(age: number | null): CharacterStyle {
+  return CHARACTER_STYLES[STAGE_OF[ageProfile(age).visual]]
+}

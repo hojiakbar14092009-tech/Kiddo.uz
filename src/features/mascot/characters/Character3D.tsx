@@ -7,7 +7,8 @@ import { FrameTicker } from '@/components/three/FrameTicker'
 import { prepareRenderer } from '@/components/three/prepareRenderer'
 import { RENDER_BUDGET } from '@/components/three/renderBudget'
 import { useInView } from '@/components/three/useInView'
-import type { Wearing } from '@/features/shop/outfits'
+import type { CharacterStyle } from '@/domain/adaptive'
+import type { OutfitTone, Wearing } from '@/features/shop/outfits'
 import type { MascotMood } from '../types'
 import { FaceOutfit3D, HeadOutfit3D, NeckOutfit3D } from './outfits3d'
 import { acquire, release } from './assets'
@@ -32,6 +33,8 @@ export interface Character3DProps {
   palette?: Palette
   /** KidoBot wears the child's outfits from the shop. */
   wearing?: Wearing
+  /** The learner's character stage (Phase 31): idle style, gestures, proportions, outfit colours. */
+  character?: CharacterStyle
   label?: string
   className?: string
   onReady: () => void
@@ -160,6 +163,7 @@ function Scene({
   quality,
   palette,
   wearing,
+  character,
   onReady,
   onFail,
   lab,
@@ -264,11 +268,23 @@ function Scene({
       } else if (signal.kind === 'mood' && signal.mood === 'oops') {
         streak.current = { count: 0, at: now }
       }
-      const perf = resolveReaction(signal, { mascot, streak: streak.current.count, reducedMotion })
+      const perf = resolveReaction(signal, {
+        mascot,
+        streak: streak.current.count,
+        reducedMotion,
+        composedReactions: character?.composedReactions,
+      })
       if (perf) director.request(perf, now)
       invalidate()
     }
-  }, [mascot, reducedMotion, director, invalidate])
+  }, [mascot, reducedMotion, director, invalidate, character?.composedReactions])
+
+  // proportions for the learner's stage (KidoBot only; the head, never a taller body)
+  const headScale = mascot === 'kidobot' ? (character?.headScale ?? 1) : 1
+  useEffect(() => {
+    controller?.setHeadScale(headScale)
+    invalidate()
+  }, [controller, headScale, invalidate])
 
   const lastKey = useRef(reactionKey)
   useEffect(() => {
@@ -314,16 +330,17 @@ function Scene({
     // spontaneous idle gestures, only on lively pages
     if (lively && !reducedMotion && quality === 'high') {
       const v = variation.current
-      if (v.next === 0) v.next = now + seconds(def.personality.idleEvery, v.index) * 1000
+      const calmer = character?.idleCalm ?? 1
+      if (v.next === 0) v.next = now + seconds(def.personality.idleEvery, v.index) * 1000 * calmer
       if (now >= v.next) {
         const gesture = IDLE_VARIATIONS[v.index % IDLE_VARIATIONS.length]!
         director.request({ gesture, emotion: 'curious', priority: PRIORITY.context, rank: 0 }, now)
         v.index += 1
-        v.next = now + seconds(def.personality.idleEvery, v.index) * 1000
+        v.next = now + seconds(def.personality.idleEvery, v.index) * 1000 * calmer
       }
     }
     const shown = director.tick(now)
-    c.show(shown, { reducedMotion, calm: !lively })
+    c.show(shown, { reducedMotion, calm: !lively, idleTempo: character?.idleTempo })
     const glance = look.current && now - look.current.at < LOOK_MS ? look.current : null
     c.update(dt, {
       speaking: shown.gesture === 'talk' || Boolean(lab?.speaking),
@@ -350,7 +367,9 @@ function Scene({
     <>
       <primitive object={controller.root} />
       {lab?.showSkeleton && <SkeletonLines root={controller.root} />}
-      {mascot === 'kidobot' && wearing && <Outfits controller={controller} wearing={wearing} />}
+      {mascot === 'kidobot' && wearing && (
+        <Outfits controller={controller} wearing={wearing} tone={character?.tone} />
+      )}
     </>
   )
 }
@@ -377,7 +396,15 @@ function seconds([min, max]: readonly [number, number], index: number): number {
 }
 
 /** The shop's outfits on KidoBot's sockets (they follow every head turn and nod). */
-function Outfits({ controller, wearing }: { controller: MascotController; wearing: Wearing }) {
+function Outfits({
+  controller,
+  wearing,
+  tone,
+}: {
+  controller: MascotController
+  wearing: Wearing
+  tone?: OutfitTone
+}) {
   const head = controller.socket('Socket_Head')
   const face = controller.socket('Socket_Face')
   const neck = controller.socket('Socket_Neck')
@@ -397,22 +424,22 @@ function Outfits({ controller, wearing }: { controller: MascotController; wearin
       {head &&
         createPortal(
           <group quaternion={offsets.head}>
-            <HeadOutfit3D id={wearing.head} />
-            <HeadOutfit3D id={wearing.ear} />
+            <HeadOutfit3D id={wearing.head} tone={tone} />
+            <HeadOutfit3D id={wearing.ear} tone={tone} />
           </group>,
           head,
         )}
       {face &&
         createPortal(
           <group quaternion={offsets.face}>
-            <FaceOutfit3D id={wearing.face} />
+            <FaceOutfit3D id={wearing.face} tone={tone} />
           </group>,
           face,
         )}
       {neck &&
         createPortal(
           <group quaternion={offsets.neck}>
-            <NeckOutfit3D id={wearing.neck} />
+            <NeckOutfit3D id={wearing.neck} tone={tone} />
           </group>,
           neck,
         )}
