@@ -49,6 +49,10 @@ test('a ten-year-old: no age ceiling, focus explained to the parent, Math Lab st
   await page.getByRole('button', { name: 'Bolalarga' }).click()
   await page.getByRole('button', { name: /Doniyor/ }).click()
   await expect(page.getByRole('heading', { name: 'Salom, Doniyor!' })).toBeVisible()
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'O‘rgan' })
+    .click()
   await page.getByRole('link', { name: 'Matematika shahri', exact: true }).click()
   await expect(page).toHaveURL(/\/math-lab$/)
   // a new learner of 7 or more first finds their start (Phase 22): all right → the top

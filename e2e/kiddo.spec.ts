@@ -177,7 +177,7 @@ test('demo admin: enter, look around, turn demo PRO on, leave; the app is unaffe
     page.getByRole('button', { name: 'Demo administrator sifatida kirish' }),
   ).toBeVisible()
   // the child's app is as before
-  await page.goto('/home')
+  await page.goto('/my-world')
   await expect(page.getByRole('heading', { name: 'Kiddo shahri' })).toBeVisible()
   await expect(page.getByTestId('demo-admin-banner')).toHaveCount(0)
 })
@@ -247,6 +247,11 @@ test('the learning sections open from their Kiddo City buildings without errors'
     if (message.type() === 'error') errors.push(message.text())
   })
   await chooseUzbek(page)
+  // the city lives in "Mening dunyom" (Phase 40)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Mening dunyom' })
+    .click()
   await expect(page.getByRole('heading', { name: 'Kiddo shahri' })).toBeVisible()
   // building on the city → the section title inside
   for (const [building, section] of [
@@ -260,9 +265,13 @@ test('the learning sections open from their Kiddo City buildings without errors'
     await expect(page.locator('.learn-title').filter({ visible: true }).first()).toContainText(
       section,
     )
-    await page.goto('/home')
+    await page.goto('/my-world')
   }
   // The Story Library opens the Story Engine, which links on to the classic tales.
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'O‘rgan' })
+    .click()
   await page.getByRole('link', { name: 'Ertaklar kutubxonasi', exact: true }).click()
   await expect(page).toHaveURL(/\/stories$/)
   await expect(page.getByRole('heading', { name: 'Ertaklar kutubxonasi' })).toBeAttached()
@@ -273,6 +282,10 @@ test('the learning sections open from their Kiddo City buildings without errors'
   )
   await page.goto('/home')
   // Math Land opens the adaptive Math Lab, which links to the step-by-step lessons.
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'O‘rgan' })
+    .click()
   await page.getByRole('link', { name: 'Matematika shahri', exact: true }).click()
   await expect(page).toHaveURL(/\/math-lab$/)
   await expect(page.getByRole('heading', { name: 'Matematika laboratoriyasi' })).toBeVisible()
@@ -281,10 +294,14 @@ test('the learning sections open from their Kiddo City buildings without errors'
 
 test('the city opens the Adventure Map and the collection', async ({ page }) => {
   await chooseUzbek(page)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Kashf et' })
+    .click()
   await page.getByRole('link', { name: 'Sarguzashtlar xaritasi', exact: true }).click()
   await expect(page).toHaveURL(/\/adventure$/)
   await expect(page.getByText('Sen shu yerdasan')).toBeVisible()
-  await page.goto('/home')
+  await page.goto('/my-world')
   await page.getByTestId('resource-bar').click()
   await expect(page).toHaveURL(/\/collection$/)
   await expect(page.getByText('Kolleksiya hali bo‘sh')).toBeVisible()

@@ -125,6 +125,8 @@ test('the next adventure: one main quest, a positive optional quest, a clear way
     await expect(card).toHaveAttribute('data-done', '0')
     await card.getByTestId('journey-go').scrollIntoViewIfNeeded()
     await expect(card.getByTestId('journey-go')).toBeInViewport()
+    // the extra practice quests live in O‘rgan (Phase 40)
+    await page.goto('/learn')
     const optional = page.getByTestId('quest-optional')
     await expect(optional).toHaveCount(1)
     await expect(optional).toContainText('O‘simligingga yordam ber: So‘zlarni o‘qish')
@@ -206,6 +208,10 @@ test('the Adventure Map shows the journey; Russian on 320 px fits', async ({ pag
   }
   await page.setViewportSize({ width: 320, height: 568 })
   await page.goto('/home')
+  await expect(page.getByTestId('child-tabs')).toContainText('Мой мир')
+  await noSidewaysScroll(page)
+  // the extra practice lives in "Учись" (Phase 40)
+  await page.goto('/learn')
   await expect(page.getByTestId('quest-optional')).toContainText(
     'Помоги растению вырасти: Порядок планет',
   )

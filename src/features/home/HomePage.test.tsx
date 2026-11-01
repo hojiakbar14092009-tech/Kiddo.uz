@@ -43,11 +43,13 @@ describe('Home', () => {
     finish('trace')
     await renderRoute('/home')
     expect(screen.getByText('Bugungi reja bajarildi!')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Alifbo uyi' })).toHaveAttribute('href', '/alphabet')
+    // the big button now leads on to more learning; nothing is locked
+    expect(screen.getByTestId('home-continue')).toHaveAttribute('href', '/learn')
+    expect(screen.getByTestId('home-continue')).toHaveTextContent('Yana o‘ynash')
   })
 
-  it('opens the numbers tab from the home card', async () => {
-    const { router, user } = await renderRoute('/home')
+  it('opens the numbers tab from the card in O‘rgan', async () => {
+    const { router, user } = await renderRoute('/learn')
     await user.click(screen.getByRole('link', { name: 'Sonlar' }))
     expect(router.state.location.pathname).toBe('/alphabet')
     expect(router.state.location.search).toBe('?tab=numbers')
@@ -76,7 +78,8 @@ describe('Home', () => {
     useFamilyStore.getState().setActiveChild(lola.id)
     const { router, user } = await renderRoute('/home')
     expect(screen.getByText('0 / 2 vazifa bajarildi')).toBeInTheDocument()
-    // games suggested for older children are playable links with a calm note
+    // games suggested for older children are playable links with a calm note (in O‘rgan)
+    await user.click(screen.getByRole('link', { name: 'O‘rgan' }))
     expect(screen.getByRole('link', { name: /Harfni top/ })).toHaveAttribute(
       'href',
       '/tasks/find-letter',

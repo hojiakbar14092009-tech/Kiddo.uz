@@ -22,7 +22,7 @@ beforeEach(() => {
 })
 afterEach(() => stop())
 
-describe('Next adventure on the home screen', () => {
+describe('Next adventure on the home screen (extras in O‘rgan)', () => {
   it('no optional quest without a growing plant (no quest wall)', async () => {
     await renderRoute('/home')
     expect(screen.getByTestId('journey-card')).toBeInTheDocument()
@@ -47,7 +47,7 @@ describe('Next adventure on the home screen', () => {
         level: 2,
       })
     }
-    await renderRoute('/home')
+    await renderRoute('/learn')
     const quest = screen.getByTestId('quest-optional')
     expect(quest).toHaveTextContent('O‘simligingga yordam ber: 10 gacha qo‘shish')
     expect(within(quest).getByRole('link', { name: 'Boshlash' })).toHaveAttribute(

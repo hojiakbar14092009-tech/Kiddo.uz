@@ -466,3 +466,51 @@ html[data-band='16+'] body {
 .scale-rail:disabled::-webkit-slider-thumb {
   border-color: var(--color-line-strong);
 }
+
+/*
+ * Section worlds (Phase 40). Each of the four sections has its own calm world,
+ * laid over the age theme: a soft wash of colour from the top and a faint
+ * motif. One fixed layer, no animation (cheap on weak tablets; nothing to
+ * reduce for reduced motion). The parent and admin areas have none.
+ *   today   – a sunny morning      learn   – a mint notebook
+ *   explore – a starry sky         mine    – a warm evening with hills
+ */
+html[data-world] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: no-repeat, repeat;
+  opacity: var(--world-strength, 1);
+}
+
+html[data-world='today'] body::before {
+  background-image:
+    radial-gradient(120% 60% at 50% 0%, #ffe3a3cc 0%, #ffe3a300 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='24' cy='28' r='5' fill='%23ffd166' fill-opacity='.35'/%3E%3Ccircle cx='88' cy='84' r='3' fill='%23ffb4a2' fill-opacity='.35'/%3E%3C/svg%3E");
+}
+
+html[data-world='learn'] body::before {
+  background-image:
+    radial-gradient(120% 60% at 50% 0%, #c9f0dfcc 0%, #c9f0df00 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M0 47.5h48' stroke='%2390cdb4' stroke-opacity='.25'/%3E%3C/svg%3E");
+}
+
+html[data-world='explore'] body::before {
+  background-image:
+    radial-gradient(120% 60% at 50% 0%, #d9d3fbcc 0%, #d9d3fb00 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cpath d='M30 20l2 5 5 2-5 2-2 5-2-5-5-2 5-2z' fill='%239f8cf0' fill-opacity='.35'/%3E%3Ccircle cx='100' cy='90' r='2.5' fill='%237aa7f0' fill-opacity='.4'/%3E%3Ccircle cx='60' cy='120' r='1.8' fill='%239f8cf0' fill-opacity='.4'/%3E%3C/svg%3E");
+}
+
+html[data-world='mine'] body::before {
+  background-image:
+    radial-gradient(120% 60% at 50% 0%, #ffd6c4cc 0%, #ffd6c400 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='60'%3E%3Cpath d='M0 60c30-22 50-22 80 0s50 22 80 0' fill='none' stroke='%23f2a58c' stroke-opacity='.22' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+/* older learners get a quieter world */
+html[data-band='13-15'],
+html[data-band='16+'] {
+  --world-strength: 0.55;
+}

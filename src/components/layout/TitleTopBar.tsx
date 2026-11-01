@@ -1,9 +1,10 @@
 import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon } from '@/components/icons'
 import { IconButton } from '@/components/ui/IconButton'
+import { hubOf } from '@/features/hubs/sections'
 import { TopBar } from './TopBar'
 
 /** The top bar with a back button and the screen's title (one `h1`). */
@@ -15,7 +16,11 @@ export function TitleTopBar({
   extra,
 }: {
   title: ReactNode
-  /** Where "back" goes; without it the button goes one step back in history. */
+  /**
+   * Where "back" goes; without it the button goes one step back in history.
+   * '/home' means "the page's section" (Phase 40): a place in O‘rgan goes back
+   * to O‘rgan, one in Mening dunyom to Mening dunyom.
+   */
   back?: string
   /** Off where "back" would only repeat the home button (e.g. a screen opened from home). */
   showBack?: boolean
@@ -26,6 +31,8 @@ export function TitleTopBar({
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const target = back === '/home' ? hubOf(pathname) : back
   return (
     <TopBar
       start={
@@ -34,7 +41,7 @@ export function TitleTopBar({
             <IconButton
               label={t('common.back')}
               data-sound="back"
-              onClick={() => (back ? navigate(back) : navigate(-1))}
+              onClick={() => (target ? navigate(target) : navigate(-1))}
             >
               <ChevronLeftIcon size={28} />
             </IconButton>

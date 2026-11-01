@@ -80,8 +80,16 @@ test('the first journey links maths, space, the garden, biology and the lab', as
   const card = page.getByTestId('journey-card')
   await expect(card).toHaveAttribute('data-done', '0')
   await expect(card).toContainText('Oxirida yong‘oq: +20')
-  // the science lab waits for the Mars flower
-  await expect(page.getByTestId('building-/science-lab')).toContainText('Mars guli ochilganda')
+  // the science lab waits for the Mars flower (Kashf et shows what opens it)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Kashf et' })
+    .click()
+  await expect(page.getByText('Mars guli ochilganda ochiladi')).toBeVisible()
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Bugun' })
+    .click()
 
   // 1. a maths challenge with three stars
   await card.getByTestId('journey-go').click()
@@ -94,8 +102,13 @@ test('the first journey links maths, space, the garden, biology and the lab', as
   }
   await expect(page.getByTestId('lab-result')).toBeVisible({ timeout: 5_000 })
   await expect(page.getByTestId('activity-reward')).toContainText('yong‘oq')
+  // back leads to the page's section (Phase 40): the Math Lab is in O‘rgan
   await back(page)
-  await expect(page).toHaveURL(/\/home$/)
+  await expect(page).toHaveURL(/\/learn$/)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Bugun' })
+    .click()
   await expect(card).toHaveAttribute('data-done', '1')
 
   // 2. the rocket, built with the nuts maths earned
@@ -117,10 +130,18 @@ test('the first journey links maths, space, the garden, biology and the lab', as
   await page.getByTestId('plant-seed').click()
   await expect(page.getByTestId('mars-bed')).toHaveAttribute('data-stage', '0')
   await back(page)
-  await expect(page).toHaveURL(/\/home$/)
+  await expect(page).toHaveURL(/\/learn$/)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Bugun' })
+    .click()
   await expect(card).toHaveAttribute('data-done', '4')
 
   // 5. biology: three dinosaur quizzes done well make the flower grow
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Kashf et' })
+    .click()
   await page.getByRole('link', { name: 'Dinozavrlar bog‘i' }).click()
   await page.getByTestId('dino-mode-quiz').click()
   await passLessonIfShown(page, 'quiz-start')
@@ -131,10 +152,15 @@ test('the first journey links maths, space, the garden, biology and the lab', as
   }
   await page.getByRole('link', { name: 'Vodiyga qaytish' }).click()
   await back(page)
-  await expect(page).toHaveURL(/\/home$/)
-  // the bloom opened the lab: the city shows it open, the journey moved on
+  // the dinosaur park is in Kashf et: back leads there, and the lab is open now
+  await expect(page).toHaveURL(/\/explore$/)
+  await expect(page.getByRole('link', { name: 'Fan laboratoriyasi' })).toBeVisible()
+  await expect(page.getByText('Mars guli ochilganda ochiladi')).toHaveCount(0)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Bugun' })
+    .click()
   await expect(card).toHaveAttribute('data-done', '5')
-  await expect(page.getByTestId('building-/science-lab')).not.toContainText('Mars guli ochilganda')
 
   // 6. the Science Lab's first experiment ends the journey
   await card.getByTestId('journey-go').click()

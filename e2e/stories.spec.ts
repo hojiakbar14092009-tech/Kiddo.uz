@@ -4,7 +4,7 @@ import { STORY_TEXT_UZ } from '../src/features/stories/text.uz.ts'
 
 /*
  * The Story Engine: a free story with a choice (guest), a PRO story's lock,
- * "Read to me" on Free, a child reading a story twice (one scroll), and a
+ * "Read to me" on Free, a child reading a story twice (one scroll's nuts), and a
  * PRO child hearing a PRO story from its recordings.
  */
 
@@ -110,12 +110,14 @@ async function answerAll(page: Page, storyId: string) {
   await expect(result).toBeVisible()
 }
 
+/** Story scrolls paid (in yong‘oq since Phase 39): the reward ledger's `scroll|tale|…` entries. */
 const scrolls = (page: Page) =>
   page.evaluate(() => {
-    const saved = JSON.parse(localStorage.getItem('kiddo.universe') ?? '{}') as {
-      state?: { byChild?: Record<string, { balances?: { scroll?: number } }> }
+    const saved = JSON.parse(localStorage.getItem('kiddo.rewards') ?? '{}') as {
+      state?: { byChild?: Record<string, { entries?: { refId: string }[] }> }
     }
-    return saved.state?.byChild?.kid1?.balances?.scroll ?? 0
+    const entries = saved.state?.byChild?.kid1?.entries ?? []
+    return entries.filter((entry) => entry.refId.startsWith('scroll|tale|')).length
   })
 
 test('a free story is read with a choice to the questions and the reward', async ({ page }) => {
@@ -124,6 +126,10 @@ test('a free story is read with a choice to the questions and the reward', async
   page.on('pageerror', (error) => errors.push(error.message))
   await chooseUzbek(page)
   // the Story Library building of Kiddo City opens the stories
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'O‘rgan' })
+    .click()
   await page.getByRole('link', { name: 'Ertaklar kutubxonasi', exact: true }).click()
   await expect(page).toHaveURL(/\/stories$/)
   await page.getByTestId('story-card-lost-lamb').click()
@@ -153,7 +159,7 @@ test('a free story is read with a choice to the questions and the reward', async
   expect(await question.getAttribute('data-answer-label')).toBeNull()
   await answerAll(page, 'lost-lamb')
   await expect(page.getByTestId('story-score')).toHaveText('Birinchi urinishda: 3 / 3')
-  await expect(page.getByTestId('activity-reward')).toContainText('+1 o‘ram')
+  await expect(page.getByTestId('activity-reward')).toContainText('+15 yong‘oq')
   expect(errors).toEqual([])
 })
 
@@ -207,7 +213,7 @@ test('a child reads a story twice: one scroll, also after a reload', async ({ pa
   await page.goto('/stories/lost-lamb')
   await readLamb(page)
   await answerAll(page, 'lost-lamb')
-  await expect(page.getByTestId('activity-reward')).toContainText('+1 o‘ram')
+  await expect(page.getByTestId('activity-reward')).toContainText('+15 yong‘oq')
   expect(await scrolls(page)).toBe(1)
 
   // a reload starts the story again; reading it again pays no second scroll
@@ -215,7 +221,7 @@ test('a child reads a story twice: one scroll, also after a reload', async ({ pa
   await readLamb(page)
   await answerAll(page, 'lost-lamb')
   await expect(page.getByTestId('story-score')).toBeVisible()
-  await expect(page.getByTestId('activity-reward')).not.toContainText('o‘ram')
+  await expect(page.getByTestId('activity-reward')).not.toContainText('yong‘oq')
   expect(await scrolls(page)).toBe(1)
 })
 

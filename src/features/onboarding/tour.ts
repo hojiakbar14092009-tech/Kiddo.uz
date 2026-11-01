@@ -21,8 +21,8 @@ export interface TourStep {
 
 export const TOURS: Record<TourId, readonly TourStep[]> = {
   home: [
-    // the button itself (the card can be taller than half a phone screen)
-    { id: 'journey', anchors: ['[data-testid="journey-go"]', '[data-testid="journey-card"]'] },
+    // in the order of the page (Phase 40): the big way on, today's steps, then the rest
+    { id: 'continue', anchors: ['[data-testid="home-continue"]'] },
     {
       id: 'plan',
       anchors: [
@@ -32,8 +32,11 @@ export const TOURS: Record<TourId, readonly TourStep[]> = {
       brief: true,
     },
     { id: 'homework', anchors: ['[data-tour="homework"]'], brief: true },
+    // the button itself (the card can be taller than half a phone screen)
+    { id: 'journey', anchors: ['[data-testid="journey-go"]', '[data-testid="journey-card"]'] },
     { id: 'coins', anchors: ['[data-testid="coin-counter"]', '[data-bar-end]'] },
-    { id: 'city', anchors: ['section[aria-labelledby="city-title"] > ul'] },
+    // the four section tabs: the city lives in "Mening dunyom"
+    { id: 'tabs', anchors: ['[data-testid="child-tabs"]'] },
     { id: 'parent', anchors: ['a[href="/parent"]'] },
   ],
   play: [

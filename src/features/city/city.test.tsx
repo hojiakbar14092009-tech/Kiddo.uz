@@ -54,7 +54,7 @@ beforeEach(() => {
 
 describe('Kiddo City', () => {
   it('shows every building as an open door, plus the writing school and the map', async () => {
-    await renderRoute('/home')
+    await renderRoute('/my-world')
     expect(screen.getByRole('heading', { name: 'Kiddo shahri' })).toBeInTheDocument()
     // the buildings (the writing school is one of them) and the map
     expect(screen.getAllByTestId(/^building-/)).toHaveLength(BUILDINGS.length + 1)
@@ -77,7 +77,7 @@ describe('Kiddo City', () => {
   it('shows the treasures and links them to the collection', async () => {
     give('star', 4)
     giveNuts(12)
-    await renderRoute('/home')
+    await renderRoute('/my-world')
     const bar = screen.getByTestId('resource-bar')
     expect(bar).toHaveAttribute('href', '/collection')
     expect(bar).toHaveAccessibleName(
@@ -87,7 +87,7 @@ describe('Kiddo City', () => {
 
   it('upgrades a building with nuts, then shows what the next level still needs', async () => {
     giveNuts(25)
-    const { user } = await renderRoute('/home')
+    const { user } = await renderRoute('/my-world')
 
     await user.click(screen.getByRole('button', { name: 'Matematika shahri: kattalashtirish' }))
     let sheet = screen.getByRole('dialog', { name: 'Matematika shahri' })
@@ -132,7 +132,7 @@ describe('Kiddo City', () => {
   it('shows only a quiet level badge until the nuts are half way to the price', async () => {
     give('star', 3)
     giveNuts(4)
-    await renderRoute('/home')
+    await renderRoute('/my-world')
     expect(
       screen.queryByRole('button', { name: 'Matematika shahri: kattalashtirish' }),
     ).not.toBeInTheDocument()
@@ -166,7 +166,7 @@ describe('Kiddo City', () => {
         [GUEST_KEY]: { ...universeChild(GUEST_KEY), buildings: { museum: 3 } },
       },
     })
-    await renderRoute('/home')
+    await renderRoute('/my-world')
     expect(screen.queryByRole('button', { name: 'Muzey: kattalashtirish' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Muzey' })).toHaveAccessibleDescription(
       'Eng katta daraja',
@@ -219,7 +219,7 @@ describe('Daily quest', () => {
       expect(claimDailyQuest(GUEST_KEY)).toBeNull()
     })
     expect(nutsOf()).toBe(coinsBefore + 15)
-    // the city stays open
-    expect(screen.getByRole('link', { name: 'Matematika shahri' })).toBeInTheDocument()
+    // nothing locks: the big button leads on to more learning
+    expect(screen.getByTestId('home-continue')).toHaveAttribute('href', '/learn')
   })
 })

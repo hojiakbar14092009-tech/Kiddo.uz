@@ -102,6 +102,10 @@ test('Math Lab: a four-year-old fills the basket (drag and tap) and finishes a s
   await seedRandom(page, 0)
   await fourYearOld(page)
   // Math Land in Kiddo City opens the Math Lab
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'O‘rgan' })
+    .click()
   await page.getByRole('link', { name: 'Matematika shahri' }).click()
   await expect(page).toHaveURL(/\/math-lab$/)
   // level 1 stays pictorial: no level number

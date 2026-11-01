@@ -96,12 +96,38 @@ export const uz = {
       },
     },
   },
+  hubs: {
+    learn: {
+      title: 'O‘rgan',
+      text: 'Harflar, sonlar, so‘zlar va ertaklar – hammasi shu yerda.',
+      places: 'O‘rganish joylari',
+    },
+    explore: {
+      title: 'Kashf et',
+      text: 'Dunyolar bo‘ylab sayohat: dinozavrlar, kosmos va O‘zbekiston.',
+      places: 'Kashfiyot dunyolari',
+    },
+    mine: {
+      title: 'Mening dunyom',
+      text: 'Shahring, xazinalaring va do‘koning.',
+    },
+  },
+  tabs: {
+    label: 'Bo‘limlar',
+    today: 'Bugun',
+    learn: 'O‘rgan',
+    explore: 'Kashf et',
+    mine: 'Mening dunyom',
+  },
   home: {
     greeting: 'Salom, {{name}}!',
     greetingNoName: 'Salom!',
     alphabet: 'Alifbo',
     numbers: 'Sonlar',
     more: 'Yana nima qilamiz?',
+    continue: 'Davom etish',
+    playMore: 'Bugungi reja bajarildi! Yana o‘ynash',
+    nextGame: 'Keyingisi: {{game}}',
     restTitle: 'Bugungi reja bajarildi!',
     restText: 'Zo‘r ishlading! Endi biroz dam olsang ham bo‘ladi.',
     homework: 'Uy vazifasi',
@@ -1891,6 +1917,11 @@ export const uz = {
     next: 'Keyingisi',
     done: 'Tushunarli!',
     home: {
+      continue: {
+        title: 'Davom etish',
+        text: 'Bu katta tugma bugungi rejadagi keyingi o‘yinga olib boradi. Bos va boshla!',
+        short: 'Bos – keyingi o‘yin.',
+      },
       journey: {
         title: 'Katta sarguzasht',
         text: 'Bu yerda bugungi asosiy sayohating. Tugmani bos — sarguzasht boshlanadi!',
@@ -1911,10 +1942,10 @@ export const uz = {
         text: 'To‘g‘ri javoblar uchun yong‘oq olasan. Ular bilan do‘kondan kiyim va uy hayvoni olasan, shahringni kattalashtirasan.',
         short: 'Yong‘oqlar: javoblar uchun beriladi, do‘kon va shaharda sarflanadi.',
       },
-      city: {
-        title: 'Kiddo shahri',
-        text: 'Har bir bino — bir fan. O‘rgangan sari binolar katta va chiroyli bo‘lib boradi.',
-        short: 'Binolar o‘qishing bilan rivojlanadi.',
+      tabs: {
+        title: 'To‘rt bo‘lim',
+        text: 'Pastdagi to‘rt tugma: Bugun, O‘rgan, Kashf et va Mening dunyom. Shahring «Mening dunyom» bo‘limida.',
+        short: 'Pastda to‘rt bo‘lim bor.',
       },
       parent: {
         title: 'Kattalar uchun',

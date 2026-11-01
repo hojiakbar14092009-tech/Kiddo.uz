@@ -84,7 +84,7 @@ test('the Home tour: full the first time, a reminder the second, then none — p
   test.setTimeout(120_000)
   await page.goto('/home')
   const first = await walkTour(page)
-  expect(first).toEqual(['journey', 'plan', 'homework', 'coins', 'city', 'parent'])
+  expect(first).toEqual(['continue', 'plan', 'homework', 'journey', 'coins', 'tabs', 'parent'])
 
   await page.reload()
   const second = await walkTour(page)
@@ -104,7 +104,7 @@ test('the Home tour: full the first time, a reminder the second, then none — p
   })
   await page.reload()
   await expect(page.getByTestId('coach-marks')).toBeVisible({ timeout: 15_000 })
-  await expect(page.getByTestId('coach-marks')).toHaveAttribute('data-step', 'journey')
+  await expect(page.getByTestId('coach-marks')).toHaveAttribute('data-step', 'continue')
   await page.keyboard.press('Escape')
   await expect(page.getByTestId('coach-marks')).toHaveCount(0)
   const tours = await page.evaluate(() => {

@@ -3,6 +3,9 @@ import { Navigate } from 'react-router-dom'
 import { AlphabetItemPage } from '@/features/alphabet/AlphabetItemPage'
 import { AlphabetPage } from '@/features/alphabet/AlphabetPage'
 import { HomePage } from '@/features/home/HomePage'
+import { ExploreHub } from '@/features/hubs/ExploreHub'
+import { LearnHub } from '@/features/hubs/LearnHub'
+import { MyWorldHub } from '@/features/hubs/MyWorldHub'
 import { LanguagePage } from '@/features/onboarding/LanguagePage'
 import { WelcomePage } from '@/features/onboarding/WelcomePage'
 import { RequireParentGate } from '@/features/parent/gate/RequireParentGate'
@@ -41,6 +44,9 @@ export const routes: RouteObject[] = [
               { path: '/welcome', element: <WelcomePage /> },
               { path: '/child-select', element: <ChildSelectPage /> },
               { path: '/home', element: <HomePage /> },
+              { path: '/learn', element: <LearnHub /> },
+              { path: '/explore', element: <ExploreHub /> },
+              { path: '/my-world', element: <MyWorldHub /> },
               { path: '/alphabet', element: <AlphabetPage /> },
               { path: '/alphabet/:itemId', element: <AlphabetItemPage /> },
               { path: '/tasks/:type', element: <GamePage /> },

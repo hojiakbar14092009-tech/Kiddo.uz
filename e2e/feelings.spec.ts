@@ -34,6 +34,10 @@ test('a child plays a feelings game from the Friendship House and gets a reward'
   page,
 }) => {
   await chooseUzbek(page)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'O‘rgan' })
+    .click()
   await page.getByRole('link', { name: 'Do‘stlik uyi' }).click()
   await expect(page).toHaveURL(/\/feelings$/)
 

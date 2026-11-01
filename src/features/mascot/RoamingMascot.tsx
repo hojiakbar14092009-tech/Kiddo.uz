@@ -112,7 +112,13 @@ function visibleArea(): Box {
   const width = document.documentElement.clientWidth || window.innerWidth
   const left = insets.left + MARGIN
   const right = width - insets.right - MARGIN
-  const bottom = window.innerHeight - insets.bottom - MARGIN
+  // the section tabs (Phase 40) stay at the bottom: nothing goes under them either
+  const tabs = document.querySelector('[data-testid="child-tabs"]')?.getBoundingClientRect()
+  const floor =
+    tabs && tabs.height > 0
+      ? Math.min(tabs.top, window.innerHeight)
+      : window.innerHeight - insets.bottom
+  const bottom = floor - MARGIN
   return {
     x: window.scrollX + left,
     y: window.scrollY + top + MARGIN,

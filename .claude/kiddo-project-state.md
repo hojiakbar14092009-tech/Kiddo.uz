@@ -699,3 +699,16 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Verification: format/lint/typecheck PASS, unit 1389/1389, build PASS, SQL 382 assertions PASS, browser 45/48
   (kiddo coin total updated; phone offline flake) then 28/28; Critic ACCEPT, Mediums fixed (offline day caps,
   opening cap, ru/en number-safe texts) + quiet conversion sounds. Next: Phase 40 (4-tab structure).
+
+## Phase 40 — COMPLETE (2026-11-01) – docs/architecture/sections.md
+
+- Four child sections with a bottom tab bar (`features/hubs`): Bugun /home (greeting, homework, big "Davom etish" to
+  the next plan game → /learn when done, 3 steps, treasure, journey), O‘rgan /learn (practice quests, learning places,
+  small games, big test), Kashf et /explore (map, worlds, space labs), Mening dunyom /my-world (Kiddo City).
+- Section worlds: `html[data-world]` (SectionWorld) + one static fixed CSS layer per world, quieter for 13+.
+  Back buttons (`back="/home"`) now go to the page's section hub; toasts sit above the tabs; robot stays above them.
+  Home tour: continue, plan, homework, journey, coins, tabs, parent.
+- Verification: format/lint/typecheck PASS, unit 1395/1395, build PASS, full browser run 226/248 (8 fails: Phase 39
+  story texts + nav moves, all fixed) then 41/41, 72/74 (tour order) and 4/4; Critic REJECT (robot behind tabs, back
+  to Bugun) → fixed with Mediums (locked places stay doors, a11y descriptions, tour order, toasts, nav outside main).
+  Next: Phase 41 (voice first).

@@ -62,7 +62,7 @@ describe('the journey card on the home screen', () => {
   })
 
   it('shows the Science Lab closed in the city, with what opens it', async () => {
-    await renderRoute('/home')
+    await renderRoute('/my-world')
     const lab = screen.getByTestId('building-/science-lab')
     expect(within(lab).getByText('Mars guli ochilganda ochiladi')).toBeInTheDocument()
     expect(within(lab).getByRole('link')).toHaveAttribute('data-locked', 'true')

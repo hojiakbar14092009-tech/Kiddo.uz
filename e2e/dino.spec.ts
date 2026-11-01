@@ -40,6 +40,10 @@ test('a guest explores a dinosaur, digs up bones and finishes the quiz', async (
   page.on('pageerror', (error) => errors.push(error.message))
 
   await chooseUzbek(page)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Kashf et' })
+    .click()
   await page.getByRole('link', { name: 'Dinozavrlar bog‘i' }).click()
   await expect(page).toHaveURL(/\/worlds\/dino$/)
 

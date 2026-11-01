@@ -53,7 +53,8 @@ describe('age policy has one home', () => {
         /useAgeLevel\(\)/,
         new Set([
           'store/familyStore.ts',
-          'features/home/HomePage.tsx', // today's plan and "N yoshdan tavsiya"
+          'features/home/HomePage.tsx', // today's plan
+          'features/hubs/LearnHub.tsx', // "N yoshdan tavsiya" on the small games
           'features/age/AgeTheme.tsx', // the look (data-age)
         ]),
       ),

@@ -20,6 +20,10 @@ test('a world card evolves after playing in that world, without overflowing', as
   await page.goto('/')
   await page.getByRole('button', { name: 'O‘zbekcha' }).click()
   await expect(page).toHaveURL(/\/home$/)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Kashf et' })
+    .click()
   await page.getByRole('link', { name: 'Sarguzashtlar xaritasi', exact: true }).click()
   const ocean = page.getByTestId('world-ocean')
   await expect(ocean).toHaveAttribute('data-stage', 'new')
@@ -57,6 +61,10 @@ test('a world card evolves after playing in that world, without overflowing', as
   }
   await expect(page.getByTestId('lab-result')).toBeVisible({ timeout: 10_000 })
   await page.getByRole('link', { name: /Shaharga qaytish/ }).click()
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Kashf et' })
+    .click()
   await page.getByRole('link', { name: 'Sarguzashtlar xaritasi', exact: true }).click()
 
   await expect(ocean).toHaveAttribute('data-stage', 'explorer')
@@ -72,6 +80,10 @@ test('a world card evolves after playing in that world, without overflowing', as
   // seen once: back on the map, the stage stays and the news is gone
   await page.getByRole('button', { name: 'Bosh sahifa', exact: true }).click()
   await expect(page).toHaveURL(/\/home$/)
+  await page
+    .getByRole('navigation', { name: 'Bo‘limlar' })
+    .getByRole('link', { name: 'Kashf et' })
+    .click()
   await page.getByRole('link', { name: 'Sarguzashtlar xaritasi', exact: true }).click()
   await expect(ocean).toHaveAttribute('data-stage', 'explorer')
   await expect(ocean.getByTestId('card-stage-up')).toHaveCount(0)

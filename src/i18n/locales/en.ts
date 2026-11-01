@@ -98,12 +98,38 @@ export const en: Translation = {
       },
     },
   },
+  hubs: {
+    learn: {
+      title: 'Learn',
+      text: 'Letters, numbers, words and stories – all here.',
+      places: 'Places to learn',
+    },
+    explore: {
+      title: 'Explore',
+      text: 'Trips across worlds: dinosaurs, space and Uzbekistan.',
+      places: 'Worlds to discover',
+    },
+    mine: {
+      title: 'My world',
+      text: 'Your city, your treasures and the shop.',
+    },
+  },
+  tabs: {
+    label: 'Sections',
+    today: 'Today',
+    learn: 'Learn',
+    explore: 'Explore',
+    mine: 'My world',
+  },
   home: {
     greeting: 'Hi, {{name}}!',
     greetingNoName: 'Hi!',
     alphabet: 'Alphabet',
     numbers: 'Numbers',
     more: 'What else shall we do?',
+    continue: 'Continue',
+    playMore: 'Today’s plan is done! Play more',
+    nextGame: 'Next: {{game}}',
     restTitle: 'Today’s plan is done!',
     restText: 'Great work! Now it’s fine to take a little rest.',
     homework: 'Homework',
@@ -1879,6 +1905,11 @@ export const en: Translation = {
     next: 'Next',
     done: 'Got it!',
     home: {
+      continue: {
+        title: 'Continue',
+        text: 'This big button takes you to the next game of today’s plan. Tap it and start!',
+        short: 'Tap it for the next game.',
+      },
       journey: {
         title: 'The big adventure',
         text: "Here is today's main journey. Tap the button and the adventure begins!",
@@ -1899,10 +1930,10 @@ export const en: Translation = {
         text: 'You get nuts for right answers. With them you buy clothes and pets in the shop and grow your city.',
         short: 'Nuts: for answers, spent in the shop and the city.',
       },
-      city: {
-        title: 'Kiddo City',
-        text: 'Each building is a subject. The more you learn, the bigger and finer they grow.',
-        short: 'Buildings grow as you learn.',
+      tabs: {
+        title: 'Four sections',
+        text: 'At the bottom are four buttons: Today, Learn, Explore and My world. Your city is in “My world”.',
+        short: 'Four sections at the bottom.',
       },
       parent: {
         title: 'For grown-ups',

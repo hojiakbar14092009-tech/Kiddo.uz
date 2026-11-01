@@ -28,7 +28,9 @@ export function Toaster() {
         'pointer-events-none fixed inset-x-0 z-[100] flex flex-col items-center gap-2 px-4',
         dialogOpen
           ? 'top-0 pt-[max(1rem,env(safe-area-inset-top))]'
-          : 'bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))]',
+          : // above the section tabs (Phase 40) when a page shows them, so a tap on a tab
+            // is never caught by a toast
+            'bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))] [html:has([data-testid=child-tabs])_&]:bottom-20 [html:has([data-testid=child-tabs])_&]:sm:bottom-24',
       )}
     >
       {toasts.map((item) => (
