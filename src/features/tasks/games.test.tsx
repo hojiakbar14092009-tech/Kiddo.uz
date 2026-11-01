@@ -96,6 +96,13 @@ describe('other games', () => {
     expect(screen.getByRole('button', { name: 'Done' })).toBeInTheDocument()
   })
 
+  it('the help shows a finger writing the letter stroke by stroke, from numbered starts', async () => {
+    const { user } = await renderRoute('/tasks/trace')
+    await user.click(screen.getByRole('button', { name: /Hint|Help/ }))
+    const demo = await screen.findByTestId('stroke-demo')
+    expect(demo.querySelector('[data-stroke-start="1"]')).not.toBeNull()
+  })
+
   it('sends unknown games home', async () => {
     const { router } = await renderRoute('/tasks/unknown')
     expect(router.state.location.pathname).toBe('/home')

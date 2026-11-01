@@ -1120,6 +1120,7 @@ export const uz = {
   },
   trace: {
     title: 'Chizamiz',
+    strokeDemo: '{{letter}} qanday yoziladi: {{count}} ta chiziq',
     pickPrompt: 'Nimani chizamiz?',
     pickNumber: 'Qaysi raqamni chizamiz?',
     pickShape: 'Qaysi shaklni chizamiz?',

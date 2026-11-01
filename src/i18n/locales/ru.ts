@@ -1115,6 +1115,7 @@ export const ru: Translation = {
   },
   trace: {
     title: 'Рисуем',
+    strokeDemo: 'Как пишется {{letter}}: линий – {{count}}',
     pickPrompt: 'Что будем рисовать?',
     pickNumber: 'Какую цифру нарисуем?',
     pickShape: 'Какую фигуру нарисуем?',

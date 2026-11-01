@@ -2,6 +2,8 @@ import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { letterStrokes } from '@/components/trace/letterStrokes'
+import { StrokeDemo } from '@/components/trace/StrokeDemo'
 import { BulbIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { BottomSheet } from '@/components/ui/Dialog'
@@ -125,8 +127,27 @@ function HintSheet({ hint, onClose }: { hint: HintContent; onClose: () => void }
   )
 }
 
-/** The letter drawn slowly, line by line, as a finger would write it – then filled in. */
+/**
+ * How the letter is written: a finger draws each stroke in order from its
+ * numbered start dot (Phase 42b). A letter without stroke data is drawn
+ * slowly as an outline, then filled in.
+ */
 function WritingAnimation({ letter }: { letter: LetterEntry }) {
+  const { t } = useTranslation()
+  const strokes = letterStrokes(letter.upper)
+  if (strokes) {
+    return (
+      <StrokeDemo
+        strokes={strokes}
+        label={t('trace.strokeDemo', { letter: letter.upper, count: strokes.length })}
+        className="aspect-square w-full max-w-[16rem] rounded-3xl bg-surface"
+      />
+    )
+  }
+  return <OutlineAnimation letter={letter} />
+}
+
+function OutlineAnimation({ letter }: { letter: LetterEntry }) {
   const reduceMotion = useReducedMotion() ?? false
   const glyph = letter.upper.length > 1 ? `${letter.upper}` : `${letter.upper}${letter.lower}`
   return (

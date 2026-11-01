@@ -1114,6 +1114,7 @@ export const en: Translation = {
   },
   trace: {
     title: 'Let’s draw',
+    strokeDemo: 'How to write {{letter}}: lines – {{count}}',
     pickPrompt: 'What shall we draw?',
     pickNumber: 'Which number shall we draw?',
     pickShape: 'Which shape shall we draw?',

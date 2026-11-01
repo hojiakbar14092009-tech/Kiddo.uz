@@ -730,3 +730,13 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   Nut roll for nuts earned, soft "correct" tune, gentle "tryAgain" (no buzzer); parent preview of palettes.
 - Verification: unit 1418/1418, build PASS, browser 30/30; Critic REJECT (taps louder than cues) → fixed + guard.
 - Owner requests 2026-11-02 added to the doc and roadmap (42b trace fixes first, then 43–50, then 51–55).
+
+## Phase 42b — COMPLETE (2026-11-02) – "Harfni yoz" fixes (owner bug reports)
+
+- Stroke data for every capital (Latin, Cyrillic, Oʻ Gʻ Sh Ch Ng ʼ: components/trace/letterStrokes.ts); TraceGame
+  uses PathTraceBoard + letterTracePasses (each stroke ≥ 0.86 covered, precision ≥ 0.85; auto 0.9/0.9) → a right R
+  passes on any screen, a wrong or close letter (C for O, R for P, scribbles) does not.
+- Help: StrokeDemo — a finger draws the strokes in order from numbered start dots with arrows (static with
+  reduced motion).
+- Verification: unit 1424/1424, build PASS, browser 52/54 → board size fix → 30/30; screenshots checked; Critic REJECT
+  (close letters passed, arrows, overlapping numbers, landscape) → fixed.
