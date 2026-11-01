@@ -50,8 +50,9 @@ test('a right answer earns praise, a finished game earns coins', async ({ page }
   }
 
   await expect(page).toHaveURL(/\/reward$/, { timeout: 10_000 })
-  await expect(page.getByText('Coinlar: +5')).toBeVisible()
-  await expect(page.getByRole('status', { name: /Coinlar: 7/ })).toBeVisible()
+  await expect(page.getByText('Yong‘oqlar: +5')).toBeVisible()
+  // the game (5), the daily gift (2) and the first three stars (10 yong‘oq)
+  await expect(page.getByRole('status', { name: /Yong‘oqlar: 17/ })).toBeVisible()
 })
 
 test('the demo: the voice is free (no PRO crown on “listen again”)', async ({ page }) => {

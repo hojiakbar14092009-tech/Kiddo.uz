@@ -1,11 +1,15 @@
-import type { ResourceId } from '@/domain/universe'
+import type { WalletId } from '@/domain/universe'
 
-/** The resources the city and the collection show (seeds and keys come later). */
-export const SHOWN_RESOURCES = ['star', 'crystal', 'part', 'scroll'] as const
+/**
+ * What the city and the collection show: stars (a measure) and yong‘oq, the
+ * one currency (Phase 39). Crystals, parts and scrolls were changed into nuts.
+ */
+export const SHOWN_RESOURCES = ['star', 'nut'] as const
 export type ShownResource = (typeof SHOWN_RESOURCES)[number]
 
 /** Soft background of each resource's chip. */
-export const RESOURCE_TINT: Record<ResourceId, string> = {
+export const RESOURCE_TINT: Record<WalletId, string> = {
+  nut: 'bg-coin-soft',
   star: 'bg-coin-soft',
   crystal: 'bg-lilac-soft',
   part: 'bg-sky-soft',

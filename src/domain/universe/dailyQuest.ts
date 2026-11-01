@@ -20,19 +20,22 @@ import {
   universeChild,
   useUniverseStore,
 } from './store'
+import { nutValue } from './nuts'
 import type { AwardSummary } from './types'
 
 /*
  * The daily quest is a day's plan (features/home/dailyPlan: DAILY_PLANS by
  * age). When every step is done the child may claim it once for that day:
- * +1 crystal (reason 'quest', refId `daily|<day>`) and QUEST_COINS coins
- * (grantReward reason 'quest', the same refId). The reward is known up
+ * QUEST_NUTS yong‘oq: the former crystal (10 nuts, ref `crystal|quest|daily|<day>`)
+ * and QUEST_COINS (grantReward reason 'quest', ref `daily|<day>`). The reward is known up
  * front, and a quest finished late in the evening is never lost at midnight:
  * yesterday's completed quest stays claimable until today's quest is claimed.
  */
 
 export const QUEST_COINS = 5
 export const QUEST_CRYSTALS = 1
+/** Everything a claimed quest pays, in nuts (Phase 39: the crystal is paid in nuts). */
+export const QUEST_NUTS = QUEST_COINS + nutValue({ crystal: QUEST_CRYSTALS })
 
 export const questRef = (day: string) => `daily|${day}`
 
@@ -47,7 +50,7 @@ export interface DailyQuestState {
   steps: DailyQuestStep[]
   complete: boolean
   claimed: boolean
-  reward: { crystals: 1; coins: number }
+  reward: { nuts: number }
 }
 
 /** Why a claim gave nothing. */
@@ -81,7 +84,7 @@ export function dailyQuestState(
     steps: plan.steps.map((step) => ({ activity: step.game, status: step.status })),
     complete: plan.complete,
     claimed: claimedDays.includes(day),
-    reward: { crystals: QUEST_CRYSTALS, coins: QUEST_COINS },
+    reward: { nuts: QUEST_NUTS },
   }
 }
 
@@ -160,12 +163,15 @@ export function tryClaimDailyQuest(
   })
   markQuestClaimed(childKey, questDay)
   if (!crystal) return fail('claimed')
-  grantReward({ childKey, coins: QUEST_COINS, reason: 'quest', refId: questRef(questDay) })
+  const coins = grantReward({
+    childKey,
+    coins: QUEST_COINS,
+    reason: 'quest',
+    refId: questRef(questDay),
+  })
   const award: AwardSummary = {
     stars: 0,
-    crystals: QUEST_CRYSTALS,
-    parts: 0,
-    scrolls: 0,
+    nuts: nutValue({ crystal: QUEST_CRYSTALS }) + (coins?.coins ?? 0),
     achievements: checkAchievements(childKey),
     starGain: 0,
   }

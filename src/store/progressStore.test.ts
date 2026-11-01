@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useRewardStore } from '@/domain/rewards'
+import { rewardHistory, useRewardStore, wasRewarded } from '@/domain/rewards'
 import { useUniverseStore } from '@/domain/universe'
 import { STICKERS } from '@/features/stickers/stickers'
 import { EMPTY_PROGRESS, GUEST_KEY, migrateProgress, useProgressStore } from './progressStore'
@@ -29,7 +29,9 @@ describe('progressStore', () => {
       )
 
     expect(outcome).toMatchObject({ coins: 5, bonus: 2, stars: 3, mistakes: 0 })
-    expect(progress().coins).toBe(7)
+    // plus the nuts of the first 3 stars (a crystal's worth, Phase 39)
+    expect(progress().coins).toBe(5 + 2 + 10)
+    expect(wasRewarded(KEY, 'learn', 'crystal|three-stars|find-letter:uz')).toBe(true)
     expect(progress().learned.uz).toEqual(['a', 'b'])
     expect(progress().stickers).toEqual([STICKERS[0]!.id])
   })
@@ -53,7 +55,9 @@ describe('progressStore', () => {
     )
 
     expect(outcome).toMatchObject({ coins: 3, bonus: 0, stars: 2, mistakes: 1 })
-    expect(progress().coins).toBe(7 + 3)
+    // 2 stars after 3: no nuts for the stars this time
+    expect(progress().coins).toBe(17 + 3)
+    expect(rewardHistory(KEY).filter((entry) => entry.reason === 'learn')).toHaveLength(1)
     expect(progress().learned.uz).toEqual(['a', 'sh'])
     expect(progress().struggles.uz).toEqual({ ch: 1 })
     expect(progress().results[0]?.mistakeDetails).toEqual([{ targetId: 'ch', chosenId: 'sh' }])

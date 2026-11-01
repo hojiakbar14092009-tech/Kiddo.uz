@@ -14,6 +14,7 @@ import { HomeworkBridge } from '@/features/homework/HomeworkBridge'
 import { PetBridge } from '@/features/pets/PetBridge'
 import { SoundBridge } from './SoundBridge'
 import { AnalyticsTracker } from './AnalyticsTracker'
+import { NutConversion } from './NutConversion'
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
@@ -25,6 +26,7 @@ export function AppShell() {
       <SpeechUnlock />
       <InterfaceSounds />
       <SyncManager />
+      <NutConversion />
       <ParentGateAutoLock />
       <ExitWatcher />
       <PresenceBeacon />

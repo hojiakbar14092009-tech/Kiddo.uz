@@ -3,16 +3,16 @@ import { Link } from 'react-router-dom'
 import { ChevronRightIcon } from '@/components/icons'
 import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { RESOURCE_TINT, SHOWN_RESOURCES } from '@/components/reward/resources'
-import { useResources } from '@/domain/universe'
+import { useWallet } from '@/domain/universe'
 
 /**
- * The child's treasures (stars, crystals, parts, scrolls) on the city, one
+ * The child's treasures (stars and yong‘oq) on the city, one
  * chip each. The whole bar is one link to the collection, which explains
  * where each comes from and what it is for.
  */
 export function ResourceBar() {
   const { t } = useTranslation()
-  const balances = useResources()
+  const balances = useWallet()
   const chips = SHOWN_RESOURCES.map((resource) => ({
     resource,
     count: balances[resource] ?? 0,
@@ -29,7 +29,7 @@ export function ResourceBar() {
       data-testid="resource-bar"
       className="flex w-full max-w-3xl items-center gap-2 rounded-card bg-surface p-2 shadow-press transition-transform active:translate-y-1 sm:gap-3 sm:p-3"
     >
-      <ul className="grid min-w-0 flex-1 grid-cols-2 gap-2 min-[480px]:grid-cols-4 sm:gap-3">
+      <ul className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:gap-3">
         {chips.map((chip) => (
           <li
             key={chip.resource}

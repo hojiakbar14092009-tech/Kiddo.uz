@@ -45,7 +45,7 @@ export function RunDone({
         <p className="font-display text-2xl font-extrabold text-primary sm:text-3xl short:text-xl">
           {doneText}
         </p>
-        <ActivityReward stars={reward.stars} crystals={reward.crystals} />
+        <ActivityReward stars={reward.stars} nuts={reward.nuts} />
         <div className="flex flex-wrap justify-center gap-3">
           <LinkButton to={HUB} variant="soft" size="md">
             {t('uzbekistan.chooseOther')}

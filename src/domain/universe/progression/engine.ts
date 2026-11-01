@@ -55,6 +55,8 @@ export interface WorldSnapshot {
   /** Finished runs, newest first (universe `recent`). */
   recent: readonly RecentRun[]
   balances: Readonly<Record<ResourceId, number>>
+  /** Yong‘oq (the reward ledger's coins): what buildings are paid with. */
+  nuts?: number
 }
 
 export type Effect =

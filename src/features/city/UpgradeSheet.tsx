@@ -6,7 +6,7 @@ import { BottomSheet } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
-import { useResources, type BuildingView } from '@/domain/universe'
+import { useWallet, type BuildingView } from '@/domain/universe'
 import { tDynamic } from '@/lib/tDynamic'
 import { costRows } from './cityModel'
 
@@ -25,7 +25,7 @@ export function UpgradeSheet({
   onClose: () => void
 }) {
   const { t } = useTranslation()
-  const balances = useResources()
+  const balances = useWallet()
   const name = tDynamic(t, building.nameKey)
   const rows = costRows(building, balances)
   const ready = building.next !== null && rows.every((row) => row.missing === 0)

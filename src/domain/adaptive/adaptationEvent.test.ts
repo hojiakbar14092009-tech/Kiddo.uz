@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { useRewardStore } from '@/domain/rewards'
+import { rewardHistory, useRewardStore } from '@/domain/rewards'
 import {
   emitActivity,
   getResources,
@@ -33,15 +33,24 @@ describe('adaptation is published, never paid', () => {
     run(1)
     expect(seen.filter((e) => e.type === 'adaptation.updated')).toHaveLength(0)
     const before = getResources('adapt-kid')
-    run(2)
+    const paidBefore = rewardHistory('adapt-kid').length
+    const award = run(2)
     stop()
     const moved = seen.filter((e) => e.type === 'adaptation.updated')
     expect(moved).toEqual([
       { type: 'adaptation.updated', childKey: 'adapt-kid', strand: 'number', from: 2, to: 3 },
     ])
-    // the second run pays what any run pays (stars, crystal, part): nothing for the move
+    // the second run pays what any run pays (stars; a crystal's and a part's worth in
+    // nuts): nothing for the move
     const after = getResources('adapt-kid')
-    expect(after.crystal - before.crystal).toBe(1)
     expect(after.star - before.star).toBe(3)
+    expect(award.nuts).toBe(15)
+    const paid = rewardHistory('adapt-kid')
+      .slice(0, rewardHistory('adapt-kid').length - paidBefore)
+      .filter((entry) => entry.reason !== 'achievement')
+    expect(paid.map((entry) => [entry.refId, entry.coins]).sort()).toEqual([
+      ['crystal|three-stars|math-lab:count:L2:2', 10],
+      [expect.stringMatching(/^part\|number-3star\|math-lab:count:L2:2\|/), 5],
+    ])
   })
 })

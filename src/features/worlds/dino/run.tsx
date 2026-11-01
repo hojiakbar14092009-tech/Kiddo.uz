@@ -75,7 +75,7 @@ export function DinoResult({
           {levelUp && <p className="text-lg font-bold short:text-base">{levelUp}</p>}
         </div>
         <div className="flex flex-col items-center gap-3 short:gap-1">
-          <ActivityReward stars={award.stars} crystals={award.crystals} />
+          <ActivityReward stars={award.stars} nuts={award.nuts} />
         </div>
         <div className="flex flex-wrap justify-center gap-3 short:col-span-2">
           <BackToGarden />

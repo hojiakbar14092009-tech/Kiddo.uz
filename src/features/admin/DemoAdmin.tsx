@@ -72,7 +72,7 @@ export function DemoOverview({ data }: { data: AdminData }) {
     { label: 'Bolalar', value: children.length, note: 'shu qurilmada' },
     { label: 'Mashg‘ulotlar', value: stats.week, note: 'oxirgi 7 kun' },
     { label: 'Uy vazifalari', value: stats.open, note: `${stats.done} tasi bajarilgan` },
-    { label: 'Tangalar', value: coins, note: pro ? 'Demo PRO yoqilgan' : 'PRO o‘chiq' },
+    { label: 'Yong‘oqlar', value: coins, note: pro ? 'Demo PRO yoqilgan' : 'PRO o‘chiq' },
   ]
 
   return (
@@ -123,7 +123,7 @@ export function DemoOverview({ data }: { data: AdminData }) {
                 <span className="font-bold">{child.name}</span>
                 <span className="text-sm text-[var(--a-ink-soft)]">
                   {child.age === null ? 'Yoshi ko‘rsatilmagan' : `${child.age} yosh`} ·{' '}
-                  <span className="kd-num">{child.coins}</span> tanga
+                  <span className="kd-num">{child.coins}</span> yong‘oq
                 </span>
                 <span className="text-xs text-[var(--a-ink-faint)]">
                   {child.lastSeen

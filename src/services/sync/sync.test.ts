@@ -195,7 +195,13 @@ describe('queue robustness', () => {
     const store = useSyncStore.getState()
     store.enqueue({
       kind: 'recordReward',
-      row: { p_child: 'ali', p_coins: 50, p_reason: 'task', p_ref: 'r1' },
+      row: {
+        p_child: 'ali',
+        p_coins: 50,
+        p_reason: 'task',
+        p_ref: 'r1',
+        p_at: '2026-11-01T10:00:00.000Z',
+      },
     })
     store.enqueue({ kind: 'deleteChild', childId: 'other' })
     expect(await flushQueue(client, () => 0)).toEqual({ sent: 1, failed: true })
@@ -252,7 +258,13 @@ describe('queue robustness', () => {
 
   it('coalesces reward entries by reason and ref, and learning data per child', () => {
     const store = useSyncStore.getState()
-    const reward = { p_child: 'ali', p_coins: 5, p_reason: 'task' as const, p_ref: 'r1' }
+    const reward = {
+      p_child: 'ali',
+      p_coins: 5,
+      p_reason: 'task' as const,
+      p_ref: 'r1',
+      p_at: '2026-11-01T10:00:00.000Z',
+    }
     store.enqueue({ kind: 'recordReward', row: reward })
     store.enqueue({ kind: 'recordReward', row: reward })
     store.enqueue({ kind: 'recordReward', row: { ...reward, p_reason: 'learn' as const } })
@@ -300,7 +312,13 @@ describe('child state and purchases', () => {
     enqueue(state(50))
     enqueue({
       kind: 'recordReward',
-      row: { p_child: 'ali', p_coins: -15, p_reason: 'purchase', p_ref: 'outfit|cap|n1' },
+      row: {
+        p_child: 'ali',
+        p_coins: -15,
+        p_reason: 'purchase',
+        p_ref: 'outfit|cap|n1',
+        p_at: '2026-11-01T10:00:00.000Z',
+      },
     })
     enqueue(state(35))
     expect(useSyncStore.getState().queue.map((item) => item.operation.kind)).toEqual([

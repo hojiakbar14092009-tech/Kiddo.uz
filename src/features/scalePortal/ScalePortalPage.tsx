@@ -297,7 +297,7 @@ export function ScalePortalPage() {
             <p className="text-lg tabular-nums">
               {t('scalePortal.doneText', { n: phase.right, total: JUMPS })}
             </p>
-            <ActivityReward stars={phase.award.stars} crystals={phase.award.crystals} />
+            <ActivityReward stars={phase.award.stars} nuts={phase.award.nuts} />
             <p className="text-base text-ink-soft">{t('scalePortal.exploreHint')}</p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button variant="soft" onClick={start}>

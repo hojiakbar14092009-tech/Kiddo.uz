@@ -176,7 +176,7 @@ export function ShadowLabPage() {
             <p className="text-lg tabular-nums">
               {t('shadowLab.doneText', { n: phase.solved, total: mission.length })}
             </p>
-            <ActivityReward stars={phase.award.stars} crystals={phase.award.crystals} />
+            <ActivityReward stars={phase.award.stars} nuts={phase.award.nuts} />
             <div className="flex flex-wrap justify-center gap-3">
               <Button variant="soft" onClick={start}>
                 {t('shadowLab.again')}

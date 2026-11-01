@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/components/ui/toast'
-import { useResources, useWorld, type BuildingView } from '@/domain/universe'
+import { useWallet, useWorld, type BuildingView } from '@/domain/universe'
 import { tDynamic } from '@/lib/tDynamic'
 import { BuildingTile } from './BuildingTile'
 import { PLOT_TINTS } from './cityModel'
@@ -28,13 +28,13 @@ function isReady(building: BuildingView): boolean {
 
 /**
  * Kiddo City on the home screen: the child's treasures, then every building
- * as a house to walk into. Each can be upgraded with crystals (and parts),
+ * as a house to walk into. Each can be upgraded with yong‘oq (nuts),
  * which only changes how it looks: entering is never blocked.
  */
 export function KiddoCity() {
   const { t } = useTranslation()
   const { buildings, upgrade } = useWorld()
-  const crystals = useResources().crystal ?? 0
+  const nuts = useWallet().nut ?? 0
   const [sheetFor, setSheetFor] = useState<string | null>(null)
   const [celebrated, setCelebrated] = useState<{ id: string; at: number } | null>(null)
   const open = buildings.find((building) => building.id === sheetFor) ?? null
@@ -79,8 +79,10 @@ export function KiddoCity() {
         maxLevel={building.maxLevel}
         upgradeReady={isReady(building)}
         onUpgrade={
-          // a quiet level badge only, until there is a crystal to think about
-          building.next && !building.locked && (crystals > 0 || isReady(building))
+          // a quiet level badge only, until the nuts are half way to the price
+          building.next &&
+          !building.locked &&
+          (nuts * 2 >= building.next.cost.nut || isReady(building))
             ? () => setSheetFor(building.id)
             : undefined
         }

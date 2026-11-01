@@ -193,8 +193,7 @@ export function WeekPanel({ insights }: { insights: ChildInsights }) {
           {(
             [
               ['stars', week.earned.star],
-              ['crystals', week.earned.crystal],
-              ['scrolls', week.earned.scroll],
+              ['nuts', week.earned.nut],
             ] as const
           ).map(([key, count]) => (
             <li key={key} className="rounded-full bg-cream px-4 py-2 font-semibold tabular-nums">

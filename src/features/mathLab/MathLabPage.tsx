@@ -8,7 +8,6 @@ import { Screen } from '@/components/layout/Screen'
 import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
 import { ActivityReward } from '@/components/reward/ActivityReward'
-import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { Button } from '@/components/ui/Button'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { StepDots } from '@/components/ui/Progress'
@@ -467,7 +466,7 @@ function LabPlacement({ onDone }: { onDone: () => void }) {
 
 interface Finished {
   summary: LabSummary
-  award: Pick<AwardSummary, 'stars' | 'crystals' | 'parts'>
+  award: Pick<AwardSummary, 'stars' | 'nuts'>
 }
 
 /**
@@ -622,7 +621,7 @@ function LabSession({
     if (emitted.current) return null
     emitted.current = true
     const summary = labSummary(sheet.current, questions.length, level)
-    let award: Finished['award'] = { stars: 0, crystals: 0, parts: 0 }
+    let award: Finished['award'] = { stars: 0, nuts: 0 }
     try {
       award = emitActivity(labActivity(runId, childKey, summary))
       // later phases (Mistake Garden) listen for these
@@ -1024,16 +1023,10 @@ function LabResult({
           >
             {score}
           </p>
-          {award.parts > 0 && (
-            <p className="flex items-center gap-2 rounded-full bg-sky-soft px-4 py-1.5 font-display text-xl font-extrabold">
-              <ResourceIcon resource="part" size={30} />
-              {t('award.parts', { count: award.parts })}
-            </p>
-          )}
           {levelUp && <p className="text-lg font-bold short:text-base">{levelUp}</p>}
         </div>
         <div className="flex flex-col items-center gap-3 short:gap-1">
-          <ActivityReward stars={award.stars} crystals={award.crystals} />
+          <ActivityReward stars={award.stars} nuts={award.nuts} />
         </div>
         <div className="flex flex-wrap justify-center gap-3 short:col-span-2">
           {fromGarden && <BackToGarden testId="lab-to-garden" force />}

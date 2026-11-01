@@ -5,19 +5,10 @@ import { ResourceIcon } from './ResourceIcon'
 
 /**
  * What a finished activity brought into the Kiddo universe (stars and
- * crystals), as one short burst with the amounts in words beside the
- * pictures (and a knowledge scroll for a story read the first time). With
- * nothing new (e.g. the same item again today) it simply praises.
+ * yong‘oq), as one short burst with the amounts in words beside the
+ * pictures. With nothing new (e.g. the same item again today) it simply praises.
  */
-export function ActivityReward({
-  stars,
-  crystals,
-  scrolls = 0,
-}: {
-  stars: number
-  crystals: number
-  scrolls?: number
-}) {
+export function ActivityReward({ stars, nuts = 0 }: { stars: number; nuts?: number }) {
   const { t } = useTranslation()
   const items = [
     {
@@ -27,16 +18,10 @@ export function ActivityReward({
       text: t('activityReward.stars', { count: stars }),
     },
     {
-      key: 'crystals',
-      count: crystals,
-      picture: 'sparkles',
-      text: t('activityReward.crystals', { count: crystals }),
-    },
-    {
-      key: 'scrolls',
-      count: scrolls,
+      key: 'nuts',
+      count: nuts,
       picture: null,
-      text: t('activityReward.scrolls', { count: scrolls }),
+      text: t('activityReward.nuts', { count: nuts }),
     },
   ].filter((item) => item.count > 0)
 
@@ -61,7 +46,7 @@ export function ActivityReward({
               {item.picture ? (
                 <Img3D name={item.picture} className="size-14 short:size-10" />
               ) : (
-                <ResourceIcon resource="scroll" size={48} className="short:size-10" />
+                <ResourceIcon resource="nut" size={48} className="short:size-10" />
               )}
               {item.text}
             </span>

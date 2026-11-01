@@ -222,7 +222,7 @@ select pg_temp.expect_error($$select * from public.presence_heartbeats$$, 'permi
 select pg_temp.check((select count(*) from public.ads) = 1, 'anon reads active ads (policy uses is_admin)');
 select pg_temp.check((select count(*) from public.app_settings) >= 0, 'anon still reads app_settings');
 commit;
-select pg_temp.check(not has_function_privilege('anon','public.record_reward(text,integer,text,text)','execute'), 'anon cannot execute record_reward');
+select pg_temp.check(not has_function_privilege('anon','public.record_reward(text,integer,text,text,timestamptz)','execute'), 'anon cannot execute record_reward');
 select pg_temp.check(not has_function_privilege('anon','public.record_resource(text,text,integer,text,text,timestamptz)','execute'), 'anon cannot execute record_resource');
 select pg_temp.check(not has_table_privilege('anon','public.resource_ledger','select'), 'anon cannot read resource_ledger');
 select pg_temp.check(not has_table_privilege('anon','public.world_state','select'), 'anon cannot read world_state');
@@ -664,7 +664,7 @@ select pg_temp.check((select (public.record_resource('cg','star',3,'activity','o
 select pg_temp.check(public.record_opening_balance('cg', 9999, '{crown,unicorn}', '{cat,dragon}'), 'opening: a new family''s balance is opened');
 select pg_temp.check(not public.record_opening_balance('cg', 9999, '{crown}', '{}'), 'opening: only once');
 insert into public.child_state (child_id, coins, outfits, wearing, pets, pet) values ('cg', 1, '{crown,unicorn,cap}', '{"head":"crown"}', '["cat","dragon"]', 'cat');
-select pg_temp.check((select coins = 5000 and outfits = '{crown}' and wearing = '{"head":"crown"}'::jsonb and pets = '["cat"]'::jsonb and pet = 'cat' from public.child_state where child_id='cg'), 'opening: capped coins, only real items, kept in the stored state');
+select pg_temp.check((select coins = 9999 and outfits = '{crown}' and wearing = '{"head":"crown"}'::jsonb and pets = '["cat"]'::jsonb and pet = 'cat' from public.child_state where child_id='cg'), 'opening: the coins (under the 20000 cap since 0017), only real items, kept in the stored state');
 select pg_temp.check((select (public.record_reward('cg', -15, 'purchase', 'outfit|cap|n1')).coins) = -15, 'opening: the next purchase is accepted');
 select pg_temp.expect_error($$select public.record_opening_balance('cb', 100, '{}', '{}')$$, 'not_your_child');
 commit;
@@ -787,6 +787,62 @@ set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
 select pg_temp.check((select installs from public.admin_analytics_funnel(30) where name='first_opened') = 1 and (select installs from public.admin_analytics_funnel(30) where name='app_opened') = 1, 'analytics: the funnel counts only installs first opened in the period');
 select pg_temp.check((select closes from public.admin_analytics_exits(30) where screen='/math-lab') = 1 and not exists (select 1 from public.admin_analytics_exits(30) where screen='/home'), 'analytics: the last leaving of a day counts');
+commit;
+
+-- ===== 0017: yong‘oq, one currency (the conversion, nut-paid building levels)
+insert into auth.users (id,email,email_confirmed_at) values ('00000000-0000-0000-0000-0000000000e1','nuts@x.uz', now());
+insert into public.children (id,parent_id,name,age,gender,mascot) values ('cn','00000000-0000-0000-0000-0000000000e1','Nodira',6,'girl','girl');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000e1","role":"authenticated"}', true);
+-- held before Phase 39: 2 crystals, 1 part (worth 25 nuts)
+select public.record_resource('cn','crystal',1,'three-stars','n-'||g) from generate_series(1,2) g;
+select public.record_resource('cn','part',1,'number-3star','n-p|2026-01-01');
+-- the conversion's spends: a device that held more converts only what the server has
+select pg_temp.check((select (public.record_resource('cn','crystal',-5,'conversion','conversion|v1')).amount) = -2, 'nuts: the conversion takes what the server holds');
+select public.record_resource('cn','part',-1,'conversion','conversion|v1');
+select pg_temp.check((select coalesce(sum(amount),0) from public.resource_ledger where child_id='cn' and resource in ('crystal','part')) = 0, 'nuts: nothing is left after the conversion');
+select pg_temp.check((select (public.record_resource('cn','scroll',-3,'conversion','conversion|v1')).id) is null, 'nuts: nothing held, nothing converted (no error)');
+select pg_temp.expect_error($$select public.record_resource('cn','star',-1,'conversion','conversion|v1')$$, 'bad_reason');
+select pg_temp.expect_error($$select public.record_resource('cn','crystal',-1,'conversion','conversion|v2')$$, 'bad_ref');
+select pg_temp.expect_error($$select public.record_resource('cn','crystal',1,'conversion','conversion|v1')$$, 'bad_sign');
+-- the nuts: at most what was converted, once
+select pg_temp.check((select (public.record_reward('cn',100,'conversion','conversion|v1')).coins) = 25, 'nuts: the conversion pays what was converted, no more');
+select pg_temp.check((select (public.record_reward('cn',100,'conversion','conversion|v1')).coins) = 25, 'nuts: the conversion is paid once');
+select pg_temp.expect_error($$select public.record_reward('cn',10,'conversion','conversion|v2')$$, 'out_of_bounds');
+select pg_temp.expect_error($$select public.record_reward('cb',10,'conversion','conversion|v1')$$, 'not_your_child');
+-- a building level paid in nuts: its exact price (math-land 1 = 10; robot-workshop 1 = 15)
+select pg_temp.expect_error($$select public.record_reward('cn',-9,'purchase','upgrade|math-land|1')$$, 'bad_purchase');
+select pg_temp.expect_error($$select public.record_reward('cn',-10,'purchase','upgrade|nowhere|1')$$, 'bad_purchase');
+select pg_temp.expect_error($$select public.record_reward('cn',-10,'purchase','upgrade|math-land|9')$$, 'bad_purchase');
+select pg_temp.check((select (public.record_reward('cn',-10,'purchase','upgrade|math-land|1')).coins) = -10, 'nuts: a level is bought at its price');
+select pg_temp.check((select (public.record_building_level('cn','math-land',1)).buildings ->> 'math-land') = '1', 'nuts: a level paid in nuts is recorded');
+select pg_temp.expect_error($$select public.record_building_level('cn','math-land',2)$$, 'not_paid');
+select pg_temp.check((select (public.record_reward('cn',-15,'purchase','upgrade|robot-workshop|1')).coins) = -15, 'nuts: a workshop level costs its parts too');
+select pg_temp.expect_error($$select public.record_reward('cn',-15,'purchase','upgrade|spaceport|1')$$, 'insufficient_coins');
+-- a find opened by the rocket bought with nuts
+select public.record_reward('cn',15,'learn','crystal|three-stars|n-extra');
+select public.record_reward('cn',-15,'purchase','upgrade|spaceport|1');
+select public.record_building_level('cn','spaceport',1);
+select pg_temp.check((select (public.record_resource('cn','seed',1,'discovery','mars-seed')).amount) = 1, 'nuts: the Mars seed is found after a rocket paid in nuts');
+commit;
+-- an offline week: nuts are capped on the day they were earned, not the day they sync
+update auth.users set created_at = now() - interval '30 days' where id = '00000000-0000-0000-0000-0000000000e1';
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000e1","role":"authenticated"}', true);
+select public.record_reward('cn',100,'learn','off-'||g||'-'||d, now() - make_interval(days => d)) from generate_series(1,5) g, generate_series(2,4) d;
+select pg_temp.check((select coalesce(sum(coins),0) from public.reward_ledger where child_id='cn' and ref_id like 'off-%') = 1500, 'nuts: an offline week syncs each day under its own cap');
+select pg_temp.expect_error($$select public.record_reward('cn',100,'learn','off-6-2', now() - interval '2 days')$$, 'daily_cap');
+select pg_temp.expect_error($$select public.record_reward('cn',10,'learn','future', now() + interval '1 day')$$, 'bad_time');
+select pg_temp.check((select (public.record_reward('cn',10,'learn','long-ago', now() - interval '60 days')).earned_at) >= now() - interval '7 days 1 minute', 'nuts: older play counts as a week ago at most');
+commit;
+select pg_temp.check(public.building_nut_price('spaceport',1) = 15 and public.building_nut_price('garden',3) = 30 and public.building_nut_price('garden',4) is null, 'nuts: building prices at the fixed rate');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000e1","role":"authenticated"}', true);
+select pg_temp.expect_error($$select public.nut_rate('crystal')$$, 'permission denied');
+select pg_temp.expect_error($$select public.building_nut_price('garden',1)$$, 'permission denied');
 commit;
 
 -- ===== every security definer function pins search_path

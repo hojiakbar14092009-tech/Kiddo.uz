@@ -48,10 +48,15 @@ export function progressChanges(
 export function snapshot(
   children: readonly ChildProfile[],
   byChild: Readonly<Record<string, ChildProgress>>,
+  /** Nuts already spent on upgrades: in the opening, since those payments are replayed after it. */
+  replayedSpend: (childId: string) => number = () => 0,
 ): SyncOperation[] {
   const openings: SyncOperation[] = children.flatMap((child) => {
     const progress = byChild[child.id]
-    return progress ? [{ kind: 'openBalance' as const, row: openingRow(child.id, progress) }] : []
+    if (!progress) return []
+    const row = openingRow(child.id, progress)
+    row.p_coins += Math.max(0, replayedSpend(child.id))
+    return [{ kind: 'openBalance' as const, row }]
   })
   return [
     ...childChanges([], children),

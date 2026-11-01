@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useRewardStore } from '@/domain/rewards/rewardStore'
 import { EMPTY_UNIVERSE_CHILD, useUniverseStore } from '@/domain/universe/store'
 import { EMPTY_LEARN_CHILD, useLearnStore } from '@/features/learn/learnStore'
 import { childAge, type ChildProfile } from '@/store/familyStore'
@@ -20,6 +21,7 @@ export function useChildInsights(child: ChildProfile) {
   const progress = useProgress(child.id)
   const learn = useLearnStore((state) => state.byChild[child.id] ?? EMPTY_LEARN_CHILD)
   const universe = useUniverseStore((state) => state.byChild[child.id] ?? EMPTY_UNIVERSE_CHILD)
+  const rewards = useRewardStore((state) => state.byChild[child.id]?.entries)
   const age = childAge(child)
   // the live local day, as the Today panel reads it (a new day shows on the next render)
   const today = dayKey()
@@ -33,6 +35,7 @@ export function useChildInsights(child: ChildProfile) {
         runs,
         ledger: universe.ledger.entries,
         results: progress.results,
+        rewards: rewards ?? [],
       },
       now,
     )
@@ -59,7 +62,7 @@ export function useChildInsights(child: ChildProfile) {
       health: healthyPlay(week.days),
       medals: medalsAndCity(universe),
     }
-  }, [child.id, progress, learn, universe, age, today])
+  }, [child.id, progress, learn, universe, rewards, age, today])
 }
 
 export type ChildInsights = ReturnType<typeof useChildInsights>

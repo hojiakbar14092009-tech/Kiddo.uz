@@ -1,5 +1,6 @@
 import { subscribeEvidence } from '@/domain/learningMemory'
 import { hasKey } from '@/domain/ledger'
+import { useProgressStore } from '@/store/progressStore'
 import {
   emitUniverse,
   EMPTY_BALANCES,
@@ -50,6 +51,7 @@ export function snapshotOf(childKey: string): WorldSnapshot {
     buildings: child.buildings,
     recent: child.recent ?? [],
     balances: { ...EMPTY_BALANCES, ...child.balances },
+    nuts: useProgressStore.getState().byChild[childKey]?.coins ?? 0,
   }
 }
 

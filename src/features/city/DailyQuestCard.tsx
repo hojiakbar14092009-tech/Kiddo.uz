@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, CoinIcon } from '@/components/icons'
-import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
 import { RewardBurst } from '@/components/ui/RewardBurst'
@@ -20,7 +19,7 @@ const FAIL_TEXT = {
 
 /**
  * Today's treasure under the plan. The reward is shown before the child
- * starts (a crystal and coins); when every step is done it can be opened
+ * starts (yong‘oq); when every step is done it can be opened
  * once, and then the card says calmly that this is a good place to rest
  * (or to keep playing). An unopened treasure waits until the day ends; the
  * card follows the clock, so after midnight it shows the new day's quest.
@@ -59,13 +58,9 @@ export function DailyQuestCard() {
 
   const prizes = (
     <ul className="flex flex-wrap items-center gap-2" aria-label={t('quest.promise')}>
-      <li className="flex min-h-10 items-center gap-1.5 rounded-full bg-lilac-soft px-3 py-1 font-display text-lg font-extrabold">
-        <ResourceIcon resource="crystal" size={26} />
-        {t('quest.crystal', { count: quest.reward.crystals })}
-      </li>
       <li className="flex min-h-10 items-center gap-1.5 rounded-full bg-coin-soft px-3 py-1 font-display text-lg font-extrabold">
         <CoinIcon size={26} />
-        {t('quest.coins', { count: quest.reward.coins })}
+        {t('quest.coins', { count: quest.reward.nuts })}
       </li>
     </ul>
   )

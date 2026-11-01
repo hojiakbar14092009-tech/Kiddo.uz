@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useChildKey } from '@/store/progressStore'
+import { useChildKey, useProgressStore } from '@/store/progressStore'
 import {
   ACHIEVEMENTS,
   metricValue,
@@ -9,7 +9,15 @@ import {
 } from './achievements'
 import { stickerUnlocked, UNIVERSE_STICKERS, type UniverseStickerDef } from './stickers'
 import { EMPTY_BALANCES, EMPTY_UNIVERSE_CHILD, useUniverseStore } from './store'
-import type { ResourceId, Tier } from './types'
+import type { ResourceId, Tier, Wallet } from './types'
+
+/** What the active child holds: resource balances plus yong‘oq ('nut'). */
+export function useWallet(): Wallet {
+  const balances = useResources()
+  const childKey = useChildKey()
+  const nuts = useProgressStore((s) => s.byChild[childKey]?.coins ?? 0)
+  return useMemo(() => ({ ...balances, nut: nuts }), [balances, nuts])
+}
 
 /** Resource balances of the active child. */
 export function useResources(): Record<ResourceId, number> {

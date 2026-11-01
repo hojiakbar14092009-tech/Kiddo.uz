@@ -10,7 +10,7 @@ export const HUB = '/worlds/uzbekistan'
 
 export interface Reward {
   stars: number
-  crystals: number
+  nuts: number
 }
 
 /**
@@ -40,10 +40,10 @@ export function useGameRun(kind: GameKind, doneText: string) {
           level,
           ...runResult(firstTries),
         })
-        setReward({ stars: gained.stars, crystals: gained.crystals })
+        setReward({ stars: gained.stars, nuts: gained.nuts })
       } catch {
         // the praise stays; the universe keeps its own state
-        setReward({ stars: 0, crystals: 0 })
+        setReward({ stars: 0, nuts: 0 })
       }
     },
     [childKey, doneText, kind, level, react],

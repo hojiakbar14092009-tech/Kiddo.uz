@@ -213,7 +213,7 @@ export function ScienceLabPage() {
           <p className="font-display text-2xl font-extrabold" data-testid="lab-finished">
             {t('scienceLab.finished')}
           </p>
-          <ActivityReward stars={phase.award.stars} crystals={phase.award.crystals} />
+          <ActivityReward stars={phase.award.stars} nuts={phase.award.nuts} />
           <div className="flex flex-wrap justify-center gap-3">
             <Button variant="soft" onClick={start}>
               {t('scienceLab.again')}

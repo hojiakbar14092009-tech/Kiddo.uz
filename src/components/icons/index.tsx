@@ -114,6 +114,10 @@ export function HeartIcon({ size = 20, filled = true, ...rest }: IconProps & { f
   )
 }
 
+/**
+ * Yong‘oq, the one currency (Phase 39): a hazelnut, a warm brown shell under
+ * a darker cap. The same picture as the 'nut' resource icon.
+ */
 export function CoinIcon({ size = 28, ...rest }: IconProps) {
   return (
     <svg
@@ -122,14 +126,41 @@ export function CoinIcon({ size = 28, ...rest }: IconProps) {
       viewBox="0 0 28 28"
       aria-hidden="true"
       focusable="false"
+      data-currency="nut"
       {...rest}
     >
-      <circle cx="14" cy="14" r="13" fill="#FFC93C" stroke="#E5A419" strokeWidth="2" />
-      <path
-        d="M14 7l2.1 4.3 4.7.7-3.4 3.3.8 4.7L14 17.8 9.8 20l.8-4.7-3.4-3.3 4.7-.7z"
-        fill="#FFF4D1"
-      />
+      <NutShape />
     </svg>
+  )
+}
+
+/** The hazelnut's paths in a 28×28 box (CoinIcon and ResourceIcon share them). */
+export function NutShape() {
+  return (
+    <>
+      <path
+        d="M14 9c5.6 0 9 4.2 9 8.6 0 4.7-4 8.4-9 8.4s-9-3.7-9-8.4C5 13.2 8.4 9 14 9z"
+        fill="#C98A4B"
+        stroke="#8A5527"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4.5 12.2C5.4 7.4 9.2 4.5 14 4.5s8.6 2.9 9.5 7.7c-2.6 1.2-5.8 1.8-9.5 1.8s-6.9-.6-9.5-1.8z"
+        fill="#7A4A22"
+        stroke="#5C3416"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M14 4.5V1.8" stroke="#5C3416" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M10 17.5c.6-1.6 1.8-2.6 3.2-3"
+        stroke="#E7B985"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </>
   )
 }
 

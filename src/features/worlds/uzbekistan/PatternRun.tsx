@@ -96,7 +96,7 @@ function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void 
       <RunDone
         kind="patterns"
         onReview={onReview}
-        reward={reward ?? { stars: 0, crystals: 0 }}
+        reward={reward ?? { stars: 0, nuts: 0 }}
         doneText={doneText}
         onAgain={onAgain}
         art={

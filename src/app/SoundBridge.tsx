@@ -5,7 +5,7 @@ import { queueCue, type SoundCue } from '@/services/audio/soundLanguage'
 import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY } from '@/store/progressStore'
 
-const QUIET_REASONS: ReadonlySet<string> = new Set(['penalty', 'pro-gift', 'admin'])
+const QUIET_REASONS: ReadonlySet<string> = new Set(['penalty', 'pro-gift', 'admin', 'conversion'])
 
 /** Only the child at the screen is heard (never a sync or another profile's change). */
 function isActive(childKey: string): boolean {
@@ -30,6 +30,8 @@ export function SoundBridge() {
       let cue: SoundCue | null = null
       switch (event.type) {
         case 'resource.changed':
+          // the one-time change to nuts happens on its own: no sound for it
+          if (event.entry.reason === 'conversion') break
           if (event.entry.amount < 0) cue = 'spend'
           else if (event.entry.amount > 0) cue = event.entry.resource === 'star' ? 'star' : 'coin'
           break

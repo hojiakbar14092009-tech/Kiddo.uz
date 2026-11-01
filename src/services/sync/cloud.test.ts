@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { birthDateForAge } from '@/features/age/ageLevel'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { dayKey } from '@/features/tasks/rules'
-import { grantReward, useRewardStore } from '@/domain/rewards'
+import { grantReward, rewardHistory, useRewardStore } from '@/domain/rewards'
 import { recordEvidence, useLearningMemoryStore } from '@/domain/learningMemory'
 import { emitActivity, grantResource, upgradeBuilding, useUniverseStore } from '@/domain/universe'
 import { useFamilyStore } from '@/store/familyStore'
@@ -98,7 +98,13 @@ describe('cloud change tracking', () => {
     expect(rewards).toHaveLength(1)
     expect(rewards[0]!.operation).toEqual({
       kind: 'recordReward',
-      row: { p_child: ali.id, p_coins: 20, p_reason: 'learn', p_ref: 'session-1' },
+      row: {
+        p_child: ali.id,
+        p_coins: 20,
+        p_reason: 'learn',
+        p_ref: 'session-1',
+        p_at: expect.any(String),
+      },
     })
     stop()
   })
@@ -120,7 +126,7 @@ describe('cloud change tracking', () => {
     emitActivity(run)
     emitActivity(run) // counted before: nothing new
     emitActivity({ ...run, childKey: 'guest' })
-    grantResource({ childKey: ali.id, resource: 'crystal', amount: 5, reason: 'admin', refId: 'a' })
+    grantResource({ childKey: ali.id, resource: 'seed', amount: 5, reason: 'admin', refId: 'a' })
 
     const rows = useSyncStore
       .getState()
@@ -135,8 +141,28 @@ describe('cloud change tracking', () => {
         p_ref: 'run-1',
         p_at: expect.any(String),
       },
-      expect.objectContaining({ p_resource: 'crystal', p_amount: 1, p_reason: 'three-stars' }),
-      expect.objectContaining({ p_resource: 'part', p_amount: 1, p_reason: 'number-3star' }),
+    ])
+    // the crystal and the part are paid in nuts (Phase 39): the coin ledger sends those
+    const rewards = useSyncStore
+      .getState()
+      .queue.filter((item) => item.operation.kind === 'recordReward')
+      .map((item) => item.operation.kind === 'recordReward' && item.operation.row)
+      .filter((row) => row && row.p_reason !== 'achievement')
+    expect(rewards).toEqual([
+      {
+        p_child: ali.id,
+        p_coins: 10,
+        p_reason: 'learn',
+        p_ref: 'crystal|three-stars|math:4',
+        p_at: expect.any(String),
+      },
+      {
+        p_child: ali.id,
+        p_coins: 5,
+        p_reason: 'learn',
+        p_ref: expect.stringMatching(/^part\|number-3star\|math:4\|\d{4}-\d{2}-\d{2}$/),
+        p_at: expect.any(String),
+      },
     ])
     stop()
   })
@@ -225,27 +251,57 @@ describe('cloud change tracking', () => {
     }
     emitActivity({ ...run, id: 'early' })
     expect(upgradeBuilding(ali.id, 'math-land')).toBe('ok')
+    const coins = useProgressStore.getState().byChild[ali.id]!.coins
     useSyncStore.setState({ queue: [], snapshotFor: null })
     const stop = trackCloudChanges(USER, () => undefined)
-    const ops = useSyncStore
-      .getState()
-      .queue.map((item) => item.operation)
-      .filter((op) => op.kind === 'recordResource' || op.kind === 'recordBuildingLevel')
+    const queued = useSyncStore.getState().queue.map((item) => item.operation)
+    // the opening includes the 10 nuts the level cost, since that payment is replayed after it
+    const opening = queued.find((op) => op.kind === 'openBalance')
+    expect(opening?.kind === 'openBalance' && opening.row).toMatchObject({
+      p_child: ali.id,
+      p_coins: coins + 10,
+    })
+    const ops = queued.filter(
+      (op) =>
+        op.kind === 'recordResource' ||
+        op.kind === 'recordBuildingLevel' ||
+        op.kind === 'recordReward',
+    )
     expect(
       ops.map((op) =>
         op.kind === 'recordResource'
           ? `${op.row.p_resource}${op.row.p_amount}`
-          : `level:${op.row.p_building}:${op.row.p_level}`,
+          : op.kind === 'recordReward'
+            ? `${op.row.p_reason}:${op.row.p_ref}:${op.row.p_coins}`
+            : `level:${op.row.p_building}:${op.row.p_level}`,
       ),
-    ).toEqual(['star3', 'crystal1', 'part1', 'crystal-1', 'level:math-land:1'])
-    // Earned later, upgraded later: still spend after grant, level after payment.
+    ).toEqual(['star3', 'purchase:upgrade|math-land|1:-10', 'level:math-land:1'])
+    // replayed on the server, the opening and the payment come to the child's balance
+    expect(
+      (opening?.kind === 'openBalance' ? opening.row.p_coins : 0) +
+        ops.reduce((sum, op) => sum + (op.kind === 'recordReward' ? op.row.p_coins : 0), 0),
+    ).toBe(coins)
+    // Earned later, upgraded later: the level still follows its payment.
     emitActivity({ ...run, id: 'late', activity: 'math:5' })
     expect(upgradeBuilding(ali.id, 'garden')).toBe('ok')
     const tail = useSyncStore
       .getState()
       .queue.slice(-2)
-      .map((item) => item.operation.kind)
-    expect(tail).toEqual(['recordResource', 'recordBuildingLevel'])
+      .map((item) => item.operation)
+    expect(tail).toEqual([
+      {
+        kind: 'recordReward',
+        row: {
+          p_child: ali.id,
+          p_coins: -10,
+          p_reason: 'purchase',
+          p_ref: 'upgrade|garden|1',
+          p_at: expect.any(String),
+        },
+      },
+      { kind: 'recordBuildingLevel', row: expect.objectContaining({ p_building: 'garden' }) },
+    ])
+    expect(rewardHistory(ali.id)[0]).toMatchObject({ refId: 'upgrade|garden|1', coins: -10 })
     stop()
   })
 
@@ -329,7 +385,13 @@ describe('parent session follows Supabase auth', () => {
     useSyncStore.getState().enqueue({ kind: 'deleteChild', childId: 'lola' })
     useSyncStore.getState().enqueue({
       kind: 'recordReward',
-      row: { p_child: 'ali', p_coins: 5, p_reason: 'task', p_ref: 'r' },
+      row: {
+        p_child: 'ali',
+        p_coins: 5,
+        p_reason: 'task',
+        p_ref: 'r',
+        p_at: '2026-11-01T10:00:00.000Z',
+      },
     })
     endCloudSession()
     expect(useParentStore.getState().session).toBeNull()

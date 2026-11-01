@@ -21,7 +21,7 @@ type Hint = 'start' | 'offPath' | 'nextStroke' | 'retry' | null
 
 interface Reward {
   stars: number
-  crystals: number
+  nuts: number
 }
 
 /** One number or shape on the board; when it is traced, the reward and what next. */
@@ -52,10 +52,10 @@ export function TraceRun({ item }: { item: TraceItem }) {
         strand: traceStrand(item),
         ...result,
       })
-      setReward({ stars: gained.stars, crystals: gained.crystals })
+      setReward({ stars: gained.stars, nuts: gained.nuts })
     } catch {
       // the child still sees the praise; the universe keeps its own state
-      setReward({ stars: 0, crystals: 0 })
+      setReward({ stars: 0, nuts: 0 })
     }
   }
 
@@ -118,7 +118,7 @@ export function TraceRun({ item }: { item: TraceItem }) {
               <p className="font-display text-3xl font-extrabold text-primary short:text-2xl">
                 {t('trace.done')}
               </p>
-              <ActivityReward stars={reward.stars} crystals={reward.crystals} />
+              <ActivityReward stars={reward.stars} nuts={reward.nuts} />
               <div className="flex flex-wrap justify-center gap-3">
                 <Button variant="soft" size="md" onClick={() => navigate(`/trace/${item.set}`)}>
                   {t('trace.chooseOther')}

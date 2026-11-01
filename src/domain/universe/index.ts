@@ -10,7 +10,16 @@ export {
   type Strand,
   type Tier,
   type UniverseEvent,
+  type Wallet,
+  type WalletId,
 } from './types'
+export {
+  isLegacyResource,
+  LEGACY_RESOURCES,
+  NUT_VALUE,
+  nutValue,
+  type LegacyResource,
+} from './nuts'
 export {
   activityBase,
   activityEffects,
@@ -30,6 +39,7 @@ export {
 export {
   clearUniverseChild,
   clearUniverseChild as clearChild,
+  convertToNuts,
   emitActivity,
   getAward,
   getResources,
@@ -63,7 +73,13 @@ export {
   UNIVERSE_STICKERS,
   type UniverseStickerDef,
 } from './stickers'
-export { useAchievements, useResources, useUniverseStickers, type AchievementView } from './hooks'
+export {
+  useAchievements,
+  useResources,
+  useUniverseStickers,
+  useWallet,
+  type AchievementView,
+} from './hooks'
 export {
   claimDailyQuest,
   dailyQuestState,
@@ -71,6 +87,7 @@ export {
   getDailyQuest,
   pendingQuestDay,
   QUEST_COINS,
+  QUEST_NUTS,
   questRef,
   tryClaimDailyQuest,
   useDailyQuest,
@@ -83,7 +100,10 @@ export {
   BUILDINGS,
   buildingView,
   findBuilding,
+  levelPrice,
   upgradeBuilding,
+  upgradeRef,
+  walletOf,
   useWorld,
   type BuildingDef,
   type BuildingLevel,

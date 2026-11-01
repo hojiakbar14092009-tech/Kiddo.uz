@@ -341,7 +341,7 @@ export function ChildrenSection({ data }: { data: AdminData }) {
                   Obuna
                 </th>
                 <th scope="col" className="py-2 text-right font-semibold">
-                  Coin
+                  Yong‘oq
                 </th>
                 <th scope="col" className="py-2 pl-6 font-semibold">
                   Oxirgi faollik
@@ -385,7 +385,7 @@ export function ChildrenSection({ data }: { data: AdminData }) {
                         disabled={busy === child.id}
                         onClick={() => run(child, () => data.actions.grantCoins(child, 50))}
                       >
-                        +50 coin
+                        +50 yong‘oq
                       </ActionButton>
                       <ActionButton
                         tone="gold"
@@ -848,7 +848,7 @@ export function SettingsSection({ data }: { data: AdminData }) {
             'PRO sotib olinganda har bir bolaga',
             gift,
             setGift,
-            `coin sovg‘a (ko‘pi bilan ${MAX_PRO_GIFT_COINS})`,
+            `yong‘oq sovg‘a (ko‘pi bilan ${MAX_PRO_GIFT_COINS})`,
             1,
             MAX_PRO_GIFT_COINS,
           )}

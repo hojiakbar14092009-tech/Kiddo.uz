@@ -39,7 +39,7 @@ import {
 
 interface Reward {
   stars: number
-  crystals: number
+  nuts: number
 }
 
 /** One run of a scored activity; "play again" starts a fresh one. */
@@ -142,10 +142,10 @@ function Run({ kind, onAgain }: { kind: ScoredKind; onAgain: () => void }) {
         level,
         ...result,
       })
-      setReward({ stars: gained.stars, crystals: gained.crystals })
+      setReward({ stars: gained.stars, nuts: gained.nuts })
     } catch {
       // the praise stays; the universe keeps its own state
-      setReward({ stars: 0, crystals: 0 })
+      setReward({ stars: 0, nuts: 0 })
     }
   }
 
@@ -173,7 +173,7 @@ function Run({ kind, onAgain }: { kind: ScoredKind; onAgain: () => void }) {
           <p className="font-display text-2xl font-extrabold text-primary sm:text-3xl short:text-xl">
             {doneText}
           </p>
-          <ActivityReward stars={reward?.stars ?? 0} crystals={reward?.crystals ?? 0} />
+          <ActivityReward stars={reward?.stars ?? 0} nuts={reward?.nuts ?? 0} />
           <div className="flex flex-wrap justify-center gap-3">
             <LinkButton to="/feelings" variant="soft" size="md">
               {t('feelings.chooseOther')}

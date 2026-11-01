@@ -1,7 +1,8 @@
 import { subscribeEvidence } from '@/domain/learningMemory'
-import { subscribeRewards } from '@/domain/rewards'
+import { rewardHistory, subscribeRewards, type RewardEntry } from '@/domain/rewards'
 import { subscribeUniverse, useUniverseStore } from '@/domain/universe/store'
 import type { ResourceEntry } from '@/domain/universe/types'
+import { upgradeRef } from '@/domain/universe/world'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { useActivityStore } from '@/store/activityStore'
 import { useFamilyStore } from '@/store/familyStore'
@@ -29,16 +30,39 @@ function learnOperations(childIds: Iterable<string>): SyncOperation[] {
   return operations
 }
 
-/** Resource entries the server may take from a parent's device ('admin' is not theirs). */
+/**
+ * Resource entries the server may take from a parent's device ('admin' is not
+ * theirs). The nut conversion's spends go too: the conversion's nuts are
+ * checked against them (record_reward, 0017).
+ */
 function syncable(entry: ResourceEntry): boolean {
   return entry.reason !== 'admin' && entry.amount !== 0
+}
+
+/** Upgrades this child paid in nuts (Phase 39), by ref `upgrade|<building>|<level>`. */
+function nutUpgrades(childId: string): Map<string, RewardEntry> {
+  const paid = new Map<string, RewardEntry>()
+  for (const entry of rewardHistory(childId)) {
+    if (entry.reason === 'purchase' && entry.refId.startsWith('upgrade|')) {
+      paid.set(entry.refId, entry)
+    }
+  }
+  return paid
+}
+
+/** The nuts a child spent on upgrades: added back to the opening, then replayed. */
+export function upgradeSpend(childId: string): number {
+  let spent = 0
+  for (const entry of nutUpgrades(childId).values()) spent -= entry.coins
+  return spent
 }
 
 /**
  * Everything the universe holds for these children, for the first snapshot of
  * an account: the kept ledger history oldest first (grants before the spends
  * that need them; the server caps each on the day it was earned), then the
- * building levels, which the server checks against those spends.
+ * building levels, which the server checks against those spends (or, since
+ * Phase 39, against the nuts paid for them, sent just before each level).
  */
 function universeOperations(childIds: Iterable<string>): SyncOperation[] {
   const { byChild } = useUniverseStore.getState()
@@ -49,8 +73,12 @@ function universeOperations(childIds: Iterable<string>): SyncOperation[] {
     for (const entry of [...child.ledger.entries].reverse()) {
       if (syncable(entry)) operations.push({ kind: 'recordResource', row: resourceRow(entry) })
     }
+    const paid = nutUpgrades(childId)
     for (const [building, level] of Object.entries(child.buildings)) {
       for (let step = 1; step <= level; step++) {
+        // a level paid in nuts: its payment first (the opening included it)
+        const payment = paid.get(upgradeRef(building, step))
+        if (payment) operations.push({ kind: 'recordReward', row: rewardRow(payment) })
         operations.push({
           kind: 'recordBuildingLevel',
           row: buildingLevelRow(childId, building, step),
@@ -84,7 +112,7 @@ export function trackCloudChanges(
     const { children } = useFamilyStore.getState()
     const ids = children.map((child) => child.id)
     enqueueAll([
-      ...snapshot(children, useProgressStore.getState().byChild),
+      ...snapshot(children, useProgressStore.getState().byChild, upgradeSpend),
       ...learnOperations(ids),
       ...universeOperations(ids),
     ])

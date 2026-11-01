@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { useChildKey } from '@/store/progressStore'
+import { useChildKey, useProgressStore } from '@/store/progressStore'
 import { EMPTY_BALANCES, EMPTY_UNIVERSE_CHILD, useUniverseStore } from '../store'
 import { FIRST_FLIGHT, UNLOCKS, type JourneyDef } from './content'
 import {
@@ -27,6 +27,7 @@ import {
 function useSnapshot(): { childKey: string; progress: WorldProgress; world: WorldSnapshot } {
   const childKey = useChildKey()
   const child = useUniverseStore((s) => s.byChild[childKey] ?? EMPTY_UNIVERSE_CHILD)
+  const nuts = useProgressStore((s) => s.byChild[childKey]?.coins ?? 0)
   // a child opened (app start, child switch): the stored world catches up with
   // what the rules say now, so the city and the pages agree
   useEffect(() => {
@@ -40,9 +41,10 @@ function useSnapshot(): { childKey: string; progress: WorldProgress; world: Worl
         buildings: child.buildings,
         recent: child.recent ?? [],
         balances: { ...EMPTY_BALANCES, ...child.balances },
+        nuts,
       },
     }),
-    [childKey, child],
+    [childKey, child, nuts],
   )
 }
 

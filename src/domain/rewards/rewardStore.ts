@@ -28,6 +28,8 @@ export type RewardReason =
   | 'penalty'
   | 'admin'
   | 'purchase'
+  /** The one-time conversion of crystals, parts and scrolls into nuts (Phase 39; ref `conversion|v1`). */
+  | 'conversion'
 
 export interface RewardEntry {
   id: string

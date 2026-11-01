@@ -1,4 +1,5 @@
 import { levelOf, masteryOf, MOVE_AFTER } from '@/domain/learner/profile'
+import type { RewardEntry, RewardReason } from '@/domain/rewards/rewardStore'
 import type { ChallengeLevel, LearnerStrands } from '@/domain/learner/profile'
 import { ACHIEVEMENTS } from '@/domain/universe/achievements'
 import type { UniverseChild } from '@/domain/universe/store'
@@ -109,8 +110,8 @@ export interface WeekSummary {
   totalMinutes: number
   totalActivities: number
   totalCoins: number
-  /** Resources earned (positive ledger entries) during these seven days. */
-  earned: { star: number; crystal: number; scroll: number }
+  /** Stars and yong‘oq earned from play (positive ledger entries) during these seven days. */
+  earned: { star: number; nut: number }
   /** Days with any minutes or activities. */
   activeDays: number
 }
@@ -129,12 +130,23 @@ export function lastSevenDays(today: Date = new Date()): string[] {
   })
 }
 
+/** Nuts the child earned by playing (not gifts, conversions, purchases or grown-ups' grants). */
+const PLAY_REASONS: ReadonlySet<RewardReason> = new Set<RewardReason>([
+  'task',
+  'daily-bonus',
+  'learn',
+  'quest',
+  'achievement',
+])
+
 export function weekSummary(
   input: {
     minutesByDay: Readonly<Record<string, number>>
     runs: readonly PlayedRun[]
     ledger: readonly ResourceEntry[]
     results?: Pick<ChildProgress, 'results'>['results']
+    /** The coin (nut) ledger: play rewards count, gifts and grown-ups' grants do not. */
+    rewards?: readonly RewardEntry[]
   },
   today: Date = new Date(),
 ): WeekSummary {
@@ -154,14 +166,16 @@ export function weekSummary(
     activities: counts.get(day) ?? 0,
     coins: coins.get(day) ?? 0,
   }))
-  const earned = { star: 0, crystal: 0, scroll: 0 }
+  const earned = { star: 0, nut: 0 }
   for (const entry of input.ledger) {
     // a grown-up's manual grant (admin) is not something the child earned
     if (!(entry.amount > 0) || entry.reason === 'admin' || !validTime(entry.at)) continue
     if (!inWeek.has(dayKey(new Date(entry.at)))) continue
-    if (entry.resource === 'star' || entry.resource === 'crystal' || entry.resource === 'scroll') {
-      earned[entry.resource] += entry.amount
-    }
+    if (entry.resource === 'star') earned.star += entry.amount
+  }
+  for (const entry of input.rewards ?? []) {
+    if (!(entry.coins > 0) || !PLAY_REASONS.has(entry.reason) || !validTime(entry.at)) continue
+    if (inWeek.has(dayKey(new Date(entry.at)))) earned.nut += entry.coins
   }
   return {
     days,

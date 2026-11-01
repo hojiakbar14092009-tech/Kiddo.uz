@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { GUEST_KEY } from '@/domain/childKey'
 import { appendIdempotent, hasKey, type LedgerBook } from '@/domain/ledger'
-import { grantReward, useRewardStore } from '@/domain/rewards/rewardStore'
+import { grantReward, useRewardStore, wasRewarded } from '@/domain/rewards/rewardStore'
 import { useProgressStore } from '@/store/progressStore'
 import { newId } from '@/lib/id'
 import {
@@ -35,6 +35,16 @@ import {
   type RecentRun,
 } from './history'
 import type { WorldProgress } from './progression/engine'
+import {
+  CONVERSION_REASON,
+  CONVERSION_REF,
+  isLegacyResource,
+  LEGACY_RESOURCES,
+  NUT_VALUE,
+  nutReason,
+  nutRef,
+  nutValue,
+} from './nuts'
 import { activityEffects } from './rules'
 import {
   isResourceId,
@@ -182,8 +192,12 @@ function rehydrateKeepingGuest(store: PerChildStore): Promise<void> {
     if (guest === undefined || store.getState().byChild[GUEST_KEY] === guest) return
     store.setState((state) => ({ byChild: { ...state.byChild, [GUEST_KEY]: guest } }))
   }
-  const done = Promise.resolve(store.persist.rehydrate()).then(restore)
   // localStorage is synchronous: the state is already re-read here.
+  const done = Promise.resolve(store.persist.rehydrate()).then(() => {
+    // later, only put the guest back if it went missing: changes made to the
+    // guest in the meantime (a spend right after this call) must not be undone
+    if (guest !== undefined && store.getState().byChild[GUEST_KEY] === undefined) restore()
+  })
   restore()
   return done
 }
@@ -322,6 +336,26 @@ function record(
   reason: string,
   refId: string,
 ): ResourceEntry | null {
+  // Phase 39: crystals, parts and scrolls are no longer paid; the same grant pays nuts
+  // (the reward ledger's coins) once, at the fixed rate
+  if (amount > 0 && isLegacyResource(resource)) {
+    const paid = grantReward({
+      childKey,
+      coins: amount * NUT_VALUE[resource],
+      reason: nutReason(reason),
+      refId: nutRef(resource, reason, refId),
+    })
+    if (!paid) return null
+    // still counted as earned: the "crystal keeper" medal counts three-star firsts
+    update(childKey, (child) => ({
+      ...child,
+      stats: {
+        ...child.stats,
+        earned: { ...child.stats.earned, [resource]: (child.stats.earned[resource] ?? 0) + amount },
+      },
+    }))
+    return { id: paid.id, childKey, resource, amount, reason, refId, at: paid.at }
+  }
   const key = keyOf(resource, reason, refId)
   const current = universeChild(childKey)
   if (hasKey(current.ledger, key)) return null
@@ -448,7 +482,40 @@ export function checkAchievements(childKey: string): string[] {
 // ---------------------------------------------------------------- activities
 
 function zeroAward(): AwardSummary {
-  return { stars: 0, crystals: 0, parts: 0, scrolls: 0, achievements: [], starGain: 0 }
+  return { stars: 0, nuts: 0, achievements: [], starGain: 0 }
+}
+
+/** An award kept before Phase 39 (crystals, parts, scrolls) said in nuts. */
+function normalAward(award: AwardSummary): AwardSummary {
+  if (typeof award.nuts === 'number') return award
+  const old = award as AwardSummary & { crystals?: number; parts?: number; scrolls?: number }
+  const { crystals, parts, scrolls, ...rest } = old
+  return { ...rest, nuts: nutValue({ crystal: crystals, part: parts, scroll: scrolls }) }
+}
+
+/**
+ * The one-time change to a single currency (Phase 39): the crystals, parts
+ * and scrolls a child still holds become nuts at the fixed rate (nuts.ts).
+ * Idempotent: the spend and the grant share the ref `conversion|v1`, and with
+ * nothing left to convert nothing happens. Returns the nuts given now.
+ */
+export function convertToNuts(childKey: string): number {
+  if (!childKey) return 0
+  refreshIfStale(childKey)
+  const balances = universeChild(childKey).balances
+  const cost: Partial<Record<ResourceId, number>> = {}
+  for (const resource of LEGACY_RESOURCES) {
+    const amount = Math.max(0, Math.floor(balances[resource] ?? 0))
+    if (amount > 0) cost[resource] = amount
+  }
+  const nuts = nutValue(cost)
+  if (nuts <= 0) return 0
+  if (!spendResources({ childKey, cost, reason: CONVERSION_REASON, refId: CONVERSION_REF })) {
+    return 0
+  }
+  return grantReward({ childKey, coins: nuts, reason: 'conversion', refId: CONVERSION_REF })
+    ? nuts
+    : 0
 }
 
 /** Local calendar day (YYYY-MM-DD), the same as the daily plan. */
@@ -509,7 +576,9 @@ export function emitActivity(e: ActivityCompleted): AwardSummary {
   const effects = activityEffects(e, {
     previousBest,
     partsToday,
-    partPaidToday: hasKey(before.ledger, keyOf('part', 'number-3star', partRef)),
+    partPaidToday:
+      hasKey(before.ledger, keyOf('part', 'number-3star', partRef)) ||
+      wasRewarded(childKey, nutReason('number-3star'), nutRef('part', 'number-3star', partRef)),
   })
 
   // a repeatable activity counts for achievements and adaptation once a day
@@ -542,21 +611,22 @@ export function emitActivity(e: ActivityCompleted): AwardSummary {
     const entry = record(childKey, 'star', effects.starGain, 'activity', id)
     award.starGain = entry?.amount ?? 0
   }
+  // what used to pay a crystal, a part or a scroll pays nuts (Phase 39)
   if (
     effects.crystals > 0 &&
     record(childKey, 'crystal', effects.crystals, 'three-stars', activity)
   ) {
-    award.crystals = effects.crystals
+    award.nuts += nutValue({ crystal: effects.crystals })
   }
   if (effects.parts > 0 && record(childKey, 'part', effects.parts, 'number-3star', partRef)) {
-    award.parts = effects.parts
+    award.nuts += nutValue({ part: effects.parts })
     update(childKey, (child) => ({
       ...child,
       partsDay: { day, count: (child.partsDay?.day === day ? child.partsDay.count : 0) + 1 },
     }))
   }
   if (effects.scrolls > 0 && record(childKey, 'scroll', effects.scrolls, 'tale', activity)) {
-    award.scrolls = effects.scrolls
+    award.nuts += nutValue({ scroll: effects.scrolls })
   }
   award.achievements = checkAchievements(childKey)
 
@@ -594,7 +664,8 @@ export function placeStrand(childKey: string, strand: Strand, placement: Placeme
 
 /** What a run earned when it was counted (null: unknown or too old). */
 export function getAward(activityId: string, childKey: string): AwardSummary | null {
-  return universeChild(childKey).awards.find((item) => item.id === activityId)?.award ?? null
+  const award = universeChild(childKey).awards.find((item) => item.id === activityId)?.award
+  return award ? normalAward(award) : null
 }
 
 // ---------------------------------------------------------------- world & quests (low level)

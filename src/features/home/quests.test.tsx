@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { GUEST_KEY } from '@/domain/childKey'
 import { recordEvidence, useLearningMemoryStore } from '@/domain/learningMemory'
 import { useRewardStore } from '@/domain/rewards'
-import { emitActivity, spendResources, useUniverseStore } from '@/domain/universe'
+import { emitActivity, upgradeBuilding, useUniverseStore } from '@/domain/universe'
 import { installProgression } from '@/domain/universe/progression'
 import { useFamilyStore } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
@@ -70,15 +70,13 @@ describe('Next adventure on the home screen', () => {
         at: new Date().toISOString(),
       })
     })
-    // the crystal went to another building: the rocket now needs one more
-    spendResources({
-      childKey: GUEST_KEY,
-      cost: { crystal: 1 },
-      reason: 'upgrade',
-      refId: 'upgrade|garden|1',
+    // the run paid 15 nuts, the rocket's price; 10 went to the garden, so 10 more are needed
+    expect(useProgressStore.getState().byChild[GUEST_KEY]?.coins).toBe(15)
+    act(() => {
+      expect(upgradeBuilding(GUEST_KEY, 'garden')).toBe('ok')
     })
     await renderRoute('/home')
     const needs = screen.getByTestId('quest-needs')
-    expect(needs).toHaveTextContent('Yana 1 ta kristall kerak')
+    expect(needs).toHaveTextContent('Yana 10 ta yong‘oq kerak')
   })
 })

@@ -6,6 +6,7 @@ import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { ageBand, isYoungBand } from '@/domain/adaptive'
+import { isLegacyResource, nutValue } from '@/domain/universe/nuts'
 import { useMainQuest } from '@/domain/universe/progression'
 import { childAge, useActiveChild } from '@/store/familyStore'
 import { onIdle } from '@/lib/onIdle'
@@ -27,6 +28,11 @@ export function JourneyCard() {
   const young = isYoungBand(ageBand(child ? childAge(child) : null))
   const current = journey.steps.find((step) => step.status === 'current')
   const needs = main?.needs ?? []
+  // a crystal reward is paid in nuts since Phase 39
+  const { resource, amount } = journey.reward
+  const reward = isLegacyResource(resource)
+    ? { resource: 'nut' as const, amount: nutValue({ [resource]: amount }) }
+    : { resource, amount }
   const nextRoute = main?.route
   // the next place's guide is fetched quietly once the page is idle
   useEffect(() => (nextRoute ? onIdle(() => prefetchMascotFor(nextRoute)) : undefined), [nextRoute])
@@ -46,9 +52,9 @@ export function JourneyCard() {
           {journey.complete ? t('voyage.done') : t('voyage.intro')}
         </p>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-lg font-extrabold">
-          <span className="flex min-h-10 items-center gap-1.5 rounded-full bg-lilac-soft px-3 py-1">
-            <ResourceIcon resource={journey.reward.resource} size={26} />
-            {t('voyage.reward', { count: journey.reward.amount })}
+          <span className="flex min-h-10 items-center gap-1.5 rounded-full bg-coin-soft px-3 py-1">
+            <ResourceIcon resource={reward.resource} size={26} />
+            {t('voyage.reward', { count: reward.amount })}
           </span>
           <span className="text-ink-soft tabular-nums">
             {t('voyage.progress', { done: journey.done, total: journey.steps.length })}

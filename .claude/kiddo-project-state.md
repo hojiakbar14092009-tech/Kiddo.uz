@@ -686,3 +686,16 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Verification: format/lint/typecheck PASS, unit 1382/1382, build PASS, browser 41/41 then 29/30 (phone "works
   offline" failed once under load; isolated --repeat-each=3: 6/6 — service-worker precache race, not this change);
   Critic REJECT ("Mevazor" wrong for vegetables, leftover "Bog‘ darsi") → fixed → accept after the test fix. Next: 39.
+
+## Phase 39 — COMPLETE (2026-11-01) – docs/architecture/nuts.md
+
+- One child currency: yong‘oq (nuts) = the reward ledger's coins (uz yong‘oq, ru орешки, en nuts, hazelnut icon).
+  Crystal/part/scroll grants pay nuts at 10/5/5 in `record()` (refs `<resource>|<reason>|<ref>`); buildings cost
+  nuts (10/20/30, workshops 15/30/45) via spendCoins ref `upgrade|b|l`; held resources convert once
+  (`convertToNuts`, `NutConversion` in AppShell, ref `conversion|v1`, quiet). Stars stay a measure.
+- Migration 0017_nuts.sql (owner applies): conversion reasons, nut prices (`building_nut_price`), nut-paid levels,
+  Mars seed after a nut-paid rocket, `record_reward(p_at)` capping per earned day (≤7 days back, `earned_at`
+  column), opening cap 20000. Snapshot replays nut-paid level payments with the opening compensated.
+- Verification: format/lint/typecheck PASS, unit 1389/1389, build PASS, SQL 382 assertions PASS, browser 45/48
+  (kiddo coin total updated; phone offline flake) then 28/28; Critic ACCEPT, Mediums fixed (offline day caps,
+  opening cap, ru/en number-safe texts) + quiet conversion sounds. Next: Phase 40 (4-tab structure).

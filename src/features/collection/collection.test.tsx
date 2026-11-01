@@ -1,5 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { rewardHistory, useRewardStore } from '@/domain/rewards'
 import { emitActivity, grantResource, useUniverseStore } from '@/domain/universe'
 import { EMPTY_UNIVERSE_CHILD } from '@/domain/universe/store'
 import { useFamilyStore } from '@/store/familyStore'
@@ -12,6 +13,7 @@ beforeEach(() => {
   useFamilyStore.setState({ children: [], activeChildId: null })
   useProgressStore.setState({ byChild: {} })
   useUniverseStore.setState({ byChild: {} })
+  useRewardStore.setState({ byChild: {} })
 })
 
 describe('Collection', () => {
@@ -23,9 +25,15 @@ describe('Collection', () => {
       'href',
       '/home',
     )
-    expect(screen.getByTestId('treasure-crystal')).toHaveTextContent(
-      'Shahardagi binolarni kattalashtirish uchun.',
+    // two treasures only: stars (a measure) and yong‘oq (the one currency)
+    expect(screen.getAllByTestId(/^treasure-/).map((item) => item.dataset.testid)).toEqual([
+      'treasure-star',
+      'treasure-nut',
+    ])
+    expect(screen.getByTestId('treasure-nut')).toHaveTextContent(
+      'Do‘konda kiyim va uy hayvonlari olish, shahardagi binolarni kattalashtirish uchun.',
     )
+    expect(screen.queryByTestId('treasure-crystal')).not.toBeInTheDocument()
     expect(screen.getByTestId('medal-first-steps')).toHaveTextContent('Hali medal yo‘q')
     expect(screen.getByTestId('medal-first-steps')).toHaveTextContent('Keyingi medalgacha: 0 / 3')
     expect(screen.getByRole('heading', { name: /Mening stikerlarim/ })).toBeInTheDocument()
@@ -48,8 +56,14 @@ describe('Collection', () => {
 
     expect(screen.queryByTestId('collection-empty')).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Yulduzlar: 9' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Kristallar: 3' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Detallar: 2' })).toBeInTheDocument()
+    // three first 3-star runs (10 nuts each), 2 parts given (5 each) and the medals' coins
+    const medalCoins = rewardHistory(GUEST_KEY)
+      .filter((entry) => entry.reason === 'achievement')
+      .reduce((sum, entry) => sum + entry.coins, 0)
+    const nuts = 3 * 10 + 2 * 5 + medalCoins
+    expect(useProgressStore.getState().byChild[GUEST_KEY]?.coins).toBe(nuts)
+    expect(screen.getByRole('heading', { name: `Yong‘oqlar: ${nuts}` })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /Kristallar|Detallar/ })).not.toBeInTheDocument()
 
     const firstSteps = screen.getByTestId('medal-first-steps')
     expect(firstSteps).toHaveTextContent('Bronza')

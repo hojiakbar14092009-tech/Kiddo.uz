@@ -5,9 +5,9 @@ import { passLessonIfShown, passMathExample } from './lesson.ts'
  * The connected universe's signature flow, played as a child plays it, in
  * one visit (a guest's world lives as long as the page, so every move is an
  * in-app link or button, never a reload):
- * Math Lab (3 stars: crystal + part) → Spaceport (rocket) → Mars (rare seed)
+ * Math Lab (3 stars: yong‘oq) → Spaceport (rocket) → Mars (rare seed)
  * → Practice Garden (plant) → science runs (the dinosaur quiz) → bloom →
- * Science Lab (experiment) → the journey's promised crystals.
+ * Science Lab (experiment) → the journey's promised nuts.
  */
 
 async function seedRandom(page: Page, seed: number) {
@@ -79,7 +79,7 @@ test('the first journey links maths, space, the garden, biology and the lab', as
 
   const card = page.getByTestId('journey-card')
   await expect(card).toHaveAttribute('data-done', '0')
-  await expect(card).toContainText('Oxirida kristall: +2')
+  await expect(card).toContainText('Oxirida yong‘oq: +20')
   // the science lab waits for the Mars flower
   await expect(page.getByTestId('building-/science-lab')).toContainText('Mars guli ochilganda')
 
@@ -93,12 +93,12 @@ test('the first journey links maths, space, the garden, biology and the lab', as
     await answerMathRight(page)
   }
   await expect(page.getByTestId('lab-result')).toBeVisible({ timeout: 5_000 })
-  await expect(page.getByTestId('activity-reward')).toContainText('kristall')
+  await expect(page.getByTestId('activity-reward')).toContainText('yong‘oq')
   await back(page)
   await expect(page).toHaveURL(/\/home$/)
   await expect(card).toHaveAttribute('data-done', '1')
 
-  // 2. the rocket, built with the crystal and the part
+  // 2. the rocket, built with the nuts maths earned
   await card.getByTestId('journey-go').click()
   await expect(page).toHaveURL(/\/spaceport$/)
   await page.getByTestId('build-rocket').click()

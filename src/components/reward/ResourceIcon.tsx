@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
-import type { ResourceId } from '@/domain/universe'
+import { NutShape } from '@/components/icons'
+import type { WalletId } from '@/domain/universe'
 
 /*
  * One picture per universe resource, drawn like the coin (solid, two tones),
- * so a star, a crystal, a part and a scroll are told apart at a glance even
+ * so a star, a nut, a crystal, a part and a scroll are told apart at a glance even
  * when small. Decorative: the amount is always said in text beside it.
  */
 
@@ -12,7 +13,7 @@ export function ResourceIcon({
   size = 28,
   className,
 }: {
-  resource: ResourceId
+  resource: WalletId
   size?: number
   className?: string
 }) {
@@ -31,7 +32,9 @@ export function ResourceIcon({
   )
 }
 
-const SHAPES: Record<ResourceId, ReactNode> = {
+const SHAPES: Record<WalletId, ReactNode> = {
+  // yong‘oq: the hazelnut of the coin counter
+  nut: <NutShape />,
   star: (
     <path
       d="M14 2.5l3.4 6.9 7.6 1.1-5.5 5.4 1.3 7.6L14 19.9l-6.8 3.6 1.3-7.6L3 10.5l7.6-1.1z"

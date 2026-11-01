@@ -1,11 +1,10 @@
 import { act, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useRewardStore } from '@/domain/rewards'
+import { grantReward, rewardHistory, useRewardStore } from '@/domain/rewards'
 import { useLearningMemoryStore } from '@/domain/learningMemory'
 import {
   emitActivity,
   getResources,
-  grantResource,
   useUniverseStore,
   type ActivityCompleted,
 } from '@/domain/universe'
@@ -52,7 +51,8 @@ describe('the journey card on the home screen', () => {
   it('announces the reward and sends the child to the current step', async () => {
     await renderRoute('/home')
     const card = screen.getByTestId('journey-card')
-    expect(within(card).getByText('Oxirida kristall: +2')).toBeInTheDocument()
+    // the journey's 2 crystals are paid in nuts: 20
+    expect(within(card).getByText('Oxirida yong‘oq: +20')).toBeInTheDocument()
     expect(within(card).getByText('0 / 6 qadam')).toBeInTheDocument()
     expect(within(card).getByTestId('journey-go')).toHaveAttribute('href', '/math-lab')
     act(() => void emitActivity(run({})))
@@ -75,8 +75,11 @@ describe('Spaceport and Mars', () => {
     expect(screen.getByTestId('rocket-level')).toHaveTextContent('Raketa hali qurilmagan')
     expect(screen.queryByTestId('build-rocket')).not.toBeInTheDocument()
     act(() => void emitActivity(run({})))
+    // the run paid 15 nuts: just the rocket's price
+    expect(useProgressStore.getState().byChild[GUEST_KEY]?.coins).toBe(15)
     fireEvent.click(screen.getByTestId('build-rocket'))
     expect(screen.getByTestId('rocket-level')).toHaveTextContent('Raketa: 1-daraja')
+    expect(useProgressStore.getState().byChild[GUEST_KEY]?.coins).toBe(0)
     expect(screen.getByTestId('fly-mars')).toHaveAttribute('href', '/spaceport/mars')
   })
 
@@ -86,10 +89,9 @@ describe('Spaceport and Mars', () => {
   })
 
   it('every rock can be turned; the last one holds the seed', async () => {
-    grantResource({ childKey: GUEST_KEY, resource: 'crystal', amount: 1, reason: 't', refId: 'c' })
-    grantResource({ childKey: GUEST_KEY, resource: 'part', amount: 1, reason: 't', refId: 'p' })
+    grantReward({ childKey: GUEST_KEY, coins: 15, reason: 'admin', refId: 'rocket' })
     const { upgradeBuilding } = await import('@/domain/universe')
-    upgradeBuilding(GUEST_KEY, 'spaceport')
+    expect(upgradeBuilding(GUEST_KEY, 'spaceport')).toBe('ok')
     await renderRoute('/spaceport/mars')
     fireEvent.click(screen.getByTestId('mars-rock-2'))
     expect(screen.getByText('Bu yerda faqat qizil chang.')).toBeInTheDocument()
@@ -106,7 +108,7 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     const universe = await import('@/domain/universe')
     const progression = await import('@/domain/universe/progression')
     universe.emitActivity(run({}))
-    universe.upgradeBuilding(GUEST_KEY, 'spaceport')
+    expect(universe.upgradeBuilding(GUEST_KEY, 'spaceport')).toBe('ok')
     progression.discoverArtifact(GUEST_KEY, 'mars-seed')
     await renderRoute('/mistake-garden')
     expect(screen.getByTestId('garden-empty')).toBeInTheDocument()
@@ -163,7 +165,7 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     const universe = await import('@/domain/universe')
     const progression = await import('@/domain/universe/progression')
     universe.emitActivity(run({}))
-    universe.upgradeBuilding(GUEST_KEY, 'spaceport')
+    expect(universe.upgradeBuilding(GUEST_KEY, 'spaceport')).toBe('ok')
     progression.discoverArtifact(GUEST_KEY, 'mars-seed')
     progression.plantSeed(GUEST_KEY, 'mars')
     for (const activity of ['garden:1', 'garden:2', 'dino:quiz']) {
@@ -184,9 +186,16 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     }
     expect(screen.getByTestId('lab-finished')).toBeInTheDocument()
     expect(progressOf(GUEST_KEY).completed['first-flight']).toBeDefined()
-    const journey = universe
-      .resourceHistory(GUEST_KEY)
-      .filter((entry) => entry.reason === 'journey')
-    expect(journey).toHaveLength(1)
+    // the journey's reward: 2 crystals' worth in nuts, once
+    const journey = rewardHistory(GUEST_KEY).filter((entry) =>
+      entry.refId.startsWith('crystal|journey|'),
+    )
+    expect(journey).toEqual([
+      expect.objectContaining({
+        reason: 'quest',
+        refId: 'crystal|journey|journey|first-flight',
+        coins: 20,
+      }),
+    ])
   })
 })

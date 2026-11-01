@@ -34,7 +34,7 @@ function AnswerArt({ picture }: { picture: AnswerPicture }) {
 interface Finished {
   correct: number
   total: number
-  award: Pick<AwardSummary, 'stars' | 'crystals' | 'scrolls'>
+  award: Pick<AwardSummary, 'stars' | 'nuts'>
 }
 
 /**
@@ -91,7 +91,7 @@ export function StoryQuestions({
     (correct: number) => {
       if (emitted.current) return
       emitted.current = true
-      let award: Finished['award'] = { stars: 0, crystals: 0, scrolls: 0 }
+      let award: Finished['award'] = { stars: 0, nuts: 0 }
       try {
         award = emitActivity(
           storyActivity(runId, childKey, story.id, level, {
@@ -182,7 +182,7 @@ export function StoryQuestions({
   )
 }
 
-/** The gentle end: praise, what the universe gave (stars, crystals, the story's scroll), read again. */
+/** The gentle end: praise, what the universe gave (stars and yong‘oq), read again. */
 function StoryResult({
   title,
   ui,
@@ -218,11 +218,7 @@ function StoryResult({
             {score}
           </p>
         </div>
-        <ActivityReward
-          stars={finished.award.stars}
-          crystals={finished.award.crystals}
-          scrolls={finished.award.scrolls}
-        />
+        <ActivityReward stars={finished.award.stars} nuts={finished.award.nuts} />
         <div className="flex flex-wrap justify-center gap-3 short:col-span-2">
           <Button variant="coin" size="md" onClick={onAgain} data-testid="story-again">
             {ui.readAgain}

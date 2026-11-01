@@ -7,7 +7,7 @@ import { ResourceIcon } from '@/components/reward/ResourceIcon'
 import { RESOURCE_TINT, SHOWN_RESOURCES, type ShownResource } from '@/components/reward/resources'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { LinkButton } from '@/components/ui/LinkButton'
-import { useAchievements, useResources, useUniverseStickers } from '@/domain/universe'
+import { useAchievements, useWallet, useUniverseStickers } from '@/domain/universe'
 import { StickerAlbum } from '@/features/shop/StickerAlbum'
 import { useProgress } from '@/store/progressStore'
 import { AchievementCard } from './AchievementCard'
@@ -22,7 +22,7 @@ const SECTION_TITLE = 'font-display text-2xl font-extrabold sm:text-3xl'
  */
 export function CollectionPage() {
   const { t } = useTranslation()
-  const balances = useResources()
+  const balances = useWallet()
   const achievements = useAchievements()
   const universeStickers = useUniverseStickers()
   const { stickers } = useProgress()

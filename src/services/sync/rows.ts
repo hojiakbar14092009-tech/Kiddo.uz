@@ -73,13 +73,15 @@ export function eventRow(event: ActivityEvent) {
   return { id: event.id, child_id: event.childId, kind: event.kind, at: event.at }
 }
 
-/** Arguments of the `record_reward` RPC (0005); the server checks and caps them. */
+/** Arguments of the `record_reward` RPC (0005, 0017); the server checks and caps them. */
 export function rewardRow(entry: RewardEntry) {
   return {
     p_child: entry.childKey,
     p_coins: entry.coins,
     p_reason: entry.reason,
     p_ref: entry.refId,
+    // the day it was earned: an offline week is capped per day, not on the day it syncs (0017)
+    p_at: entry.at,
   }
 }
 

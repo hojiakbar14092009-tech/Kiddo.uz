@@ -98,11 +98,11 @@ test('a photo and the birthday present: 50 coins and one pet, once', async ({ pa
   await page.getByTestId('birthday-pet-bunny').click()
   await page.getByTestId('birthday-claim').click()
   await expect(party).toHaveCount(0)
-  await expect(page.getByRole('status', { name: /Coinlar: 50/ })).toBeVisible()
+  await expect(page.getByRole('status', { name: /Yong‘oqlar: 50/ })).toBeVisible()
 
   // a reload: no second party, still 50 coins
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Salom, Lola!' })).toBeVisible()
   await expect(page.getByTestId('birthday-celebration')).toHaveCount(0)
-  await expect(page.getByRole('status', { name: /Coinlar: 50/ })).toBeVisible()
+  await expect(page.getByRole('status', { name: /Yong‘oqlar: 50/ })).toBeVisible()
 })

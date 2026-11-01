@@ -1,5 +1,6 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { rewardHistory, useRewardStore } from '@/domain/rewards'
 import { emitActivity, getResources, useUniverseStore } from '@/domain/universe'
 import { birthDateForAge } from '@/features/age/ageLevel'
 import { audioManager } from '@/services/audio/audioManager'
@@ -53,6 +54,7 @@ beforeEach(() => {
   useFamilyStore.setState({ children: [], activeChildId: null })
   useProgressStore.setState({ byChild: {} })
   useUniverseStore.setState({ byChild: {} })
+  useRewardStore.setState({ byChild: {} })
   useSubscriptionStore.getState().cancel()
   vi.mocked(emitActivity).mockClear()
 })
@@ -160,7 +162,8 @@ describe('reading a free story', () => {
     expect(['who', 'what']).toContain(first.dataset.kind)
     const result = await answerAll(user)
     expect(within(result).getByTestId('story-score')).toHaveTextContent(UI.score(3, 3))
-    expect(within(result).getByTestId('activity-reward')).toHaveTextContent('Scrolls: +1')
+    // the story's scroll (5) and the first 3 stars' crystal (10), in nuts
+    expect(within(result).getByTestId('activity-reward')).toHaveTextContent('Nuts: +15')
 
     expect(emitActivity).toHaveBeenCalledTimes(1)
     expect(vi.mocked(emitActivity).mock.calls[0]![0]).toMatchObject({
@@ -172,7 +175,16 @@ describe('reading a free story', () => {
       independent: 3,
       level: 2,
     })
-    expect(getResources(GUEST_KEY).scroll).toBe(1)
+    expect(getResources(GUEST_KEY).scroll).toBe(0)
+    expect(
+      rewardHistory(GUEST_KEY)
+        .map((entry) => [entry.reason, entry.refId, entry.coins])
+        .filter(([reason]) => reason === 'learn')
+        .sort(),
+    ).toEqual([
+      ['learn', 'crystal|three-stars|story:lost-lamb', 10],
+      ['learn', 'scroll|tale|story:lost-lamb', 5],
+    ])
 
     // reading it again: no second scroll
     await user.click(screen.getByTestId('story-again'))

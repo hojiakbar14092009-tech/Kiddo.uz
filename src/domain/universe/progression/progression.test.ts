@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { useRewardStore } from '@/domain/rewards'
+import { grantReward, rewardHistory, useRewardStore } from '@/domain/rewards'
 import { recordEvidence, useLearningMemoryStore, type SkillMemory } from '@/domain/learningMemory'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { useFamilyStore } from '@/store/familyStore'
@@ -270,6 +270,7 @@ describe('the server knows the same world (0011)', () => {
 // ---------------------------------------------------------------- integration
 
 const KID = 'kid-journey'
+const coinsOf = () => useProgressStore.getState().byChild[KID]?.coins ?? 0
 let counter = 0
 function activity(over: Partial<ActivityCompleted>): ActivityCompleted {
   counter += 1
@@ -313,14 +314,20 @@ describe('the first journey across worlds (store + rules)', () => {
   const types = () => seen.map((event) => event.type)
 
   it('maths → crystal → rocket → Mars → seed → garden → biology → bloom → lab → reward', () => {
-    // 1. a maths challenge with three stars pays a crystal and a part
+    // 1. a maths challenge with three stars pays what a crystal and a part were worth
     const award = emitActivity(activity({}))
-    expect(award.crystals).toBe(1)
-    expect(award.parts).toBe(1)
+    expect(award.nuts).toBe(15)
     expect(progressOf(KID).steps['first-flight|math']).toBeDefined()
 
-    // 2. they build the rocket's first level
+    // 2. they build the rocket's first level: those 15 nuts are its price
+    const nutsBefore = coinsOf()
     expect(upgradeBuilding(KID, 'spaceport')).toBe('ok')
+    expect(nutsBefore - coinsOf()).toBe(15)
+    expect(rewardHistory(KID)[0]).toMatchObject({
+      reason: 'purchase',
+      refId: 'upgrade|spaceport|1',
+      coins: -15,
+    })
     expect(getResources(KID)).toMatchObject({ crystal: 0, part: 0 })
     expect(progressOf(KID).unlocked.mars).toBeDefined()
     expect(types()).toContain('world.unlocked')
@@ -351,23 +358,27 @@ describe('the first journey across worlds (store + rules)', () => {
     expect(progressOf(KID).unlocked['science-lab']).toBeDefined()
 
     // 7. its first experiment finishes the journey: the promised reward, once
-    const before = getResources(KID).crystal
+    const paidBefore = rewardHistory(KID).length
     emitActivity(activity({ activity: 'science-lab:plants', strand: 'science' }))
     expect(progressOf(KID).completed['first-flight']).toBeDefined()
-    const crystalsAfter = getResources(KID).crystal
-    // 1 crystal for the lab's first three stars + 2 for the journey
-    expect(crystalsAfter - before).toBe(3)
+    // in nuts: 10 for the lab's first three stars (a crystal) + 20 for the journey (2 crystals)
+    const newRows = () =>
+      rewardHistory(KID)
+        .slice(0, rewardHistory(KID).length - paidBefore)
+        .filter((entry) => entry.reason !== 'achievement')
+        .map((entry) => [entry.reason, entry.refId, entry.coins])
+        .sort()
+    expect(newRows()).toEqual([
+      ['learn', 'crystal|three-stars|science-lab:plants', 10],
+      ['quest', 'crystal|journey|journey|first-flight', 20],
+    ])
+    expect(getResources(KID).crystal).toBe(0)
     expect(types()).toContain('quest.completed')
     syncProgression(KID)
     emitActivity(activity({ activity: 'science-lab:plants', strand: 'science' }))
-    expect(getResources(KID).crystal).toBe(crystalsAfter)
-    const journeyRows = resourceHistory(KID).filter((entry) => entry.reason === 'journey')
-    expect(journeyRows).toHaveLength(1)
-    expect(journeyRows[0]).toMatchObject({
-      resource: 'crystal',
-      amount: 2,
-      refId: 'journey|first-flight',
-    })
+    // the journey pays once
+    expect(newRows()).toHaveLength(2)
+    expect(resourceHistory(KID).filter((entry) => entry.reason === 'journey')).toHaveLength(0)
 
     // the events tell the story in order
     const story = types().filter((type) =>
@@ -400,8 +411,7 @@ describe('the first journey across worlds (store + rules)', () => {
   })
 
   it('a second tab that already paid the find still records it, without paying again', () => {
-    grantResource({ childKey: KID, resource: 'crystal', amount: 1, reason: 'admin', refId: 'c' })
-    grantResource({ childKey: KID, resource: 'part', amount: 1, reason: 'admin', refId: 'p' })
+    grantReward({ childKey: KID, coins: 15, reason: 'admin', refId: 'rocket' })
     expect(upgradeBuilding(KID, 'spaceport')).toBe('ok')
     // the other tab's ledger row, without its progress
     grantResource({
@@ -416,8 +426,7 @@ describe('the first journey across worlds (store + rules)', () => {
   })
 
   it('a bed paid for before (progress lost) is recorded as planted, without paying again', () => {
-    grantResource({ childKey: KID, resource: 'crystal', amount: 1, reason: 'admin', refId: 'c' })
-    grantResource({ childKey: KID, resource: 'part', amount: 1, reason: 'admin', refId: 'p' })
+    grantReward({ childKey: KID, coins: 15, reason: 'admin', refId: 'rocket' })
     expect(upgradeBuilding(KID, 'spaceport')).toBe('ok')
     expect(discoverArtifact(KID, 'mars-seed')).toBe('ok')
     expect(plantSeed(KID, 'mars')).toBe('ok')

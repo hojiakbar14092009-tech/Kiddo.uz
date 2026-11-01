@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { RewardEntry, RewardReason } from '@/domain/rewards'
 import type { ResourceEntry } from '@/domain/universe/types'
 import type { LearnChild, SessionRecord } from '@/features/learn/learnStore'
 import { dayKey } from '@/features/tasks/rules'
@@ -132,6 +133,16 @@ describe('weekSummary', () => {
       at: localIso(daysAgo),
     }) as ResourceEntry
 
+  const reward = (coins: number, daysAgo: number, reason: RewardReason) =>
+    ({
+      id: `${reason}${coins}${daysAgo}`,
+      childKey: 'kid',
+      coins,
+      reason,
+      refId: `${reason}|${coins}|${daysAgo}`,
+      at: localIso(daysAgo),
+    }) as RewardEntry
+
   it('has seven days, oldest first, today last', () => {
     const days = lastSevenDays(TODAY)
     expect(days).toHaveLength(7)
@@ -154,6 +165,21 @@ describe('weekSummary', () => {
           entry('part', 1, 0), // not shown
           entry('star', 50, 0, 'admin'), // a grown-up's grant is not earned
         ],
+        rewards: [
+          reward(10, 1, 'learn'), // first 3 stars (a crystal's worth)
+          reward(5, 2, 'learn'), // a story's scroll
+          reward(5, 0, 'task'),
+          reward(2, 0, 'daily-bonus'),
+          reward(15, 3, 'quest'),
+          reward(25, 4, 'achievement'),
+          reward(7, 8, 'learn'), // last week
+          reward(-10, 0, 'purchase'), // spending never lowers what was earned
+          reward(-3, 0, 'penalty'),
+          reward(50, 0, 'admin'), // gifts, grants and the conversion are not earned by playing
+          reward(50, 0, 'pro-gift'),
+          reward(50, 0, 'birthday'),
+          reward(40, 0, 'conversion'),
+        ],
         results: [result('t1', localIso(0)), result('t2', localIso(3)), result('t3', localIso(10))],
       },
       TODAY,
@@ -162,7 +188,7 @@ describe('weekSummary', () => {
     expect(week.days.map((day) => day.activities)).toEqual([0, 0, 0, 1, 0, 0, 2])
     expect(week.totalMinutes).toBe(20)
     expect(week.totalActivities).toBe(3)
-    expect(week.earned).toEqual({ star: 5, crystal: 1, scroll: 1 })
+    expect(week.earned).toEqual({ star: 5, nut: 10 + 5 + 5 + 2 + 15 + 25 })
     expect(week.activeDays).toBe(2)
     // coins as the Today panel counts them (finished letter games and tests)
     expect(week.days.map((day) => day.coins)).toEqual([0, 0, 0, 5, 0, 0, 5])

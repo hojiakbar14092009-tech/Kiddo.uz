@@ -6,7 +6,7 @@ import {
   stickersForTier,
   stickerTitleKey,
   type AwardSummary,
-  type ResourceId,
+  type WalletId,
 } from '@/domain/universe'
 import { medalTierLabelKey } from '@/features/collection/medalLabels'
 import { StickerArt } from '@/features/collection/StickerArt'
@@ -15,13 +15,13 @@ import { ResourceIcon } from './ResourceIcon'
 import { RESOURCE_TINT } from './resources'
 
 interface Line {
-  resource: ResourceId
+  resource: WalletId
   count: number
   text: string
 }
 
 /**
- * The universe part of a result screen: "+2 stars · +1 crystal · +1 part",
+ * The universe part of a result screen: "+2 stars, +10 nuts",
  * each with its picture, in one short burst, and one calm line per medal
  * reached (no pop-ups). Nothing at all when the run brought nothing new.
  */
@@ -33,15 +33,9 @@ export function AwardLines({ award }: { award: AwardSummary | null }) {
     [
       { resource: 'star', count: stars, text: t('award.stars', { count: stars }) },
       {
-        resource: 'crystal',
-        count: award.crystals,
-        text: t('award.crystals', { count: award.crystals }),
-      },
-      { resource: 'part', count: award.parts, text: t('award.parts', { count: award.parts }) },
-      {
-        resource: 'scroll',
-        count: award.scrolls,
-        text: t('award.scrolls', { count: award.scrolls }),
+        resource: 'nut',
+        count: award.nuts ?? 0,
+        text: t('award.nuts', { count: award.nuts ?? 0 }),
       },
     ] satisfies Line[]
   ).filter((line) => line.count > 0)

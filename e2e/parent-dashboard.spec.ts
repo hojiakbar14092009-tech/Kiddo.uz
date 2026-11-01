@@ -95,27 +95,9 @@ async function seedPlay(page: Page) {
         refId: 'story-1',
         at: iso(10),
       },
-      {
-        id: 'e2',
-        childKey: id,
-        resource: 'crystal',
-        amount: 1,
-        reason: 'three-stars',
-        refId: 'story:lost-lamb',
-        at: iso(10),
-      },
-      {
-        id: 'e3',
-        childKey: id,
-        resource: 'scroll',
-        amount: 1,
-        reason: 'tale',
-        refId: 'story:lost-lamb',
-        at: iso(10),
-      },
     ]
     const universe = {
-      balances: { star: 3, crystal: 1, seed: 0, part: 0, scroll: 1, key: 0 },
+      balances: { star: 3, crystal: 0, seed: 0, part: 0, scroll: 0, key: 0 },
       ledger: {
         entries: [...entries].reverse(),
         keys: entries.map((e) => `${e.resource}|${e.reason}|${e.refId}`).reverse(),
@@ -145,6 +127,25 @@ async function seedPlay(page: Page) {
         { skill: 'sub:within5', strand: 'number', at: iso(30), activityId: 'lab-1' },
       ],
     }
+    // the story's first three stars and its scroll, paid in yong‘oq (Phase 39)
+    const nuts = [
+      { coins: 10, reason: 'learn', refId: 'crystal|three-stars|story:lost-lamb' },
+      { coins: 5, reason: 'learn', refId: 'scroll|tale|story:lost-lamb' },
+    ].map((entry, index) => ({ id: `r${index}`, childKey: id, at: iso(10), ...entry }))
+    localStorage.setItem(
+      'kiddo.rewards',
+      JSON.stringify({
+        state: {
+          byChild: {
+            [id]: {
+              entries: [...nuts].reverse(),
+              keys: nuts.map((e) => `${e.reason}|${e.refId}`).reverse(),
+            },
+          },
+        },
+        version: 1,
+      }),
+    )
     localStorage.setItem(
       'kiddo.universe',
       JSON.stringify({ state: { byChild: { [id]: universe } }, version: 1 }),
@@ -201,7 +202,7 @@ test('the parent dashboard shows a child’s week, skills, ideas and exports the
   })
   await expect(week.getByText('Jami vaqt: 18 daq')).toBeVisible()
   await expect(week.getByText('Mashg‘ulotlar: 4')).toBeVisible()
-  await expect(week.getByText('Kristallar: 1')).toBeVisible()
+  await expect(week.getByText('O‘yinda topilgan yong‘oqlar: 15')).toBeVisible()
   await expect(week.getByRole('img', { name: /daqiqalar, jami 18/ })).toBeVisible()
   await week.getByText('Raqamlarni jadval ko‘rinishida ko‘rsatish').click()
   await expect(week.getByTestId('week-table').getByRole('row').last()).toContainText('18')

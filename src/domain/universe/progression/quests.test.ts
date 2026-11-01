@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import routesSource from '@/app/routes.tsx?raw'
 import { gardenPlants } from '@/domain/garden/garden'
+import { rewardHistory, useRewardStore } from '@/domain/rewards'
 import { applyEvidence, type Evidence, type SkillMemory } from '@/domain/learningMemory/memory'
 import { en } from '@/i18n/locales/en'
 import { ru } from '@/i18n/locales/ru'
@@ -9,6 +10,7 @@ import type { RecentRun } from '../history'
 import { clearUniverseChild, emitActivity, emitUniverse, getResources } from '../store'
 import type { ActivityCompleted } from '../types'
 import { RESOURCE_IDS } from '../types'
+import { useProgressStore } from '@/store/progressStore'
 import { FIRST_FLIGHT, JOURNEYS, UNLOCKS, type JourneyDef } from './content'
 import { EMPTY_PROGRESS, journeyView, type WorldSnapshot } from './engine'
 import { conditionNeeds, practiceQuests, smartQuests, worldState } from './quests'
@@ -99,17 +101,18 @@ describe('Smart Quest (deterministic, stable, explainable)', () => {
   })
 
   it('the rocket step says what is still missing, instead of "locked"', () => {
-    const w = world({ recent: [run({})], balances: { ...NO_BALANCES, part: 1 } })
+    // the rocket (spaceport level 1) costs 15 nuts; held crystals and parts no longer count
+    const w = world({ recent: [run({})], nuts: 10, balances: { ...NO_BALANCES, part: 1 } })
     const { main } = quests(w)
     expect(main?.id).toBe('main:first-flight|rocket')
-    expect(main?.needs).toEqual([{ resource: 'crystal', missing: 1 }])
-    const ready = world({ recent: [run({})], balances: { ...NO_BALANCES, part: 1, crystal: 1 } })
+    expect(main?.needs).toEqual([{ resource: 'nut', missing: 5 }])
+    const ready = world({ recent: [run({})], nuts: 15 })
     expect(quests(ready).main?.needs).toEqual([])
     const mars = UNLOCKS.find((item) => item.id === 'mars')!
-    expect(conditionNeeds(mars.when, world())).toEqual([
-      { resource: 'crystal', missing: 1 },
-      { resource: 'part', missing: 1 },
-    ])
+    expect(conditionNeeds(mars.when, world())).toEqual([{ resource: 'nut', missing: 15 }])
+    expect(
+      conditionNeeds(mars.when, world({ balances: { ...NO_BALANCES, crystal: 1, part: 1 } })),
+    ).toEqual([{ resource: 'nut', missing: 15 }])
   })
 
   it('a finished journey has no main quest', () => {
@@ -190,6 +193,8 @@ describe('quests in the store: profiles, idempotency, typed events', () => {
   let stop: () => void
   beforeEach(() => {
     for (const key of ['qa', 'qb']) clearUniverseChild(key)
+    useRewardStore.setState({ byChild: {} })
+    useProgressStore.setState({ byChild: {} })
     stop = installProgression()
   })
   afterEach(() => stop())
@@ -209,8 +214,15 @@ describe('quests in the store: profiles, idempotency, typed events', () => {
   it('the same completion twice pays once; another child gets nothing', () => {
     emitActivity(finish({}))
     emitActivity(finish({}))
-    expect(getResources('qa').crystal).toBe(1)
-    expect(getResources('qb').crystal).toBe(0)
+    // a crystal's and a part's worth in nuts, once
+    const paid = rewardHistory('qa').filter((entry) => entry.reason === 'learn')
+    expect(paid.map((entry) => [entry.refId.split('|')[0], entry.coins]).sort()).toEqual([
+      ['crystal', 10],
+      ['part', 5],
+    ])
+    expect(getResources('qa').crystal).toBe(0)
+    expect(rewardHistory('qb')).toHaveLength(0)
+    expect(useProgressStore.getState().byChild.qb?.coins ?? 0).toBe(0)
     expect('first-flight|math' in progressOf('qa').steps).toBe(true)
     syncProgression('qb')
     expect(progressOf('qb').steps).toEqual({})

@@ -76,8 +76,8 @@ describe('device admin coin grant', () => {
     const { user } = await renderRoute('/admin')
     await user.click(screen.getByRole('button', { name: 'Bolalar' }))
     const table = screen.getByRole('table')
-    await user.click(within(table).getByRole('button', { name: '+50 coin' }))
-    await user.click(within(table).getByRole('button', { name: '+50 coin' }))
+    await user.click(within(table).getByRole('button', { name: '+50 yong‘oq' }))
+    await user.click(within(table).getByRole('button', { name: '+50 yong‘oq' }))
 
     expect(useProgressStore.getState().byChild[ali.id]?.coins).toBe(100)
     const entries = rewardHistory(ali.id)

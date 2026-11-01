@@ -145,10 +145,9 @@ test('a closed place says what it still needs; a double tap builds once; reload 
   await page.goto('/spaceport/mars')
   await expect(page.getByTestId('mars-locked')).toBeVisible()
   const needs = page.getByTestId('quest-needs')
-  await expect(needs).toContainText('Yana 1 ta kristall kerak')
-  await expect(needs).toContainText('Yana 1 ta detal kerak')
+  await expect(needs).toContainText('Yana 15 ta yong‘oq kerak')
 
-  // maths with three stars pays the crystal and the part
+  // maths with three stars pays yong‘oq (what a crystal and a part were worth)
   await page.goto('/math-lab')
   await page.getByTestId('lab-start').click()
   for (let step = 0; step < 5; step += 1) {
@@ -162,14 +161,17 @@ test('a closed place says what it still needs; a double tap builds once; reload 
   await page.goto('/spaceport')
   await page.getByTestId('build-rocket').dblclick()
   await expect(page.getByTestId('rocket-level')).toHaveText('Raketa: 1-daraja')
-  const balances = await page.evaluate(() => {
-    const saved = JSON.parse(localStorage.getItem('kiddo.universe')!) as {
-      state: { byChild: Record<string, { balances: Record<string, number> }> }
+  const paid = await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem('kiddo.rewards')!) as {
+      state: {
+        byChild: Record<string, { entries: { reason: string; refId: string; coins: number }[] }>
+      }
     }
-    return saved.state.byChild['kid-a']!.balances
+    return saved.state.byChild['kid-a']!.entries.filter(
+      (entry) => entry.reason === 'purchase' && entry.refId.startsWith('upgrade|'),
+    )
   })
-  expect(balances.crystal).toBe(0)
-  expect(balances.part).toBe(0)
+  expect(paid).toEqual([expect.objectContaining({ refId: 'upgrade|spaceport|1', coins: -15 })])
 
   // the world changed for good: after a reload the journey has moved on
   await page.reload()

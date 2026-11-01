@@ -24,18 +24,15 @@ describe('AwardLines', () => {
         award={{
           stars: 3,
           starGain: 2,
-          crystals: 1,
-          parts: 1,
-          scrolls: 0,
+          nuts: 15,
           achievements: ['first-steps|bronze'],
         }}
       />,
     )
     const list = screen.getByRole('list', { name: 'Sen yutding' })
     expect(list).toHaveTextContent('Yulduz: +2')
-    expect(list).toHaveTextContent('Kristall: +1')
-    expect(list).toHaveTextContent('Detal: +1')
-    expect(list).not.toHaveTextContent('O‘ram')
+    expect(list).toHaveTextContent('Yong‘oq: +15')
+    expect(list).not.toHaveTextContent('Kristall')
     expect(screen.getByText('Yangi medal: Birinchi qadamlar (Bronza)')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
@@ -46,9 +43,7 @@ describe('AwardLines', () => {
         award={{
           stars: 0,
           starGain: 0,
-          crystals: 0,
-          parts: 0,
-          scrolls: 0,
+          nuts: 0,
           achievements: ['number-path|bronze', 'first-steps|silver'],
         }}
       />,
@@ -62,16 +57,14 @@ describe('AwardLines', () => {
 
   it('shows nothing for a run that brought nothing new', () => {
     const { container } = render(
-      <AwardLines
-        award={{ stars: 3, starGain: 0, crystals: 0, parts: 0, scrolls: 0, achievements: [] }}
-      />,
+      <AwardLines award={{ stars: 3, starGain: 0, nuts: 0, achievements: [] }} />,
     )
     expect(container).toBeEmptyDOMElement()
   })
 })
 
 describe('result screens', () => {
-  it('the task reward screen shows the stars and crystal of a first perfect game', async () => {
+  it('the task reward screen shows the stars and the nuts of a first perfect game', async () => {
     const { router } = await renderRoute('/home')
     const outcome = useProgressStore.getState().completeTask(GUEST_KEY, {
       type: 'find-letter',
@@ -83,7 +76,9 @@ describe('result screens', () => {
     await act(() => router.navigate('/reward', { state: { taskType: 'find-letter', outcome } }))
     const lines = await screen.findByTestId('award-lines')
     expect(lines).toHaveTextContent('Yulduz: +3')
-    expect(lines).toHaveTextContent('Kristall: +1')
+    // the first 3 stars pay a crystal's worth: 10 nuts
+    expect(lines).toHaveTextContent('Yong‘oq: +10')
+    expect(lines).not.toHaveTextContent('Kristall')
   })
 
   it('the learning result shows what the session earned', () => {
@@ -118,7 +113,9 @@ describe('result screens', () => {
     )
     const lines = screen.getByTestId('award-lines')
     expect(lines).toHaveTextContent('Yulduz: +2')
-    expect(lines).toHaveTextContent('O‘ram: +1')
+    // a tale read for the first time: a scroll's worth, 5 nuts (2 stars pay no crystal)
+    expect(lines).toHaveTextContent('Yong‘oq: +5')
+    expect(lines).not.toHaveTextContent('O‘ram')
   })
 })
 

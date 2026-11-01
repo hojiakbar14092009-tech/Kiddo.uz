@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { entitlementFor } from '@/domain/entitlements'
+import { rewardHistory, useRewardStore, wasRewarded } from '@/domain/rewards'
 import {
   activityEffects,
   emitActivity,
@@ -280,7 +281,10 @@ describe('questions follow the language level', () => {
 
 describe('the universe pays one scroll per story', () => {
   const KID = 'kid-1'
-  beforeEach(() => useUniverseStore.setState({ byChild: {} }))
+  beforeEach(() => {
+    useUniverseStore.setState({ byChild: {} })
+    useRewardStore.setState({ byChild: {} })
+  })
 
   it('recognises story activities', () => {
     expect(isStory('story:lost-lamb')).toBe(true)
@@ -298,32 +302,33 @@ describe('the universe pays one scroll per story', () => {
   })
 
   it('emitActivity pays once per story, idempotent by run and by story, with reason tale', () => {
+    // the scroll is paid in nuts (5); 2 stars pay no crystal
     const first = emitActivity(storyActivity('r1', KID, 'lost-lamb', 2, { total: 3, firstTry: 2 }))
-    expect(first.scrolls).toBe(1)
+    expect(first.nuts).toBe(5)
     // the same run again: nothing
     expect(
       emitActivity(storyActivity('r1', KID, 'lost-lamb', 2, { total: 3, firstTry: 3 })),
     ).toMatchObject({
-      scrolls: 0,
+      nuts: 0,
       stars: 0,
     })
     // the same story read again: stars may improve, but no second scroll
     const again = emitActivity(storyActivity('r2', KID, 'lost-lamb', 2, { total: 3, firstTry: 3 }))
-    expect(again.scrolls).toBe(0)
     expect(again.stars).toBe(3)
+    // only the first 3 stars' crystal (10), no second scroll
+    expect(again.nuts).toBe(10)
     // another story: its own scroll
     expect(
-      emitActivity(storyActivity('r3', KID, 'grandma-garden', 2, { total: 3, firstTry: 3 }))
-        .scrolls,
-    ).toBe(1)
-    expect(getResources(KID).scroll).toBe(2)
-    const scrolls = resourceHistory(KID).filter((entry) => entry.resource === 'scroll')
-    expect(scrolls.map((entry) => [entry.reason, entry.refId])).toEqual(
-      expect.arrayContaining([
-        ['tale', 'story:lost-lamb'],
-        ['tale', 'story:grandma-garden'],
-      ]),
-    )
+      emitActivity(storyActivity('r3', KID, 'grandma-garden', 2, { total: 3, firstTry: 3 })).nuts,
+    ).toBe(15)
+    expect(getResources(KID).scroll).toBe(0)
+    expect(resourceHistory(KID).filter((entry) => entry.resource === 'scroll')).toHaveLength(0)
+    const scrolls = rewardHistory(KID).filter((entry) => entry.refId.startsWith('scroll|'))
+    expect(scrolls.map((entry) => [entry.reason, entry.refId, entry.coins]).sort()).toEqual([
+      ['learn', 'scroll|tale|story:grandma-garden', 5],
+      ['learn', 'scroll|tale|story:lost-lamb', 5],
+    ])
+    expect(wasRewarded(KID, 'learn', 'crystal|three-stars|story:lost-lamb')).toBe(true)
   })
 
   it('reports strand language, first-try answers and the level', () => {

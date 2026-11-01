@@ -164,16 +164,23 @@ describe('coin paths pay exactly once', () => {
       .completeTask(KID, { ...task, mistakeDetails: [] }, MORNING)
     expect(first).toMatchObject({ coins: 5, bonus: 2 })
     await reload()
-    expect(coins()).toBe(7)
+    // the task (5), the day's bonus (2) and the first 3 stars' nuts (10, Phase 39)
+    expect(coins()).toBe(17)
     expect(wasRewarded(KID, 'daily-bonus', 'daily|2026-10-18')).toBe(true)
+    expect(wasRewarded(KID, 'learn', 'crystal|three-stars|memory:uz')).toBe(true)
 
     const second = useProgressStore
       .getState()
       .completeTask(KID, { ...task, mistakeDetails: [] }, EVENING)
     expect(second).toMatchObject({ coins: 5, bonus: 0 })
-    expect(coins()).toBe(12)
-    expect(rewardHistory(KID).map((entry) => entry.reason)).toEqual(['task', 'daily-bonus', 'task'])
-    expect(ledgerTotal(KID)).toBe(12)
+    expect(coins()).toBe(22)
+    expect(rewardHistory(KID).map((entry) => [entry.reason, entry.coins])).toEqual([
+      ['task', 5],
+      ['learn', 10],
+      ['daily-bonus', 2],
+      ['task', 5],
+    ])
+    expect(ledgerTotal(KID)).toBe(22)
   })
 
   it('finishSession pays a session once, also after a reload', async () => {

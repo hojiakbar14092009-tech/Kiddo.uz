@@ -7,7 +7,7 @@ import { Img3D } from '@/components/ui/Img3D'
 import { LinkButton } from '@/components/ui/LinkButton'
 import { RewardBurst } from '@/components/ui/RewardBurst'
 import { toast } from '@/components/ui/toast'
-import { useResources, useWorld } from '@/domain/universe'
+import { useWallet, useWorld } from '@/domain/universe'
 import { useUnlockNeeds, useWorldProgress } from '@/domain/universe/progression'
 import { QuestNeeds } from '@/features/city/QuestNeeds'
 import { costRows } from '@/features/city/cityModel'
@@ -16,21 +16,21 @@ import { MascotFigure } from '@/features/mascot/MascotFigure'
 import { useMascotModel } from '@/store/familyStore'
 
 /**
- * The Spaceport: the rocket is built with what maths earned (a crystal and a
- * part) and takes the child to Mars. Building it is the city's normal
+ * The Spaceport: the rocket is built with yong‘oq (nuts, what maths and play
+ * earned) and takes the child to Mars. Building it is the city's normal
  * upgrade (the same price list as the server's); the flight opens because
  * the connected world says so (progression rules), not because of this page.
  */
 export function SpaceportPage() {
   const { t } = useTranslation()
   const { buildings, upgrade } = useWorld()
-  const balances = useResources()
+  const wallet = useWallet()
   const { isUnlocked } = useWorldProgress()
   const [justBuilt, setJustBuilt] = useState(false)
   const port = buildings.find((building) => building.id === 'spaceport')
   const level = port?.level ?? 0
   const marsOpen = isUnlocked('mars')
-  const rows = port && level === 0 ? costRows(port, balances) : []
+  const rows = port && level === 0 ? costRows(port, wallet) : []
   const ready = rows.length > 0 && rows.every((row) => row.missing === 0)
   // what is still missing, said plainly (the unlock rules and the server's price list)
   const needs = useUnlockNeeds('mars')
@@ -69,7 +69,9 @@ export function SpaceportPage() {
 
       {level === 0 && (
         <section className="flex w-full max-w-md flex-col items-center gap-3">
-          <p className="text-lg text-ink-soft">{t('spaceport.buildText')}</p>
+          <p className="text-lg text-ink-soft">
+            {t('spaceport.buildText', { count: port?.next?.cost.nut ?? 0 })}
+          </p>
           <ul className="flex flex-wrap justify-center gap-2">
             {rows.map((row) => (
               <li

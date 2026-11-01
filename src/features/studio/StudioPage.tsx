@@ -32,7 +32,7 @@ type Sheet = 'stickers' | 'backgrounds' | 'clear' | null
 interface Saved {
   url: string
   stars: number
-  crystals: number
+  nuts: number
 }
 
 /**
@@ -77,7 +77,7 @@ export function StudioPage() {
       if (!image) throw new Error('This browser cannot draw the picture')
       const { work, removed } = await studioGallery().save(childKey, newId(), image)
       if (removed > 0) toast(t('studio.oldestRemoved', { count: removed }), 'warning', 6000)
-      let reward = { stars: 0, crystals: 0 }
+      let reward = { stars: 0, nuts: 0 }
       try {
         const gained = emitActivity({
           id: work.id,
@@ -88,7 +88,7 @@ export function StudioPage() {
           total: 1,
           independent: 1,
         })
-        reward = { stars: gained.stars, crystals: gained.crystals }
+        reward = { stars: gained.stars, nuts: gained.nuts }
       } catch {
         // the picture is saved either way
       }
@@ -233,7 +233,7 @@ export function StudioPage() {
           testId="studio-saved"
         >
           <div className="flex flex-col items-center gap-4 short:gap-2">
-            <ActivityReward stars={saved.stars} crystals={saved.crystals} />
+            <ActivityReward stars={saved.stars} nuts={saved.nuts} />
             <div className="flex flex-wrap justify-center gap-3">
               <Button variant="soft" size="md" onClick={() => navigate('/studio/gallery')}>
                 {t('studio.gallery')}

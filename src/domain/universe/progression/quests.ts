@@ -1,6 +1,6 @@
 import type { GardenPlant } from '@/domain/garden/garden'
-import { findBuilding } from '../world'
-import type { ResourceId } from '../types'
+import { findBuilding, levelPrice } from '../world'
+import type { WalletId } from '../types'
 import { FIRST_FLIGHT, PLANT_STAGES, type Condition, type JourneyDef } from './content'
 import {
   conditionMet,
@@ -29,7 +29,7 @@ import {
 
 /** What is still missing for a step (a resource and how many). */
 export interface Need {
-  resource: ResourceId
+  resource: WalletId
   missing: number
 }
 
@@ -67,19 +67,16 @@ export const MAX_OPTIONAL = 2
 
 /**
  * What a condition still needs from the child's resources: the next level of
- * a building costs resources (server prices: world.ts BUILDINGS). Other
+ * a building costs nuts (world.ts BUILDINGS, the server checks the price). Other
  * conditions are actions, not purchases: nothing to count.
  */
 export function conditionNeeds(condition: Condition, world: WorldSnapshot): Need[] {
   if (condition.kind !== 'building') return []
   if ((world.buildings[condition.id] ?? 0) >= condition.level) return []
-  const cost = findBuilding(condition.id)?.levels[condition.level]?.cost ?? {}
-  return (Object.entries(cost) as [ResourceId, number][])
-    .map(([resource, amount]) => ({
-      resource,
-      missing: Math.max(0, amount - (world.balances[resource] ?? 0)),
-    }))
-    .filter((need) => need.missing > 0)
+  const level = findBuilding(condition.id)?.levels[condition.level]
+  if (!level) return []
+  const missing = Math.max(0, levelPrice(level) - (world.nuts ?? 0))
+  return missing > 0 ? [{ resource: 'nut', missing }] : []
 }
 
 /** The world's lasting facts, by name (one place every screen reads them from). */

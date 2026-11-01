@@ -3,7 +3,7 @@ import {
   tryClaimDailyQuest,
   type AwardSummary,
   type BuildingView,
-  type ResourceId,
+  type Wallet,
 } from '@/domain/universe'
 
 /** Sky colours of the plots, in turn, so the city is varied but calm. */
@@ -17,35 +17,31 @@ export const PLOT_TINTS = [
 ] as const
 
 export interface CostRow {
-  resource: ResourceId
+  resource: 'nut' | 'star'
   need: number
   have: number
   missing: number
 }
 
-/** What the next level costs, next to what the child has; stars are a threshold, not a price. */
-export function costRows(
-  building: BuildingView,
-  balances: Readonly<Record<ResourceId, number>>,
-): CostRow[] {
+/** What the next level costs in nuts, next to what the child has; stars are a threshold, not a price. */
+export function costRows(building: BuildingView, wallet: Wallet): CostRow[] {
   if (!building.next) return []
   const rows: CostRow[] = []
-  for (const [resource, need] of Object.entries(building.next.cost) as [ResourceId, number][]) {
-    if (need > 0) {
-      rows.push({
-        resource,
-        need,
-        have: balances[resource] ?? 0,
-        missing: building.next.missing[resource] ?? 0,
-      })
-    }
+  const price = building.next.cost.nut
+  if (price > 0) {
+    rows.push({
+      resource: 'nut',
+      need: price,
+      have: wallet.nut ?? 0,
+      missing: building.next.missing.nut ?? 0,
+    })
   }
   const starsNeeded = findBuilding(building.id)?.levels[building.level + 1]?.starsNeeded ?? 0
   if (starsNeeded > 0) {
     rows.push({
       resource: 'star',
       need: starsNeeded,
-      have: balances.star ?? 0,
+      have: wallet.star ?? 0,
       missing: building.next.missing.star ?? 0,
     })
   }

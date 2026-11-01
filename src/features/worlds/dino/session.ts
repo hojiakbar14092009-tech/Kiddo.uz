@@ -11,7 +11,7 @@ export const NEXT_DELAY_MS = 1100
 
 export interface DinoFinished {
   score: DinoScore
-  award: Pick<AwardSummary, 'stars' | 'crystals'>
+  award: Pick<AwardSummary, 'stars' | 'nuts'>
 }
 
 /**
@@ -27,7 +27,7 @@ export function useDinoRecorder(kind: DinoActivityKind, level: ChallengeLevel) {
     (score: DinoScore): DinoFinished | null => {
       if (emitted.current) return null
       emitted.current = true
-      let award: DinoFinished['award'] = { stars: 0, crystals: 0 }
+      let award: DinoFinished['award'] = { stars: 0, nuts: 0 }
       try {
         award = emitActivity(dinoActivity(runId, childKey, kind, level, score))
       } catch {

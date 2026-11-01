@@ -8,6 +8,13 @@ import type { EvidenceKind } from '@/domain/learner/evidence'
 export const RESOURCE_IDS = ['star', 'crystal', 'seed', 'part', 'scroll', 'key'] as const
 export type ResourceId = (typeof RESOURCE_IDS)[number]
 
+/**
+ * What a child can hold and count: the universe resources plus yong‘oq
+ * ('nut': the reward ledger's coins, the one currency since Phase 39).
+ */
+export type WalletId = ResourceId | 'nut'
+export type Wallet = Readonly<Partial<Record<WalletId, number>>>
+
 export function isResourceId(value: unknown): value is ResourceId {
   return typeof value === 'string' && (RESOURCE_IDS as readonly string[]).includes(value)
 }
@@ -78,9 +85,8 @@ export interface ActivityCompleted {
 export interface AwardSummary {
   /** The activity's star rating, 1–3 (0 on a repeat or for a quest). */
   stars: number
-  crystals: number
-  parts: number
-  scrolls: number
+  /** Yong‘oq (nuts, the reward ledger's coins) this run paid (Phase 39). */
+  nuts: number
   /** Achievement tiers reached now, as `${achievementId}|${tier}`. */
   achievements: string[]
   /**

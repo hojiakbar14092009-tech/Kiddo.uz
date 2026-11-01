@@ -24,7 +24,7 @@ describe('find-letter game', () => {
 
   afterEach(() => vi.useRealTimers())
 
-  it('plays five rounds without mistakes and pays 5 coins plus the daily gift', async () => {
+  it('plays five rounds without mistakes and pays 5 nuts, the daily gift and the 3 stars’ nuts', async () => {
     const { router, user } = await renderRoute('/tasks/find-letter', {
       advanceTimers: vi.advanceTimersByTime,
     })
@@ -36,12 +36,14 @@ describe('find-letter game', () => {
     }
 
     expect(router.state.location.pathname).toBe('/reward')
-    expect(screen.getByText('Coinlar: +5')).toBeInTheDocument()
+    expect(screen.getByText('Yong‘oqlar: +5')).toBeInTheDocument()
     expect(screen.getByText('Kunlik sovg‘a: +2')).toBeInTheDocument()
-    expect((useProgressStore.getState().byChild[GUEST_KEY] ?? EMPTY_PROGRESS).coins).toBe(7)
+    // the first 3 stars also pay a crystal's worth in nuts (Phase 39)
+    expect(screen.getByText('Yong‘oq: +10')).toBeInTheDocument()
+    expect((useProgressStore.getState().byChild[GUEST_KEY] ?? EMPTY_PROGRESS).coins).toBe(17)
   })
 
-  it('encourages after a wrong answer and pays 3 coins at the end', async () => {
+  it('encourages after a wrong answer and pays 3 nuts at the end', async () => {
     const { user } = await renderRoute('/tasks/find-letter', {
       advanceTimers: vi.advanceTimersByTime,
     })
@@ -62,7 +64,9 @@ describe('find-letter game', () => {
       await user.click(screen.getByRole('button', { name: `${currentTargetLetter()} harfi` }))
       await act(async () => vi.advanceTimersByTime(1800))
     }
-    expect(screen.getByText('Coinlar: +3')).toBeInTheDocument()
+    expect(screen.getByText('Yong‘oqlar: +3')).toBeInTheDocument()
+    // not 3 stars: no nuts beyond the task's own
+    expect(screen.queryByText(/^Yong‘oq: \+/)).not.toBeInTheDocument()
   })
 })
 

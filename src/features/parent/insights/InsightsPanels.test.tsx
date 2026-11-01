@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { rewardHistory } from '@/domain/rewards'
 import { emitActivity, useUniverseStore } from '@/domain/universe'
 import { emitUniverse } from '@/domain/universe/store'
 import { birthDateForAge } from '@/features/age/ageLevel'
@@ -108,15 +109,22 @@ describe('Parent dashboard insights', () => {
     const week = section('So‘nggi 7 kun')
     expect(within(week).getByText('Jami vaqt: 14 daq')).toBeInTheDocument()
     expect(within(week).getByText('Mashg‘ulotlar: 5')).toBeInTheDocument()
-    expect(within(week).getByText('Kristallar: 2')).toBeInTheDocument()
-    expect(within(week).getByText('O‘ramlar: 1')).toBeInTheDocument()
+    // earned by playing: the letter game (5 + 2 bonus), two first 3-star runs (10 each),
+    // the story's scroll (5) and any medals' coins
+    const medals = rewardHistory(ali.id)
+      .filter((entry) => entry.reason === 'achievement')
+      .reduce((sum, entry) => sum + entry.coins, 0)
+    const earned = within(week).getByTestId('week-earned')
+    expect(earned).toHaveTextContent(`O‘yinda topilgan yong‘oqlar: ${5 + 2 + 10 + 10 + 5 + medals}`)
+    expect(earned).not.toHaveTextContent(/Kristallar|O‘ramlar/)
     const table = within(week).getByTestId('week-table')
     const todayRow = within(table).getAllByRole('row').at(-1)!
     expect(todayRow).toHaveTextContent('14')
     expect(todayRow).toHaveTextContent('5')
     // coins are one of the three measures of the same week view
-    expect(within(week).getByText(/^Coinlar: [1-9]\d*$/)).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Hafta bo‘yicha coinlar' })).toBeNull()
+    // the letter game's task and daily gift: 5 + 2
+    expect(within(week).getByText('Yong‘oqlar: 7')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Hafta bo‘yicha yong‘oqlar' })).toBeNull()
 
     const played = within(section('Ali nimalar o‘ynadi')).getByTestId('played-list')
     expect(within(played).getByText('Hikoya: Adashgan qo‘zichoq')).toBeInTheDocument()

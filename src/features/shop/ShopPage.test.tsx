@@ -24,7 +24,7 @@ describe('Shop', () => {
 
   it('asks before spending coins, then puts the item on', async () => {
     const { user } = await renderRoute('/shop')
-    await user.click(screen.getByRole('button', { name: 'Kepka — 15 coin' }))
+    await user.click(screen.getByRole('button', { name: 'Kepka — 15 yong‘oq' }))
 
     const dialog = screen.getByRole('alertdialog', { name: 'Kepka olamizmi?' })
     expect(guest().coins).toBe(20)
@@ -42,7 +42,7 @@ describe('Shop', () => {
 
   it('spends nothing when the child says no', async () => {
     const { user } = await renderRoute('/shop')
-    await user.click(screen.getByRole('button', { name: 'Gul — 10 coin' }))
+    await user.click(screen.getByRole('button', { name: 'Gul — 10 yong‘oq' }))
     await user.click(screen.getByRole('button', { name: 'Yo‘q' }))
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect(guest().coins).toBe(20)
@@ -51,9 +51,9 @@ describe('Shop', () => {
 
   it('encourages instead of buying when coins are short', async () => {
     const { user } = await renderRoute('/shop')
-    await user.click(screen.getByRole('button', { name: 'Toj — Yana 20 coin' }))
+    await user.click(screen.getByRole('button', { name: 'Toj — Yana 20 yong‘oq' }))
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
-    expect(screen.getByText('Yana 20 coin yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
+    expect(screen.getByText('Yana 20 yong‘oq yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
     expect(guest().coins).toBe(20)
   })
 
@@ -69,7 +69,7 @@ describe('Shop', () => {
     useProgressStore.setState({ byChild: { [GUEST_KEY]: { ...EMPTY_PROGRESS, coins: 20 } } })
     const { user } = await renderRoute('/shop?tab=pets')
     // with only 20 coins the kitten can still be tried, for free
-    await user.click(screen.getByRole('button', { name: 'Mushuk — Yana 55 coin' }))
+    await user.click(screen.getByRole('button', { name: 'Mushuk — Yana 55 yong‘oq' }))
     expect(screen.getByText('👀 Sinab ko‘rilyapti: Mushuk')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Mushuk' })).toBeInTheDocument() // at the robot's feet
     expect(screen.getByText('Mushuk yonimda mana shunday turadi! Yoqdimi?')).toBeInTheDocument()
@@ -79,7 +79,7 @@ describe('Shop', () => {
     // adopting it still needs the coins
     await user.click(screen.getByRole('button', { name: /Olish · 75/ }))
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
-    expect(screen.getByText('Yana 55 coin yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
+    expect(screen.getByText('Yana 55 yong‘oq yig‘amiz! Vazifa bajar!')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Qaytarish' }))
     expect(screen.queryByRole('button', { name: 'Mushuk' })).not.toBeInTheDocument()
@@ -88,7 +88,7 @@ describe('Shop', () => {
   it('buys a tried pet after a second tap, showing the robot and pet together', async () => {
     useProgressStore.setState({ byChild: { [GUEST_KEY]: { ...EMPTY_PROGRESS, coins: 80 } } })
     const { user } = await renderRoute('/shop?tab=pets')
-    await user.click(screen.getByRole('button', { name: 'Quyoncha — 75 coin' }))
+    await user.click(screen.getByRole('button', { name: 'Quyoncha — 75 yong‘oq' }))
     expect(guest().coins).toBe(80)
     await user.click(screen.getByRole('button', { name: /^Quyoncha — Sinab ko‘rilyapti/ }))
     const dialog = screen.getByRole('alertdialog', { name: 'Quyonchani olamizmi?' })
@@ -137,7 +137,7 @@ describe('Shop', () => {
     await user.click(screen.getByRole('button', { name: 'Milliy' }))
     expect(screen.getByRole('button', { name: 'Milliy' })).toHaveAttribute('aria-pressed', 'true')
     expect(within(wardrobe).getAllByRole('listitem')).toHaveLength(1)
-    expect(screen.getByRole('button', { name: 'Do‘ppi — Yana 5 coin' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Do‘ppi — Yana 5 yong‘oq' })).toBeInTheDocument()
   })
 
   it('a 14-year-old sees the same wardrobe in calm colours, smart and tech first', async () => {
@@ -164,8 +164,8 @@ describe('Shop', () => {
     expect(within(wardrobe).getAllByRole('listitem')).toHaveLength(OUTFITS.length)
     expect(within(wardrobe).getAllByRole('listitem')[0]).toHaveAttribute('data-category', 'smart')
     // nothing is locked by gender or age: the flower and the crown are there too
-    expect(screen.getByRole('button', { name: 'Gul — 10 coin' })).toBeEnabled()
-    expect(screen.getByRole('button', { name: 'Toj — Yana 20 coin' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Gul — 10 yong‘oq' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Toj — Yana 20 yong‘oq' })).toBeEnabled()
     expect(document.querySelector('[data-outfit-preview="cap"]')).toHaveAttribute(
       'data-tone',
       'muted',
