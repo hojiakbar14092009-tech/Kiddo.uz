@@ -229,7 +229,7 @@ describe('Read to me', () => {
     expect(say).toHaveBeenCalledWith(
       LAMB.pages.p1!.map((text) => ({ text })),
       { language: 'en' },
-      { requirePro: true, clipsOnly: true },
+      { requirePro: true, clipsOnly: true, quiet: false },
     )
     // no automatic page turn without narration that played
     expect(page()).toBe('p1')

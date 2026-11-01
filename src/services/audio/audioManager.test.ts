@@ -65,6 +65,51 @@ describe('audioManager', () => {
     audioManager.stopSpeech()
   })
 
+  it('waits the pause after an item before the next one (letter, pause, word)', async () => {
+    useSubscriptionStore.getState().setDemoPro(true)
+    useFamilyStore.setState({ activeChildId: 'ali' })
+    vi.useFakeTimers()
+    try {
+      const said: string[] = []
+      vi.spyOn(speech, 'say').mockImplementation(async (text) => {
+        said.push(String(text))
+        return true
+      })
+      const done = audioManager.say(
+        [{ text: 'Бэ без записи.', pauseAfterMs: 900 }, { text: 'Слово без записи.' }],
+        { language: 'ru' },
+      )
+      await vi.advanceTimersByTimeAsync(10)
+      expect(said).toEqual(['Бэ без записи.'])
+      await vi.advanceTimersByTimeAsync(800)
+      // still the pause: the word waits
+      expect(said).toEqual(['Бэ без записи.'])
+      await vi.advanceTimersByTimeAsync(200)
+      expect(said).toEqual(['Бэ без записи.', 'Слово без записи.'])
+      expect(await done).toBe('done')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('a stop during the pause ends the speech at once', async () => {
+    useSubscriptionStore.getState().setDemoPro(true)
+    useFamilyStore.setState({ activeChildId: 'ali' })
+    const said: string[] = []
+    vi.spyOn(speech, 'say').mockImplementation(async (text) => {
+      said.push(String(text))
+      return true
+    })
+    const done = audioManager.say(
+      [{ text: 'Бэ без записи.', pauseAfterMs: 3000 }, { text: 'Слово без записи.' }],
+      { language: 'ru' },
+    )
+    await vi.waitFor(() => expect(said).toEqual(['Бэ без записи.']))
+    audioManager.stopSpeech()
+    expect(await done).toBe('cancelled')
+    expect(said).toEqual(['Бэ без записи.'])
+  })
+
   it('stays silent at zero volume', async () => {
     useSubscriptionStore.getState().setDemoPro(true)
     useFamilyStore.setState({ activeChildId: 'ali' })

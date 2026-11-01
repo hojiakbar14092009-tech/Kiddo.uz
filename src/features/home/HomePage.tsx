@@ -152,7 +152,6 @@ function ContinueButton({ plan }: { plan: ReturnType<typeof dailyPlanState> }) {
   return (
     <Link
       to={to}
-      data-roam="home"
       data-testid="home-continue"
       className="flex w-full max-w-xl items-center gap-4 rounded-card bg-primary px-5 py-4 text-white shadow-[0_8px_0_var(--color-primary-shadow)] transition-transform active:translate-y-1 sm:px-7 sm:py-5"
     >

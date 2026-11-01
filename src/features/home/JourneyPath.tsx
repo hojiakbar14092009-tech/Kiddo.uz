@@ -52,11 +52,7 @@ export function JourneyPath({ plan }: { plan: DailyPlanState }) {
             const status = t(STATUS_KEY[step.status])
             const glow = step.status === 'next' && !reduceMotion
             return (
-              <li
-                key={step.game}
-                data-roam="home"
-                className="relative flex flex-col items-center gap-2"
-              >
+              <li key={step.game} className="relative flex flex-col items-center gap-2">
                 <Link
                   to={`/tasks/${step.game}`}
                   aria-label={`${index + 1}. ${title} — ${status}`}

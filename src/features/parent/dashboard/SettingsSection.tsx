@@ -23,6 +23,10 @@ export function SettingsSection() {
   const language = useLanguage()
   const session = useParentStore((state) => state.session)
   const percent = Math.round(volume * 100)
+  const slowVoice = useSettingsStore((state) => state.slowVoice)
+  const setSlowVoice = useSettingsStore((state) => state.setSlowVoice)
+  const autoVoice = useSettingsStore((state) => state.autoVoice)
+  const setAutoVoice = useSettingsStore((state) => state.setAutoVoice)
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
@@ -60,6 +64,27 @@ export function SettingsSection() {
             ))}
           </div>
         </div>
+        {/* Phase 41: instructions read on their own, or only when the speaker is pressed */}
+        <ChoiceChips
+          label={t('parent.settings.autoVoice')}
+          options={[
+            { value: 'auto', label: t('parent.settings.autoVoiceOn') },
+            { value: 'tap', label: t('parent.settings.autoVoiceOff') },
+          ]}
+          value={autoVoice ? 'auto' : 'tap'}
+          onChange={(value) => setAutoVoice(value === 'auto')}
+        />
+        {/* Phase 41: the pause between a letter and its word (longer at four, longer still when slow) */}
+        <ChoiceChips
+          label={t('parent.settings.pace')}
+          options={[
+            { value: 'normal', label: t('parent.settings.paceNormal') },
+            { value: 'slow', label: t('parent.settings.paceSlow') },
+          ]}
+          value={slowVoice ? 'slow' : 'normal'}
+          onChange={(value) => setSlowVoice(value === 'slow')}
+        />
+        <p className="text-sm text-ink-soft">{t('parent.settings.paceHint')}</p>
         <p className="text-sm text-ink-soft">{t('parent.settings.voiceNote')}</p>
       </Panel>
 

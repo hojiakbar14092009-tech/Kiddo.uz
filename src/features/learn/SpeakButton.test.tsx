@@ -59,6 +59,17 @@ function Quiz() {
   )
 }
 
+/** A question with feedback added under it, in the same part of the screen. */
+function QuizWithFeedback() {
+  const [feedback, setFeedback] = useState<string | null>(null)
+  useSpeakable([moon('en'), feedback])
+  return (
+    <button type="button" onClick={() => setFeedback(rings('en'))}>
+      answer
+    </button>
+  )
+}
+
 function Screen({ show = true }: { show?: boolean }) {
   return (
     <MemoryRouter>
@@ -117,6 +128,61 @@ describe('speaker button on a learning screen', () => {
   afterEach(() => {
     audioManager.stopSpeech()
     vi.restoreAllMocks()
+  })
+
+  it('voice first: a new question is read on its own a moment after it appears', async () => {
+    useSettingsStore.setState({ autoVoice: true })
+    render(<Screen />)
+    await waitFor(() =>
+      expect(playing().map((howl) => howl.options.src[0])).toEqual([url('en', moon('en'))]),
+    )
+    endCurrent()
+    // the next question: read on its own as well, once
+    await act(() => fireEvent.click(screen.getByText('next question')))
+    await waitFor(() =>
+      expect(playing().map((howl) => howl.options.src[0])).toEqual([url('en', rings('en'))]),
+    )
+  })
+
+  it('feedback under the same question does not read the question again', async () => {
+    useSettingsStore.setState({ autoVoice: true })
+    render(
+      <MemoryRouter>
+        <LearnShell title="Koinot">
+          <QuizWithFeedback />
+        </LearnShell>
+      </MemoryRouter>,
+    )
+    await waitFor(() => expect(playing()).toHaveLength(1))
+    endCurrent()
+    const before = voiceHowls().length
+    await act(() => fireEvent.click(screen.getByText('answer')))
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    expect(voiceHowls().slice(before)).toEqual([])
+  })
+
+  it('a page left before the moment passes reads nothing of it', async () => {
+    useSettingsStore.setState({ autoVoice: true })
+    const { rerender } = render(<Screen />)
+    rerender(<Screen show={false} />)
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    expect(voiceHowls()).toEqual([])
+  })
+
+  it('a parent can leave the reading to the speaker button', async () => {
+    useSettingsStore.setState({ autoVoice: false })
+    render(<Screen />)
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    expect(playing()).toEqual([])
+    useSettingsStore.setState({ autoVoice: true })
+  })
+
+  it('nothing is read on its own on Free', async () => {
+    useSettingsStore.setState({ autoVoice: true })
+    useSubscriptionStore.getState().cancel()
+    render(<Screen />)
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    expect(voiceHowls()).toEqual([])
   })
 
   it.each(['en', 'uz', 'ru'] as const)(

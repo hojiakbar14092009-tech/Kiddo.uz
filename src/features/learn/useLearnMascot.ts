@@ -10,13 +10,18 @@ const SPOKEN_EVENTS: ReadonlySet<MascotEvent> = new Set(['correct', 'wrong', 'ce
 /**
  * The mascot in the new sections: its bubble always shows the text (Free and
  * PRO). It speaks only on PRO, only from recordings, and only its reactions
- * to an answer once the child has used the speaker button; greetings and
- * instructions are never read out on their own (the speaker button reads them).
+ * to an answer once the voice is on; the screen's instruction or question is
+ * read by the speaker (on its own since Phase 41: speakable.ts), so the bubble
+ * never says it a second time.
  */
 export function useLearnMascot() {
   const { t } = useTranslation()
   const { react, reset } = useMascot()
   const voice = useLearnVoice()
+  // `speak` is stable: `say` must not change on every render, or a screen's
+  // effect that says something (with `say` in its deps) would say it again and
+  // again while the voice status changes – a loop that freezes the page
+  const { speak } = voice
 
   const say = useCallback(
     (event: MascotEvent, message?: MascotMessage, spoken?: string) => {
@@ -29,9 +34,9 @@ export function useLearnMascot() {
             : { text: '' })
       react(event, shown, { speak: false })
       const line = spoken ?? shown.spoken ?? shown.text
-      if (line && SPOKEN_EVENTS.has(event)) void voice.speak([line])
+      if (line && SPOKEN_EVENTS.has(event)) void speak([line])
     },
-    [react, t, voice],
+    [react, speak, t],
   )
 
   return { say, reset, voice }

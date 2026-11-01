@@ -70,8 +70,9 @@ export function MemoryGame() {
       },
       { speak: false },
     )
-    void sayText(`${introducing.spoken} — ${introducing.word}`)
-  }, [introducing, react, sayText, t])
+    // the letter, a pause, then its word (Phase 41)
+    void sayLetter(introducing)
+  }, [introducing, react, sayLetter, t])
 
   // the game's instruction, once the new letters have been met
   const ready = introducing === undefined

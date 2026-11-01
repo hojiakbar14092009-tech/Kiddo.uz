@@ -8,9 +8,10 @@ import { canUse, useCanUse } from '@/domain/entitlements'
 /*
  * Voice in the new sections:
  * - only with the audio feature (PRO), checked again right before every sound,
- * - never on its own: the child presses the speaker button to hear the
- *   current question; after that first press the mascot also says its short
- *   reactions to the child's answers (until the page is reloaded),
+ * - a new question or instruction is read on its own a moment after it
+ *   appears (Phase 41, speakable.ts; a parent can turn that off), and the
+ *   speaker button reads it again; once the voice has spoken, the mascot also
+ *   says its short reactions to the child's answers (until the page is reloaded),
  * - only recorded sentences in the chosen language (no device voice standing
  *   in for a language it may not speak), the text always stays on screen,
  * - one voice at a time (audioManager), and it stops when the question, the
@@ -31,12 +32,16 @@ export function isLearnVoiceOn(): boolean {
 }
 
 /** Reads the lines from recordings, in this language. */
-export function speakLines(lines: readonly string[], language: Language): Promise<SpeakOutcome> {
+export function speakLines(
+  lines: readonly string[],
+  language: Language,
+  { quiet = false }: { quiet?: boolean } = {},
+): Promise<SpeakOutcome> {
   if (!canUse('audio')) return Promise.resolve('locked')
   return audioManager.say(
     lines.filter(Boolean).map((text) => ({ text })),
     { language },
-    { requirePro: true, clipsOnly: true },
+    { requirePro: true, clipsOnly: true, quiet },
   )
 }
 

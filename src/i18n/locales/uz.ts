@@ -780,6 +780,14 @@ export const uz = {
       testSound: 'Tekshirib eshitish',
       voiceNote:
         'O‘zbekcha ovoz vaqtinchalik sun’iy (sintez qilingan) ovoz, o‘zbek tilida so‘zlashuvchi odamning ovozi emas: o‘zbekcha matnni ochiq qozoqcha nutq modeli o‘qiydi, shuning uchun talaffuz ba’zan o‘zbekcha bo‘lmaydi. Haqiqiy o‘zbekcha ovoz tayyor bo‘lganda u almashtiriladi. Matn har doim ekranda ko‘rinadi.',
+      pace: 'Harf va so‘z orasidagi pauza',
+      paceNormal: 'Odatiy',
+      paceSlow: 'Uzunroq',
+      paceHint:
+        'Harf aytiladi, pauza, keyin so‘z. 4 yoshda pauza uzunroq; «Uzunroq» uni yana uzaytiradi.',
+      autoVoice: 'O‘rganish bo‘limlarida ko‘rsatmalar',
+      autoVoiceOn: 'O‘zi o‘qiydi',
+      autoVoiceOff: 'Tugma bosilganda',
       language: 'Til',
       languageHint: 'Ilova va o‘rganish tili',
       account: 'Hisob',
@@ -1180,7 +1188,7 @@ export const uz = {
         'Savatda {{a}} ta {{noun}} bor edi. Keyin {{b}} ta {{noun}} olib ketishdi. Savatda nechta {{noun}} qoldi?',
       drag: 'Savatga {{group}} sol.',
     },
-    dragHow: 'Rasmga bos yoki uni barmog‘ing bilan savatga sudrab olib bor.',
+    dragHow: 'Rasmga bos yoki uni savatga sudrab olib bor.',
     basket: 'Savat, ichida {{count}} ta',
     pick: 'Savatga solish',
     takeOut: 'Savatdan olish',
@@ -1204,7 +1212,7 @@ export const uz = {
       addLine: '{{a}} sonidan boshlab {{b}} qadam o‘ngga yur.',
       subLine: '{{a}} sonidan boshlab {{b}} qadam chapga yur.',
       missingAdd: '{{from}} sonidan {{to}} sonigacha necha qadam borligini sana.',
-      missingSub: '{{from}} sonidan {{to}} sonigacha orqaga necha qadam ekanini sana.',
+      missingSub: '{{from}} sonidan orqaga sana: {{to}} sonigacha necha qadam?',
       compare:
         'Son chizig‘ida o‘ngroqdagi son kattaroq. Belgining ochiq tomoni katta songa qaraydi.',
       neighbors: 'Son chizig‘iga qara: har bir sonning ikki yonida qo‘shnilari turadi.',
@@ -1919,7 +1927,7 @@ export const uz = {
     home: {
       continue: {
         title: 'Davom etish',
-        text: 'Bu katta tugma bugungi rejadagi keyingi o‘yinga olib boradi. Bos va boshla!',
+        text: 'Bu katta tugma keyingi o‘yinga olib boradi. Bos va boshla!',
         short: 'Bos – keyingi o‘yin.',
       },
       journey: {
@@ -1939,7 +1947,7 @@ export const uz = {
       },
       coins: {
         title: 'Yong‘oqlar',
-        text: 'To‘g‘ri javoblar uchun yong‘oq olasan. Ular bilan do‘kondan kiyim va uy hayvoni olasan, shahringni kattalashtirasan.',
+        text: 'To‘g‘ri javob uchun yong‘oq olasan. Yong‘oqqa kiyim va uy hayvoni olasan. Shahringni ham kattalashtirasan.',
         short: 'Yong‘oqlar: javoblar uchun beriladi, do‘kon va shaharda sarflanadi.',
       },
       tabs: {
@@ -1961,7 +1969,7 @@ export const uz = {
       },
       back: {
         title: 'Uyga qaytish',
-        text: 'Shu uycha tugmasi seni har doim bosh sahifaga qaytaradi.',
+        text: 'Uycha tugmasi seni bosh sahifaga qaytaradi.',
         short: 'Uycha tugmasi — bosh sahifaga qaytish.',
       },
     },

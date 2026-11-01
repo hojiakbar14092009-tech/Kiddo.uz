@@ -85,7 +85,7 @@ export function ChoiceRounds({ type, rounds, title, onFinish, introduce }: Choic
   const markLesson = useLearnStore((state) => state.markLesson)
   const [met, setMet] = useState<ReadonlySet<string>>(() => new Set())
   const { react, reset } = useMascot()
-  const { sayText, speaking } = useSpeaker()
+  const { sayText, sayLetter, speaking } = useSpeaker()
   const [session, dispatch] = useReducer(taskSessionReducer, rounds, createSession)
   const round = currentRound(session)
   const childKey = useChildKey()
@@ -134,7 +134,8 @@ export function ChoiceRounds({ type, rounds, title, onFinish, introduce }: Choic
         word: round.target.word,
       })
       react('instruct', { text: intro, emoji: round.target.emoji }, { speak: false })
-      void sayText(`${round.target.spoken} — ${round.target.word}`)
+      // the letter, a pause, then its word (Phase 41)
+      void sayLetter(round.target)
       return
     }
     react(
@@ -143,7 +144,7 @@ export function ChoiceRounds({ type, rounds, title, onFinish, introduce }: Choic
       { speak: false },
     )
     void sayText(prompt(round.target, true))
-  }, [meeting, prompt, react, round, sayText, t, type])
+  }, [meeting, prompt, react, round, sayLetter, sayText, t, type])
 
   // Every new round: the mascot gives the instruction.
   useEffect(instruct, [instruct])

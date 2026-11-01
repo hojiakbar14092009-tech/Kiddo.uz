@@ -5,14 +5,28 @@ import { afterEach, vi } from 'vitest'
 import { registerLanguage } from '@/i18n'
 import { en } from '@/i18n/locales/en'
 import { ru } from '@/i18n/locales/ru'
+import { useSettingsStore } from '@/store/settingsStore'
 
 // tests switch languages synchronously: every language is there from the start
 registerLanguage('ru', ru)
 registerLanguage('en', en)
 
-afterEach(() => {
+// Instructions read on their own (Phase 41) are tested where they are meant to be
+// (SpeakButton.test.tsx); elsewhere a test's fake clips never end, so it is off.
+useSettingsStore.setState({ autoVoice: false })
+
+afterEach(async () => {
   cleanup()
   localStorage.clear()
+  useSettingsStore.setState({ autoVoice: false })
+  // loaded here, not at the top: a test file's own mocks (e.g. @/config/demo)
+  // must apply to these modules too
+  const [{ resetAutoRead }, { setLearnVoiceOn }] = await Promise.all([
+    import('@/features/learn/speakable'),
+    import('@/features/learn/voice'),
+  ])
+  resetAutoRead()
+  setLearnVoiceOn(false)
 })
 
 // jsdom has no matchMedia; Framer Motion uses it for prefers-reduced-motion.

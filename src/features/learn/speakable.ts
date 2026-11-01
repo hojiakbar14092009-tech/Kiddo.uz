@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react'
+import { canUse } from '@/domain/entitlements'
 import { audioManager } from '@/services/audio/audioManager'
+import { useSettingsStore } from '@/store/settingsStore'
+import { setLearnVoiceOn, speakLines } from './voice'
 
 /*
  * What the speaker button reads: the text that is on screen right now (the
@@ -73,6 +76,47 @@ function stopIfReading(entry: Entry) {
   if (still) audioManager.stopSpeech()
 }
 
+/*
+ * Voice first (Phase 41): a new question or a new screen's instruction is
+ * read out on its own, a moment after it appears (the speaker button still
+ * reads it again). Only with the voice (PRO or the demo), not muted, and
+ * not when a parent turned it off (Settings: "the instructions are read").
+ */
+const AUTO_DELAY_MS = 450
+let autoTimer: ReturnType<typeof setTimeout> | undefined
+/** The last text read on its own: the same screen part with the same text is not read twice. */
+let lastAuto: { order: number; key: string } | null = null
+
+function scheduleAutoRead() {
+  clearTimeout(autoTimer)
+  autoTimer = setTimeout(autoRead, AUTO_DELAY_MS)
+}
+
+/** For tests: forget what was read on its own and any reading still waiting. */
+export function resetAutoRead() {
+  clearTimeout(autoTimer)
+  lastAuto = null
+}
+
+function autoRead() {
+  const settings = useSettingsStore.getState()
+  if (!settings.autoVoice || settings.volume <= 0 || !canUse('audio')) return
+  if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return
+  const entry = top()
+  if (!entry) return
+  // the same part with the same text again (a screen drawn twice) is not read twice
+  const key = JSON.stringify(entry.lines)
+  if (lastAuto && lastAuto.order === entry.order && lastAuto.key === key) return
+  lastAuto = { order: entry.order, key }
+  setLearnVoiceOn(true)
+  const before = audioManager.currentSpeech()
+  // a reading nobody asked for never flashes an error (an unrecorded line stays quiet)
+  void speakLines(entry.lines, settings.language ?? 'uz', { quiet: true })
+  const now = audioManager.currentSpeech()
+  // only a speech that really started is this text's reading
+  reading = now !== before ? { entry, speech: now } : reading
+}
+
 function clean(lines: readonly (string | null | undefined | false)[]): string[] {
   return lines.filter((line): line is string => typeof line === 'string' && line.trim() !== '')
 }
@@ -108,6 +152,10 @@ export function useSpeakable(
     const next = JSON.parse(key) as string[]
     if (JSON.stringify(mine.lines) === key) return
     stopIfReading(mine)
+    // a new question (or a new screen's instruction) is read on its own; feedback
+    // added under the same question is not (the question is not read again)
+    const fresh = next.length > 0 && next[0] !== mine.lines[0]
     mine.lines = next
+    if (fresh) scheduleAutoRead()
   }, [key, priority])
 }

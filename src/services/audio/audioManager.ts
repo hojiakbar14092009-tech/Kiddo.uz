@@ -17,10 +17,18 @@ const UI_SOUND_URLS: Record<UiSound, string> = {
   soft: '/audio/ui/ui_soft.mp3',
 }
 
+/** The longest pause between two spoken items. */
+const MAX_PAUSE_MS = 3000
+
 /** One spoken item: a recorded clip if we have it, otherwise text for the device voice. */
 export interface Utterance {
   text: string
   clip?: VoiceClip
+  /**
+   * A quiet pause after this item, in ms, before the next one (Phase 41: the
+   * letter, a pause, then its word, so a young child hears them apart).
+   */
+  pauseAfterMs?: number
 }
 
 export type VoiceOptions = Omit<SpeakOptions, 'volume'> & { language: Language }
@@ -33,6 +41,8 @@ export interface SpeakFlags {
    * this language.
    */
   clipsOnly?: boolean
+  /** A reading nobody asked for (Phase 41): a failure ends quietly, without the error state. */
+  quiet?: boolean
 }
 
 /** What a speaker button shows: nothing, getting ready, talking, or a short error. */
@@ -116,7 +126,7 @@ class AudioManager {
   async say(
     items: readonly Utterance[],
     options: VoiceOptions,
-    { requirePro = true, clipsOnly = false }: SpeakFlags = {},
+    { requirePro = true, clipsOnly = false, quiet = false }: SpeakFlags = {},
   ): Promise<SpeakOutcome> {
     // The PRO check runs right before any sound, not only when the button is drawn.
     if (requirePro && !this.canSpeak()) return 'locked'
@@ -136,9 +146,15 @@ class AudioManager {
     let failed = 0
     try {
       const parts: SpeechPart[] = []
-      for (const item of items) {
-        if (!item.text.trim()) continue
+      // after which part a pause comes (the last part of an item with pauseAfterMs)
+      const pauses = new Map<number, number>()
+      const spoken = items.filter((item) => item.text.trim())
+      for (const [index, item] of spoken.entries()) {
         parts.push(...(await planSpeech(clipLanguage, item.text, name)))
+        const pause = Math.max(0, Math.min(MAX_PAUSE_MS, item.pauseAfterMs ?? 0))
+        if (pause > 0 && index < spoken.length - 1 && parts.length > 0) {
+          pauses.set(parts.length - 1, pause)
+        }
       }
       if (generation !== this.generation) return 'cancelled'
       // One server call for every clip of this request; each clip still asks
@@ -153,9 +169,15 @@ class AudioManager {
           clipsFailed = batch.status === 'error'
         }
       }
-      for (const part of parts) {
+      for (const [index, part] of parts.entries()) {
         // A newer phrase or stop() wins: the rest of this one is dropped.
         if (generation !== this.generation) return 'cancelled'
+        // the pause after the previous item (a stop ends it at once)
+        const pause = pauses.get(index - 1)
+        if (pause && played > 0) {
+          await this.pause(pause)
+          if (generation !== this.generation) return 'cancelled'
+        }
         if (part.kind === 'clip') {
           let url: string | null = part.url
           if (isPrivate) {
@@ -221,9 +243,24 @@ class AudioManager {
     }
     const outcome: SpeakOutcome =
       failed > 0 && played === 0 ? 'error' : missing > 0 && played === 0 ? 'missing' : 'done'
-    if (outcome === 'done') this.setStatus('idle')
+    if (outcome === 'done' || quiet) this.setStatus('idle')
     else this.showError(generation, outcome, items)
     return outcome
+  }
+
+  /** A quiet wait inside a speech; `stopSpeech` or a new speech ends it at once. */
+  private pause(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        if (this.finishCurrent === finish) this.finishCurrent = null
+        resolve()
+      }, ms)
+      const finish = () => {
+        clearTimeout(timer)
+        resolve()
+      }
+      this.finishCurrent = finish
+    })
   }
 
   stopSpeech(): void {

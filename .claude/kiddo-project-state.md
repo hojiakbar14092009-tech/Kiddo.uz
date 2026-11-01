@@ -712,3 +712,13 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   story texts + nav moves, all fixed) then 41/41, 72/74 (tour order) and 4/4; Critic REJECT (robot behind tabs, back
   to Bugun) → fixed with Mediums (locked places stay doors, a11y descriptions, tour order, toasts, nav outside main).
   Next: Phase 41 (voice first).
+
+## Phase 41 — COMPLETE (2026-11-02) – docs/architecture/voice-first.md
+
+- Letter → pause → word (pace.ts: 1100/850/650 ms by age, parent "Longer" ×1.6); auto-read of new learn questions and
+  instructions (speakable.ts, parent can switch to tap-only; quiet on failure); ≤ 8 words for new child sentences;
+  childPhrases + pendingRecordings.json (uz 1337, ru 1301, en 1284 + ~50 templates to record in Phase 48).
+- Fixed a real freeze: useLearnMascot `say` changed every render → effects with `say` re-spoke forever once voice on.
+- Verification: format/lint/typecheck PASS, unit 1414/1414, build PASS, browser 94/102 → fixes → 18/18 and 78/78;
+  Critic REJECT ×2 (no auto instructions, coverage blind spots, re-read on feedback, hidden templates) → fixed.
+  Next: Phase 42 (sound palettes).

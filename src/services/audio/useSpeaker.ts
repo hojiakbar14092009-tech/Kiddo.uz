@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { LetterEntry } from '@/content/alphabet'
 import type { NumberEntry } from '@/content/numbers'
-import { useLanguage } from '@/store/settingsStore'
+import { useAgeLevel } from '@/store/familyStore'
+import { useLanguage, useSettingsStore } from '@/store/settingsStore'
+import { letterPauseMs } from './pace'
 import { useCanUse } from '@/domain/entitlements'
 import { audioManager, type Utterance } from './audioManager'
 
@@ -16,6 +18,9 @@ export function useSpeaker() {
   const canSpeak = useCanUse('audio')
   const [speaking, setSpeaking] = useState(false)
   const latestRequest = useRef(0)
+  const level = useAgeLevel()
+  const slow = useSettingsStore((state) => state.slowVoice)
+  const pause = letterPauseMs(level, slow)
 
   useEffect(() => () => audioManager.stopSpeech(), [])
 
@@ -33,14 +38,14 @@ export function useSpeaker() {
     [language],
   )
 
-  /** “B … banan”: the letter first, then its word. */
+  /** “B … banan”: the letter, a pause (longer for the youngest), then its word. */
   const sayLetter = useCallback(
     (letter: LetterEntry) =>
       speak([
-        { text: letter.spoken, clip: { kind: 'letters', id: letter.id } },
+        { text: letter.spoken, clip: { kind: 'letters', id: letter.id }, pauseAfterMs: pause },
         { text: letter.word, clip: { kind: 'words', id: letter.id } },
       ]),
-    [speak],
+    [pause, speak],
   )
 
   /** The number’s word in the child’s language, e.g. “uch”. */

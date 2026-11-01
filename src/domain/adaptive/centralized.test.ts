@@ -56,6 +56,7 @@ describe('age policy has one home', () => {
           'features/home/HomePage.tsx', // today's plan
           'features/hubs/LearnHub.tsx', // "N yoshdan tavsiya" on the small games
           'features/age/AgeTheme.tsx', // the look (data-age)
+          'services/audio/useSpeaker.ts', // the pause between a letter and its word
         ]),
       ),
     ).toEqual([])

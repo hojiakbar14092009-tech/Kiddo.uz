@@ -77,7 +77,7 @@ export const en: Translation = {
       },
       speaker: {
         textNoVoice: 'This button reads the question aloud. A grown-up can turn the voice on.',
-        doneNoVoice: 'Once the voice is on, this button reads aloud.',
+        doneNoVoice: 'With the voice on, this button reads aloud.',
         title: 'The speaker button',
         text: 'This button reads the question aloud. Tap it!',
         try: 'Tap the speaker',
@@ -92,7 +92,7 @@ export const en: Translation = {
       },
       parent: {
         title: 'The grown-ups’ area',
-        text: 'This part is for grown-ups. They give you homework and see how you’re doing.',
+        text: 'This part is for grown-ups. They give homework and see your progress.',
         try: 'Tap the family',
         done: 'Your family is proud of you!',
       },
@@ -237,7 +237,7 @@ export const en: Translation = {
     petTake: 'Take along',
     petConfirm: 'Adopt the {{name}}?',
     petBought: 'Yay! Now we have a {{name}}!',
-    petPreview: 'This is how the {{name}} will stand next to me! Like it?',
+    petPreview: 'The {{name}} will stand next to me! Like it?',
     petTrying: 'Trying on',
     petBuy: 'Adopt',
     petStopTry: 'Put back',
@@ -775,6 +775,14 @@ export const en: Translation = {
       testSound: 'Play a test sound',
       voiceNote:
         'The Uzbek voice is a temporary synthetic voice, not a native Uzbek voice: an open Kazakh speech model reads the Uzbek text, so the accent is not always Uzbek. It will be replaced when a real Uzbek voice is ready. The text is always shown on screen.',
+      pace: 'Pause between a letter and its word',
+      paceNormal: 'Normal',
+      paceSlow: 'Longer',
+      paceHint:
+        'First the letter, a pause, then the word. At four the pause is longer; “Longer” makes it longer still.',
+      autoVoice: 'Instructions in the learning sections',
+      autoVoiceOn: 'Reads on its own',
+      autoVoiceOff: 'When the button is tapped',
       language: 'Language',
       languageHint: 'App and learning language',
       account: 'Account',
@@ -961,7 +969,7 @@ export const en: Translation = {
       },
       light: {
         title: 'The sun gives light',
-        line: 'A plant grows in the sunlight and turns green.',
+        line: 'In sunlight a plant grows and turns green.',
       },
       seed: {
         title: 'A plant grows from a seed',
@@ -969,7 +977,7 @@ export const en: Translation = {
       },
       first: {
         title: 'First a seedling, then a flower',
-        line: 'First a little seedling comes out of the seed, then it blooms.',
+        line: 'First a seedling comes out of the seed. Then it blooms.',
       },
     },
   },
@@ -1038,7 +1046,7 @@ export const en: Translation = {
   feelings: {
     lesson: {
       kindness: {
-        share: { title: 'Sharing', text: 'A kind child shares a toy or a treat with a friend.' },
+        share: { title: 'Sharing', text: 'A kind child shares toys and treats.' },
         help: {
           title: 'Helping',
           text: 'When someone has a hard time — falls or drops something — we go and help.',
@@ -1142,7 +1150,7 @@ export const en: Translation = {
       step: 'Question {{current}} of up to {{total}}',
       notSure: 'I don’t know yet',
       doneTitle: 'All set! We found your starting point',
-      doneText: 'The tasks now fit you, and they keep adjusting as you answer.',
+      doneText: 'The tasks now fit you. They change as you answer.',
       go: 'Start practising',
     },
     objects: {
@@ -1173,7 +1181,7 @@ export const en: Translation = {
         'There were {{group}} in the basket. Then {{b}} were taken out. How many {{noun}} are left?',
       drag: 'Put {{group}} in the basket.',
     },
-    dragHow: 'Tap a picture, or drag it to the basket with your finger.',
+    dragHow: 'Tap or drag a picture to the basket.',
     basket: 'Basket, {{count}} inside',
     pick: 'Put in the basket',
     takeOut: 'Take out of the basket',
@@ -1184,10 +1192,9 @@ export const en: Translation = {
       equal: 'equal to',
     },
     help: {
-      columnsAdd:
-        'Add ones to ones and tens to tens. If it is more than 10, carry 1 to the next column.',
+      columnsAdd: 'Add ones to ones, tens to tens. More than 10? Carry 1 to the next column.',
       columnsSub:
-        'Take ones from ones and tens from tens. If there are not enough, borrow 1 ten from the next column.',
+        'Take ones from ones, tens from tens. Not enough? Borrow 1 ten from the next column.',
       count: 'Let’s count together: one number for each one.',
       oneMore: 'One more is the next number: {{n}}, then {{next}}.',
       oneLess: 'One less is the number before: {{next}} comes before {{n}}.',
@@ -1199,7 +1206,7 @@ export const en: Translation = {
       missingAdd: 'Count the hops from {{from}} to {{to}}.',
       missingSub: 'Count the hops back from {{from}} to {{to}}.',
       compare:
-        'On the number line, the number further right is bigger. The open side of the sign faces the bigger number.',
+        'Further right on the number line is bigger. The sign opens toward the bigger number.',
       neighbors: 'Look at the number line: every number has a neighbour on each side.',
       twoStep: 'First solve the first part: {{first}}. Then go on.',
       drag: 'Count as you put them in: 1, 2, 3… Stop at {{target}}.',
@@ -1230,7 +1237,7 @@ export const en: Translation = {
       'stopped-after-first-step': 'Your first step is right! One more step to go.',
       'too-many': 'There are too many in the basket. Take some out.',
       'too-few': 'Put some more in the basket.',
-      'sign-reversed': 'The open side of the sign faces the bigger number. Look again.',
+      'sign-reversed': 'The sign opens toward the bigger number. Look again.',
       'not-equal': 'Are these numbers the same? Compare again.',
       'chose-fewer': 'Count both groups. Which one has more?',
       default: 'Let’s look at it together again.',
@@ -1907,7 +1914,7 @@ export const en: Translation = {
     home: {
       continue: {
         title: 'Continue',
-        text: 'This big button takes you to the next game of today’s plan. Tap it and start!',
+        text: 'This big button opens your next game. Tap it and start!',
         short: 'Tap it for the next game.',
       },
       journey: {
@@ -1927,8 +1934,8 @@ export const en: Translation = {
       },
       coins: {
         title: 'Nuts',
-        text: 'You get nuts for right answers. With them you buy clothes and pets in the shop and grow your city.',
-        short: 'Nuts: for answers, spent in the shop and the city.',
+        text: 'Right answers give you nuts. Buy clothes and pets with them. And grow your city!',
+        short: 'Nuts come from answers. Spend them in the shop and city.',
       },
       tabs: {
         title: 'Four sections',
@@ -1944,24 +1951,24 @@ export const en: Translation = {
     play: {
       answer: {
         title: 'Pick the answer',
-        text: 'Listen to the task and tap the right answer. A mistake is fine — we will try again!',
+        text: 'Listen and tap the right answer. A mistake is fine — we will try again!',
         short: 'Tap an answer. A mistake shows a hint.',
       },
       back: {
         title: 'Back home',
-        text: 'This little house button always takes you back home.',
+        text: 'The little house button takes you home.',
         short: 'The house button goes home.',
       },
     },
     reward: {
       earned: {
         title: 'Your reward',
-        text: 'You earned these nuts and stars yourself! With nuts you can buy things in the shop and grow your city.',
+        text: 'You earned these nuts and stars yourself! Buy things with nuts and grow your city.',
         short: 'Nuts and stars — for the shop and the city.',
       },
       home: {
         title: 'What next',
-        text: 'The house button takes you home, where new games are waiting.',
+        text: 'The house button takes you home. New games wait there.',
         short: 'The house button goes home.',
       },
     },
@@ -2090,8 +2097,7 @@ export const en: Translation = {
     gamesTitle: 'Games',
     locked: 'This trip is part of PRO. A parent can turn it on in the Parent area.',
     lockedTitle: 'This is a PRO trip',
-    lockedText:
-      'A parent can turn it on in the Parent area. Let’s keep going with the free trips for now!',
+    lockedText: 'A parent can turn it on in the Parent area. Let’s play the free trips for now!',
     backToWorld: 'Back to the trip',
     facts: 'Did you know?',
     points: 'Tap a part to learn more',
@@ -2117,7 +2123,7 @@ export const en: Translation = {
       tray: 'What we have',
       cloth: 'Dasturxon: {{count}} things',
       put: '{{item}}: put on the dasturxon',
-      hint: 'Drag a picture onto the dasturxon, or just tap it.',
+      hint: 'Put a picture on the dasturxon: drag or tap it.',
       ready: 'The dasturxon is ready! Well done!',
       done: 'Well done! What a generous dasturxon.',
     },

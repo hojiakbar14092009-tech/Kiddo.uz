@@ -15,6 +15,12 @@ interface SettingsState {
   /** The guided tours seen by a guest (no profile); a profile keeps its own (ChildProfile.tours). */
   guestTours: Partial<Record<string, number>>
   setGuestTours: (tours: Partial<Record<string, number>>) => void
+  /** A slower voice: longer pauses between a letter and its word (Phase 41). */
+  slowVoice: boolean
+  setSlowVoice: (slow: boolean) => void
+  /** Instructions and questions are read out on their own (Phase 41); off: only on a tap. */
+  autoVoice: boolean
+  setAutoVoice: (on: boolean) => void
 }
 
 export const DEFAULT_VOLUME = 0.8
@@ -30,6 +36,10 @@ export const useSettingsStore = create<SettingsState>()(
       setOnboarded: (done) => set({ onboarded: done }),
       guestTours: {},
       setGuestTours: (tours) => set({ guestTours: tours }),
+      slowVoice: false,
+      setSlowVoice: (slow) => set({ slowVoice: slow }),
+      autoVoice: true,
+      setAutoVoice: (on) => set({ autoVoice: on }),
     }),
     {
       name: 'kiddo.settings',
