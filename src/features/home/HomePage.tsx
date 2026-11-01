@@ -1,3 +1,4 @@
+import { track } from '@/domain/analytics'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
@@ -30,7 +31,7 @@ import { GAME_TYPES } from '@/features/tasks/games'
 import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useReducedMotion } from 'framer-motion'
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useProgress, useWearing } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { dailyPlanState } from './dailyPlan'
@@ -72,6 +73,11 @@ export function HomePage() {
     planDone: plan.complete,
   })
   const hello = tDynamic(t, `mascot.life.${line.key}`, line.params)
+
+  // the day's journey done (anonymous analytics, once a day)
+  useEffect(() => {
+    if (plan.complete) track('journey_done')
+  }, [plan.complete])
 
   return (
     <Screen

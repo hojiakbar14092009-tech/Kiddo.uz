@@ -55,9 +55,14 @@ describe('Admin panel', () => {
     expect(usePaymentStore.getState().payments[0]).toMatchObject({ amount: 278_400, family: 'Ali' })
 
     useAdminStore.setState({ session: { source: 'device' } })
-    await renderRoute('/admin')
+    const { user } = await renderRoute('/admin')
     expect(screen.getAllByText('278 400').length).toBeGreaterThan(0)
-    expect(await screen.findByText(/Bugun 1 kishi PRO sotib oldi/)).toBeInTheDocument()
+    // the day's summary waits in the notifications list (no mascot in the corner)
+    expect(await screen.findByTestId('admin-notes-unread')).toHaveTextContent('1')
+    await user.click(screen.getByRole('button', { name: /Bildirishnomalar/ }))
+    expect(screen.getByTestId('admin-notes')).toHaveTextContent(/Bugun 1 kishi PRO sotib oldi/)
+    expect(screen.queryByTestId('admin-notes-unread')).toBeNull()
+    expect(screen.queryByLabelText(/Navi/)).toBeNull()
   })
 
   it('works the yearly price out of the monthly one and saves both', async () => {

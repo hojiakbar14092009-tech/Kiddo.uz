@@ -9,7 +9,8 @@ import './admin.css'
 import { AdminBackground } from './AdminBackground'
 import { useAdminData, type AdminData } from './adminData'
 import { useAdminPromo } from './adminPromo'
-import { AdminMascot, NaviFigure, type MascotNote } from './AdminMascot'
+import { NotificationsSection, type AdminNotification } from './AdminNotifications'
+import { AnalyticsSection } from './AnalyticsSection'
 import {
   ChildrenSection,
   Overview,
@@ -28,13 +29,32 @@ import {
 import { DemoBanner, DemoControls, DemoOverview } from './DemoAdmin'
 import { formatSom, revenueTotals } from './revenue'
 
-type Section = 'overview' | 'demo' | 'children' | 'payments' | 'promo' | 'ads' | 'settings'
+type Section =
+  | 'overview'
+  | 'notifications'
+  | 'analytics'
+  | 'demo'
+  | 'children'
+  | 'payments'
+  | 'promo'
+  | 'ads'
+  | 'settings'
 
 const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
   {
     id: 'overview',
     label: 'Umumiy',
     icon: <IconPath d="M4 13h6V4H4zm0 7h6v-5H4zm10 0h6v-9h-6zm0-16v5h6V4z" />,
+  },
+  {
+    id: 'notifications',
+    label: 'Bildirishnomalar',
+    icon: <IconPath d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9m4 13h4" />,
+  },
+  {
+    id: 'analytics',
+    label: 'Analitika',
+    icon: <IconPath d="M4 20V10m6 10V4m6 16v-7m6 7H2" />,
   },
   {
     id: 'children',
@@ -149,7 +169,7 @@ function AdminLogin() {
       <main className="relative flex min-h-dvh items-center justify-center p-4">
         <div className="kd-panel flex w-full max-w-md flex-col gap-6 p-7">
           <div className="flex items-center gap-4">
-            <NaviFigure className="size-16" />
+            <KiddoMark size={56} />
             <div>
               <h1 className="font-display text-2xl font-semibold">Kiddo boshqaruvi</h1>
               <p className="text-sm text-[var(--a-ink-soft)]">
@@ -266,21 +286,24 @@ function AdminLogin() {
 
 /* ---------------------------------------------------------------- console */
 
-function useNaviNotes(data: AdminData) {
-  const [notes, setNotes] = useState<MascotNote[]>([])
-  const [excited, setExcited] = useState(false)
+function useAdminNotifications(data: AdminData) {
+  const [notes, setNotes] = useState<AdminNotification[]>([])
   const [pulse, setPulse] = useState(0)
   const greeted = useRef(false)
   const seenPayment = useRef<string | null>(null)
   const seenOnline = useRef<Set<string>>(new Set())
 
-  const add = (kind: MascotNote['kind'], text: string) =>
+  // every note ever added (the list keeps the latest 20; unread counts from this)
+  const [total, setTotal] = useState(0)
+  const add = (kind: AdminNotification['kind'], text: string) => {
+    setTotal((count) => count + 1)
     setNotes((current) =>
       [
         { id: `${Date.now()}-${Math.random()}`, kind, text, at: new Date().toISOString() },
         ...current,
       ].slice(0, 20),
     )
+  }
 
   // A morning summary once the data is there.
   useEffect(() => {
@@ -291,7 +314,7 @@ function useNaviNotes(data: AdminData) {
       'info',
       today.count > 0
         ? `Bugun ${today.count} kishi PRO sotib oldi – ${formatSom(today.amount)} so‘m.`
-        : 'Bugun hali PRO sotib olinmadi. Yangi to‘lov bo‘lsa, darhol yozaman.',
+        : 'Bugun hali PRO sotib olinmadi. Yangi to‘lov bo‘lsa, shu yerda ko‘rinadi.',
     )
   }, [data.loading, data.payments])
 
@@ -309,9 +332,6 @@ function useNaviNotes(data: AdminData) {
       `Yangi to‘lov! ${payment.family || 'Bir oila'} ${PLAN_NAMES[payment.plan] ?? ''} PRO oldi: ${formatSom(payment.amount)} so‘m. Bugun jami ${today.count} ta.`,
     )
     setPulse((value) => value + 1)
-    setExcited(true)
-    const timer = setTimeout(() => setExcited(false), 6000)
-    return () => clearTimeout(timer)
   }, [data.livePayment, data.payments])
 
   // Someone starts playing.
@@ -329,7 +349,7 @@ function useNaviNotes(data: AdminData) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onlineKey])
 
-  return { notes, excited, pulse }
+  return { notes, total, pulse }
 }
 
 function AdminConsole({ session }: { session: AdminSession }) {
@@ -345,7 +365,15 @@ function AdminConsole({ session }: { session: AdminSession }) {
   const theme = useAdminStore((state) => state.theme)
   const toggleTheme = useAdminStore((state) => state.toggleTheme)
   const signOut = useAdminStore((state) => state.signOut)
-  const { notes, excited, pulse } = useNaviNotes(data)
+  const { notes, total, pulse } = useAdminNotifications(data)
+  // notes count as read once the list has been opened
+  const [seenNotes, setSeenNotes] = useState(0)
+  const unread = section === 'notifications' ? 0 : Math.max(0, total - seenNotes)
+  const open = (next: Section) => {
+    // entering or leaving the list marks what it showed as read
+    if (next === 'notifications' || section === 'notifications') setSeenNotes(total)
+    setSection(next)
+  }
   const online = data.children.filter((child) => child.online).length
   const title = sections.find((item) => item.id === section)?.label ?? ''
 
@@ -378,7 +406,7 @@ function AdminConsole({ session }: { session: AdminSession }) {
               <li key={item.id}>
                 <button
                   type="button"
-                  onClick={() => setSection(item.id)}
+                  onClick={() => open(item.id)}
                   aria-current={section === item.id ? 'page' : undefined}
                   className={clsx(
                     'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold whitespace-nowrap transition-colors',
@@ -389,6 +417,15 @@ function AdminConsole({ session }: { session: AdminSession }) {
                 >
                   {item.icon}
                   {item.label}
+                  {item.id === 'notifications' && unread > 0 && (
+                    <span
+                      className="kd-num ml-auto flex min-w-6 items-center justify-center rounded-full bg-[var(--a-gold)] px-1.5 text-xs font-bold text-[#1d1300]"
+                      aria-label={`${unread} ta yangi`}
+                      data-testid="admin-notes-unread"
+                    >
+                      {Math.min(unread, 99)}
+                    </span>
+                  )}
                 </button>
               </li>
             ))}
@@ -472,6 +509,8 @@ function AdminConsole({ session }: { session: AdminSession }) {
             <>
               {section === 'overview' &&
                 (demo ? <DemoOverview data={data} /> : <Overview data={data} />)}
+              {section === 'notifications' && <NotificationsSection notes={notes} />}
+              {section === 'analytics' && <AnalyticsSection source={dataSource(session)} />}
               {section === 'demo' && demo && <DemoControls />}
               {section === 'children' && <ChildrenSection data={data} />}
               {section === 'payments' && <PaymentsSection data={data} />}
@@ -484,7 +523,6 @@ function AdminConsole({ session }: { session: AdminSession }) {
           )}
         </main>
       </div>
-      <AdminMascot notes={notes} excited={excited} />
     </>
   )
 }

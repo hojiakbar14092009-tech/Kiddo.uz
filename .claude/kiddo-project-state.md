@@ -660,3 +660,18 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 ## Next: Phases 37–50 — `.claude/kiddo-roadmap-phase37-50.md` (owner decisions 2026-11-01: yong‘oq currency,
 
 4-tab child nav, voice first, natural mascot, child-friendly voices, admin without mascot). Start with Phase 37.
+
+## Phase 37 — COMPLETE (2026-11-01) – docs/architecture/analytics.md
+
+- Anonymous analytics (`src/domain/analytics`): 9 events (first_opened cohort, app_opened daily, onboarding, activity
+  opened/finished, journey, day-2/day-7 return, app_closed last-per-day), install id + day + coarse screen only;
+  parent switch to turn off; `AnalyticsTracker` in AppShell (admin never counted); send every 60 s + keepalive on
+  hide (`sendAnalytics.ts`), only when Supabase is configured.
+- Migration 0016_analytics.sql (owner applies): no table access; `add_analytics_events` skips bad rows, 1 install
+  per batch, 200 events/install cap, 180-day retention; admin-only cohort funnel + last-exit counts.
+- Admin: Navi mascot removed → "Bildirishnomalar" list with unread count; new "Analitika" (funnel 7/30 days,
+  exit screens in plain names).
+- Verification: format/lint/typecheck PASS, unit 1382/1382, build PASS, SQL 356 assertions PASS, browser 40/40
+  (first code) + 34/34 + final 28/28 (kiddo, parent-dashboard; performance and onboarding in the earlier runs);
+  Critic REJECT (H: exits never sent on a last visit) → fixed with Mediums → ACCEPT; its follow-up Mediums fixed.
+  Next: Phase 38 (cleanup).

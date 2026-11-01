@@ -587,6 +587,9 @@ export const en: Translation = {
         device: 'Stored on this device only. In this mode no child data is sent anywhere.',
         cloud:
           'Synced to your account ({{email}}): the child’s profile (name, date of birth), coins and rewards, task and learning results, minutes per day, leaving/returning events and online presence signals. The activity history and mistakes on this page stay on this device only.',
+        analytics:
+          'To improve the app, anonymous statistics are sent too: which steps were opened and on which page the app was closed. They contain no child, name, answer or photo.',
+        analyticsSwitch: 'Send anonymous statistics',
         export: 'Export this child’s data',
         exportHint:
           'A JSON file with the profile, progress, learning results, city and medals. Pictures are not included – only their dates and sizes.',

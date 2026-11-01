@@ -13,6 +13,7 @@ import { AppSettingsSync } from './AppSettingsSync'
 import { HomeworkBridge } from '@/features/homework/HomeworkBridge'
 import { PetBridge } from '@/features/pets/PetBridge'
 import { SoundBridge } from './SoundBridge'
+import { AnalyticsTracker } from './AnalyticsTracker'
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
@@ -31,6 +32,7 @@ export function AppShell() {
       <HomeworkBridge />
       <PetBridge />
       <SoundBridge />
+      <AnalyticsTracker />
       <Outlet />
       {!pathname.startsWith('/admin') && <SplashScreen />}
       <Toaster />

@@ -745,6 +745,50 @@ insert into public.children (id,parent_id,name,age,gender,mascot) values ('cl','
 select pg_temp.check((select age from public.children where id='cl') = 40, 'age: a forty-year-old learner is allowed');
 select pg_temp.expect_error($$insert into public.children (id,parent_id,name,age,gender,mascot) values ('cm','00000000-0000-0000-0000-0000000000d2','X',2,'girl','girl')$$, 'children_age_check');
 
+-- ===== 0016: anonymous analytics (anyone adds through the function, only an admin reads counts)
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-00000001","install":"install-0001","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'","screen":"/worlds/dino"}'||','||'{"id":"evt-00000002","install":"install-0001","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 2, 'analytics: a batch is added');
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-00000001","install":"install-0001","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'","screen":"/worlds/dino"}'||']')::jsonb) = 0, 'analytics: an event sent twice is ignored');
+-- a bad event is skipped, the good ones in its batch are kept
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-00000003","install":"install-0001","name":"child_name","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"evt-00000004","install":"install-0001","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'","screen":"/Aziz Karimov"}'||','||'{"id":"evt-00000005","install":"install-0001","name":"app_opened","day":"2020-01-01","at":"'||now()||'"}'||','||'{"id":"evt-00000007","install":"install-0001","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 1, 'analytics: bad events are skipped, the good one is kept');
+select pg_temp.check(public.add_analytics_events('[{"id":"evt-00000008","install":"install-0001","name":"app_opened","day":"tomorrow","at":"soon"}]'::jsonb) = 0, 'analytics: a malformed day or time is skipped, never an error');
+select pg_temp.expect_error($q$select public.add_analytics_events(('['||'{"id":"evt-00000009","install":"install-0001","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"evt-00000010","install":"install-0002","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb)$q$, 'bad_batch');
+select pg_temp.expect_error($q$select public.add_analytics_events((select jsonb_agg(x) from generate_series(1,101) x))$q$, 'bad_batch');
+-- a flood from one install stops at 200 events a day
+select pg_temp.check(
+  public.add_analytics_events((select jsonb_agg(jsonb_build_object('id','flood-'||lpad(i::text,6,'0'),'install','install-flood','name','activity_opened','day',(now() at time zone 'Asia/Tashkent')::date,'at',now(),'screen','/home')) from generate_series(1,100) i))
+  + public.add_analytics_events((select jsonb_agg(jsonb_build_object('id','flood-'||lpad(i::text,6,'0'),'install','install-flood','name','activity_opened','day',(now() at time zone 'Asia/Tashkent')::date,'at',now(),'screen','/home')) from generate_series(101,200) i))
+  + public.add_analytics_events((select jsonb_agg(jsonb_build_object('id','flood-'||lpad(i::text,6,'0'),'install','install-flood','name','activity_opened','day',(now() at time zone 'Asia/Tashkent')::date,'at',now(),'screen','/home')) from generate_series(201,250) i))
+  = 200, 'analytics: at most 200 events per install and day');
+select pg_temp.expect_error($$insert into public.analytics_events (id,install_id,name,day,at) values ('evt-00000006','install-0001','app_opened',current_date, now())$$, 'permission denied');
+select pg_temp.expect_error($$select count(*) from public.analytics_events$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.admin_analytics_funnel(30)$$, 'permission denied');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select pg_temp.expect_error($$select count(*) from public.analytics_events$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.admin_analytics_funnel(30)$$, 'not_admin');
+select pg_temp.expect_error($$select * from public.admin_analytics_exits(30)$$, 'not_admin');
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from public.admin_analytics_funnel(30)) = 0, 'analytics: no install first opened in the period, an empty funnel');
+select pg_temp.check((select closes from public.admin_analytics_exits(30) where screen='/worlds/dino') = 1, 'analytics: where the app was left, for an admin');
+commit;
+-- a cohort: install-0003 is new in the period and reaches two steps; it left twice in a day, the last place counts
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-00000011","install":"install-0003","name":"first_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"evt-00000012","install":"install-0003","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"evt-00000013","install":"install-0003","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||(now() - interval '1 minute')||'","screen":"/home"}'||','||'{"id":"evt-00000014","install":"install-0003","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'","screen":"/math-lab"}'||']')::jsonb) = 4, 'analytics: a new install sends its first steps');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select pg_temp.check((select installs from public.admin_analytics_funnel(30) where name='first_opened') = 1 and (select installs from public.admin_analytics_funnel(30) where name='app_opened') = 1, 'analytics: the funnel counts only installs first opened in the period');
+select pg_temp.check((select closes from public.admin_analytics_exits(30) where screen='/math-lab') = 1 and not exists (select 1 from public.admin_analytics_exits(30) where screen='/home'), 'analytics: the last leaving of a day counts');
+commit;
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

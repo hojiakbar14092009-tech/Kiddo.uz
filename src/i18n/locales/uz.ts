@@ -589,6 +589,9 @@ export const uz = {
           'Faqat shu qurilmada saqlanadi. Bu rejimda bolaga oid hech qanday ma’lumot yuborilmaydi.',
         cloud:
           'Hisobingizga ({{email}}) quyidagilar sinxronlanadi: bola profili (ismi, tug‘ilgan kuni), coinlar va mukofotlar, vazifa va o‘quv natijalari, kunlik daqiqalar, ilovadan chiqish/qaytish voqealari va onlayn holat belgisi. Bu sahifadagi mashg‘ulotlar tarixi va xatolar faqat shu qurilmada qoladi.',
+        analytics:
+          'Ilovani yaxshilash uchun ismsiz statistika ham yuboriladi: qaysi qadamlar ochilgani va ilova qaysi sahifada yopilgani. Unda bola, ism, javob yoki rasm yo‘q.',
+        analyticsSwitch: 'Ismsiz statistikani yuborish',
         export: 'Bola ma’lumotlarini yuklab olish',
         exportHint:
           'JSON fayl: profil, natijalar, o‘quv natijalari, shahar va medallar. Rasmlar kirmaydi – faqat ularning sanasi va hajmi.',

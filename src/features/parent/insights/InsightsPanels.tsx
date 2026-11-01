@@ -1,3 +1,6 @@
+import clsx from 'clsx'
+import { useAnalyticsStore } from '@/domain/analytics'
+import { isSupabaseConfigured } from '@/services/supabase/config'
 import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -469,6 +472,7 @@ export function DataPanel({ child }: { child: ChildProfile }) {
           ? t('parent.insights.data.cloud', { email: session.email })
           : t('parent.insights.data.device')}
       </p>
+      {isSupabaseConfigured && <AnalyticsChoice />}
       <div className="flex flex-col gap-2">
         <button
           type="button"
@@ -486,5 +490,36 @@ export function DataPanel({ child }: { child: ChildProfile }) {
         <ChevronRightIcon size={18} />
       </Link>
     </Panel>
+  )
+}
+
+/** The anonymous statistics, in one sentence, with a switch to turn them off (Phase 37). */
+function AnalyticsChoice() {
+  const { t } = useTranslation()
+  const enabled = useAnalyticsStore((state) => state.enabled)
+  const setEnabled = useAnalyticsStore((state) => state.setEnabled)
+  return (
+    <div className="flex items-center gap-3" data-testid="data-analytics">
+      <p className="flex-1 text-ink-soft">{t('parent.insights.data.analytics')}</p>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={enabled}
+        aria-label={t('parent.insights.data.analyticsSwitch')}
+        onClick={() => setEnabled(!enabled)}
+        className={clsx(
+          'flex h-11 w-20 shrink-0 items-center rounded-full p-1 transition-colors',
+          enabled ? 'bg-primary' : 'bg-line-strong',
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={clsx(
+            'size-9 rounded-full bg-surface shadow transition-transform motion-reduce:transition-none',
+            enabled && 'translate-x-9',
+          )}
+        />
+      </button>
+    </div>
   )
 }
