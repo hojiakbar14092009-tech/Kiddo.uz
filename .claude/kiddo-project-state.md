@@ -656,3 +656,6 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Release follow-ups (non-blocking): age fit of the home plan and Math start for 8+; harder parent gate (e.g. 23 × 7);
   rest-hours greeting vs plan; empty shop at 0 coins; first-screen JS 320/340 KB; apply migrations 0014 + 0015;
   record new voice phrases; Scale Portal near/far for 3–6; Shadow Lab two-clue detective; admin cloud session re-check.
+
+## Next: Phases 37–50 — `.claude/kiddo-roadmap-phase37-50.md` (owner decisions 2026-11-01: yong‘oq currency,
+4-tab child nav, voice first, natural mascot, child-friendly voices, admin without mascot). Start with Phase 37.
