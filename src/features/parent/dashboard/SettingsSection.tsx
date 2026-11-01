@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { LANGUAGE_INFO, LANGUAGES } from '@/content/languages'
 import { audioManager } from '@/services/audio/audioManager'
-import { playCue, SOUND_CUES } from '@/services/audio/soundLanguage'
+import { playCue, playTap, SOUND_CUES } from '@/services/audio/soundLanguage'
 import { isSupabaseConfigured } from '@/services/supabase/client'
 import { useParentGateStore, useParentStore } from '@/store/parentStore'
 import { useLanguage, useSettingsStore } from '@/store/settingsStore'
@@ -60,6 +60,17 @@ export function SettingsSection() {
             {SOUND_CUES.map((cue) => (
               <Button key={cue} variant="soft" size="md" onClick={() => playCue(cue)}>
                 {t(`parent.settings.cues.${cue}`)}
+              </Button>
+            ))}
+          </div>
+        </div>
+        {/* Phase 42: each part of the app answers a tap in its own voice */}
+        <div className="flex flex-col gap-2" data-testid="tap-palettes">
+          <span className="font-semibold">{t('parent.settings.tapsTitle')}</span>
+          <div className="flex flex-wrap gap-2">
+            {(['xylophone', 'nut', 'blip'] as const).map((palette) => (
+              <Button key={palette} variant="soft" size="md" onClick={() => playTap(palette)}>
+                {t(`parent.settings.taps.${palette}`)}
               </Button>
             ))}
           </div>

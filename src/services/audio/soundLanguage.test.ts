@@ -2,8 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSettingsStore } from '@/store/settingsStore'
 
 const playTone = vi.hoisted(() => vi.fn())
+const gains = vi.hoisted(() => [] as { gain: { value: number } }[])
 const ctx = vi.hoisted(() => ({
-  createGain: () => ({ gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() }),
+  createGain: () => {
+    const node = { gain: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() }
+    gains.push(node)
+    return node
+  },
   destination: {},
 }))
 vi.mock('./synth', () => ({ audio: () => ctx, playTone }))
@@ -14,12 +19,15 @@ const {
   playBack,
   playConfirm,
   playCue,
+  playTap,
+  nextTapStep,
   queueCue,
   resetCueQueue,
   setNarrating,
   SOUND_CUES,
   stepHz,
   strongestCue,
+  tapPaletteFor,
 } = await import('./soundLanguage')
 
 const PENTATONIC_C = [0, 2, 4, 7, 9]
@@ -157,5 +165,59 @@ describe('sound language', () => {
     useSettingsStore.setState({ volume: 0 })
     playCue('unlock')
     expect(playTone).not.toHaveBeenCalled()
+  })
+
+  it('each part of the app has its own tap (Phase 42)', () => {
+    expect(tapPaletteFor('/home')).toBe('wood')
+    expect(tapPaletteFor('/parent/dashboard')).toBe('wood')
+    expect(tapPaletteFor('/alphabet')).toBe('xylophone')
+    expect(tapPaletteFor('/alphabet', '?tab=numbers')).toBe('nut')
+    expect(tapPaletteFor('/alphabet/num-9')).toBe('nut')
+    expect(tapPaletteFor('/tasks/find-letter')).toBe('xylophone')
+    expect(tapPaletteFor('/math-lab')).toBe('nut')
+    expect(tapPaletteFor('/learn/math/add')).toBe('nut')
+    expect(tapPaletteFor('/learn/space')).toBe('blip')
+    expect(tapPaletteFor('/worlds/dino')).toBe('blip')
+    expect(tapPaletteFor('/shop')).toBe('nut')
+    expect(tapPaletteFor('/trace/numbers/7')).toBe('nut')
+  })
+
+  it('taps walk a tune: never the same note twice in a row, softer under the voice', () => {
+    let previous = nextTapStep()
+    for (let i = 0; i < 20; i += 1) {
+      const step = nextTapStep()
+      expect(step).not.toBe(previous)
+      previous = step
+    }
+    // a tap of every palette is quieter at its peak than the softest cue (back, try again)
+    const peak = () => {
+      const out = gains.at(-1)!.gain.value
+      return (
+        Math.max(...playTone.mock.calls.map((call) => (call[2] as { gain: number }).gain)) * out
+      )
+    }
+    const quietestCue = Math.min(
+      ...(['back', 'tryAgain', 'confirm'] as const).map(
+        (cue) => Math.max(...cueNotes(cue).map((n) => 0.3 * (n.gain ?? 1))) * 0.8 * 0.6,
+      ),
+    )
+    for (const palette of ['xylophone', 'nut', 'blip'] as const) {
+      playTone.mockReset()
+      playTap(palette)
+      expect(peak()).toBeLessThan(quietestCue)
+    }
+  })
+
+  it('a right answer is a soft tune up; a wrong one a gentle question, never a buzz', () => {
+    const correct = cueNotes('correct')
+    expect(correct.map((n) => n.step)).toEqual(
+      [...correct.map((n) => n.step)].sort((a, b) => a - b),
+    )
+    const again = cueNotes('tryAgain')
+    expect(again.every((n) => (n.gain ?? 1) <= 0.4)).toBe(true)
+    expect(Math.max(...again.map((n) => n.at + n.duration))).toBeLessThan(0.4)
+    // the nut roll: knocks rolling up
+    const coin = cueNotes('coin')
+    expect(coin.length).toBeGreaterThanOrEqual(3)
   })
 })

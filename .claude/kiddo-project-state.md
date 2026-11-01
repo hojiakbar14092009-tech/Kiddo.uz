@@ -722,3 +722,11 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Verification: format/lint/typecheck PASS, unit 1414/1414, build PASS, browser 94/102 → fixes → 18/18 and 78/78;
   Critic REJECT ×2 (no auto instructions, coverage blind spots, re-read on feedback, hidden templates) → fixed.
   Next: Phase 42 (sound palettes).
+
+## Phase 42 — COMPLETE (2026-11-02) – sound palettes
+
+- Tap palettes by section (soundLanguage.tapPaletteFor/playTap): xylophone (letters), nut (numbers, city, shop),
+  blip (explore), wood mp3 (Bugun, parent, admin); pentatonic walk; taps the quietest sound (TAP_LEVEL).
+  Nut roll for nuts earned, soft "correct" tune, gentle "tryAgain" (no buzzer); parent preview of palettes.
+- Verification: unit 1418/1418, build PASS, browser 30/30; Critic REJECT (taps louder than cues) → fixed + guard.
+- Owner requests 2026-11-02 added to the doc and roadmap (42b trace fixes first, then 43–50, then 51–55).

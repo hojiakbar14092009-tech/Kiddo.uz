@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
 import { audioManager } from '@/services/audio/audioManager'
-import { playBack, playConfirm } from '@/services/audio/soundLanguage'
+import { playBack, playConfirm, playTap, tapPaletteFor } from '@/services/audio/soundLanguage'
 
 const INTERACTIVE = 'button, a[href], [role="button"], [role="tab"]'
 /** Taps closer together than this make one click (a fast child never makes a clatter). */
 const TAP_GAP_MS = 70
 
 /**
- * Every tap on something interactive answers with the soft wooden click,
- * in Free and PRO alike (back and confirm buttons, marked `data-sound`, with
+ * Every tap on something interactive answers softly, in the voice of the
+ * part of the app it is in (soundLanguage tap palettes), in Free and PRO alike (back and confirm buttons, marked `data-sound`, with
  * their own cue). One listener for the whole app keeps it consistent.
  */
 export function InterfaceSounds() {
@@ -24,7 +24,10 @@ export function InterfaceSounds() {
       const now = performance.now()
       if (now - lastTap < TAP_GAP_MS) return
       lastTap = now
-      audioManager.play('click')
+      // each part of the app has its own tap (Phase 42); Bugun and the grown-ups' areas the wooden click
+      const palette = tapPaletteFor(window.location.pathname, window.location.search)
+      if (palette === 'wood') audioManager.play('click')
+      else playTap(palette)
     }
     document.addEventListener('pointerdown', onPointerDown, { capture: true })
     return () => document.removeEventListener('pointerdown', onPointerDown, { capture: true })

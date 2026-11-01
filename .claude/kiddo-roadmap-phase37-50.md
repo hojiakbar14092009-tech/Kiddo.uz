@@ -44,3 +44,15 @@ migrations written only — the owner applies them, no fake success, commit + pu
 
 Owner can start now in parallel: 5-children test, voice casting + Aisha pricing, ElevenLabs (1 month Pro),
 Google OAuth client, Telegram bot, EU Supabase project + apply 0014/0015, lawyer on child data/photos.
+
+## Owner requests 2026-11-02 (doc section "Yangi so‘rovlar") — order after Phase 42
+
+| Phase | What                                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------------------- |
+| 42b   | Trace bugs: correct letter rejected (desktop R), wrong letter accepted (phone D); help shows finger strokes   |
+| 43–50 | As planned above                                                                                              |
+| 51    | Admin preview: "Ilovani ochish" from the admin panel, sandbox profile, banner + back                          |
+| 52    | Security audit (keys, admin routes, RLS, XSS, rate limits, headers, CORS, deps, leaked secrets) — only needed |
+| 53    | Scale: pooler, indexes, cron/edge queue for background jobs, load test (no own LB/servers: Vercel+Supabase)   |
+| 54    | Admin V4 glassy animated dashboard + premium icon set (app and admin)                                         |
+| 55    | Tools vetting (graphify, ghost-editor, ffmpeg-skill, ECC) + ad clip 9:16 (Reels/Shorts), voices, music        |

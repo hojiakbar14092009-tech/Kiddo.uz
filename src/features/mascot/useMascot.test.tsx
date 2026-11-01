@@ -2,6 +2,7 @@ import { act, render, renderHook, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import '@/i18n'
 import { audioManager } from '@/services/audio/audioManager'
+import * as soundLanguage from '@/services/audio/soundLanguage'
 import { useSettingsStore } from '@/store/settingsStore'
 import { useFamilyStore } from '@/store/familyStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
@@ -30,10 +31,15 @@ describe('useMascot', () => {
     render(<Mascot />)
     const { result } = renderHook(() => useMascot())
 
+    const cue = vi.spyOn(soundLanguage, 'playCue').mockImplementation(() => undefined)
     act(() => result.current.react('correct'))
 
     expect(screen.getByText('Yahoooo! Barakalla!')).toBeInTheDocument()
-    expect(audioManager.play).toHaveBeenCalledWith('success')
+    // a right answer: the soft tune (Phase 42); a wrong one: a gentle question, no buzzer
+    expect(cue).toHaveBeenCalledWith('correct', { byTap: true })
+    act(() => result.current.react('wrong'))
+    expect(cue).toHaveBeenCalledWith('tryAgain', { byTap: true })
+    expect(audioManager.play).not.toHaveBeenCalledWith('soft')
     expect(audioManager.canSpeak()).toBe(false)
   })
 

@@ -765,6 +765,12 @@ export const uz = {
       volume: 'Balandligi',
       cuesTitle: 'Ilova tovushlari',
       cuesHint: 'Har bir yutuqning o‘z qisqa tovushi bor. Bosib eshitib ko‘ring.',
+      tapsTitle: 'Tugma tovushlari (bo‘limlar bo‘yicha)',
+      taps: {
+        xylophone: 'Harflar: ksilofon',
+        nut: 'Sonlar va shahar: yong‘oq',
+        blip: 'Kashfiyot: kosmos',
+      },
       cues: {
         coin: 'Yong‘oq',
         star: 'Yulduz',
@@ -776,6 +782,8 @@ export const uz = {
         discovery: 'Kashfiyot',
         confirm: 'Tasdiqlash',
         back: 'Orqaga',
+        correct: 'To‘g‘ri javob',
+        tryAgain: 'Yana urinib ko‘r',
       },
       testSound: 'Tekshirib eshitish',
       voiceNote:

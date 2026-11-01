@@ -760,6 +760,12 @@ export const en: Translation = {
       volume: 'Volume',
       cuesTitle: 'App sounds',
       cuesHint: 'Every kind of success has its own short sound. Tap to listen.',
+      tapsTitle: 'Button sounds (by section)',
+      taps: {
+        xylophone: 'Letters: xylophone',
+        nut: 'Numbers and city: nut',
+        blip: 'Explore: space',
+      },
       cues: {
         coin: 'Nuts',
         star: 'Star',
@@ -771,6 +777,8 @@ export const en: Translation = {
         discovery: 'Discovery',
         confirm: 'Confirm',
         back: 'Back',
+        correct: 'Right answer',
+        tryAgain: 'Try again',
       },
       testSound: 'Play a test sound',
       voiceNote:

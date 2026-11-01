@@ -763,6 +763,12 @@ export const ru: Translation = {
       volume: 'Громкость',
       cuesTitle: 'Звуки приложения',
       cuesHint: 'У каждого успеха свой короткий звук. Нажмите, чтобы послушать.',
+      tapsTitle: 'Звуки кнопок (по разделам)',
+      taps: {
+        xylophone: 'Буквы: ксилофон',
+        nut: 'Числа и город: орешек',
+        blip: 'Открытия: космос',
+      },
       cues: {
         coin: 'Орешки',
         star: 'Звезда',
@@ -774,6 +780,8 @@ export const ru: Translation = {
         discovery: 'Открытие',
         confirm: 'Подтверждение',
         back: 'Назад',
+        correct: 'Правильный ответ',
+        tryAgain: 'Попробуй ещё',
       },
       testSound: 'Проверить звук',
       voiceNote:

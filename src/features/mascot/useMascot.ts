@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { audioManager, type Utterance } from '@/services/audio/audioManager'
+import { noteSuccessSound, playCue } from '@/services/audio/soundLanguage'
 import { useActiveChild } from '@/store/familyStore'
 import { useLanguage } from '@/store/settingsStore'
 import { useMascotStore } from './mascotStore'
@@ -108,8 +109,14 @@ export function useMascot() {
     (event: MascotEvent, custom?: MascotMessage, options: ReactOptions = {}) => {
       const message = custom ?? defaultMessage(event)
       storeReact(event, message)
-      if (event === 'correct' || event === 'celebrate') audioManager.play('success')
-      if (event === 'wrong') audioManager.play('soft')
+      // a right answer: a soft tune; a celebration: the full chime; a wrong answer:
+      // a gentle "hmm?", never a buzzer (Phase 42)
+      if (event === 'celebrate') audioManager.play('success')
+      if (event === 'correct') {
+        noteSuccessSound()
+        playCue('correct', { byTap: true })
+      }
+      if (event === 'wrong') playCue('tryAgain', { byTap: true })
       if (options.speak !== false) void speakFor(event, message)
     },
     [defaultMessage, speakFor, storeReact],

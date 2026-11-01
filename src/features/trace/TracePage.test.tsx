@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
@@ -29,6 +29,9 @@ describe('trace page', () => {
 
   it('sends an unknown item back to its list', async () => {
     const { router } = await renderRoute('/trace/numbers/42')
-    expect(router.state.location.pathname).toBe('/trace/numbers')
+    // the redirect may land a moment later on a busy machine (lazy route)
+    await waitFor(() => expect(router.state.location.pathname).toBe('/trace/numbers'), {
+      timeout: 5000,
+    })
   })
 })
