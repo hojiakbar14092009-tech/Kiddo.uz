@@ -24,7 +24,7 @@ const SCREEN_NAMES: Record<string, string> = {
   learn: 'O‘rganish',
   'math-lab': 'Matematika laboratoriyasi',
   worlds: 'Dunyolar',
-  stories: 'Hikoyalar',
+  stories: 'Ertaklar kutubxonasi',
   'scale-portal': 'Masshtab portali',
   'shadow-lab': 'Soya laboratoriyasi',
   'mistake-garden': 'Mashq bog‘i',

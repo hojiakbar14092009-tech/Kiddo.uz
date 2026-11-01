@@ -85,7 +85,7 @@ export const PLOTS: readonly PlotDef[] = [
     id: 'mars',
     seed: 'mars-seed',
     cost: { seed: 1 },
-    // biology: the Garden lessons, the dinosaur quiz, any science activity done well
+    // biology: the Veggie Patch game, the dinosaur quiz, any science activity done well
     grows: { strand: 'science', minStars: 2 },
     stages: PLANT_STAGES,
   },

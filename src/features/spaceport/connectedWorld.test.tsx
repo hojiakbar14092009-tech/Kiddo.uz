@@ -112,7 +112,7 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     expect(screen.getByTestId('garden-empty')).toBeInTheDocument()
     fireEvent.click(screen.getByTestId('plant-seed'))
     expect(screen.getByTestId('mars-bed')).toHaveAttribute('data-stage', '0')
-    expect(screen.getByRole('link', { name: 'Bog‘ darsi' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Tomorqa o‘yini' })).toHaveAttribute(
       'href',
       '/learn/garden',
     )

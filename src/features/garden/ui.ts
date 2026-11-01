@@ -34,7 +34,7 @@ export const GARDEN_UI: Record<Language, GardenUi> = {
     notThis: 'Bu boshqa narsa. Yana qidir!',
     learnDone: 'Barakalla! Hammasini topding!',
     found: (found, total) => `Topildi: ${found}/${total}`,
-    board: 'Bog‘',
+    board: 'Tomorqa',
   },
   ru: {
     howToPlay: 'Как будем играть?',
@@ -49,7 +49,7 @@ export const GARDEN_UI: Record<Language, GardenUi> = {
     notThis: 'Это что-то другое. Поищи ещё!',
     learnDone: 'Молодец! Всё найдено!',
     found: (found, total) => `Найдено: ${found} из ${total}`,
-    board: 'Сад',
+    board: 'Огород',
   },
   en: {
     howToPlay: 'How shall we play?',
@@ -64,6 +64,6 @@ export const GARDEN_UI: Record<Language, GardenUi> = {
     notThis: 'That’s something else. Keep looking!',
     learnDone: 'Well done! You found them all!',
     found: (found, total) => `Found: ${found} of ${total}`,
-    board: 'Garden',
+    board: 'Veggie Patch',
   },
 }

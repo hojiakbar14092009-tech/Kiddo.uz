@@ -251,7 +251,7 @@ test('the learning sections open from their Kiddo City buildings without errors'
   for (const [building, section] of [
     ['So‘zlar ustaxonasi', 'Birinchi so‘zim'],
     ['Rasadxona', 'Koinot'],
-    ['Sehrli bog‘', 'Bog‘da top'],
+    ['Tomorqa', 'Tomorqada top'],
     ['Robot ustaxonasi', 'Maskotga yordam ber'],
   ] as const) {
     await page.getByRole('link', { name: building, exact: true }).click()
@@ -264,7 +264,7 @@ test('the learning sections open from their Kiddo City buildings without errors'
   // The Story Library opens the Story Engine, which links on to the classic tales.
   await page.getByRole('link', { name: 'Ertaklar kutubxonasi', exact: true }).click()
   await expect(page).toHaveURL(/\/stories$/)
-  await expect(page.getByRole('heading', { name: 'Hikoyalar' })).toBeAttached()
+  await expect(page.getByRole('heading', { name: 'Ertaklar kutubxonasi' })).toBeAttached()
   await page.getByTestId('stories-classic-tales').click()
   await expect(page).toHaveURL(/\/learn\/tales$/)
   await expect(page.locator('.learn-title').filter({ visible: true }).first()).toContainText(

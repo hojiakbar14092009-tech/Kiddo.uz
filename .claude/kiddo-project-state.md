@@ -675,3 +675,14 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   (first code) + 34/34 + final 28/28 (kiddo, parent-dashboard; performance and onboarding in the earlier runs);
   Critic REJECT (H: exits never sent on a last visit) → fixed with Mediums → ACCEPT; its follow-up Mediums fixed.
   Next: Phase 38 (cleanup).
+
+## Phase 38 — COMPLETE (2026-11-01) – naming cleanup
+
+- Child menus already had one maths entry (Math Lab, which links to the lessons) and one story library (which links to
+  the classic tales): those stay as teach-first inner pages. The real clash was "bog‘": the finding game (/learn/garden,
+  fruit/vegetables/flowers/animals) is now uz "Tomorqa"/"Tomorqada top", ru "Огород"/"Найди на огороде", en "Veggie
+  Patch"/"Veggie Patch hunt" (+ building levels, board, Practice Garden button, journey text); "Mashq bog‘i" keeps
+  the garden word. Story Library title = its building name. /dev/mascots stays dev/e2e only.
+- Verification: format/lint/typecheck PASS, unit 1382/1382, build PASS, browser 41/41 then 29/30 (phone "works
+  offline" failed once under load; isolated --repeat-each=3: 6/6 — service-worker precache race, not this change);
+  Critic REJECT ("Mevazor" wrong for vegetables, leftover "Bog‘ darsi") → fixed → accept after the test fix. Next: 39.

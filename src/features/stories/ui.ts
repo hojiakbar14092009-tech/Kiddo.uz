@@ -39,7 +39,7 @@ export interface StoriesUi {
 
 export const STORIES_UI: Record<Language, StoriesUi> = {
   uz: {
-    title: 'Hikoyalar',
+    title: 'Ertaklar kutubxonasi',
     intro: 'Qaysi hikoyani o‘qiymiz?',
     classic: 'Klassik ertaklar',
     classicText: 'Qisqa 3D ertaklar va topshiriqlar',
@@ -73,7 +73,7 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
     pictureLabel: (title) => `«${title}» hikoyasidan rasm`,
   },
   ru: {
-    title: 'Истории',
+    title: 'Библиотека сказок',
     intro: 'Какую историю почитаем?',
     classic: 'Классические сказки',
     classicText: 'Короткие 3D-сказки с заданиями',
@@ -107,7 +107,7 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
     pictureLabel: (title) => `Картинка из истории «${title}»`,
   },
   en: {
-    title: 'Stories',
+    title: 'Story Library',
     intro: 'Which story shall we read?',
     classic: 'Classic tales',
     classicText: 'Short 3D tales with tasks',

@@ -434,7 +434,7 @@ function ModePicker({ onPick }: { onPick: (mode: LearnMode) => void }) {
   )
 }
 
-/** «Bog‘da top»: find things in a garden, with help that comes in small steps. */
+/** «Tomorqada top» (the veggie patch): find things in a home garden plot, with help that comes in small steps. */
 export function GardenPage() {
   const language = useLanguage()
   const level = useContentTier(SECTION_STRAND.garden)
