@@ -1,0 +1,57 @@
+{
+  "hooks": {
+    "a": {
+      "uz": "Farzandingiz telefonda nima qilyapti?",
+      "ru": "Чем ваш ребёнок занят в телефоне?",
+      "en": "What is your child doing on that phone?"
+    },
+    "b": {
+      "uz": "Bir soat multfilm. Bitta ham yangi harf yo‘q.",
+      "ru": "Час мультиков. Ни одной новой буквы.",
+      "en": "An hour of cartoons. Not one new letter."
+    },
+    "c": {
+      "uz": "O‘n daqiqa. Bitta yangi harf. Har kuni.",
+      "ru": "Десять минут. Одна новая буква. Каждый день.",
+      "en": "Ten minutes. One new letter. Every day."
+    }
+  },
+  "scenes": [
+    {
+      "id": "turn",
+      "uz": "Maqsadsiz videolar o‘rniga — Kiddo.",
+      "ru": "Вместо бесконечных роликов — Kiddo.",
+      "en": "Instead of endless videos, try Kiddo."
+    },
+    {
+      "id": "letter",
+      "uz": "Bola harfni eshitadi, ko‘radi va topadi.",
+      "ru": "Ребёнок слышит букву, видит и находит её.",
+      "en": "Your child hears a letter, sees it, finds it."
+    },
+    {
+      "id": "plan",
+      "uz": "Har kuni uch qadam: harf, rasm, yozuv.",
+      "ru": "Каждый день три шага: буква, картинка, письмо.",
+      "en": "Three short steps a day: letter, picture, writing."
+    },
+    {
+      "id": "nuts",
+      "uz": "To‘g‘ri javob uchun — yong‘oq va yangi kashfiyot.",
+      "ru": "За верный ответ — орешки и новые открытия.",
+      "en": "Right answers earn nuts and new places to explore."
+    },
+    {
+      "id": "parent",
+      "uz": "Siz esa natijani ota-ona bo‘limida ko‘rasiz.",
+      "ru": "А вы видите успехи в разделе для родителей.",
+      "en": "And you see the progress in the parent area."
+    },
+    {
+      "id": "cta",
+      "uz": "Kiddo. Bugunoq bepul boshlang.",
+      "ru": "Kiddo. Начните бесплатно уже сегодня.",
+      "en": "Kiddo. Start free today."
+    }
+  ]
+}

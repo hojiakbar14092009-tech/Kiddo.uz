@@ -1,0 +1,66 @@
+{
+ "lines": {
+  "uz": {
+   "hook-a": "Farzandingiz telefonda nima qilyapti?",
+   "hook-b": "Bir soat multfilm. Bitta ham yangi harf yo‘q.",
+   "hook-c": "O‘n daqiqa. Bitta yangi harf. Har kuni.",
+   "turn": "Maqsadsiz videolar o‘rniga — Kiddo.",
+   "letter": "Bola harfni eshitadi, ko‘radi va topadi.",
+   "plan": "Har kuni uch qadam: harf, rasm, yozuv.",
+   "nuts": "To‘g‘ri javob uchun — yong‘oq va yangi kashfiyot.",
+   "parent": "Siz esa natijani ota-ona bo‘limida ko‘rasiz.",
+   "cta": "Kiddo. Bugunoq bepul boshlang."
+  },
+  "ru": {
+   "hook-a": "Чем ваш ребёнок занят в телефоне?",
+   "hook-b": "Час мультиков. Ни одной новой буквы.",
+   "hook-c": "Десять минут. Одна новая буква. Каждый день.",
+   "turn": "Вместо бесконечных роликов — Kiddo.",
+   "letter": "Ребёнок слышит букву, видит и находит её.",
+   "plan": "Каждый день три шага: буква, картинка, письмо.",
+   "nuts": "За верный ответ — орешки и новые открытия.",
+   "parent": "А вы видите успехи в разделе для родителей.",
+   "cta": "Kiddo. Начните бесплатно уже сегодня."
+  },
+  "en": {
+   "hook-a": "What is your child doing on that phone?",
+   "hook-b": "An hour of cartoons. Not one new letter.",
+   "hook-c": "Ten minutes. One new letter. Every day.",
+   "turn": "Instead of endless videos, try Kiddo.",
+   "letter": "Your child hears a letter, sees it, finds it.",
+   "plan": "Three short steps a day: letter, picture, writing.",
+   "nuts": "Right answers earn nuts and new places to explore.",
+   "parent": "And you see the progress in the parent area.",
+   "cta": "Kiddo. Start free today."
+  }
+ },
+ "durations": {
+  "uz-hook-a": 2.473,
+  "uz-hook-b": 3.506,
+  "uz-hook-c": 3.622,
+  "uz-turn": 2.833,
+  "uz-letter": 3.17,
+  "uz-plan": 3.762,
+  "uz-nuts": 3.193,
+  "uz-parent": 3.297,
+  "uz-cta": 2.31,
+  "ru-hook-a": 2.392,
+  "ru-hook-b": 3.17,
+  "ru-hook-c": 3.622,
+  "ru-turn": 3.32,
+  "ru-letter": 3.587,
+  "ru-plan": 5.41,
+  "ru-nuts": 3.704,
+  "ru-parent": 3.077,
+  "ru-cta": 3.077,
+  "en-hook-a": 2.264,
+  "en-hook-b": 3.135,
+  "en-hook-c": 3.181,
+  "en-turn": 3.007,
+  "en-letter": 3.495,
+  "en-plan": 3.111,
+  "en-nuts": 3.077,
+  "en-parent": 2.45,
+  "en-cta": 2.45
+ }
+}
