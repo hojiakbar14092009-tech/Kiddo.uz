@@ -22,6 +22,18 @@ import { screenName, STEP_LABELS } from './analyticsLabels'
 interface Report {
   funnel: FunnelRow[]
   exits: ExitRow[]
+  /** Cloud: when the exits were last brought up to date (Phase 53). */
+  refreshedAt?: string | null
+}
+
+/** "14:05" in Tashkent time. */
+function clock(iso: string): string {
+  return new Intl.DateTimeFormat('uz-UZ', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'Asia/Tashkent',
+  }).format(new Date(iso))
 }
 
 type Load =
@@ -40,9 +52,10 @@ function useCloudReport(days: number, enabled: boolean): Load {
         const { getAdminSupabase } = await import('@/services/supabase/client')
         const supabase = getAdminSupabase()
         if (!supabase) throw new Error('Supabase sozlanmagan.')
-        const [funnel, exits] = await Promise.all([
+        const [funnel, exits, refreshed] = await Promise.all([
           supabase.rpc('admin_analytics_funnel', { p_days: days }),
           supabase.rpc('admin_analytics_exits', { p_days: days }),
+          supabase.rpc('admin_stats_refreshed_at'),
         ])
         if (funnel.error || exits.error) throw new Error((funnel.error ?? exits.error)!.message)
         const counts = new Map(
@@ -57,6 +70,8 @@ function useCloudReport(days: number, enabled: boolean): Load {
           exits: ((exits.data ?? []) as { screen: string; closes: number }[])
             .slice(0, 8)
             .map((row) => ({ screen: row.screen, count: Number(row.closes) })),
+          // an older server without the time: the panel simply does not show it
+          refreshedAt: refreshed.error ? null : ((refreshed.data as string | null) ?? null),
         })
       } catch (reason) {
         done({ status: 'error', message: (reason as Error).message })
@@ -122,6 +137,13 @@ export function AnalyticsSection({ source }: { source: 'device' | 'cloud' }) {
         <p className="mb-3 text-sm text-[var(--a-ink-soft)]">
           Bola ilovadan chiqqan paytdagi sahifa. Ro‘yxat tepasidagi sahifalarni birinchi bo‘lib
           tekshirish kerak.
+          {source === 'cloud' && ' Bu ro‘yxat har 10 daqiqada yangilanadi.'}
+          {load.status === 'ready' && load.refreshedAt && (
+            <span data-testid="admin-exits-refreshed">
+              {' '}
+              Oxirgi yangilanish: {clock(load.refreshedAt)}.
+            </span>
+          )}
         </p>
         {load.status === 'ready' &&
           (load.exits.length === 0 ? (

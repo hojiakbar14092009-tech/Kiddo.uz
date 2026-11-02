@@ -155,6 +155,12 @@ describe('restoring the family from the cloud', () => {
     expect(useFamilyStore.getState().children).toEqual([])
   })
 
+  it('Phase 53: the children are read with the account as a filter (the index, not every family)', async () => {
+    const { client, requests } = fakeTables(tables())
+    await fetchCloudFamily(client as unknown as SupabaseClient, new Set(), 'parent-1')
+    expect(requests[0]).toEqual({ table: 'children', filters: ['eq:parent_id'] })
+  })
+
   it('nothing missing here: one small read only', async () => {
     useFamilyStore.setState({
       children: family().children.map((row) => profileFromRow(row)),

@@ -144,6 +144,7 @@ export function SyncManager() {
                 alive &&
                 useParentStore.getState().session?.mode === 'cloud' &&
                 (useParentStore.getState().session as { userId: string }).userId === userId,
+              userId,
             ),
           )
           .then((count) => {

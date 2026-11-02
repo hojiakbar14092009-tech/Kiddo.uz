@@ -18,6 +18,7 @@ import {
 } from '@/store/paymentStore'
 import { useProgressStore } from '@/store/progressStore'
 import { isProActive, useSubscriptionStore, type PlanId } from '@/store/subscriptionStore'
+import type { RevenueItem } from './revenue'
 
 /** A child as the admin sees it. */
 export interface AdminChild {
@@ -47,7 +48,12 @@ export interface AdminActions {
 export interface AdminData {
   source: 'device' | 'cloud'
   children: AdminChild[]
+  /** The newest payments (in the cloud at most PAYMENTS_SHOWN). */
   payments: Payment[]
+  /** True when there are more payments than the list holds. */
+  paymentsLimited: boolean
+  /** What the income figures and charts count: every payment, or per-day totals. */
+  revenue: RevenueItem[]
   settings: AppSettings
   /** The newest payment that arrived while the panel was open (for live alerts). */
   livePayment: Payment | null
@@ -251,6 +257,8 @@ function useDeviceData(): AdminData {
     source: 'device',
     children: list,
     payments,
+    paymentsLimited: false,
+    revenue: payments,
     settings: {
       prices: settingsState.prices,
       proGiftCoins: settingsState.proGiftCoins,
@@ -284,10 +292,68 @@ interface CloudRows {
     created_at: string
     parent_id: string
   }[]
+  /** False when the server has no admin_revenue_days yet: income from `payments`. */
+  serverRevenue: boolean
+  /** Payments that arrived after the load (counted on top of revenueDays). */
+  livePayments: CloudRows['payments']
+  /** Income per Tashkent day from the server (admin_revenue_days, Phase 53). */
+  revenueDays: { day: string; payments: number; amount: number }[]
   settings: AppSettings
   /** When the rows were fetched; PRO is judged against this time. */
   loadedAt: number
 }
+
+/** The newest payments the cloud list shows (one server page). */
+export const PAYMENTS_SHOWN = 1000
+/** Days of income the charts can show (a year and a month, so the year-to-date fits). */
+const REVENUE_DAYS = 400
+/** A table read in pages stops here (far above any real family count): an error, never half. */
+export const MAX_ROWS = 200_000
+
+interface Page<T> {
+  data: T[] | null
+  error: { message: string } | null
+}
+
+/**
+ * Every row of a read, page by page (Phase 53). The server answers at most a
+ * page of rows (1000 on Supabase) to one request; a single request would
+ * silently show only the first page. Pages follow the key (`after` = the last
+ * key read), so a row added or removed meanwhile never shifts the others, and
+ * any page size the server uses works. Past MAX_ROWS the read fails rather
+ * than show part of the table as all of it.
+ */
+export async function fetchAllRows<T>(
+  page: (after: string | null) => PromiseLike<Page<T>>,
+  keyOf: (row: T) => string,
+): Promise<T[]> {
+  const rows: T[] = []
+  let after: string | null = null
+  for (;;) {
+    const { data, error } = await page(after)
+    if (error) throw new Error(error.message)
+    if (!data || data.length === 0) return rows
+    rows.push(...data)
+    if (rows.length > MAX_ROWS) throw new Error(`Jadvalda ${MAX_ROWS} dan ortiq qator bor`)
+    after = keyOf(data[data.length - 1]!)
+  }
+}
+
+/**
+ * A day's income as one revenue item, at noon in Tashkent (the same date
+ * anywhere near), or now if today is not yet at noon, so that this morning's
+ * sales count as today's.
+ */
+export function revenueOfDay(
+  row: { day: string; payments: number; amount: number },
+  now: number = Date.now(),
+): RevenueItem {
+  const noon = Date.parse(`${row.day}T12:00:00+05:00`)
+  const at = noon > now ? new Date(now).toISOString() : `${row.day}T12:00:00+05:00`
+  return { at, amount: row.amount, count: row.payments }
+}
+
+const PAGE_ROWS = 1000
 
 /** Every family, from Supabase (needs an admin account, see supabase/migrations/0003_admin.sql). */
 function useCloudData(enabled: boolean): AdminData {
@@ -301,27 +367,65 @@ function useCloudData(enabled: boolean): AdminData {
     const { getAdminSupabase } = await import('@/services/supabase/client')
     const supabase = getAdminSupabase()
     if (!supabase) throw new Error('Supabase sozlanmagan')
-    const [children, states, subscriptions, payments, settings] = await Promise.all([
-      supabase.from('children').select('id, name, age, parent_id, updated_at'),
-      supabase.from('child_state').select('child_id, coins, updated_at'),
-      supabase.from('subscriptions').select('parent_id, plan, expires_at'),
+    const [children, states, subscriptions, payments, revenueDays, settings] = await Promise.all([
+      fetchAllRows<CloudRows['children'][number]>(
+        (after) => {
+          const query = supabase
+            .from('children')
+            .select('id, name, age, parent_id, updated_at')
+            .order('id')
+            .limit(PAGE_ROWS)
+          return after === null ? query : query.gt('id', after)
+        },
+        (row) => row.id,
+      ),
+      fetchAllRows<CloudRows['states'][number]>(
+        (after) => {
+          const query = supabase
+            .from('child_state')
+            .select('child_id, coins, updated_at')
+            .order('child_id')
+            .limit(PAGE_ROWS)
+          return after === null ? query : query.gt('child_id', after)
+        },
+        (row) => row.child_id,
+      ),
+      fetchAllRows<CloudRows['subscriptions'][number]>(
+        (after) => {
+          const query = supabase
+            .from('subscriptions')
+            .select('parent_id, plan, expires_at')
+            .order('parent_id')
+            .limit(PAGE_ROWS)
+          return after === null ? query : query.gt('parent_id', after)
+        },
+        (row) => row.parent_id,
+      ),
       supabase
         .from('payments')
         .select('id, family, plan, provider, amount, created_at, parent_id')
         .order('created_at', { ascending: false })
-        .limit(5000),
+        .limit(PAYMENTS_SHOWN),
+      supabase.rpc('admin_revenue_days', { p_days: REVENUE_DAYS }),
       supabase.from('app_settings').select('key, value'),
     ])
-    const failed = [children, states, subscriptions, payments, settings].find(
-      (result) => result.error,
-    )
+    const failed = [payments, settings].find((result) => result.error)
     if (failed?.error) throw new Error(failed.error.message)
+    // a server without 0021 yet (the app is live before the owner applies it): income is
+    // counted from the newest payments, as before Phase 53
+    const serverRevenue = !revenueDays.error
     const stored = Object.fromEntries((settings.data ?? []).map((row) => [row.key, row.value]))
     return {
-      children: children.data ?? [],
-      states: states.data ?? [],
-      subscriptions: subscriptions.data ?? [],
+      children,
+      states,
+      subscriptions,
       payments: payments.data ?? [],
+      serverRevenue,
+      revenueDays: ((revenueDays.data ?? []) as CloudRows['revenueDays']).map((row) => ({
+        day: String(row.day),
+        payments: Number(row.payments),
+        amount: Number(row.amount),
+      })),
       settings: {
         restHours: clampRestHours((stored as Partial<AppSettings>).restHours),
         season: isSeasonSetting((stored as Partial<AppSettings>).season)
@@ -337,6 +441,7 @@ function useCloudData(enabled: boolean): AdminData {
           ),
         },
       },
+      livePayments: [],
       loadedAt: Date.now(),
     } as CloudRows
   }, [])
@@ -376,7 +481,14 @@ function useCloudData(enabled: boolean): AdminData {
             }
             setLivePayment(payment)
             setRows((current) =>
-              current ? { ...current, payments: [row, ...current.payments] } : current,
+              // already read with the panel (it arrived while the panel loaded): counted once
+              current && !current.payments.some((item) => item.id === row.id)
+                ? {
+                    ...current,
+                    payments: [row, ...current.payments],
+                    livePayments: [...current.livePayments, row],
+                  }
+                : current,
             )
           },
         )
@@ -494,6 +606,18 @@ function useCloudData(enabled: boolean): AdminData {
       family: row.family,
       at: row.created_at,
     })),
+    paymentsLimited:
+      (rows?.payments.length ?? 0) - (rows?.livePayments.length ?? 0) >= PAYMENTS_SHOWN,
+    revenue:
+      rows && !rows.serverRevenue
+        ? rows.payments.map((row) => ({ at: row.created_at, amount: row.amount }))
+        : [
+            ...(rows?.revenueDays ?? []).map((row) => revenueOfDay(row)),
+            ...(rows?.livePayments ?? []).map((row) => ({
+              at: row.created_at,
+              amount: row.amount,
+            })),
+          ],
     settings: rows?.settings ?? DEFAULT_APP_SETTINGS,
     livePayment,
     loading: enabled && rows === null && error === null,

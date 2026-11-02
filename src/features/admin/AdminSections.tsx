@@ -142,10 +142,10 @@ export function ProBadge({ child }: { child: AdminChild }) {
 
 export function Overview({ data }: { data: AdminData }) {
   const [range, setRange] = useState<'days' | 'months'>('days')
-  const totals = revenueTotals(data.payments)
+  const totals = revenueTotals(data.revenue)
   const bars = useMemo(
-    () => (range === 'days' ? dailyBars(data.payments, 30) : monthlyBars(data.payments, 12)),
-    [data.payments, range],
+    () => (range === 'days' ? dailyBars(data.revenue, 30) : monthlyBars(data.revenue, 12)),
+    [data.revenue, range],
   )
   const online = data.children.filter((child) => child.online)
   const proCount = data.children.filter((child) => child.pro).length
@@ -520,7 +520,11 @@ export function PaymentsSection({ data }: { data: AdminData }) {
   }
   return (
     <Panel
-      title={`To‘lovlar: ${data.payments.length} ta, jami ${formatSom(total)} so‘m`}
+      title={
+        data.paymentsLimited
+          ? `Eng so‘nggi ${data.payments.length} ta to‘lov, jami ${formatSom(total)} so‘m`
+          : `To‘lovlar: ${data.payments.length} ta, jami ${formatSom(total)} so‘m`
+      }
       action={
         <button
           type="button"

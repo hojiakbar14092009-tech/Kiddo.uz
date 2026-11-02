@@ -17,3 +17,12 @@ verify_jwt = true
 
 [functions.delete-account]
 verify_jwt = true
+
+# Phase 53: called before any account exists (the app's anonymous analytics);
+# the function limits each IP itself.
+[functions.analytics]
+verify_jwt = false
+
+# Phase 53: started by pg_cron with its own WORKER_SECRET (not a Supabase JWT).
+[functions.worker]
+verify_jwt = false

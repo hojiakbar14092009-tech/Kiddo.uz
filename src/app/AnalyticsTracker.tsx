@@ -5,7 +5,7 @@ import { subscribeDomainEvents } from '@/domain/universe/progression'
 import {
   flushAnalytics,
   sendOnLeave,
-  supabaseAnalyticsSender,
+  cloudAnalyticsSender,
 } from '@/services/analytics/sendAnalytics'
 import { isSupabaseConfigured } from '@/services/supabase/config'
 import { useFamilyStore } from '@/store/familyStore'
@@ -74,12 +74,12 @@ export function AnalyticsTracker() {
     return () => document.removeEventListener('visibilitychange', onVisibility)
   }, [])
 
-  // sending (cloud only; the Supabase library is loaded on demand)
+  // sending (cloud only; a plain request to the `analytics` Edge Function)
   useEffect(() => {
     if (!isSupabaseConfigured) return undefined
     let alive = true
     const send = async () => {
-      const sender = await supabaseAnalyticsSender()
+      const sender = cloudAnalyticsSender()
       if (alive && sender) await flushAnalytics(sender)
     }
     const first = setTimeout(() => void send(), 5_000)

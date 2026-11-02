@@ -1,4 +1,12 @@
-import type { Payment } from '@/store/paymentStore'
+/**
+ * What income is counted from: a payment (count 1), or a day's total from the
+ * server (Phase 53) with the number of payments in it.
+ */
+export interface RevenueItem {
+  at: string
+  amount: number
+  count?: number
+}
 
 export interface RevenueTotals {
   today: { amount: number; count: number }
@@ -26,21 +34,24 @@ function startOfWeek(date: Date): Date {
   return day
 }
 
-function sumSince(payments: readonly Payment[], since: Date, until: Date) {
+function sumSince(payments: readonly RevenueItem[], since: Date, until: Date) {
   let amount = 0
   let count = 0
   for (const payment of payments) {
     const at = new Date(payment.at)
     if (at >= since && at <= until) {
       amount += payment.amount
-      count += 1
+      count += payment.count ?? 1
     }
   }
   return { amount, count }
 }
 
 /** Income today, this week (from Monday), this month and this year – counted automatically. */
-export function revenueTotals(payments: readonly Payment[], now: Date = new Date()): RevenueTotals {
+export function revenueTotals(
+  payments: readonly RevenueItem[],
+  now: Date = new Date(),
+): RevenueTotals {
   return {
     today: sumSince(payments, startOfDay(now), now),
     week: sumSince(payments, startOfWeek(now), now),
@@ -51,7 +62,7 @@ export function revenueTotals(payments: readonly Payment[], now: Date = new Date
 
 /** One bar per day for the last `days` days, oldest first. */
 export function dailyBars(
-  payments: readonly Payment[],
+  payments: readonly RevenueItem[],
   days: number,
   now: Date = new Date(),
 ): RevenueBar[] {
@@ -69,7 +80,7 @@ export function dailyBars(
     const bar = bars[index]
     if (bar) {
       bar.amount += payment.amount
-      bar.count += 1
+      bar.count += payment.count ?? 1
     }
   }
   return bars
@@ -77,7 +88,7 @@ export function dailyBars(
 
 /** One bar per month for the last `months` months, oldest first. */
 export function monthlyBars(
-  payments: readonly Payment[],
+  payments: readonly RevenueItem[],
   months: number,
   now: Date = new Date(),
 ): RevenueBar[] {
@@ -94,7 +105,7 @@ export function monthlyBars(
     )
     if (bar) {
       bar.amount += payment.amount
-      bar.count += 1
+      bar.count += payment.count ?? 1
     }
   }
   return bars

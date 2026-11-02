@@ -747,8 +747,8 @@ select pg_temp.expect_error($$insert into public.children (id,parent_id,name,age
 
 -- ===== 0016: anonymous analytics (anyone adds through the function, only an admin reads counts)
 begin;
-set local role anon;
-select set_config('request.jwt.claims', '{"role":"anon"}', true);
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
 select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-00000001","install":"install-0001","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'","screen":"/worlds/dino"}'||','||'{"id":"evt-00000002","install":"install-0001","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 2, 'analytics: a batch is added');
 select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-00000001","install":"install-0001","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'","screen":"/worlds/dino"}'||']')::jsonb) = 0, 'analytics: an event sent twice is ignored');
 -- a bad event is skipped, the good ones in its batch are kept
@@ -762,10 +762,14 @@ select pg_temp.check(
   + public.add_analytics_events((select jsonb_agg(jsonb_build_object('id','flood-'||lpad(i::text,6,'0'),'install','install-flood','name','activity_opened','day',(now() at time zone 'Asia/Tashkent')::date,'at',now(),'screen','/home')) from generate_series(101,200) i))
   + public.add_analytics_events((select jsonb_agg(jsonb_build_object('id','flood-'||lpad(i::text,6,'0'),'install','install-flood','name','activity_opened','day',(now() at time zone 'Asia/Tashkent')::date,'at',now(),'screen','/home')) from generate_series(201,250) i))
   = 200, 'analytics: at most 200 events per install and day');
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.expect_error($q$select public.add_analytics_events('[]'::jsonb)$q$, 'permission denied');
 select pg_temp.expect_error($$insert into public.analytics_events (id,install_id,name,day,at) values ('evt-00000006','install-0001','app_opened',current_date, now())$$, 'permission denied');
 select pg_temp.expect_error($$select count(*) from public.analytics_events$$, 'permission denied');
 select pg_temp.expect_error($$select * from public.admin_analytics_funnel(30)$$, 'permission denied');
 commit;
+select public.refresh_admin_stats();
 begin;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
@@ -778,10 +782,11 @@ select pg_temp.check((select closes from public.admin_analytics_exits(30) where 
 commit;
 -- a cohort: install-0003 is new in the period and reaches two steps; it left twice in a day, the last place counts
 begin;
-set local role anon;
-select set_config('request.jwt.claims', '{"role":"anon"}', true);
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
 select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-00000011","install":"install-0003","name":"first_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"evt-00000012","install":"install-0003","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"evt-00000013","install":"install-0003","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||(now() - interval '1 minute')||'","screen":"/home"}'||','||'{"id":"evt-00000014","install":"install-0003","name":"app_closed","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'","screen":"/math-lab"}'||']')::jsonb) = 4, 'analytics: a new install sends its first steps');
 commit;
+select public.refresh_admin_stats();
 begin;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
@@ -1147,11 +1152,16 @@ set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
 insert into ret45_before select * from public.admin_retention(30);
 commit;
-insert into public.analytics_events (id, install_id, name, day, at) values
- ('ret45-0001','install-ret45-1','first_opened',(now() at time zone 'Asia/Tashkent')::date - 1, now()),
- ('ret45-0002','install-ret45-1','returned_day2',(now() at time zone 'Asia/Tashkent')::date, now()),
- ('ret45-0003','install-ret45-2','first_opened',(now() at time zone 'Asia/Tashkent')::date, now()),
- ('ret45-0004','install-ret45-3','returned_day7',(now() at time zone 'Asia/Tashkent')::date, now());
+create function pg_temp.ev(p_id text, p_install text, p_name text, p_day date)
+returns jsonb language sql as $$ select jsonb_build_object('id',p_id,'install',p_install,'name',p_name,'day',p_day,'at',now()) $$;
+select pg_temp.check(public.add_analytics_events(jsonb_build_array(
+    pg_temp.ev('ret45-0001','install-ret45-1','first_opened',(now() at time zone 'Asia/Tashkent')::date - 1),
+    pg_temp.ev('ret45-0002','install-ret45-1','returned_day2',(now() at time zone 'Asia/Tashkent')::date)))
+  + public.add_analytics_events(jsonb_build_array(
+    pg_temp.ev('ret45-0003','install-ret45-2','first_opened',(now() at time zone 'Asia/Tashkent')::date)))
+  + public.add_analytics_events(jsonb_build_array(
+    pg_temp.ev('ret45-0004','install-ret45-3','returned_day7',(now() at time zone 'Asia/Tashkent')::date))) = 4,
+  'analytics 0019: the retention fixtures are kept');
 begin;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
@@ -1178,18 +1188,126 @@ select pg_temp.check((select count(*) from public.admins) = 1, 'audit 0020: the 
 insert into public.analytics_daily (day, events) values ((now() at time zone 'Asia/Tashkent')::date, 200000)
   on conflict (day) do update set events = 200000;
 begin;
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-52-0001","install":"install-52-new","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 0, 'audit 0020: past the daily cap a new install adds nothing');
 set local role anon;
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
-select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-52-0001","install":"install-52-new","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 0, 'audit 0020: past the daily cap a new install adds nothing');
 select pg_temp.expect_error($$select * from public.analytics_daily$$, 'permission denied');
 commit;
 update public.analytics_daily set events = 0 where day = (now() at time zone 'Asia/Tashkent')::date;
 begin;
-set local role anon;
-select set_config('request.jwt.claims', '{"role":"anon"}', true);
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
 select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-52-0002","install":"install-52-new","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 1, 'audit 0020: under the cap events are kept');
 commit;
 select pg_temp.check((select events from public.analytics_daily where day = (now() at time zone 'Asia/Tashkent')::date) = 1, 'audit 0020: the day counter counts what was kept');
+
+-- ===== Phase 53 (0021): scale
+select pg_temp.check(not exists (
+  select 1 from pg_constraint c
+  where c.contype = 'f' and c.connamespace = 'public'::regnamespace
+    and not exists (select 1 from pg_index i where i.indrelid = c.conrelid
+      and (i.indkey::int2[])[0:array_length(c.conkey, 1) - 1] @> c.conkey
+      and (i.indkey::int2[])[0] = c.conkey[1])
+), 'scale 0021: every foreign key has an index');
+select pg_temp.check(not exists (
+  select 1 from pg_policies p where p.schemaname = 'public'
+    and (coalesce(p.qual, '') || ' ' || coalesce(p.with_check, '')) ~ '(?<!SELECT )(auth\.uid\(\)|(?<![[:alnum:]_.])is_admin\(\))'
+), 'scale 0021: RLS reads auth.uid() and is_admin() once per query');
+select pg_temp.check(not has_table_privilege(r, t, 'select'), 'scale 0021: ' || r || ' cannot read ' || t)
+  from unnest(array['anon','authenticated']) r,
+       unnest(array['public.analytics_installs','public.admin_exits_daily','public.admin_revenue_daily',
+                     'public.jobs','public.analytics_ip_hits','public.admin_stats_state']) t;
+select pg_temp.check(not has_function_privilege(r, f, 'execute'), 'scale 0021: ' || r || ' cannot call ' || f)
+  from unnest(array['anon','authenticated']) r,
+       unnest(array['public.add_analytics_events(jsonb)',
+                     'public.enqueue_job(text,jsonb,timestamptz,text,integer)',
+                     'public.claim_jobs(integer,integer)','public.finish_job(bigint,integer)',
+                     'public.fail_job(bigint,integer,text,boolean)','public.prune_jobs()',
+                     'public.analytics_ip_take(text,integer,integer,integer)',
+                     'public.refresh_admin_stats(interval)','public.request_admin_stats_refresh()',
+                     'public.kick_worker()']) f;
+select pg_temp.check(not has_function_privilege('anon', 'public.admin_revenue_days(integer)', 'execute')
+  and not has_function_privilege('anon', 'public.admin_stats_refreshed_at()', 'execute'),
+  'scale 0021: anon cannot read the admin revenue');
+-- one row per install, kept by add_analytics_events
+select pg_temp.check((select first_day = (now() at time zone 'Asia/Tashkent')::date
+    and reached @> array['app_closed','app_opened','first_opened']
+    from public.analytics_installs where install_id = 'install-0003'),
+  'scale 0021: an install''s first day and the steps it reached are kept');
+select pg_temp.check((select first_day is null and 'returned_day7' = any (reached)
+    from public.analytics_installs where install_id = 'install-ret45-3'),
+  'scale 0021: an install first opened before the data has no first day');
+-- the job queue
+select pg_temp.check(public.enqueue_job('test_job', '{"n":1}', now(), 'once-53')
+    = public.enqueue_job('test_job', '{"n":2}', now(), 'once-53'),
+  'queue 0021: a job with a dedupe key is added once');
+select public.enqueue_job('test_job', '{"n":3}', now(), null, 1);
+select public.enqueue_job('test_job', '{"n":4}', now() + interval '1 hour');
+create temp table claimed53 as select * from public.claim_jobs(10, 60);
+select pg_temp.check((select count(*) from claimed53) = 2 and (select bool_and(attempts = 1) from claimed53),
+  'queue 0021: due jobs are claimed, a later one waits');
+select pg_temp.check((select count(*) from public.claim_jobs(10, 60)) = 0,
+  'queue 0021: a claimed job is not handed out twice');
+select pg_temp.check(not public.finish_job((select id from claimed53 where payload ->> 'n' = '1'), 2),
+  'queue 0021: a run that lost its lease cannot finish the job');
+select public.fail_job((select id from claimed53 where payload ->> 'n' = '1'), 1, 'telegram: 502');
+select pg_temp.check((select not dead and run_at > now() and locked_until is null and last_error = 'telegram: 502'
+    from public.jobs where dedupe_key = 'once-53'), 'queue 0021: a failed job is tried again later');
+select public.fail_job((select id from claimed53 where payload ->> 'n' = '3'), 1, 'boom');
+select pg_temp.check((select dead from public.jobs where payload ->> 'n' = '3'),
+  'queue 0021: a job past its last attempt is dead');
+update public.jobs set run_at = now() where dedupe_key = 'once-53';
+select pg_temp.check((select attempts from public.claim_jobs(10, 60)) = 2, 'queue 0021: a retried job is claimed again');
+select pg_temp.check(public.finish_job((select id from public.jobs where dedupe_key = 'once-53'), 2),
+  'queue 0021: the run holding the job finishes it');
+select pg_temp.check((select done_at is not null from public.jobs where dedupe_key = 'once-53'),
+  'queue 0021: a finished job is done');
+-- a run that died: its last try never reports back; the job ends dead, not tried forever
+select public.enqueue_job('test_job', '{"n":5}', now(), 'died-53', 1);
+update public.jobs set attempts = 1, locked_until = now() - interval '1 second' where dedupe_key = 'died-53';
+select pg_temp.check((select count(*) from public.claim_jobs(10, 60)) = 0,
+  'queue 0021: a job with no tries left is not claimed again');
+select pg_temp.check((select dead from public.jobs where dedupe_key = 'died-53'),
+  'queue 0021: it ends dead');
+-- stale admin views ask the worker for a refresh (once per 10 minutes), never refresh in the call
+update public.admin_stats_state set refreshed_at = now() - interval '1 hour';
+select public.request_admin_stats_refresh();
+select public.request_admin_stats_refresh();
+select pg_temp.check((select count(*) from public.jobs where kind = 'refresh_admin_stats' and done_at is null) = 1,
+  'scale 0021: stale admin numbers queue one refresh');
+select public.refresh_admin_stats();
+select pg_temp.check(public.kick_worker() = false, 'queue 0021: without pg_net and Vault the worker is not called');
+select pg_temp.check(public.prune_jobs() >= 0, 'queue 0021: housekeeping runs');
+-- the per-IP analytics window
+select pg_temp.check(public.analytics_ip_take('iphash-53-aaaaaaaa', 100, 150, 3600)
+    and public.analytics_ip_take('iphash-53-aaaaaaaa', 50, 150, 3600)
+    and not public.analytics_ip_take('iphash-53-aaaaaaaa', 1, 150, 3600)
+    and public.analytics_ip_take('iphash-53-bbbbbbbb', 1, 150, 3600),
+  'analytics 0021: each IP has its own window of events');
+-- revenue per Tashkent day: closed days from the view, the rest live
+insert into public.payments (id, parent_id, plan, provider, amount, created_at) values
+  ('p53-old', '00000000-0000-0000-0000-00000000000a', 'monthly', 'click', 777, now() - interval '3 days');
+select public.refresh_admin_stats();
+insert into public.payments (id, parent_id, plan, provider, amount) values
+  ('p53-new', '00000000-0000-0000-0000-00000000000a', 'monthly', 'click', 555);
+create temp table revenue53 (day date, payments bigint, amount bigint);
+grant select, insert on revenue53 to authenticated;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select pg_temp.expect_error($$select * from public.admin_revenue_days(30)$$, 'not_admin');
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+insert into revenue53 select * from public.admin_revenue_days(30);
+commit;
+select pg_temp.check((select count(*) = count(distinct day) from revenue53),
+  'revenue 0021: one row per day');
+select pg_temp.check((select sum(amount) from revenue53) = (select sum(amount) from public.payments
+    where created_at >= (((now() at time zone 'Asia/Tashkent')::date - 29)::timestamp at time zone 'Asia/Tashkent')),
+  'revenue 0021: the days add up to the payments, the one after the refresh included');
+select pg_temp.check((select amount from revenue53 where day = ((now() - interval '3 days') at time zone 'Asia/Tashkent')::date) >= 777,
+  'revenue 0021: an earlier day comes from the view');
 
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (

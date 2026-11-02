@@ -5,7 +5,8 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/services/supabase/config'
 
 /*
  * Sends the device's anonymous analytics (Phase 37) in batches of up to 100
- * through the server's `add_analytics_events` function. Offline or failing:
+ * to the `analytics` Edge Function (Phase 53), which limits each IP and then
+ * adds them with the server's `add_analytics_events`. Offline or failing:
  * the events wait and go with the next try; the server ignores an event it
  * already has, so a lost answer never counts twice. A batch the server
  * refuses for its content (never valid, e.g. a wrong device clock) and
@@ -83,33 +84,45 @@ export function sendOnLeave(
     .queue.filter((event) => !tooOld(event, today))
     .slice(-ANALYTICS_BATCH)
   if (events.length === 0) return false
-  void fetch(`${url.replace(/\/$/, '')}/rest/v1/rpc/add_analytics_events`, {
-    method: 'POST',
-    keepalive: true,
-    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ p_events: events.map(rowOf) }),
-  }).catch(() => undefined)
+  void postEvents(url, key, events, true).catch(() => undefined)
   return true
 }
 
-/**
- * Errors about the data itself (a check, a bad value, the server's own
- * refusal such as `bad_batch`): sending again will not help.
- */
-const CONTENT_ERRORS = /^(22|23|P0001$)/
+/** The address of the `analytics` Edge Function. */
+export function analyticsEndpoint(url: string): string {
+  return `${url.replace(/\/$/, '')}/functions/v1/analytics`
+}
 
-/** The Supabase sender (loaded on demand, only when the cloud is configured). */
-export async function supabaseAnalyticsSender(): Promise<AnalyticsSender | null> {
+function postEvents(
+  url: string,
+  key: string,
+  events: readonly AnalyticsEvent[],
+  keepalive = false,
+): Promise<Response> {
+  return fetch(analyticsEndpoint(url), {
+    method: 'POST',
+    keepalive,
+    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ events: events.map(rowOf) }),
+  })
+}
+
+/**
+ * The function's answer: 400 is a refusal for the data itself (sending again
+ * will not help); anything else that is not OK (offline, 429 for a busy
+ * address, 5xx) waits for the next try.
+ */
+export function resultOf(status: number): SendResult {
+  if (status >= 200 && status < 300) return 'ok'
+  return status === 400 ? 'drop' : 'retry'
+}
+
+/** The cloud sender (only when the cloud is configured). */
+export function cloudAnalyticsSender(
+  url: string = SUPABASE_URL,
+  key: string = SUPABASE_ANON_KEY,
+): AnalyticsSender | null {
   // the admin's sandbox tab is never counted (Phase 51)
-  if (isAdminPreview()) return null
-  const { getSupabase } = await import('@/services/supabase/client')
-  const supabase = getSupabase()
-  if (!supabase) return null
-  return async (events) => {
-    const { error } = await supabase.rpc('add_analytics_events', {
-      p_events: events.map(rowOf),
-    })
-    if (!error) return 'ok'
-    return CONTENT_ERRORS.test(error.code ?? '') ? 'drop' : 'retry'
-  }
+  if (!url || !key || isAdminPreview() || typeof fetch !== 'function') return null
+  return async (events) => resultOf((await postEvents(url, key, events)).status)
 }

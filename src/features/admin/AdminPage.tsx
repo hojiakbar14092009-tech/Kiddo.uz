@@ -333,21 +333,21 @@ function useAdminNotifications(data: AdminData) {
   useEffect(() => {
     if (greeted.current || data.loading) return
     greeted.current = true
-    const today = revenueTotals(data.payments).today
+    const today = revenueTotals(data.revenue).today
     add(
       'info',
       today.count > 0
         ? `Bugun ${today.count} kishi PRO sotib oldi – ${formatSom(today.amount)} so‘m.`
         : 'Bugun hali PRO sotib olinmadi. Yangi to‘lov bo‘lsa, shu yerda ko‘rinadi.',
     )
-  }, [data.loading, data.payments])
+  }, [data.loading, data.revenue])
 
   // A payment arriving while the panel is open.
   useEffect(() => {
     const payment: Payment | null = data.livePayment
     if (!payment || payment.id === seenPayment.current) return
     seenPayment.current = payment.id
-    const today = revenueTotals(data.payments).today
+    const today = revenueTotals(data.revenue).today
     // The list may not have the new payment yet (it arrives a moment later from the other tab).
     const counted = data.payments.some((item) => item.id === payment.id)
     today.count += counted ? 0 : 1
@@ -356,7 +356,7 @@ function useAdminNotifications(data: AdminData) {
       `Yangi to‘lov! ${payment.family || 'Bir oila'} ${PLAN_NAMES[payment.plan] ?? ''} PRO oldi: ${formatSom(payment.amount)} so‘m. Bugun jami ${today.count} ta.`,
     )
     setPulse((value) => value + 1)
-  }, [data.livePayment, data.payments])
+  }, [data.livePayment, data.payments, data.revenue])
 
   // Someone starts playing.
   const onlineKey = data.children

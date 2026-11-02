@@ -50,10 +50,9 @@ describe('admin preview keeps the server off (Phase 51)', () => {
 
   it('analytics are not sent, neither in batches nor on leaving', async () => {
     const { track } = await import('@/domain/analytics')
-    const { sendOnLeave, supabaseAnalyticsSender } =
-      await import('@/services/analytics/sendAnalytics')
+    const { sendOnLeave, cloudAnalyticsSender } = await import('@/services/analytics/sendAnalytics')
     track('activity_opened', { screen: '/tasks/match' })
-    expect(await supabaseAnalyticsSender()).toBeNull()
+    expect(cloudAnalyticsSender('https://example.supabase.co', 'anon')).toBeNull()
     expect(sendOnLeave('https://example.supabase.co', 'anon')).toBe(false)
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(rpc).not.toHaveBeenCalled()

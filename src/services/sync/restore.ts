@@ -261,8 +261,12 @@ async function pages(read: (from: number, to: number) => PromiseLike<Page>, limi
 export async function fetchCloudFamily(
   supabase: SupabaseClient,
   skip: ReadonlySet<string> = new Set(),
+  parentId?: string,
 ): Promise<CloudFamily | null> {
-  const children = await supabase.from('children').select('*')
+  // the account's id as a filter too (Phase 53): RLS alone ("own" or "an admin") cannot use
+  // the parent_id index, so without it the server looks at every family's children
+  const query = supabase.from('children').select('*')
+  const children = await (parentId ? query.eq('parent_id', parentId) : query)
   if (children.error) return null
   const rows = ((children.data ?? []) as CloudChildRow[]).filter((row) => !skip.has(row.id))
   const family: CloudFamily = { children: rows, states: [], results: [], rewards: [], learn: [] }
@@ -354,10 +358,11 @@ function childrenHere(): Set<string> {
 export async function restoreFromCloud(
   supabase: SupabaseClient,
   stillCurrent: () => boolean = () => true,
+  parentId?: string,
 ): Promise<number | null> {
   // taken before reading: a removal sent while the cloud is being read stays a removal
   const before = childrenHere()
-  const family = await fetchCloudFamily(supabase, before)
+  const family = await fetchCloudFamily(supabase, before, parentId)
   if (!family || !stillCurrent()) return null
   return applyRestore(planRestore(family, new Set([...before, ...childrenHere()])))
 }

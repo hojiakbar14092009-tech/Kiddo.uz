@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { track, useAnalyticsStore } from '@/domain/analytics'
-import { ANALYTICS_BATCH, flushAnalytics, sendOnLeave, type AnalyticsSender } from './sendAnalytics'
+import {
+  ANALYTICS_BATCH,
+  cloudAnalyticsSender,
+  flushAnalytics,
+  resultOf,
+  sendOnLeave,
+  type AnalyticsSender,
+} from './sendAnalytics'
 
 const NOW = new Date('2026-11-01T10:00:00Z')
 
@@ -68,15 +75,35 @@ describe('sending analytics (Phase 37)', () => {
     vi.stubGlobal('fetch', fetch)
     expect(sendOnLeave('https://x.supabase.co/', 'anon-key', NOW)).toBe(true)
     const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit]
-    expect(url).toBe('https://x.supabase.co/rest/v1/rpc/add_analytics_events')
+    expect(url).toBe('https://x.supabase.co/functions/v1/analytics')
     expect(init.keepalive).toBe(true)
-    expect(JSON.parse(String(init.body)).p_events[0]).toMatchObject({
+    expect(JSON.parse(String(init.body)).events[0]).toMatchObject({
       name: 'app_closed',
       screen: '/math-lab',
     })
     // the answer may never come: the events wait for the normal send (the server ignores repeats)
     expect(useAnalyticsStore.getState().queue).toHaveLength(1)
     expect(sendOnLeave('', '', NOW)).toBe(false)
+    vi.unstubAllGlobals()
+  })
+
+  it('Phase 53: batches go to the analytics function; 400 drops, a busy address or a failure waits', async () => {
+    track('app_opened', { at: NOW })
+    const fetch = vi.fn(async () => new Response('{"added":1}', { status: 200 }))
+    vi.stubGlobal('fetch', fetch)
+    const send = cloudAnalyticsSender('https://x.supabase.co', 'anon-key')!
+    expect(await flushAnalytics(send, NOW)).toBe(1)
+    const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit]
+    expect(url).toBe('https://x.supabase.co/functions/v1/analytics')
+    expect(init.keepalive).toBe(false)
+    expect((init.headers as Record<string, string>).apikey).toBe('anon-key')
+    expect(JSON.parse(String(init.body)).events).toHaveLength(1)
+    expect(resultOf(200)).toBe('ok')
+    expect(resultOf(400)).toBe('drop')
+    expect(resultOf(429)).toBe('retry')
+    expect(resultOf(503)).toBe('retry')
+    expect(resultOf(404)).toBe('retry')
+    expect(cloudAnalyticsSender('', '')).toBeNull()
     vi.unstubAllGlobals()
   })
 })
