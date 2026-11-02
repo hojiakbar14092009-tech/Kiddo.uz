@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { isSupabaseConfigured } from '@/services/supabase/config'
+import { isSeasonSetting } from '@/features/seasons/seasons'
 import {
+  clampRestHours,
   DEFAULT_APP_SETTINGS,
   useAppSettingsStore,
   type AppSettings,
@@ -27,6 +29,8 @@ export function AppSettingsSync() {
       useAppSettingsStore.getState().update({
         prices: { ...DEFAULT_APP_SETTINGS.prices, ...stored.prices },
         proGiftCoins: stored.proGiftCoins ?? DEFAULT_APP_SETTINGS.proGiftCoins,
+        restHours: clampRestHours(stored.restHours),
+        season: isSeasonSetting(stored.season) ? stored.season : 'auto',
       })
     })
     return () => {

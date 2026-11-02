@@ -14,6 +14,8 @@ import { homeLine, mascotMemory } from '@/features/mascot/life'
 import { useUniverseStore } from '@/domain/universe/store'
 import { birthdayWeekYear, tashkentDay } from '@/features/birthday/birthday'
 import { tDynamic } from '@/lib/tDynamic'
+import { activeSeason, isSeasonSetting } from '@/features/seasons/seasons'
+import { clampRestHours, isRestHour, useAppSettingsStore } from '@/store/appSettingsStore'
 import { CoachMarks } from '@/features/onboarding/CoachMarks'
 import { BirthdayCelebration } from '@/features/birthday/BirthdayCelebration'
 import { childAge, useActiveChild, useAgeLevel, useMascotModel } from '@/store/familyStore'
@@ -59,8 +61,13 @@ export function HomePage() {
       runs: runs ?? [],
     }),
   )
+  const restHours = useAppSettingsStore((state) => state.restHours)
+  const seasonSetting = useAppSettingsStore((state) => state.season)
+  const [today] = useState(() => new Date())
   const line = homeLine({
     memory,
+    resting: isRestHour(hour, clampRestHours(restHours)),
+    season: activeSeason(isSeasonSetting(seasonSetting) ? seasonSetting : 'auto', today),
     hour,
     name: child?.name ?? null,
     birthday: child ? birthdayWeekYear(child.birthDate, tashkentDay()) !== null : false,

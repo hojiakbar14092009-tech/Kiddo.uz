@@ -761,3 +761,13 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - photos.ts + settings cloudPhotos (opt-in) + AccountPanel (photos, delete with DELETE).
 - Server (subagent): 0018_accounts.sql (child-photos bucket + RLS, account_consents), delete-account
   function (+15 tests), SQL tests 425. Docs: docs/architecture/accounts.md.
+
+## Phase 45 — COMPLETE (2026-11-02) – admin overhaul
+
+- Server (subagent): 0019_admin.sql – promo max_uses/expires_at/note + checks in redeem/claim,
+  admin_promo_usage, ads schedule (ad_is_live), voice_reviews, admin_audit (+trigger), admin_list/add/remove,
+  admin_retention; SQL tests 489+.
+- Client: retention tiles, bulk codes + limits UI, ad schedule, VoicesSection (adminVoices.ts),
+  ContentSection (+ seasons: features/seasons/seasons.ts, mascot.life.season.*), TeamSection (adminTeam.ts),
+  rest hours (appSettings.restHours → useRestHours + homeLine resting), Telegram status panel.
+- Docs: docs/architecture/admin.md.

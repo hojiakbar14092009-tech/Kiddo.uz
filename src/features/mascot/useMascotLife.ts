@@ -1,20 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { clampRestHours, isRestHour, useAppSettingsStore } from '@/store/appSettingsStore'
 import { TapTracker } from './characters/director'
-import { dayPart } from './life'
 import type { MascotMood } from './types'
 
 /**
- * Rest hours (Phase 43): from 22:00 to 05:00 the robot is sleepy when nothing else happens. A
- * touch, an answer or speech wakes it for the moment; then it dozes again.
+ * Rest hours (Phase 43; the hours are the admin's since Phase 45, 22:00–05:00 by default): the
+ * robot is sleepy when nothing else happens. A touch, an answer or speech wakes it for the
+ * moment; then it dozes again.
  */
 export function useRestHours(): boolean {
+  const rest = useAppSettingsStore((state) => state.restHours)
   const [hour, setHour] = useState(() => new Date().getHours())
   useEffect(() => {
     // the evening can turn into night while the page is open
     const timer = window.setInterval(() => setHour(new Date().getHours()), 60_000)
     return () => window.clearInterval(timer)
   }, [])
-  return dayPart(hour) === 'night'
+  return isRestHour(hour, clampRestHours(rest))
 }
 
 /**

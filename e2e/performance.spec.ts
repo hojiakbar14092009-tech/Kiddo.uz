@@ -16,8 +16,12 @@ const BUDGET_KB = {
    * measured at 312 KB before Phase 22 and 320 KB at Phase 31 (the test had
    * not been run since). The new opening adds no pictures and removes the
    * splash pets. three.js and the other languages stay out (checked below).
+   * Raised to 352 on 2026-11-02 (Phase 45), measured at 341.6 KB: the robot's
+   * living mascot (taps, lip sync from the voice level, memory of the days,
+   * Phase 43) and the admin's rest hours and seasons on the home line (Phase 45,
+   * +1.9 KB against Phase 44). The admin panel itself stays out (lazy route).
    */
-  scripts: 340,
+  scripts: 352,
   /**
    * All images of the first screen: the city icons in view, so it grows with
    * the screen (134 KB at 393×852, 169 KB on the test tablet incl. the splash

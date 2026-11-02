@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { grantReward } from '@/domain/rewards'
 import { useActivityStore } from '@/store/activityStore'
+import { isSeasonSetting } from '@/features/seasons/seasons'
 import {
+  clampRestHours,
   DEFAULT_APP_SETTINGS,
   useAppSettingsStore,
   yearlyPrice,
@@ -252,6 +254,8 @@ function useDeviceData(): AdminData {
     settings: {
       prices: settingsState.prices,
       proGiftCoins: settingsState.proGiftCoins,
+      restHours: clampRestHours(settingsState.restHours),
+      season: isSeasonSetting(settingsState.season) ? settingsState.season : 'auto',
     },
     livePayment,
     loading: false,
@@ -319,6 +323,10 @@ function useCloudData(enabled: boolean): AdminData {
       subscriptions: subscriptions.data ?? [],
       payments: payments.data ?? [],
       settings: {
+        restHours: clampRestHours((stored as Partial<AppSettings>).restHours),
+        season: isSeasonSetting((stored as Partial<AppSettings>).season)
+          ? (stored as AppSettings).season
+          : 'auto',
         proGiftCoins:
           (stored as Partial<AppSettings>).proGiftCoins ?? DEFAULT_APP_SETTINGS.proGiftCoins,
         prices: {
@@ -414,10 +422,14 @@ function useCloudData(enabled: boolean): AdminData {
   ) => {
     const { getSupabase } = await import('@/services/supabase/client')
     const supabase = getSupabase()
-    if (!supabase) return
+    if (!supabase) throw new Error('Supabase sozlanmagan')
     const { error: failure } = await work(supabase)
-    if (failure) setError(failure.message)
     setVersion((current) => current + 1)
+    if (failure) {
+      setError(failure.message)
+      // the screen must not say "saved" for something the server refused
+      throw new Error(failure.message)
+    }
   }
 
   const actions: AdminActions = {
@@ -463,6 +475,8 @@ function useCloudData(enabled: boolean): AdminData {
               },
             },
             { key: 'proGiftCoins', value: settings.proGiftCoins },
+            { key: 'restHours', value: clampRestHours(settings.restHours) },
+            { key: 'season', value: settings.season },
           ],
           { onConflict: 'key' },
         ),

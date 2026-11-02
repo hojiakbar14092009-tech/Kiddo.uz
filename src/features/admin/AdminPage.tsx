@@ -11,6 +11,9 @@ import { useAdminData, type AdminData } from './adminData'
 import { useAdminPromo } from './adminPromo'
 import { NotificationsSection, type AdminNotification } from './AdminNotifications'
 import { AnalyticsSection } from './AnalyticsSection'
+import { ContentSection } from './ContentSection'
+import { TeamSection } from './TeamSection'
+import { VoicesSection } from './VoicesSection'
 import {
   ChildrenSection,
   Overview,
@@ -33,6 +36,9 @@ type Section =
   | 'overview'
   | 'notifications'
   | 'analytics'
+  | 'voices'
+  | 'content'
+  | 'team'
   | 'demo'
   | 'children'
   | 'payments'
@@ -71,6 +77,23 @@ const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
   },
   { id: 'promo', label: 'Promokodlar', icon: <IconPath d="M4 8V4h4l12 12-4 4L4 8m4-1h.01" /> },
   { id: 'ads', label: 'Reklamalar', icon: <IconPath d="M3 5h18v12H3zm7 4v4l4-2zM8 21h8" /> },
+  {
+    id: 'voices',
+    label: 'Ovozlar',
+    icon: (
+      <IconPath d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3m7 9a7 7 0 0 1-14 0m7 7v3" />
+    ),
+  },
+  {
+    id: 'content',
+    label: 'Kontent',
+    icon: <IconPath d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zm4 2h6m-6 4h6" />,
+  },
+  {
+    id: 'team',
+    label: 'Adminlar',
+    icon: <IconPath d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zm-3 9 2 2 4-4" />,
+  },
   {
     id: 'settings',
     label: 'Sozlamalar',
@@ -516,6 +539,11 @@ function AdminConsole({ session }: { session: AdminSession }) {
               {section === 'payments' && <PaymentsSection data={data} />}
               {section === 'promo' && <PromoSection promo={promo} />}
               {section === 'ads' && <AdsSection promo={promo} />}
+              {section === 'voices' && <VoicesSection source={dataSource(session)} />}
+              {section === 'content' && (
+                <ContentSection key={data.loading ? 'loading' : data.source} data={data} />
+              )}
+              {section === 'team' && <TeamSection source={dataSource(session)} />}
               {section === 'settings' && (
                 <SettingsSection key={data.loading ? 'loading' : data.source} data={data} />
               )}

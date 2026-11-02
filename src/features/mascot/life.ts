@@ -1,4 +1,5 @@
 import type { Strand } from '@/domain/universe/types'
+import type { Season } from '@/features/seasons/seasons'
 
 /*
  * Living mascots (Phase 26): what KidoBot says when the child comes home
@@ -26,6 +27,10 @@ export interface HomeLifeInput {
   /** Open homework (letters and activities). */
   homework: number
   planDone: boolean
+  /** In the admin's rest hours (Phase 45); without it, night is 22–05. */
+  resting?: boolean
+  /** A holiday now (Phase 45, features/seasons): greeted for, instead of the time of day. */
+  season?: Season | null
   /** What the robot remembers of the days before (local data only, Phase 43). */
   memory?: MascotMemory
 }
@@ -150,7 +155,7 @@ export interface HomeLine {
 export function homeLine(input: HomeLifeInput): HomeLine {
   const named = input.name ? 'Named' : ''
   const params: Record<string, string | number> = input.name ? { name: input.name } : {}
-  if (dayPart(input.hour) === 'night') return { key: `night${named}`, params }
+  if (input.resting ?? dayPart(input.hour) === 'night') return { key: `night${named}`, params }
   if (input.birthday) return { key: `birthday${named}`, params }
   if (input.homework > 0) {
     return { key: `homework${named}`, params: { ...params, count: input.homework } }
@@ -162,6 +167,12 @@ export function homeLine(input: HomeLifeInput): HomeLine {
     if (memory.awayDays >= 3) return { key: `missed${named}`, params }
     if (memory.friendDay) return { key: `friend${memory.friendDay}${named}`, params }
     if (memory.yesterday) return { key: `yesterday.${memory.yesterday}`, params: {} }
+  }
+  if (input.season) return { key: `season.${input.season}`, params: {} }
+  // outside the admin's rest hours it is never "time to rest": a late evening or an early morning
+  const late = dayPart(input.hour)
+  if (late === 'night') {
+    return { key: `${input.hour >= 12 ? 'evening' : 'morning'}${named}`, params }
   }
   const part = dayPart(input.hour)
   return { key: `${part}${named}`, params }

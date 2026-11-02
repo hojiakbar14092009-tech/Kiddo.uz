@@ -133,6 +133,9 @@ const REDEEM_ERRORS: Record<string, RedeemOutcome> = {
   invalid: 'invalid',
   used: 'used',
   lifetime: 'lifetime',
+  // the code's time is over, or every use was taken (0019): the code no longer works
+  expired: 'expired',
+  used_up: 'expired',
   // Too many wrong codes in 10 minutes (0005): shown like any other failure.
   rate_limited: 'error',
 }

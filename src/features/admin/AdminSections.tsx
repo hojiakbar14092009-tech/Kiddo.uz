@@ -1,10 +1,12 @@
 import { DEMO } from '@/config/demo'
 import clsx from 'clsx'
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import { YEARLY_DISCOUNT, yearlyPrice } from '@/store/appSettingsStore'
+import { isoFromLocal, localFromIso } from './dateInput'
+import { RetentionTiles } from './RetentionTiles'
+import { clampRestHours, YEARLY_DISCOUNT, yearlyPrice } from '@/store/appSettingsStore'
 import type { Payment } from '@/store/paymentStore'
 import type { AdminChild, AdminData } from './adminData'
-import { CODE_PATTERN, type AdminPromo } from './adminPromo'
+import { bulkCodes, CODE_PATTERN, NO_LIMITS, type AdminPromo, type CodeLimits } from './adminPromo'
 import { dailyBars, formatSom, monthlyBars, revenueTotals } from './revenue'
 import { RevenueChart } from './RevenueChart'
 import { clampGift, MAX_PRO_GIFT_COINS } from './settingsLimits'
@@ -80,7 +82,7 @@ export function Panel({
   )
 }
 
-function Segmented<T extends string>({
+export function Segmented<T extends string>({
   options,
   value,
   onChange,
@@ -95,7 +97,7 @@ function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="flex gap-1 rounded-full bg-[var(--a-raise)] p-1"
+      className="flex flex-wrap gap-1 rounded-3xl bg-[var(--a-raise)] p-1"
     >
       {options.map((option) => (
         <button
@@ -105,7 +107,7 @@ function Segmented<T extends string>({
           aria-checked={value === option.value}
           onClick={() => onChange(option.value)}
           className={clsx(
-            'rounded-full px-3 py-1.5 text-sm font-bold transition-colors',
+            'min-h-11 rounded-full px-3 py-1.5 text-sm font-bold transition-colors',
             value === option.value
               ? 'bg-[var(--a-accent)] text-[var(--a-accent-ink)]'
               : 'text-[var(--a-ink-soft)] hover:text-[var(--a-ink)]',
@@ -171,6 +173,9 @@ export function Overview({ data }: { data: AdminData }) {
             </span>
           </div>
         ))}
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:col-span-3">
+        <RetentionTiles source={data.source} />
       </div>
 
       <Panel
@@ -537,41 +542,157 @@ export function PaymentsSection({ data }: { data: AdminData }) {
 const inputClass =
   'h-10 rounded-lg border border-[var(--a-line)] bg-[var(--a-raise)] px-3 font-bold text-[var(--a-ink)] outline-none focus:border-[var(--a-accent)]'
 
+const shortDate = (iso: string) =>
+  new Date(iso).toLocaleString('uz-UZ', { dateStyle: 'medium', timeStyle: 'short' })
+
+/** The limits fields shared by the new-code form and a code's edit form. */
+function LimitFields({
+  limits,
+  onChange,
+}: {
+  limits: CodeLimits
+  onChange: (limits: CodeLimits) => void
+}) {
+  return (
+    <>
+      <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+        Ko‘pi bilan necha oila (bo‘sh: cheksiz)
+        <input
+          type="number"
+          min={1}
+          max={100000}
+          value={limits.maxUses ?? ''}
+          onChange={(event) =>
+            onChange({
+              ...limits,
+              maxUses: event.target.value ? Math.max(1, Number(event.target.value)) : null,
+            })
+          }
+          className={clsx(inputClass, 'w-36')}
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+        Amal qilish muddati (bo‘sh: muddatsiz)
+        <input
+          type="datetime-local"
+          value={localFromIso(limits.expiresAt)}
+          onChange={(event) => onChange({ ...limits, expiresAt: isoFromLocal(event.target.value) })}
+          className={inputClass}
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+        Izoh (ixtiyoriy)
+        <input
+          value={limits.note ?? ''}
+          maxLength={80}
+          onChange={(event) => onChange({ ...limits, note: event.target.value || null })}
+          className={clsx(inputClass, 'w-48 font-normal')}
+        />
+      </label>
+    </>
+  )
+}
+
 export function PromoSection({ promo }: { promo: AdminPromo }) {
+  const [mode, setMode] = useState<'one' | 'bulk'>('one')
   const [code, setCode] = useState('')
+  const [prefix, setPrefix] = useState('KIDDO')
+  const [count, setCount] = useState(10)
   const [days, setDays] = useState(7)
+  const [limits, setLimits] = useState<CodeLimits>(NO_LIMITS)
   const [problem, setProblem] = useState<string | null>(null)
+  const [made, setMade] = useState<string[]>([])
+  const [editing, setEditing] = useState<string | null>(null)
+  const [draft, setDraft] = useState<CodeLimits>(NO_LIMITS)
+  const [now] = useState(() => Date.now())
 
   const add = async (event: FormEvent) => {
     event.preventDefault()
-    const key = code.trim().toUpperCase()
-    if (!CODE_PATTERN.test(key)) {
-      setProblem('Kod 3–20 ta lotin harf yoki raqamdan iborat bo‘lsin.')
-      return
-    }
     setProblem(null)
-    await promo
-      .addCode(key, Math.min(365, Math.max(1, days)))
-      .catch((reason: Error) => setProblem(reason.message))
-    setCode('')
+    setMade([])
+    const span = Math.min(365, Math.max(1, days))
+    const chosen = promo.limitsSupported ? limits : NO_LIMITS
+    try {
+      if (mode === 'one') {
+        const key = code.trim().toUpperCase()
+        if (!CODE_PATTERN.test(key)) {
+          setProblem('Kod 3–20 ta lotin harf yoki raqamdan iborat bo‘lsin.')
+          return
+        }
+        await promo.addCode(key, span, chosen)
+        setCode('')
+      } else {
+        const list = bulkCodes(prefix, count, new Set(promo.codes.map((item) => item.code)))
+        if (list.length === 0) {
+          setProblem('Prefiks faqat lotin harf va raqamdan iborat bo‘lsin.')
+          return
+        }
+        await promo.addCodes(list, span, chosen)
+        setMade(list)
+      }
+    } catch (reason) {
+      setProblem((reason as Error).message)
+    }
   }
 
+  const copyMade = () => void navigator.clipboard?.writeText(made.join('\n')).catch(() => undefined)
+
   return (
-    <Panel title="Promokodlar">
+    <Panel
+      title="Promokodlar"
+      action={
+        <Segmented
+          label="Qo‘shish usuli"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'one', label: 'Bitta kod' },
+            { value: 'bulk', label: 'Ko‘p kod' },
+          ]}
+        />
+      }
+    >
       <p className="text-sm text-[var(--a-ink-soft)]">
         Ota-onalar promokodni faqat reklamani oxirigacha ko‘rgandan keyin oladi – har bir oila 1
         marta. Kodlar saytda ochiq turmaydi: ular faqat shu yerda ko‘rinadi.
       </p>
       <form onSubmit={(event) => void add(event)} className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
-          Kod (lotin harf va raqam)
-          <input
-            value={code}
-            onChange={(event) => setCode(event.target.value.toUpperCase())}
-            maxLength={20}
-            className={clsx(inputClass, 'uppercase')}
-          />
-        </label>
+        {mode === 'one' ? (
+          <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+            Kod (lotin harf va raqam)
+            <input
+              value={code}
+              onChange={(event) => setCode(event.target.value.toUpperCase())}
+              maxLength={20}
+              className={clsx(inputClass, 'uppercase')}
+            />
+          </label>
+        ) : (
+          <>
+            <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+              Prefiks
+              <input
+                value={prefix}
+                onChange={(event) => setPrefix(event.target.value.toUpperCase())}
+                maxLength={12}
+                className={clsx(inputClass, 'w-36 uppercase')}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+              Nechta (ko‘pi bilan 200)
+              <input
+                type="number"
+                min={1}
+                max={200}
+                value={count}
+                onChange={(event) =>
+                  setCount(Math.min(200, Math.max(1, Number(event.target.value))))
+                }
+                className={clsx(inputClass, 'w-28')}
+              />
+            </label>
+          </>
+        )}
         <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
           Necha kun PRO
           <input
@@ -583,42 +704,116 @@ export function PromoSection({ promo }: { promo: AdminPromo }) {
             className={clsx(inputClass, 'w-28')}
           />
         </label>
+        {promo.limitsSupported && <LimitFields limits={limits} onChange={setLimits} />}
         <button
           type="submit"
-          className="h-10 rounded-full bg-[var(--a-accent)] px-5 text-sm font-bold text-[var(--a-accent-ink)]"
+          className="h-11 rounded-full bg-[var(--a-accent)] px-5 text-sm font-bold text-[var(--a-accent-ink)]"
         >
-          Kod qo‘shish
+          {mode === 'one' ? 'Kod qo‘shish' : `${count} ta kod yaratish`}
         </button>
       </form>
+      {!promo.limitsSupported && (
+        <p className="text-sm text-[var(--a-ink-soft)]">
+          Foydalanish cheklovi va muddat faqat bulutli admin uchun: ularni server tekshiradi.
+        </p>
+      )}
+      {made.length > 0 && (
+        <div className="flex flex-col gap-2 rounded-xl bg-[var(--a-raise)] p-3" role="status">
+          <span className="text-sm font-bold">{made.length} ta yangi kod:</span>
+          <code className="kd-num text-sm break-all">{made.join(', ')}</code>
+          <button
+            type="button"
+            onClick={copyMade}
+            className="h-11 self-start rounded-full border border-[var(--a-line)] px-4 text-sm font-bold"
+          >
+            Nusxa olish
+          </button>
+        </div>
+      )}
       {(problem ?? promo.error) && (
         <p role="alert" className="text-sm font-bold text-[var(--a-coral)]">
           {problem ?? promo.error}
         </p>
       )}
-      <ul className="flex flex-col">
-        {promo.codes.map((item) => (
-          <li
-            key={item.code}
-            className="flex flex-wrap items-center gap-4 border-b border-[var(--a-line)] py-3 last:border-0"
-          >
-            <span
-              className={clsx(
-                'kd-num flex-1 text-base font-bold tracking-wide',
-                !item.active && 'text-[var(--a-ink-soft)] line-through',
-              )}
+      <ul className="flex flex-col" data-testid="promo-codes">
+        {promo.codes.map((item) => {
+          const expired = item.expiresAt !== null && Date.parse(item.expiresAt) <= now
+          const full = item.maxUses !== null && item.used >= item.maxUses
+          return (
+            <li
+              key={item.code}
+              className="flex flex-col gap-2 border-b border-[var(--a-line)] py-3 last:border-0"
             >
-              {item.code}
-            </span>
-            <span className="text-[var(--a-ink-soft)]">{item.days} kun PRO</span>
-            <span className="text-[var(--a-ink-soft)]">{item.claims} ta oila oldi</span>
-            <ActionButton onClick={() => void promo.setCodeActive(item.code, !item.active)}>
-              {item.active ? 'To‘xtatish' : 'Yoqish'}
-            </ActionButton>
-            <ActionButton tone="danger" onClick={() => void promo.removeCode(item.code)}>
-              O‘chirish
-            </ActionButton>
-          </li>
-        ))}
+              <div className="flex flex-wrap items-center gap-4">
+                <span
+                  className={clsx(
+                    'kd-num flex-1 text-base font-bold tracking-wide',
+                    (!item.active || expired || full) && 'text-[var(--a-ink-soft)] line-through',
+                  )}
+                >
+                  {item.code}
+                </span>
+                <span className="text-[var(--a-ink-soft)]">{item.days} kun PRO</span>
+                <span className="kd-num text-[var(--a-ink-soft)]" data-testid="promo-used">
+                  {item.used}
+                  {item.maxUses !== null ? ` / ${item.maxUses}` : ''} ta oila
+                </span>
+                {item.expiresAt && (
+                  <span
+                    className={clsx(
+                      'text-sm',
+                      expired ? 'text-[var(--a-coral)]' : 'text-[var(--a-ink-soft)]',
+                    )}
+                  >
+                    {expired ? 'Muddati tugagan' : `${shortDate(item.expiresAt)} gacha`}
+                  </span>
+                )}
+                {full && <span className="text-sm text-[var(--a-coral)]">Tugagan</span>}
+                <ActionButton onClick={() => void promo.setCodeActive(item.code, !item.active)}>
+                  {item.active ? 'To‘xtatish' : 'Yoqish'}
+                </ActionButton>
+                {promo.limitsSupported && (
+                  <ActionButton
+                    onClick={() => {
+                      setEditing(editing === item.code ? null : item.code)
+                      setDraft({
+                        maxUses: item.maxUses,
+                        expiresAt: item.expiresAt,
+                        note: item.note,
+                      })
+                    }}
+                  >
+                    Cheklovlar
+                  </ActionButton>
+                )}
+                <ActionButton tone="danger" onClick={() => void promo.removeCode(item.code)}>
+                  O‘chirish
+                </ActionButton>
+              </div>
+              {item.note && <span className="text-sm text-[var(--a-ink-soft)]">{item.note}</span>}
+              {editing === item.code && (
+                <form
+                  className="flex flex-wrap items-end gap-3"
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void promo
+                      .setCodeLimits(item.code, draft)
+                      .then(() => setEditing(null))
+                      .catch((reason: Error) => setProblem(reason.message))
+                  }}
+                >
+                  <LimitFields limits={draft} onChange={setDraft} />
+                  <button
+                    type="submit"
+                    className="h-11 rounded-full bg-[var(--a-accent)] px-5 text-sm font-bold text-[var(--a-accent-ink)]"
+                  >
+                    Saqlash
+                  </button>
+                </form>
+              )}
+            </li>
+          )
+        })}
       </ul>
     </Panel>
   )
@@ -634,6 +829,8 @@ export function AdsSection({ promo }: { promo: AdminPromo }) {
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [preview, setPreview] = useState<{ id: string; src: string } | null>(null)
+  const [scheduling, setScheduling] = useState<string | null>(null)
+  const [slot, setSlot] = useState({ start: '', end: '' })
 
   const add = async (event: FormEvent) => {
     event.preventDefault()
@@ -746,6 +943,22 @@ export function AdsSection({ promo }: { promo: AdminPromo }) {
                 <span className="text-[var(--a-ink-soft)]">
                   {ad.views} ko‘rish, {ad.completions} oxirigacha
                 </span>
+                {(ad.startsAt || ad.endsAt) && (
+                  <span className="text-sm text-[var(--a-ink-soft)]" data-testid="ad-schedule">
+                    {ad.startsAt ? shortDate(ad.startsAt) : '…'} –{' '}
+                    {ad.endsAt ? shortDate(ad.endsAt) : '…'}
+                  </span>
+                )}
+                {promo.limitsSupported && (
+                  <ActionButton
+                    onClick={() => {
+                      setScheduling(scheduling === ad.id ? null : ad.id)
+                      setSlot({ start: localFromIso(ad.startsAt), end: localFromIso(ad.endsAt) })
+                    }}
+                  >
+                    Jadval
+                  </ActionButton>
+                )}
                 <ActionButton
                   onClick={() =>
                     preview?.id === ad.id
@@ -764,6 +977,43 @@ export function AdsSection({ promo }: { promo: AdminPromo }) {
                   O‘chirish
                 </ActionButton>
               </div>
+              {scheduling === ad.id && (
+                <form
+                  className="flex flex-wrap items-end gap-3"
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void promo
+                      .setAdSchedule(ad, isoFromLocal(slot.start), isoFromLocal(slot.end))
+                      .then(() => setScheduling(null))
+                      .catch((reason: Error) => setProblem(reason.message))
+                  }}
+                >
+                  <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+                    Boshlanishi (bo‘sh: hozirdan)
+                    <input
+                      type="datetime-local"
+                      value={slot.start}
+                      onChange={(event) => setSlot({ ...slot, start: event.target.value })}
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+                    Tugashi (bo‘sh: muddatsiz)
+                    <input
+                      type="datetime-local"
+                      value={slot.end}
+                      onChange={(event) => setSlot({ ...slot, end: event.target.value })}
+                      className={inputClass}
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="h-11 rounded-full bg-[var(--a-accent)] px-5 text-sm font-bold text-[var(--a-accent-ink)]"
+                  >
+                    Saqlash
+                  </button>
+                </form>
+              )}
               {preview?.id === ad.id && (
                 <video
                   src={preview.src}
@@ -784,17 +1034,31 @@ export function AdsSection({ promo }: { promo: AdminPromo }) {
 export function SettingsSection({ data }: { data: AdminData }) {
   const [monthly, setMonthly] = useState(data.settings.prices.monthly)
   const [gift, setGift] = useState(data.settings.proGiftCoins)
+  const [restStart, setRestStart] = useState(data.settings.restHours.start)
+  const [restEnd, setRestEnd] = useState(data.settings.restHours.end)
   const [saved, setSaved] = useState(false)
   const yearly = yearlyPrice(Math.max(0, monthly))
   const full = Math.max(0, monthly) * 12
 
+  const [problem, setProblem] = useState<string | null>(null)
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    await data.actions.saveSettings({
-      ...data.settings,
-      prices: { monthly: Math.max(0, monthly), yearly },
-      proGiftCoins: clampGift(gift),
-    })
+    setProblem(null)
+    const restHours = clampRestHours({ start: restStart, end: restEnd })
+    try {
+      await data.actions.saveSettings({
+        ...data.settings,
+        prices: { monthly: Math.max(0, monthly), yearly },
+        proGiftCoins: clampGift(gift),
+        restHours,
+      })
+    } catch (reason) {
+      setProblem(`Saqlanmadi: ${(reason as Error).message}`)
+      return
+    }
+    // what was saved is shown (an hour out of range was brought into it)
+    setRestStart(restHours.start)
+    setRestEnd(restHours.end)
     setSaved(true)
   }
 
@@ -805,13 +1069,14 @@ export function SettingsSection({ data }: { data: AdminData }) {
     suffix: string,
     step = 1,
     max?: number,
+    min = 0,
   ) => (
     <label className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
       {label}
       <span className="flex items-center gap-2">
         <input
           type="number"
-          min={0}
+          min={min}
           max={max}
           step={step}
           value={value}
@@ -827,48 +1092,73 @@ export function SettingsSection({ data }: { data: AdminData }) {
   )
 
   return (
-    <Panel title="Sozlamalar">
-      <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
-        <div className="flex flex-wrap items-end gap-6">
-          {field('PRO – 1 oy narxi', monthly, setMonthly, 'so‘m', 100)}
-          <div className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
-            PRO – 1 yil narxi (avtomatik, −{Math.round(YEARLY_DISCOUNT * 100)}%)
-            <output
-              data-testid="yearly-price"
-              className="kd-num flex h-11 items-center rounded-lg border border-dashed border-[var(--a-line)] px-3 text-base font-bold text-[var(--a-ink)]"
-            >
-              {formatSom(yearly)} so‘m
-            </output>
-            <span className="kd-num text-xs">
-              12 × {formatSom(Math.max(0, monthly))} = {formatSom(full)} −{' '}
-              {Math.round(YEARLY_DISCOUNT * 100)}% = {formatSom(yearly)}
-            </span>
+    <div className="flex flex-col gap-5">
+      <Panel title="Sozlamalar">
+        <form onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
+          <div className="flex flex-wrap items-end gap-6">
+            {field('PRO – 1 oy narxi', monthly, setMonthly, 'so‘m', 100)}
+            <div className="flex flex-col gap-1 text-sm text-[var(--a-ink-soft)]">
+              PRO – 1 yil narxi (avtomatik, −{Math.round(YEARLY_DISCOUNT * 100)}%)
+              <output
+                data-testid="yearly-price"
+                className="kd-num flex h-11 items-center rounded-lg border border-dashed border-[var(--a-line)] px-3 text-base font-bold text-[var(--a-ink)]"
+              >
+                {formatSom(yearly)} so‘m
+              </output>
+              <span className="kd-num text-xs">
+                12 × {formatSom(Math.max(0, monthly))} = {formatSom(full)} −{' '}
+                {Math.round(YEARLY_DISCOUNT * 100)}% = {formatSom(yearly)}
+              </span>
+            </div>
+            {field(
+              'PRO sotib olinganda har bir bolaga',
+              gift,
+              setGift,
+              `yong‘oq sovg‘a (ko‘pi bilan ${MAX_PRO_GIFT_COINS})`,
+              1,
+              MAX_PRO_GIFT_COINS,
+            )}
           </div>
-          {field(
-            'PRO sotib olinganda har bir bolaga',
-            gift,
-            setGift,
-            `yong‘oq sovg‘a (ko‘pi bilan ${MAX_PRO_GIFT_COINS})`,
-            1,
-            MAX_PRO_GIFT_COINS,
-          )}
-        </div>
-        <div className="flex items-center gap-4">
-          <button
-            type="submit"
-            className="h-11 rounded-full bg-[var(--a-accent)] px-6 text-sm font-bold text-[var(--a-accent-ink)]"
-          >
-            Saqlash
-          </button>
-          {saved && (
-            <span role="status" className="text-sm font-bold text-[var(--a-online)]">
-              {DEMO.publicProUIEnabled
-                ? 'Saqlandi. Ota-onalar endi shu narxlarni ko‘radi va to‘laydi.'
-                : 'Saqlandi. Demoda narxlar ota-onalarga ko‘rsatilmaydi – keyingi versiya uchun saqlab qo‘yildi.'}
-            </span>
-          )}
-        </div>
-      </form>
-    </Panel>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="text-sm font-bold text-[var(--a-ink)]">Dam olish vaqti</legend>
+            <p className="text-sm text-[var(--a-ink-soft)]">
+              Shu soatlarda maskot mudraydi va bolaga dam olish vaqti ekanini aytadi (qurilma vaqti
+              bo‘yicha).
+            </p>
+            <div className="flex flex-wrap items-end gap-6">
+              {field('Boshlanishi (18–23)', restStart, setRestStart, ':00 dan', 1, 23, 18)}
+              {field('Tugashi (4–9)', restEnd, setRestEnd, ':00 gacha', 1, 9, 4)}
+            </div>
+          </fieldset>
+          <div className="flex items-center gap-4">
+            <button
+              type="submit"
+              className="h-11 rounded-full bg-[var(--a-accent)] px-6 text-sm font-bold text-[var(--a-accent-ink)]"
+            >
+              Saqlash
+            </button>
+            {problem && (
+              <span role="alert" className="text-sm font-bold text-[var(--a-coral)]">
+                {problem}
+              </span>
+            )}
+            {saved && (
+              <span role="status" className="text-sm font-bold text-[var(--a-online)]">
+                {DEMO.publicProUIEnabled
+                  ? 'Saqlandi. Ota-onalar endi shu narxlarni ko‘radi va to‘laydi.'
+                  : 'Saqlandi. Demoda narxlar ota-onalarga ko‘rsatilmaydi – keyingi versiya uchun saqlab qo‘yildi.'}
+              </span>
+            )}
+          </div>
+        </form>
+      </Panel>
+      <Panel title="Telegram">
+        <p className="text-sm" data-testid="telegram-status">
+          <span className="font-bold text-[var(--a-coral)]">Ulanmagan.</span> Ota-onalarga haftalik
+          hisobot va eslatmalar yuboradigan bot keyingi bosqichda ulanadi (bot tokeni va webhook
+          kerak bo‘ladi).
+        </p>
+      </Panel>
+    </div>
   )
 }

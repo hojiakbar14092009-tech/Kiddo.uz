@@ -2159,6 +2159,12 @@ export const uz = {
       friend100Named: '{{name}}, biz birga yuz kun o‘ynadik!',
       missed: 'Seni sog‘indim! Yana birga o‘ynaymizmi?',
       missedNamed: '{{name}}, seni sog‘indim! Yana o‘ynaymizmi?',
+      season: {
+        navruz: 'Navro‘z muborak! Bahor keldi, kel, o‘ynaymiz!',
+        newYear: 'Yangi yil muborak! Bugun nima o‘rganamiz?',
+        independence: 'Mustaqillik kuni muborak! Bugun nima o‘rganamiz?',
+        knowledge: 'Bilimlar kuni muborak! Kel, yangi narsa o‘rganamiz!',
+      },
       yesterday: {
         letters: 'Kecha harflarni o‘rgandik. Bugun yana davom etamizmi?',
         numbers: 'Kecha sonlar bilan o‘ynadik. Bugun davom etamizmi?',

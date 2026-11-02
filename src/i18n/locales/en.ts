@@ -2147,6 +2147,12 @@ export const en: Translation = {
       friend100Named: '{{name}}, we’ve played together for a hundred days!',
       missed: 'I missed you! Shall we play again?',
       missedNamed: '{{name}}, I missed you! Play again?',
+      season: {
+        navruz: 'Happy Navruz! Spring is here, let’s play!',
+        newYear: 'Happy New Year! What shall we learn today?',
+        independence: 'Happy Independence Day! What shall we learn?',
+        knowledge: 'Happy Knowledge Day! Let’s learn something new!',
+      },
       yesterday: {
         letters: 'Yesterday we learned letters. Shall we go on?',
         numbers: 'Yesterday we played with numbers. Shall we go on?',

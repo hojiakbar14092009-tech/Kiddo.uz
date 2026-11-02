@@ -985,6 +985,183 @@ select pg_temp.check(not exists (
                     and con.confdeltype = 'c' and con.confrelid in ('auth.users'::regclass, 'public.children'::regclass))
 ), 'delete account: every table with a parent, user or child cascades');
 
+-- ===== Phase 45 (0019): admin overhaul
+-- fixtures: four confirmed families, a second admin account (not an admin yet)
+insert into auth.users (id,email,email_confirmed_at) values
+ ('00000000-0000-0000-0000-000000000451','p451@x.uz', now()),
+ ('00000000-0000-0000-0000-000000000452','p452@x.uz', now()),
+ ('00000000-0000-0000-0000-000000000453','p453@x.uz', now()),
+ ('00000000-0000-0000-0000-000000000454','p454@x.uz', now()),
+ ('00000000-0000-0000-0000-0000000004ad','Ad2@x.uz', now());
+-- the admin sets up codes (audited); the launch codes are paused for these tests
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+insert into public.promo_codes (code, days, max_uses, note) values ('ONCE45', 5, 1, 'one family only');
+insert into public.promo_codes (code, days, expires_at) values ('OLD45', 5, now() - interval '1 day');
+insert into public.promo_codes (code, days, active) values ('OFF45', 5, false);
+insert into public.promo_codes (code, days) values ('TEMP45', 5);
+select pg_temp.expect_error($$insert into public.promo_codes (code, days, max_uses) values ('ZERO45', 5, 0)$$, 'promo_codes_max_uses_check');
+select pg_temp.expect_error($$insert into public.promo_codes (code, days, note) values ('NOTE45', 5, repeat('n', 81))$$, 'promo_codes_note_check');
+update public.promo_codes set active = false where code in ('KIDDO07','BOLAJON30');
+update public.promo_codes set note = 'temporary' where code = 'TEMP45';
+update public.promo_codes set note = 'temporary' where code = 'TEMP45';
+delete from public.promo_codes where code = 'TEMP45';
+select pg_temp.check((select admin_id = '00000000-0000-0000-0000-0000000000ad' and summary ->> 'max_uses' = '1' and summary ->> 'note' = 'one family only'
+  from public.admin_audit where target = 'promo_codes' and action = 'insert' and target_key = 'ONCE45'), 'audit: promo insert logged with the admin and the new values');
+select pg_temp.check((select count(*) = 1 and bool_and(summary = '{"note":"temporary"}'::jsonb) from public.admin_audit where target = 'promo_codes' and action = 'update' and target_key = 'TEMP45'), 'audit: promo update logs only the changed column (a no-op update is not logged)');
+select pg_temp.check((select count(*) = 1 and bool_and(summary ->> 'code' = 'TEMP45') from public.admin_audit where target = 'promo_codes' and action = 'delete' and target_key = 'TEMP45'), 'audit: promo delete logged');
+insert into public.app_settings (key, value) values ('phase45', '1') on conflict (key) do update set value = excluded.value;
+insert into public.app_settings (key, value) values ('phase45', '2') on conflict (key) do update set value = excluded.value;
+select pg_temp.check((select count(*) from public.admin_audit where target = 'app_settings' and target_key = 'phase45' and action = 'insert') = 1
+  and (select summary -> 'value' from public.admin_audit where target = 'app_settings' and target_key = 'phase45' and action = 'update') = '2'::jsonb, 'audit: app_settings upsert logged (insert, then update with the new value)');
+select pg_temp.expect_error($$insert into public.admin_audit (action, target) values ('insert', 'x')$$, 'permission denied');
+select pg_temp.expect_error($$update public.admin_audit set target = 'x'$$, 'permission denied');
+select pg_temp.expect_error($$delete from public.admin_audit$$, 'permission denied');
+commit;
+-- finished ad views for two families; claims made before the admin set limits
+insert into public.ad_views (id,user_id,ad_id,started_at) values
+ ('45000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000451','11111111-1111-1111-1111-111111111111', now() - interval '60 seconds'),
+ ('45000000-0000-0000-0000-000000000002','00000000-0000-0000-0000-000000000452','11111111-1111-1111-1111-111111111111', now() - interval '60 seconds');
+insert into public.promo_claims (user_id, code) values
+ ('00000000-0000-0000-0000-000000000453','OLD45'),
+ ('00000000-0000-0000-0000-000000000454','OFF45');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000451","role":"authenticated"}', true);
+select pg_temp.check((select code from public.claim_promo('45000000-0000-0000-0000-000000000001')) = 'ONCE45', 'promo 0019: claim hands out only an open code (not expired, not inactive)');
+select pg_temp.check((public.redeem_promo_code('ONCE45') ->> 'ok')::boolean, 'promo 0019: a max_uses=1 code works once');
+select pg_temp.expect_error($$select * from public.admin_promo_usage()$$, 'not_admin');
+select pg_temp.check((select count(*) from public.admin_audit) = 0, 'audit: a parent reads nothing');
+select pg_temp.expect_error($$insert into public.admin_audit (action, target) values ('insert', 'x')$$, 'permission denied');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000452","role":"authenticated"}', true);
+select pg_temp.expect_error($$select public.claim_promo('45000000-0000-0000-0000-000000000002')$$, 'no_codes');
+commit;
+-- the next family holds a claim on it from before the limit was set
+insert into public.promo_claims (user_id, code) values ('00000000-0000-0000-0000-000000000452','ONCE45');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000452","role":"authenticated"}', true);
+select pg_temp.check((public.redeem_promo_code('ONCE45') ->> 'error') = 'used_up', 'promo 0019: a used-up code is refused for the next family');
+select pg_temp.check(not exists (select 1 from public.subscriptions), 'promo 0019: no PRO for the next family');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000453","role":"authenticated"}', true);
+select pg_temp.check((public.redeem_promo_code('OLD45') ->> 'error') = 'expired', 'promo 0019: an expired code is refused');
+select pg_temp.check(not exists (select 1 from public.subscriptions), 'promo 0019: no PRO from an expired code');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000454","role":"authenticated"}', true);
+select pg_temp.check((public.redeem_promo_code('OFF45') ->> 'error') = 'invalid', 'promo 0019: an inactive code is refused (as invalid)');
+commit;
+-- the legacy wrapper refuses the same way (callable only by the server)
+begin;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000453","role":"authenticated"}', true);
+select pg_temp.expect_error($$select public.redeem_promo('OLD45')$$, 'expired');
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000452","role":"authenticated"}', true);
+select pg_temp.expect_error($$select public.redeem_promo('ONCE45')$$, 'used_up');
+commit;
+select pg_temp.check(not has_function_privilege('authenticated','public.promo_code_uses(text,uuid)','execute') and not has_function_privilege('anon','public.promo_code_open(text)','execute'), 'promo 0019: the use-count helpers are not callable by clients');
+-- ads with a schedule
+insert into public.ads (id,title,video_url,duration_s,starts_at,ends_at) values
+ ('45000000-0000-0000-0000-0000000000a1','Later','https://x/l.mp4',20, now() + interval '1 day', null),
+ ('45000000-0000-0000-0000-0000000000a2','Over','https://x/o.mp4',20, null, now() - interval '1 hour'),
+ ('45000000-0000-0000-0000-0000000000a3','Now','https://x/n.mp4',20, now() - interval '1 hour', now() + interval '1 hour');
+select pg_temp.expect_error($$insert into public.ads (title,video_url,duration_s,starts_at,ends_at) values ('Bad','https://x/b.mp4',20, now(), now() - interval '1 minute')$$, 'ads_schedule_check');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000453","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from public.ads where id in ('45000000-0000-0000-0000-0000000000a1','45000000-0000-0000-0000-0000000000a2')) = 0, 'ads 0019: a parent cannot read an ad outside its schedule');
+select pg_temp.check((select count(*) from public.ads where id = '45000000-0000-0000-0000-0000000000a3') = 1, 'ads 0019: a parent reads an ad inside its schedule');
+select pg_temp.expect_error($$select public.start_ad_view('45000000-0000-0000-0000-0000000000a1')$$, 'no_ad');
+select pg_temp.expect_error($$select public.start_ad_view('45000000-0000-0000-0000-0000000000a2')$$, 'no_ad');
+select pg_temp.check(public.start_ad_view('45000000-0000-0000-0000-0000000000a3') is not null, 'ads 0019: start_ad_view works inside the schedule');
+commit;
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.check((select count(*) from public.ads where id::text like '45000000-%') = 1, 'ads 0019: anon reads only the scheduled-now ad');
+select pg_temp.expect_error($$select * from public.voice_reviews$$, 'permission denied');
+select pg_temp.expect_error($$insert into public.voice_reviews (key, language, status) values ('a/b', 'uz', 'approved')$$, 'permission denied');
+select pg_temp.expect_error($$select * from public.admin_audit$$, 'permission denied');
+commit;
+select pg_temp.check(not has_function_privilege('anon','public.admin_list()','execute') and not has_function_privilege('anon','public.admin_add(text)','execute')
+  and not has_function_privilege('anon','public.admin_remove(uuid)','execute') and not has_function_privilege('anon','public.admin_retention(integer)','execute')
+  and not has_function_privilege('anon','public.admin_promo_usage()','execute') and not has_function_privilege('authenticated','public.audit_admin_change()','execute'), 'admin 0019: anon cannot call the admin RPCs, nobody calls the audit trigger');
+-- voice reviews: a parent can neither write nor read them
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000453","role":"authenticated"}', true);
+select pg_temp.expect_error($$insert into public.voice_reviews (key, language, status) values ('letters/a.mp3', 'uz', 'approved')$$, 'row-level security');
+commit;
+-- admin: reads all ads, voice reviews, promo usage, manages admins
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from public.ads where id::text like '45000000-%') = 3, 'ads 0019: an admin reads every ad');
+insert into public.voice_reviews (key, language, status, note, reviewed_by, reviewed_at) values ('letters/a.mp3', 'uz', 'approved', 'clear', '00000000-0000-0000-0000-000000000453', '2000-01-01');
+insert into public.voice_reviews (key, language, status) values ('letters/a.mp3', 'uz', 'rejected') on conflict (language, key) do update set status = excluded.status;
+select pg_temp.check((select status = 'rejected' and reviewed_by = '00000000-0000-0000-0000-0000000000ad' and reviewed_at > now() - interval '1 minute' from public.voice_reviews), 'voice 0019: an admin writes a review (server stamps who and when)');
+select pg_temp.expect_error($$insert into public.voice_reviews (key, language, status) values ('Bad Key!', 'uz', 'approved')$$, 'voice_reviews_key_check');
+select pg_temp.expect_error($$insert into public.voice_reviews (key, language, status) values ('a', 'de', 'approved')$$, 'voice_reviews_language_check');
+select pg_temp.expect_error($$insert into public.voice_reviews (key, language, status) values ('a', 'en', 'maybe')$$, 'voice_reviews_status_check');
+select pg_temp.check((select count(*) from public.admin_audit where target = 'voice_reviews' and target_key = 'uz/letters/a.mp3') = 2, 'audit: voice review insert and update logged');
+select pg_temp.check((select used from public.admin_promo_usage() where code = 'ONCE45') = 2
+  and (select used from public.admin_promo_usage() where code = 'OLD45') = 1
+  and (select used from public.admin_promo_usage() where code = 'OFF45') = 1
+  and (select count(*) from public.admin_promo_usage()) = (select count(*) from public.promo_codes), 'promo 0019: admin_promo_usage counts each account once, for every code');
+select pg_temp.expect_error($$select * from public.admin_add('nobody@x.uz')$$, 'no_such_user');
+select pg_temp.expect_error($$select public.admin_remove('00000000-0000-0000-0000-0000000000ad')$$, 'last_admin');
+select pg_temp.check((select email from public.admin_add('  AD2@x.uz ')) = 'Ad2@x.uz', 'admins 0019: add by e-mail (any case)');
+select pg_temp.check((select user_id from public.admin_add('ad2@x.uz')) = '00000000-0000-0000-0000-0000000004ad', 'admins 0019: adding again is idempotent');
+select pg_temp.check((select count(*) from public.admin_list()) = 2 and (select added_at is not null from public.admin_list() where email = 'Ad2@x.uz'), 'admins 0019: list with e-mail and added_at');
+select pg_temp.expect_error($$select public.admin_remove('00000000-0000-0000-0000-0000000000ad')$$, 'not_self');
+select pg_temp.check(not public.admin_remove('00000000-0000-0000-0000-000000000453'), 'admins 0019: removing a non-admin changes nothing');
+select pg_temp.check(public.admin_remove('00000000-0000-0000-0000-0000000004ad'), 'admins 0019: another admin can be removed');
+select pg_temp.check((select count(*) from public.admins) = 1, 'admins 0019: one admin left');
+select pg_temp.check((select count(*) from public.admin_audit where target = 'admins' and target_key = '00000000-0000-0000-0000-0000000004ad' and action = 'insert') = 1
+  and (select count(*) from public.admin_audit where target = 'admins' and target_key = '00000000-0000-0000-0000-0000000004ad' and action = 'delete') = 1, 'audit: admin add and remove logged');
+select pg_temp.check((select count(*) from public.admin_audit) > 0, 'audit: an admin reads the log');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000453","role":"authenticated"}', true);
+select pg_temp.expect_error($$select * from public.admin_list()$$, 'not_admin');
+select pg_temp.expect_error($$select * from public.admin_add('p453@x.uz')$$, 'not_admin');
+select pg_temp.expect_error($$select public.admin_remove('00000000-0000-0000-0000-0000000000ad')$$, 'not_admin');
+select pg_temp.expect_error($$select * from public.admin_retention(30)$$, 'not_admin');
+select pg_temp.check((select count(*) from public.voice_reviews) = 0, 'voice 0019: a parent reads no reviews');
+update public.promo_codes set max_uses = 100000;
+commit;
+select pg_temp.check((select max_uses from public.promo_codes where code = 'ONCE45') = 1, 'promo 0019: a parent cannot change a limit');
+-- retention: the admin sees installs of the period and their day-2 / day-7 returns
+create temp table ret45_before (installs bigint, eligible_day2 bigint, returned_day2 bigint, eligible_day7 bigint, returned_day7 bigint);
+grant select, insert on ret45_before to authenticated;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+insert into ret45_before select * from public.admin_retention(30);
+commit;
+insert into public.analytics_events (id, install_id, name, day, at) values
+ ('ret45-0001','install-ret45-1','first_opened',(now() at time zone 'Asia/Tashkent')::date - 1, now()),
+ ('ret45-0002','install-ret45-1','returned_day2',(now() at time zone 'Asia/Tashkent')::date, now()),
+ ('ret45-0003','install-ret45-2','first_opened',(now() at time zone 'Asia/Tashkent')::date, now()),
+ ('ret45-0004','install-ret45-3','returned_day7',(now() at time zone 'Asia/Tashkent')::date, now());
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select pg_temp.check((select r.installs - b.installs = 2 and r.eligible_day2 - b.eligible_day2 = 1 and r.returned_day2 - b.returned_day2 = 1
+  and r.eligible_day7 = b.eligible_day7 and r.returned_day7 = b.returned_day7
+  from public.admin_retention(30) r, ret45_before b), 'analytics 0019: admin_retention counts the cohort, the installs old enough to return, and their returns (a new install is not yet due; outside the cohort not counted)');
+commit;
+-- the launch codes run again (as the owner set them)
+update public.promo_codes set active = true where code in ('KIDDO07','BOLAJON30');
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

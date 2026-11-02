@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { isSeasonSetting, type SeasonSetting } from '@/features/seasons/seasons'
 
 /**
  * Settings the admin can change: the PRO price and the coins given with PRO.
@@ -12,6 +13,40 @@ export interface AppSettings {
   prices: { monthly: number; yearly: number }
   /** Coins each child gets as a thank-you when PRO is bought. */
   proGiftCoins: number
+  /**
+   * Rest hours (Phase 45), local time: from `start` to `end` (over midnight) the robot dozes
+   * and says it is time to rest. Set by the admin for every family.
+   */
+  restHours: RestHours
+  /** A holiday greeting on Home (Phase 45): by the calendar, off, or one holiday now. */
+  season: SeasonSetting
+}
+
+export interface RestHours {
+  /** 18–23. */
+  start: number
+  /** 4–9. */
+  end: number
+}
+
+export const DEFAULT_REST_HOURS: RestHours = { start: 22, end: 5 }
+
+/** Rest hours the admin may choose: the evening start 18–23, the morning end 4–9. */
+export function clampRestHours(value: Partial<RestHours> | null | undefined): RestHours {
+  // a number out of range is brought to the nearest allowed hour; anything else is the default
+  const hour = (raw: unknown, min: number, max: number, fallback: number) =>
+    typeof raw === 'number' && Number.isFinite(raw)
+      ? Math.min(max, Math.max(min, Math.round(raw)))
+      : fallback
+  return {
+    start: hour(value?.start, 18, 23, DEFAULT_REST_HOURS.start),
+    end: hour(value?.end, 4, 9, DEFAULT_REST_HOURS.end),
+  }
+}
+
+/** Is `hour` (0–23) inside the rest hours? */
+export function isRestHour(hour: number, rest: RestHours = DEFAULT_REST_HOURS): boolean {
+  return hour >= rest.start || hour < rest.end
 }
 
 /** A year costs twelve months less 20 %. */
@@ -25,6 +60,8 @@ export function yearlyPrice(monthly: number): number {
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   prices: { monthly: 29_000, yearly: yearlyPrice(29_000) },
   proGiftCoins: 50,
+  restHours: DEFAULT_REST_HOURS,
+  season: 'auto',
 }
 
 interface AppSettingsState extends AppSettings {
@@ -51,6 +88,8 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         return {
           prices: { monthly, yearly: yearlyPrice(monthly) },
           proGiftCoins: old.proGiftCoins ?? DEFAULT_APP_SETTINGS.proGiftCoins,
+          restHours: clampRestHours(old.restHours),
+          season: isSeasonSetting(old.season) ? old.season : 'auto',
         }
       },
     },
@@ -58,6 +97,11 @@ export const useAppSettingsStore = create<AppSettingsState>()(
 )
 
 export function getAppSettings(): AppSettings {
-  const { prices, proGiftCoins } = useAppSettingsStore.getState()
-  return { prices, proGiftCoins }
+  const { prices, proGiftCoins, restHours, season } = useAppSettingsStore.getState()
+  return {
+    prices,
+    proGiftCoins,
+    restHours: clampRestHours(restHours),
+    season: isSeasonSetting(season) ? season : 'auto',
+  }
 }
