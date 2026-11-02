@@ -6,6 +6,7 @@ import { registerLanguage } from '@/i18n'
 import { en } from '@/i18n/locales/en'
 import { ru } from '@/i18n/locales/ru'
 import { useSettingsStore } from '@/store/settingsStore'
+import { countUpConfig } from '@/features/admin/countUpConfig'
 
 // tests switch languages synchronously: every language is there from the start
 registerLanguage('ru', ru)
@@ -80,6 +81,7 @@ vi.mock('howler', () => {
 
 // Animations finish instantly in tests, so assertions see the end state.
 MotionGlobalConfig.skipAnimations = true
+countUpConfig.skip = true
 
 // jsdom has no canvas; behave like a browser without 2D/WebGL support.
 HTMLCanvasElement.prototype.getContext = (() =>

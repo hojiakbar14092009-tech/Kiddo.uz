@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { KiddoMark } from '@/components/brand/KiddoLogo'
 import { openAdminPreview } from '@/app/preview/adminPreview'
@@ -32,6 +32,7 @@ import {
 } from './adminSession'
 import { DemoBanner, DemoControls, DemoOverview } from './DemoAdmin'
 import { formatSom, revenueTotals } from './revenue'
+import { AdminIcon } from './icons'
 
 type Section =
   | 'overview'
@@ -47,79 +48,20 @@ type Section =
   | 'ads'
   | 'settings'
 
-const SECTIONS: { id: Section; label: string; icon: ReactNode }[] = [
-  {
-    id: 'overview',
-    label: 'Umumiy',
-    icon: <IconPath d="M4 13h6V4H4zm0 7h6v-5H4zm10 0h6v-9h-6zm0-16v5h6V4z" />,
-  },
-  {
-    id: 'notifications',
-    label: 'Bildirishnomalar',
-    icon: <IconPath d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9m4 13h4" />,
-  },
-  {
-    id: 'analytics',
-    label: 'Analitika',
-    icon: <IconPath d="M4 20V10m6 10V4m6 16v-7m6 7H2" />,
-  },
-  {
-    id: 'children',
-    label: 'Bolalar',
-    icon: (
-      <IconPath d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8m7 1a3 3 0 1 0 0-6M2 21c0-4 3-7 7-7s7 3 7 7m2-7c2.5.4 4 3 4 7" />
-    ),
-  },
-  { id: 'payments', label: 'To‘lovlar', icon: <IconPath d="M3 6h18v12H3zm0 4h18M7 15h3" /> },
-  {
-    id: 'demo',
-    label: 'Demo',
-    icon: <IconPath d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z" />,
-  },
-  { id: 'promo', label: 'Promokodlar', icon: <IconPath d="M4 8V4h4l12 12-4 4L4 8m4-1h.01" /> },
-  { id: 'ads', label: 'Reklamalar', icon: <IconPath d="M3 5h18v12H3zm7 4v4l4-2zM8 21h8" /> },
-  {
-    id: 'voices',
-    label: 'Ovozlar',
-    icon: (
-      <IconPath d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3m7 9a7 7 0 0 1-14 0m7 7v3" />
-    ),
-  },
-  {
-    id: 'content',
-    label: 'Kontent',
-    icon: <IconPath d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zm4 2h6m-6 4h6" />,
-  },
-  {
-    id: 'team',
-    label: 'Adminlar',
-    icon: <IconPath d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zm-3 9 2 2 4-4" />,
-  },
-  {
-    id: 'settings',
-    label: 'Sozlamalar',
-    icon: (
-      <IconPath d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6m7.4-3 1.6-1.2-2-3.4-1.9.6a7 7 0 0 0-1.7-1l-.4-2h-4l-.4 2a7 7 0 0 0-1.7 1l-1.9-.6-2 3.4L4.6 12 3 13.2l2 3.4 1.9-.6a7 7 0 0 0 1.7 1l.4 2h4l.4-2a7 7 0 0 0 1.7-1l1.9.6 2-3.4z" />
-    ),
-  },
+const SECTIONS: { id: Section; label: string }[] = [
+  { id: 'overview', label: 'Umumiy' },
+  { id: 'notifications', label: 'Bildirishnomalar' },
+  { id: 'analytics', label: 'Analitika' },
+  { id: 'children', label: 'Bolalar' },
+  { id: 'payments', label: 'To‘lovlar' },
+  { id: 'demo', label: 'Demo' },
+  { id: 'promo', label: 'Promokodlar' },
+  { id: 'ads', label: 'Reklamalar' },
+  { id: 'voices', label: 'Ovozlar' },
+  { id: 'content', label: 'Kontent' },
+  { id: 'team', label: 'Adminlar' },
+  { id: 'settings', label: 'Sozlamalar' },
 ]
-
-function IconPath({ d }: { d: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="size-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d={d} />
-    </svg>
-  )
-}
 
 const PLAN_NAMES: Record<string, string> = {
   monthly: 'oylik',
@@ -439,7 +381,7 @@ function AdminConsole({ session }: { session: AdminSession }) {
                       : 'text-[var(--a-ink-soft)] hover:bg-[var(--a-raise)] hover:text-[var(--a-ink)]',
                   )}
                 >
-                  {item.icon}
+                  <AdminIcon name={item.id} size={22} className="shrink-0" />
                   {item.label}
                   {item.id === 'notifications' && unread > 0 && (
                     <span
@@ -487,18 +429,7 @@ function AdminConsole({ session }: { session: AdminSession }) {
                 className="kd-panel flex h-10 items-center gap-2 px-3 text-sm font-bold"
                 data-testid="admin-open-app"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="size-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
-                </svg>
+                <AdminIcon name="openApp" />
                 Ilovani ochish
               </button>
               <button
@@ -507,27 +438,15 @@ function AdminConsole({ session }: { session: AdminSession }) {
                 aria-label={theme === 'dark' ? 'Yorug‘ rejimga o‘tish' : 'Qorong‘i rejimga o‘tish'}
                 className="kd-panel flex h-10 items-center gap-2 px-3 text-sm font-bold"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="size-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  aria-hidden="true"
-                >
-                  {theme === 'dark' ? (
-                    <path d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.7-5.7 1.4-1.4M4.9 19.1l1.4-1.4m11.4 0 1.4 1.4M4.9 4.9l1.4 1.4M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10" />
-                  ) : (
-                    <path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10" />
-                  )}
-                </svg>
+                <AdminIcon name={theme === 'dark' ? 'light' : 'dark'} />
                 {theme === 'dark' ? 'Yorug‘' : 'Qorong‘i'}
               </button>
               <button
                 type="button"
                 onClick={() => void leave()}
-                className="kd-panel h-10 px-4 text-sm font-bold"
+                className="kd-panel flex h-10 items-center gap-2 px-3 text-sm font-bold"
               >
+                <AdminIcon name="signOut" />
                 Chiqish
               </button>
             </div>

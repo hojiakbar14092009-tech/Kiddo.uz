@@ -7,6 +7,7 @@ import { TALES } from '@/features/tales/content'
 import { activeSeason, SEASON_SETTINGS, type SeasonSetting } from '@/features/seasons/seasons'
 import { Panel } from './AdminSections'
 import type { AdminData } from './adminData'
+import { CountUp } from './CountUp'
 
 const SEASON_NAMES: Record<SeasonSetting, string> = {
   auto: 'Taqvim bo‘yicha (avtomatik)',
@@ -70,7 +71,7 @@ export function ContentSection({ data }: { data: AdminData }) {
             >
               <span className="text-xs text-[var(--a-ink-soft)]">{item.label}</span>
               <span className="kd-num font-display text-2xl font-semibold">
-                {item.value}
+                <CountUp value={item.value} />
                 <span className="ml-1 text-sm font-normal text-[var(--a-ink-faint)]">
                   {item.unit}
                 </span>

@@ -9,6 +9,8 @@ import type { AdminChild, AdminData } from './adminData'
 import { bulkCodes, CODE_PATTERN, NO_LIMITS, type AdminPromo, type CodeLimits } from './adminPromo'
 import { dailyBars, formatSom, monthlyBars, revenueTotals } from './revenue'
 import { RevenueChart } from './RevenueChart'
+import { CountUp } from './CountUp'
+import { IconChip } from './icons'
 import { clampGift, MAX_PRO_GIFT_COINS } from './settingsLimits'
 
 const MONTHS = [
@@ -162,11 +164,14 @@ export function Overview({ data }: { data: AdminData }) {
     <div className="grid gap-4 xl:grid-cols-3">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:col-span-3">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="kd-panel flex flex-col gap-1 p-4">
-            <span className="text-sm text-[var(--a-ink-soft)]">{kpi.label}</span>
-            <span className="kd-num text-xl font-bold whitespace-nowrap sm:text-3xl">
-              {formatSom(kpi.value.amount)}
-              <span className="ml-1 text-sm font-semibold text-[var(--a-ink-faint)]">so‘m</span>
+          <div key={kpi.label} className="kd-panel kd-kpi flex flex-col gap-1 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-[var(--a-ink-soft)]">{kpi.label}</span>
+              <IconChip name="revenue" tone="gold" />
+            </div>
+            <span className="kd-num flex flex-wrap items-baseline gap-x-1 text-base font-bold min-[360px]:text-lg sm:flex-nowrap sm:text-3xl">
+              <CountUp value={kpi.value.amount} format={formatSom} className="whitespace-nowrap" />
+              <span className="text-sm font-semibold text-[var(--a-ink-faint)]">so‘m</span>
             </span>
             <span className="text-xs text-[var(--a-ink-faint)]">
               {kpi.value.count} ta PRO to‘lovi
@@ -230,9 +235,9 @@ export function Overview({ data }: { data: AdminData }) {
             </ul>
           )}
         </Panel>
-        <Panel title="PRO ulushi">
+        <Panel title="PRO ulushi" action={<IconChip name="pro" tone="gold" />}>
           <div className="flex items-baseline gap-2">
-            <span className="kd-num text-3xl font-bold text-[var(--a-gold)]">{proCount}</span>
+            <CountUp value={proCount} className="kd-num text-3xl font-bold text-[var(--a-gold)]" />
             <span className="text-[var(--a-ink-soft)]">/ {total} bola PRO’da</span>
           </div>
           <div

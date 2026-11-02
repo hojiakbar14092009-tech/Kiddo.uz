@@ -6,6 +6,7 @@ import { useFamilyStore } from '@/store/familyStore'
 import { isProActive, normalizePromo, useSubscriptionStore } from '@/store/subscriptionStore'
 import type { AdminData } from './adminData'
 import { Panel } from './AdminSections'
+import { CountUp } from './CountUp'
 
 /*
  * The demo admin's own screens (Phase 20): what the children on this device
@@ -79,9 +80,9 @@ export function DemoOverview({ data }: { data: AdminData }) {
     <div className="grid gap-4 xl:grid-cols-3" data-testid="demo-overview">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:col-span-3">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="kd-panel flex flex-col gap-1 p-4">
+          <div key={kpi.label} className="kd-panel kd-kpi flex flex-col gap-1 p-4">
             <span className="text-sm text-[var(--a-ink-soft)]">{kpi.label}</span>
-            <span className="kd-num text-2xl font-bold sm:text-3xl">{kpi.value}</span>
+            <CountUp value={kpi.value} className="kd-num text-2xl font-bold sm:text-3xl" />
             <span className="text-xs text-[var(--a-ink-faint)]">{kpi.note}</span>
           </div>
         ))}

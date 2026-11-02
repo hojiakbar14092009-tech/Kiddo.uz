@@ -36,6 +36,9 @@
   --a-glow-1: rgb(43 196 169 / 0.18);
   --a-glow-2: rgb(242 183 64 / 0.1);
   --a-glow-3: rgb(124 140 255 / 0.1);
+  --a-highlight: rgb(255 255 255 / 0.07);
+  --a-sheen: rgb(255 255 255 / 0.05);
+  --a-shadow: 0 10px 30px rgb(0 0 0 / 0.28);
 }
 
 .kd-admin[data-theme='light'] {
@@ -61,6 +64,9 @@
   --a-glow-1: rgb(43 196 169 / 0.16);
   --a-glow-2: rgb(242 183 64 / 0.14);
   --a-glow-3: rgb(124 140 255 / 0.08);
+  --a-highlight: rgb(255 255 255 / 0.9);
+  --a-sheen: rgb(255 255 255 / 0.55);
+  --a-shadow: 0 8px 24px rgb(19 52 48 / 0.07);
 }
 
 /* The slow aurora behind the constellation. */
@@ -71,7 +77,7 @@
     radial-gradient(45% 55% at 70% 90%, var(--a-glow-2), transparent 70%),
     linear-gradient(180deg, var(--a-bg) 0%, var(--a-bg-2) 100%);
   background-size: 160% 160%;
-  animation: kd-aurora 28s ease-in-out infinite alternate;
+  animation: kd-aurora 40s ease-in-out infinite alternate;
 }
 
 @keyframes kd-aurora {
@@ -87,8 +93,68 @@
   background: var(--a-panel);
   border: 1px solid var(--a-line);
   border-radius: var(--a-radius);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  /* glass (Phase 54): a lit top edge and a soft shadow under frosted glass */
+  box-shadow:
+    inset 0 1px 0 var(--a-highlight),
+    var(--a-shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+}
+
+/* KPI tiles: a faint diagonal sheen across the glass. */
+.kd-kpi {
+  position: relative;
+}
+
+/* only the sheen is clipped: a long number on a narrow phone still shows whole */
+.kd-kpi::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--a-sheen), transparent 45%);
+}
+
+.kd-kpi > * {
+  position: relative;
+}
+
+/* The square a duotone icon sits in: its tone says what kind of number it is. */
+.kd-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: var(--a-accent);
+  background: var(--a-accent-soft);
+}
+
+/* narrow phones: a smaller chip leaves the label room */
+@media (max-width: 639px) {
+  .kd-chip {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .kd-chip svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.kd-chip[data-tone='gold'] {
+  color: var(--a-gold);
+  background: var(--a-gold-soft);
+}
+
+.kd-chip[data-tone='coral'] {
+  color: var(--a-coral);
+  background: var(--a-coral-soft);
 }
 
 .kd-admin :focus-visible {

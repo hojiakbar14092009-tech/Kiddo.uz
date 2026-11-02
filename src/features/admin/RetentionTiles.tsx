@@ -2,10 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAnalyticsStore } from '@/domain/analytics'
 import { retentionOf, type Retention } from './retention'
 import { tashkentDay } from '@/lib/dates'
+import { CountUp } from './CountUp'
+import { IconChip, type AdminIconName } from './icons'
 
-function share(part: number, whole: number): string {
-  return whole > 0 ? `${Math.round((part / whole) * 100)}%` : '—'
+/** Whole percent of `whole` that `part` is, or null when nobody is due yet. */
+function share(part: number, whole: number): number | null {
+  return whole > 0 ? Math.round((part / whole) * 100) : null
 }
+
+const percent = (n: number) => `${Math.round(n)}%`
 
 function useRetention(source: 'device' | 'cloud'): Retention | null | 'error' {
   const log = useAnalyticsStore((state) => state.log)
@@ -50,20 +55,31 @@ export function RetentionTiles({ source }: { source: 'device' | 'cloud' }) {
       </p>
     )
   }
-  const tiles = [
+  const tiles: {
+    label: string
+    icon: AdminIconName
+    value: number | null
+    format?: (n: number) => string
+    hint: string
+  }[] = [
     {
       label: 'Yangi qurilmalar (30 kun)',
-      value: retention ? String(retention.installs) : '…',
+      icon: 'installs',
+      value: retention ? retention.installs : null,
       hint: 'ilovani birinchi ochgan',
     },
     {
       label: '2-kun qaytdi',
-      value: retention ? share(retention.day2, retention.due2) : '…',
+      icon: 'day2',
+      value: retention ? share(retention.day2, retention.due2) : null,
+      format: percent,
       hint: retention ? `${retention.day2} / ${retention.due2} ta qurilma` : '',
     },
     {
       label: '7-kun qaytdi',
-      value: retention ? share(retention.day7, retention.due7) : '…',
+      icon: 'day7',
+      value: retention ? share(retention.day7, retention.due7) : null,
+      format: percent,
       hint: retention ? `${retention.day7} / ${retention.due7} ta qurilma` : '',
     },
   ]
@@ -72,11 +88,24 @@ export function RetentionTiles({ source }: { source: 'device' | 'cloud' }) {
       {tiles.map((tile) => (
         <div
           key={tile.label}
-          className="kd-panel flex flex-col gap-1 p-4"
+          className="kd-panel kd-kpi flex flex-col gap-1 p-4"
           data-testid="retention-tile"
         >
-          <span className="text-sm text-[var(--a-ink-soft)]">{tile.label}</span>
-          <span className="kd-num text-xl font-bold sm:text-3xl">{tile.value}</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-[var(--a-ink-soft)]">{tile.label}</span>
+            <IconChip name={tile.icon} />
+          </div>
+          <span className="kd-num text-xl font-bold sm:text-3xl">
+            {tile.value === null ? (
+              retention ? (
+                '—'
+              ) : (
+                '…'
+              )
+            ) : (
+              <CountUp value={tile.value} format={tile.format} />
+            )}
+          </span>
           <span className="text-xs text-[var(--a-ink-faint)]">{tile.hint}</span>
         </div>
       ))}

@@ -11,6 +11,7 @@ import {
   type ReviewStatus,
   type VoiceLine,
 } from './adminVoices'
+import { CountUp } from './CountUp'
 
 type Filter = 'all' | 'waiting' | 'recorded' | 'approved' | 'rejected'
 
@@ -122,7 +123,10 @@ export function VoicesSection({ source }: { source: 'device' | 'cloud' }) {
           ].map(([label, value]) => (
             <div key={label} className="bg-[var(--a-raise)] flex flex-col gap-1 rounded-xl p-3">
               <span className="text-xs text-[var(--a-ink-soft)]">{label}</span>
-              <span className="kd-num font-display text-2xl font-semibold">{value}</span>
+              <CountUp
+                value={Number(value)}
+                className="kd-num font-display text-2xl font-semibold"
+              />
             </div>
           ))}
         </div>
