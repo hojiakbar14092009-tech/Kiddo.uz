@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { canUse, useCanUse } from '@/domain/entitlements'
+import { isAdminPreview } from '@/app/preview/adminPreview'
 import { isSupabaseConfigured } from '@/services/supabase/config'
 import { useParentStore } from '@/store/parentStore'
 import type { TutorReply, TutorRequest } from './types'
@@ -93,7 +94,7 @@ function cloudSession(): boolean {
 }
 
 export function aiAvailability(childId: string, now: number = Date.now()): AiAvailability {
-  if (!isSupabaseConfigured) return 'no-server'
+  if (!isSupabaseConfigured || isAdminPreview()) return 'no-server'
   if (!AI_TUTOR_ENABLED) return 'disabled'
   if (!cloudSession()) return 'no-account'
   if (!canUse('aiFriend')) return 'not-pro'
@@ -108,7 +109,7 @@ export function useAiAvailability(childId: string): AiAvailability {
   const cloud = useParentStore((state) => state.session?.mode === 'cloud')
   const consent = useAiConsentStore((state) => state.byChild[childId])
   const resting = useRestStore((state) => state.resting)
-  if (!isSupabaseConfigured) return 'no-server'
+  if (!isSupabaseConfigured || isAdminPreview()) return 'no-server'
   if (!AI_TUTOR_ENABLED) return 'disabled'
   if (!cloud) return 'no-account'
   if (!isPro) return 'not-pro'
@@ -199,7 +200,8 @@ export async function askTutorAI(
  * when the server refused or cannot be reached (the switch stays as it was).
  */
 export async function saveAiConsent(childId: string, granted: boolean): Promise<void> {
-  if (!isSupabaseConfigured || !cloudSession()) throw new Error('no cloud account')
+  if (!isSupabaseConfigured || isAdminPreview() || !cloudSession())
+    throw new Error('no cloud account')
   const { getSupabase } = await import('@/services/supabase/client')
   const supabase = getSupabase()
   if (!supabase) throw new Error('no cloud account')
@@ -214,7 +216,7 @@ export async function saveAiConsent(childId: string, granted: boolean): Promise<
 
 /** Reads the parent's consents from the server (another device may have changed them). */
 export async function pullAiConsent(): Promise<void> {
-  if (!isSupabaseConfigured || !cloudSession()) return
+  if (!isSupabaseConfigured || isAdminPreview() || !cloudSession()) return
   const { getSupabase } = await import('@/services/supabase/client')
   const supabase = getSupabase()
   if (!supabase) return

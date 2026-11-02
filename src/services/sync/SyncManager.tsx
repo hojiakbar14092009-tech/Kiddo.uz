@@ -4,6 +4,7 @@ import i18n from '@/i18n'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { useFamilyStore } from '@/store/familyStore'
 import { useParentStore } from '@/store/parentStore'
+import { isAdminPreview } from '@/app/preview/adminPreview'
 import { useSettingsStore } from '@/store/settingsStore'
 import { watchCloudSession } from './cloudSession'
 import {
@@ -25,6 +26,8 @@ async function loadSupabase(): Promise<{
   supabase: SupabaseClient
   client: SyncClient
 } | null> {
+  // the admin's sandbox tab never syncs (Phase 51)
+  if (isAdminPreview()) return null
   // Loaded on demand, so families without a cloud account never download Supabase.
   const [{ getSupabase }, { supabaseSyncClient }] = await Promise.all([
     import('@/services/supabase/client'),

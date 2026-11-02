@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { isAdminPreview } from '@/app/preview/adminPreview'
 import type { PlanId } from './subscriptionStore'
 
 /** One PRO payment, as the admin panel lists it. */
@@ -27,7 +28,8 @@ export type AdminMessage =
   | { type: 'leave'; childId: string }
 
 export function postAdminMessage(message: AdminMessage): void {
-  if (typeof BroadcastChannel === 'undefined') return
+  // the admin's sandbox tab is not a child playing, and its payments are not real (Phase 51)
+  if (isAdminPreview() || typeof BroadcastChannel === 'undefined') return
   const channel = new BroadcastChannel(ADMIN_CHANNEL)
   channel.postMessage(message)
   channel.close()

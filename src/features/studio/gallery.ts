@@ -8,6 +8,8 @@
  * no IndexedDB at all (tests) the gallery lives in memory.
  */
 
+import { isAdminPreview } from '@/app/preview/adminPreview'
+
 export const GALLERY_LIMITS = { maxWorks: 30, maxBytes: 25 * 1024 * 1024 } as const
 
 export interface WorkMeta {
@@ -154,8 +156,11 @@ let shared: Gallery | null = null
 /** The app's gallery (IndexedDB when the browser has it). */
 export function studioGallery(): Gallery {
   shared ??= createGallery(
-    // no silent fallback: a picture that cannot be stored is reported as not saved
-    typeof indexedDB === 'undefined' ? memoryBackend() : indexedDbBackend(indexedDB),
+    // no silent fallback: a picture that cannot be stored is reported as not saved;
+    // the admin's sandbox tab keeps its pictures in memory (Phase 51)
+    isAdminPreview() || typeof indexedDB === 'undefined'
+      ? memoryBackend()
+      : indexedDbBackend(indexedDB),
   )
   return shared
 }

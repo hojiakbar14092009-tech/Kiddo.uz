@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AgeTheme } from '@/features/age/AgeTheme'
 import { InterfaceSounds } from './InterfaceSounds'
@@ -16,12 +17,21 @@ import { SoundBridge } from './SoundBridge'
 import { AnalyticsTracker } from './AnalyticsTracker'
 import { NutConversion } from './NutConversion'
 import { SectionWorld } from './SectionWorld'
+import { isAdminPreview } from './preview/adminPreview'
+
+/** The admin's sandbox bar (Phase 51), only ever downloaded in that tab. */
+const PreviewBanner = lazy(() => import('./preview/PreviewBanner'))
 
 /** Root of every route: app-wide effects, then the current screen. */
 export function AppShell() {
   const { pathname } = useLocation()
   return (
     <>
+      {isAdminPreview() && (
+        <Suspense fallback={null}>
+          <PreviewBanner />
+        </Suspense>
+      )}
       <LanguageSync />
       <AgeTheme />
       <SectionWorld />

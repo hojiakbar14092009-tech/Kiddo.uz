@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { KiddoMark } from '@/components/brand/KiddoLogo'
+import { openAdminPreview } from '@/app/preview/adminPreview'
 import { DEMO } from '@/config/demo'
 import { isSupabaseConfigured } from '@/services/supabase/config'
 import type { Payment } from '@/store/paymentStore'
@@ -478,7 +479,28 @@ function AdminConsole({ session }: { session: AdminSession }) {
               />
               {online} onlayn
             </span>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => openAdminPreview()}
+                title="Bolalar ilovasi yangi oynada, sinov profili bilan ochiladi"
+                className="kd-panel flex h-10 items-center gap-2 px-3 text-sm font-bold"
+                data-testid="admin-open-app"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+                </svg>
+                Ilovani ochish
+              </button>
               <button
                 type="button"
                 onClick={toggleTheme}

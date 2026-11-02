@@ -1,3 +1,4 @@
+import { isAdminPreview } from '@/app/preview/adminPreview'
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/services/supabase/config'
 
 /** What an Edge Function answered: its HTTP status and JSON body (null when not JSON). */
@@ -23,6 +24,7 @@ async function accessToken(): Promise<string | null> {
  * never stored (`no-store`): it may carry short-lived signed URLs.
  */
 export async function callEdgeFunction(name: string, payload: unknown): Promise<EdgeReply | null> {
+  if (isAdminPreview()) return null
   const token = await accessToken()
   if (!token) return null
   const response = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {

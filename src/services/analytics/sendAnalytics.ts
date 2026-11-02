@@ -1,3 +1,4 @@
+import { isAdminPreview } from '@/app/preview/adminPreview'
 import { useAnalyticsStore, type AnalyticsEvent } from '@/domain/analytics'
 import { tashkentDay } from '@/lib/dates'
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/services/supabase/config'
@@ -75,7 +76,7 @@ export function sendOnLeave(
   key: string = SUPABASE_ANON_KEY,
   now: Date = new Date(),
 ): boolean {
-  if (!url || !key || typeof fetch !== 'function') return false
+  if (!url || !key || typeof fetch !== 'function' || isAdminPreview()) return false
   const today = tashkentDay(now)
   const events = useAnalyticsStore
     .getState()
@@ -99,6 +100,8 @@ const CONTENT_ERRORS = /^(22|23|P0001$)/
 
 /** The Supabase sender (loaded on demand, only when the cloud is configured). */
 export async function supabaseAnalyticsSender(): Promise<AnalyticsSender | null> {
+  // the admin's sandbox tab is never counted (Phase 51)
+  if (isAdminPreview()) return null
   const { getSupabase } = await import('@/services/supabase/client')
   const supabase = getSupabase()
   if (!supabase) return null
