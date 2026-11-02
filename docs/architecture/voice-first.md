@@ -20,3 +20,11 @@
   at run time (`templates`). The list is the recorder's to-do (Phase 48: about
   1300 sentences per language and ~50 templates, mostly the nut texts and the
   newer sections); a recorded line must leave it.
+- **Phase 48: all sentences recorded.** `scripts/voices/generate.py` (Piper:
+  ru irina, en cori, uz through the Kazakh ISSAI voice) recorded every
+  collected sentence: uz 3710, ru 3687, en 3610 clips. Only the run-time
+  templates (filled with numbers and names) and the lone uz "?" (nothing to
+  say: it gets no clip and is kept out of the manifest) stay on the list.
+  A spot check with Whisper reads the new ru/en clips back as written. With an
+  ElevenLabs key the same set can be re-recorded in a warmer, more child-like
+  voice (`--engine elevenlabs --force`).

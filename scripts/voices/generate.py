@@ -80,7 +80,7 @@ def load_voice(language: str):
     return PiperVoice.load(str(path), config_path=str(path) + '.json')
 
 
-def synthesize(voice, language: str, text: str) -> tuple[np.ndarray, int]:
+def synthesize(voice, language: str, text: str) -> tuple[np.ndarray | None, int]:
     from piper.config import SynthesisConfig
 
     _, length, noise, speaker = VOICES[language]
@@ -89,8 +89,11 @@ def synthesize(voice, language: str, text: str) -> tuple[np.ndarray, int]:
     )
     if language == 'uz':
         text = to_kazakh_cyrillic(text)
-    audio = np.concatenate([chunk.audio_float_array for chunk in voice.synthesize(text, config)])
-    return audio, voice.config.sample_rate
+    chunks = [chunk.audio_float_array for chunk in voice.synthesize(text, config)]
+    if not chunks:
+        # nothing speakable (only signs or pictures): no clip, the line stays on the pending list
+        return None, voice.config.sample_rate
+    return np.concatenate(chunks), voice.config.sample_rate
 
 
 def write_mp3(audio: np.ndarray, rate: int, target: Path) -> None:
@@ -160,6 +163,9 @@ def main() -> None:
             else:
                 voice = voice or load_voice(language)
                 audio, rate = synthesize(voice, language, sentence)
+                if audio is None:
+                    print(language, 'skipped (nothing to say):', repr(sentence), flush=True)
+                    continue
                 write_mp3(audio, rate, target)
             if index % 100 == 0:
                 print(language, index, '/', len(sentences), sentence, flush=True)
@@ -168,6 +174,8 @@ def main() -> None:
         for old in folder.glob('*.mp3'):
             if old.name not in wanted:
                 old.unlink()
+        # a line with nothing to say has no clip: the app must not look for one
+        manifest[language] = [key for key in keys if (folder / f'{key}.mp3').exists()]
     MANIFEST.write_text(json.dumps(manifest, separators=(',', ':')) + '\n')
 
 
