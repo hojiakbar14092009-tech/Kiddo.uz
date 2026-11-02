@@ -24,3 +24,25 @@ export function getSupabase(): SupabaseClient | null {
   })
   return client
 }
+
+let adminClient: SupabaseClient | null = null
+
+/**
+ * The admin panel's own client (Phase 52). Its sign-in lives in this browser
+ * tab only (sessionStorage, its own key): closing the tab ends it, and the
+ * child app and the parent's cloud sync on the same device never run as the
+ * admin. `null` like `getSupabase()` without keys or in the sandbox tab.
+ */
+export function getAdminSupabase(): SupabaseClient | null {
+  if (!isSupabaseConfigured || isAdminPreview()) return null
+  adminClient ??= createClient(url, anonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      storageKey: 'kiddo.admin.auth',
+      storage: window.sessionStorage,
+      detectSessionInUrl: false,
+    },
+  })
+  return adminClient
+}

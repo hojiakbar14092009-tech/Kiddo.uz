@@ -43,9 +43,9 @@ breaking anywhere in every button would let tight rows of buttons break words at
 
 ## Owner actions before a cloud release
 
-- Apply migrations `0014` to `0019` to production, in order: `0014_birthday_no_age_ceiling`,
+- Apply migrations `0014` to `0020` to production, in order: `0014_birthday_no_age_ceiling`,
   `0015_age_wardrobe` (without it the server refuses the 12 new outfits), `0016_analytics`,
-  `0017_nuts`, `0018_accounts`, `0019_admin`.
+  `0017_nuts`, `0018_accounts`, `0019_admin`, `0020_security_audit` (Phase 52).
 - Put the server keys in the Supabase function secrets, never in `VITE_*`: the Google sign-in client,
   the ElevenLabs key (`tts`, `voice-url`) and, later, the Telegram bot tokens (Phases 56–57).
 - Approve the design of the printable sheets (letters, numbers, counting PDFs).

@@ -80,8 +80,8 @@ interface HeartbeatRow {
 
 /** Heartbeats seen within the cloud window (admins may read all of them, see 0005). */
 export async function loadHeartbeats(now: number = Date.now()): Promise<Map<string, Presence>> {
-  const { getSupabase } = await import('@/services/supabase/client')
-  const supabase = getSupabase()
+  const { getAdminSupabase } = await import('@/services/supabase/client')
+  const supabase = getAdminSupabase()
   const beats = new Map<string, Presence>()
   if (!supabase) return beats
   const { data, error } = await supabase
@@ -298,8 +298,8 @@ function useCloudData(enabled: boolean): AdminData {
   const presence = usePresence(enabled)
 
   const load = useCallback(async () => {
-    const { getSupabase } = await import('@/services/supabase/client')
-    const supabase = getSupabase()
+    const { getAdminSupabase } = await import('@/services/supabase/client')
+    const supabase = getAdminSupabase()
     if (!supabase) throw new Error('Supabase sozlanmagan')
     const [children, states, subscriptions, payments, settings] = await Promise.all([
       supabase.from('children').select('id, name, age, parent_id, updated_at'),
@@ -356,8 +356,8 @@ function useCloudData(enabled: boolean): AdminData {
   useEffect(() => {
     if (!enabled) return undefined
     let remove = () => undefined as void
-    void import('@/services/supabase/client').then(({ getSupabase }) => {
-      const supabase = getSupabase()
+    void import('@/services/supabase/client').then(({ getAdminSupabase }) => {
+      const supabase = getAdminSupabase()
       if (!supabase) return
       const channel = supabase
         .channel('admin-payments')
@@ -417,11 +417,11 @@ function useCloudData(enabled: boolean): AdminData {
 
   const supabaseCall = async (
     work: (
-      client: NonNullable<ReturnType<typeof import('@/services/supabase/client').getSupabase>>,
+      client: NonNullable<ReturnType<typeof import('@/services/supabase/client').getAdminSupabase>>,
     ) => PromiseLike<{ error: { message: string } | null }>,
   ) => {
-    const { getSupabase } = await import('@/services/supabase/client')
-    const supabase = getSupabase()
+    const { getAdminSupabase } = await import('@/services/supabase/client')
+    const supabase = getAdminSupabase()
     if (!supabase) throw new Error('Supabase sozlanmagan')
     const { error: failure } = await work(supabase)
     setVersion((current) => current + 1)

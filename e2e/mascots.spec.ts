@@ -168,7 +168,10 @@ test('reduced motion: the 3D mascot holds still (no idle sway, no blinking)', as
   const guide = mascot3D(page, 'astro')
   await expect(guide).toBeVisible({ timeout: 30_000 })
   // a greeting may play first (a short pose change); then the base pose holds
-  await expect(guide).toHaveAttribute('data-clip', /^(float|idle|talk)$/, { timeout: 15_000 })
+  // (in the evening the mascot's base pose is sleep, which must hold still too)
+  await expect(guide).toHaveAttribute('data-clip', /^(float|idle|talk|sleep)$/, {
+    timeout: 15_000,
+  })
   // once a face change has blended in, the picture stops changing (with motion, breathing and
   // blinking never let two frames 1.5 s apart match)
   await expect

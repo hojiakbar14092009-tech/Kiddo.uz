@@ -15,8 +15,8 @@ function useRetention(source: 'device' | 'cloud'): Retention | null | 'error' {
     if (source !== 'cloud') return undefined
     let alive = true
     void (async () => {
-      const { getSupabase } = await import('@/services/supabase/client')
-      const supabase = getSupabase()
+      const { getAdminSupabase } = await import('@/services/supabase/client')
+      const supabase = getAdminSupabase()
       if (!supabase) return
       const { data, error } = await supabase.rpc('admin_retention', { p_days: 30 })
       if (!alive) return

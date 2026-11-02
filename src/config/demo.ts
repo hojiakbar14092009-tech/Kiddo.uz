@@ -44,7 +44,13 @@ export function resolveDemoConfig(env: DemoEnv, cloudBackend: boolean): DemoConf
   }
 }
 
+// Each flag is read by name (Phase 52): passing the env object whole makes
+// the bundler inline every VITE_ variable of the build into the app, any
+// value meant only for tests (VITE_ADMIN_PIN) included.
 export const DEMO: DemoConfig = resolveDemoConfig(
-  import.meta.env as unknown as DemoEnv,
+  {
+    VITE_DEMO_MODE: import.meta.env.VITE_DEMO_MODE as string | undefined,
+    VITE_PUBLIC_PRO_UI: import.meta.env.VITE_PUBLIC_PRO_UI as string | undefined,
+  },
   isSupabaseConfigured,
 )

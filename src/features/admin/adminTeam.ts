@@ -33,7 +33,8 @@ export interface AdminTeam {
 
 /** The server's refusals in the admin's words. */
 export const TEAM_ERRORS: Record<string, string> = {
-  no_such_user: 'Bu pochta bilan hisob topilmadi. Avval u ilovada ro‘yxatdan o‘tsin.',
+  no_such_user:
+    'Bu pochta bilan tasdiqlangan hisob topilmadi. Avval u ilovada ro‘yxatdan o‘tib, pochtasini tasdiqlasin.',
   last_admin: 'Oxirgi adminni o‘chirib bo‘lmaydi.',
   not_self: 'O‘zingizni o‘chira olmaysiz – buni boshqa admin qiladi.',
   not_admin: 'Bu amal faqat admin uchun.',
@@ -71,8 +72,8 @@ export function useAdminTeam(enabled: boolean): AdminTeam {
   const [version, setVersion] = useState(0)
 
   const client = useCallback(async () => {
-    const { getSupabase } = await import('@/services/supabase/client')
-    const supabase = getSupabase()
+    const { getAdminSupabase } = await import('@/services/supabase/client')
+    const supabase = getAdminSupabase()
     if (!supabase) throw new Error('Supabase sozlanmagan')
     return supabase
   }, [])

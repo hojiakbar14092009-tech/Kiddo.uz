@@ -1162,6 +1162,35 @@ commit;
 -- the launch codes run again (as the owner set them)
 update public.promo_codes set active = true where code in ('KIDDO07','BOLAJON30');
 
+-- ===== Phase 52 (0020): audit fixes
+select pg_temp.check(not has_function_privilege('anon','public.is_birthday_week(text,text)','execute')
+  and not has_function_privilege('authenticated','public.is_birthday_week(text,text)','execute'), 'audit 0020: nobody calls is_birthday_week directly');
+insert into auth.users (id, email, email_confirmed_at) values ('00000000-0000-0000-0000-0000000052ad','unconfirmed52@x.uz', null);
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select pg_temp.expect_error($$select * from public.admin_add('unconfirmed52@x.uz')$$, 'no_such_user');
+commit;
+select pg_temp.expect_error($$delete from public.admins where user_id = '00000000-0000-0000-0000-0000000000ad'$$, 'last_admin');
+select pg_temp.expect_error($$delete from auth.users where id = '00000000-0000-0000-0000-0000000000ad'$$, 'last_admin');
+select pg_temp.check((select count(*) from public.admins) = 1, 'audit 0020: the last admin stays, even when the account is deleted');
+-- the daily cap for everyone: once it is reached, a new install adds nothing
+insert into public.analytics_daily (day, events) values ((now() at time zone 'Asia/Tashkent')::date, 200000)
+  on conflict (day) do update set events = 200000;
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-52-0001","install":"install-52-new","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 0, 'audit 0020: past the daily cap a new install adds nothing');
+select pg_temp.expect_error($$select * from public.analytics_daily$$, 'permission denied');
+commit;
+update public.analytics_daily set events = 0 where day = (now() at time zone 'Asia/Tashkent')::date;
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"evt-52-0002","install":"install-52-new","name":"app_opened","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 1, 'audit 0020: under the cap events are kept');
+commit;
+select pg_temp.check((select events from public.analytics_daily where day = (now() at time zone 'Asia/Tashkent')::date) = 1, 'audit 0020: the day counter counts what was kept');
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

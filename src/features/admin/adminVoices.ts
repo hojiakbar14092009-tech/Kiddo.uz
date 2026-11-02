@@ -113,8 +113,8 @@ export function useAdminVoices(source: 'device' | 'cloud'): AdminVoices {
   const [error, setError] = useState<string | null>(null)
 
   const client = useCallback(async () => {
-    const { getSupabase } = await import('@/services/supabase/client')
-    return getSupabase()
+    const { getAdminSupabase } = await import('@/services/supabase/client')
+    return getAdminSupabase()
   }, [])
 
   useEffect(() => {

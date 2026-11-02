@@ -37,8 +37,8 @@ function useCloudReport(days: number, enabled: boolean): Load {
     }
     void (async () => {
       try {
-        const { getSupabase } = await import('@/services/supabase/client')
-        const supabase = getSupabase()
+        const { getAdminSupabase } = await import('@/services/supabase/client')
+        const supabase = getAdminSupabase()
         if (!supabase) throw new Error('Supabase sozlanmagan.')
         const [funnel, exits] = await Promise.all([
           supabase.rpc('admin_analytics_funnel', { p_days: days }),

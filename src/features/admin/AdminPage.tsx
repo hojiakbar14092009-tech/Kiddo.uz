@@ -166,8 +166,8 @@ function AdminLogin() {
     setBusy(true)
     setError(null)
     try {
-      const { getSupabase } = await import('@/services/supabase/client')
-      const supabase = getSupabase()
+      const { getAdminSupabase } = await import('@/services/supabase/client')
+      const supabase = getAdminSupabase()
       if (!supabase) throw new Error('Supabase sozlanmagan.')
       const { error: failure } = await supabase.auth.signInWithPassword({ email, password })
       if (failure) throw new Error('E-pochta yoki parol noto‘g‘ri.')
@@ -403,8 +403,8 @@ function AdminConsole({ session }: { session: AdminSession }) {
 
   const leave = async () => {
     if (session.source === 'cloud') {
-      const { getSupabase } = await import('@/services/supabase/client')
-      await getSupabase()?.auth.signOut()
+      const { getAdminSupabase } = await import('@/services/supabase/client')
+      await getAdminSupabase()?.auth.signOut()
     }
     signOut()
     navigate('/admin', { replace: true })

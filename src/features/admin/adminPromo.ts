@@ -204,8 +204,8 @@ function limitRow(limits: CodeLimits) {
 }
 
 async function supabase() {
-  const { getSupabase } = await import('@/services/supabase/client')
-  const client = getSupabase()
+  const { getAdminSupabase } = await import('@/services/supabase/client')
+  const client = getAdminSupabase()
   if (!client) throw new Error('Supabase sozlanmagan')
   return client
 }

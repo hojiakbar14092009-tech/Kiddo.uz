@@ -51,6 +51,10 @@ describe('security headers', () => {
     }
   })
 
+  it('browsers keep to HTTPS for two years (Phase 52), subdomains included', () => {
+    expect(header('Strict-Transport-Security')).toBe('max-age=63072000; includeSubDomains')
+  })
+
   it('the app shell is never cached stale, built files are cached for good', () => {
     const cache = (source: string) =>
       config.headers
