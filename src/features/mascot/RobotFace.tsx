@@ -1,4 +1,7 @@
-import { motion, type MotionValue } from 'framer-motion'
+import { motion, useAnimationFrame, useMotionValue, type MotionValue } from 'framer-motion'
+import { useState } from 'react'
+import { Syllables } from './characters/emotions'
+import { voiceLevel } from '@/services/audio/voiceLevel'
 import type { MascotModel } from '@/store/familyStore'
 import type { MascotMood } from './types'
 
@@ -105,18 +108,29 @@ export function RobotFace({
       </motion.g>
 
       {mood === 'talk' ? (
-        <motion.ellipse
-          cx="100"
-          cy="111"
-          rx="9"
-          fill={glow}
-          initial={{ ry: 2 }}
-          animate={animateLoops ? { ry: [2, 6, 3, 7, 2.5, 5, 2] } : { ry: 4 }}
-          transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        animateLoops ? (
+          <TalkingMouth glow={glow} />
+        ) : (
+          <ellipse cx="100" cy="111" rx="9" ry="4" fill={glow} />
+        )
       ) : (
         <path d="M88 108 Q100 118 112 108" stroke={glow} strokeWidth={4} {...STROKE} />
       )}
     </g>
   )
+}
+
+/**
+ * The talking mouth (Phase 43): as open as Kiddo's voice is loud (voiceLevel), shut in the
+ * pauses; a syllable rhythm when the loudness cannot be measured.
+ */
+function TalkingMouth({ glow }: { glow: string }) {
+  const ry = useMotionValue(2)
+  const [syllables] = useState(() => new Syllables(11))
+  useAnimationFrame((_, delta) => {
+    const dt = Math.min(delta, 100) / 1000
+    const open = syllables.step(dt, true, voiceLevel())
+    ry.set(1.5 + open * 6)
+  })
+  return <motion.ellipse cx="100" cy="111" rx="9" ry={ry} fill={glow} data-mouth="talk" />
 }

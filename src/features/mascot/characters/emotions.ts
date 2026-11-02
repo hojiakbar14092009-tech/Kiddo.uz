@@ -152,9 +152,10 @@ export class Blinker {
 }
 
 /**
- * Talking mouth without phoneme data: the speech audio gives no timing, so the
- * mouth opens on irregular syllable-like beats (5–9 per second) while speech
- * plays. This is not lip-sync and is not claimed to be.
+ * The talking mouth. With the voice's measured loudness (services/audio/voiceLevel, Phase 43)
+ * it opens as wide as the voice is loud — quick to open, a little slower to close — and shuts
+ * in the pauses. Without it (no Web Audio) it opens on irregular syllable-like beats (5–9 per
+ * second). Neither is lip-sync by sounds, and neither is claimed to be.
  */
 export class Syllables {
   private time = 0
@@ -172,7 +173,12 @@ export class Syllables {
     return this.seed / 0x1_0000_0000
   }
 
-  step(dt: number, speaking: boolean): number {
+  step(dt: number, speaking: boolean, level: number | null = null): number {
+    if (speaking && level !== null) {
+      const target = Math.min(1, level) * 0.95
+      this.open += (target - this.open) * Math.min(1, dt * (target > this.open ? 30 : 14))
+      return this.open
+    }
     if (!speaking) {
       this.open = Math.max(0, this.open - dt * 8)
       return this.open

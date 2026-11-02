@@ -19,3 +19,23 @@ Builds on the 3D mascot system (docs/architecture/mascot-3d-system.md).
   and the Shadow Lab (Phase 34).
 
 Tests: `features/mascot/life.test.ts`, `e2e/living-mascots.spec.ts`.
+
+## Phase 43 — a robot that remembers, dozes and listens
+
+- **Memory** (`features/mascot/life.ts` `mascotMemory`, pure): from the active child's own data only —
+  the robot's uncapped day count (`progressStore` `robotBond`, raised once a day on `activity.completed`
+  in `PetBridge`, seeded once from the capped history), the finished runs of yesterday (one count per run,
+  strand → letters / numbers / explore / play) and the days away. Home reads it once on arrival.
+- **Home line order**: night → birthday → homework → plan done → "I missed you" (≥ 3 days away) →
+  a friendship day (3, 7, 14, 30, 100 days played; each said once, `said`; a skipped one is still said
+  within a week) → "yesterday we …" → the time of day. All lines ≤ 8 words, in `pendingRecordings.json`.
+- **Touch** (`characters/director.ts` `TapTracker`): a different move each time (never twice in a row,
+  `TAP_MOVES`), a giggle-jump for three quick taps in 3D; at most three answers in any 10 s. The 2D robot
+  (`useTapMood`) waves / smiles on a click, only while at rest; no cue and no cheer (those belong to
+  progress); posters do not take touches.
+- **Rest hours** (`useRestHours`, 22:00–05:00): an idle robot dozes — the screen robot only when there
+  is nothing to read (not mid-lesson), the roaming robot on Home always. Any reaction or speech wakes it.
+- **Talking mouth** (`services/audio/voiceLevel.ts`): an analyser on Howler's master output (the one
+  AudioContext), plugged in only while Kiddo speaks; the mouth opens with the loudness and shuts in the
+  pauses. Before the voice is first heard, or after 2 s of silence (the device's own voice), it keeps the
+  syllable rhythm (`Syllables`). UI taps during a pause can open it for a moment (accepted).

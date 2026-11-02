@@ -175,12 +175,43 @@ export class MascotDirector {
 export class TapGate {
   private times: number[] = []
 
-  allow(now: number): boolean {
+  /** `spacing`: the least time since the last reaction (a quick-tap giggle skips it). */
+  allow(now: number, spacing = 1200): boolean {
     this.times = this.times.filter((t) => now - t < 10_000)
     const last = this.times[this.times.length - 1]
-    if (last !== undefined && now - last < 1200) return false
+    if (last !== undefined && now - last < spacing) return false
     if (this.times.length >= 3) return false
     this.times.push(now)
     return true
+  }
+}
+
+export interface Tap {
+  /** Taps answered so far (each one gets a different move). */
+  count: number
+  /** Three quick taps: a little giggle-jump (at most once in 4 s). */
+  burst: boolean
+}
+
+/** Every press on a mascot goes here: the rate limit, the move count and quick-tap bursts. */
+export class TapTracker {
+  private readonly gate = new TapGate()
+  private presses: number[] = []
+  private count = 0
+  private burstAt = -Infinity
+
+  press(now: number): Tap | null {
+    this.presses = this.presses.filter((t) => now - t < 1500)
+    this.presses.push(now)
+    // a giggle still counts against the three reactions per 10 s
+    if (this.presses.length >= 3 && now - this.burstAt >= 4000 && this.gate.allow(now, 0)) {
+      this.burstAt = now
+      this.presses = []
+      return { count: this.count++, burst: true }
+    }
+    // a giggle plays out before the next move
+    if (now - this.burstAt < 1600) return null
+    if (!this.gate.allow(now)) return null
+    return { count: this.count++, burst: false }
   }
 }

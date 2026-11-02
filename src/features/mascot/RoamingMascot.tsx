@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import type { Wearing } from '@/features/shop/outfits'
 import type { MascotModel } from '@/store/familyStore'
 import { MascotFigure } from './MascotFigure'
+import { useRestHours } from './useMascotLife'
 import { PetSprite } from '@/features/pets/PetSprite'
 import { useActivePet } from '@/store/progressStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
@@ -246,6 +247,8 @@ export function RoamingMascot({
   )
   const body = useAnimationControls()
   const [mood, setMood] = useState<MascotMood>('idle')
+  // rest hours: a robot with nothing to do dozes as it shuffles about (Phase 43)
+  const resting = useRestHours()
   const [bubble, setBubble] = useState<GreetBubble | null>(null)
   const bubbleRef = useRef<HTMLDivElement>(null)
   const [facing, setFacing] = useState<1 | -1>(-1)
@@ -610,7 +613,7 @@ export function RoamingMascot({
         <MascotFigure
           model={model}
           wearing={wearing}
-          mood={mood}
+          mood={mood === 'idle' && resting ? 'sleepy' : mood}
           followPointer={false}
           lively
           className="h-auto w-full drop-shadow-[0_10px_8px_rgba(58,46,77,0.18)]"

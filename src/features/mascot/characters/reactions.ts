@@ -19,7 +19,28 @@ import { MASCOTS, type Gesture, type MascotId } from './registry'
  */
 
 export type Signal =
-  { kind: 'mood'; mood: MascotMood } | { kind: 'domain'; event: DomainEvent } | { kind: 'tap' }
+  | { kind: 'mood'; mood: MascotMood }
+  | { kind: 'domain'; event: DomainEvent }
+  /** `count`: taps so far on this mascot (a different move each time); `burst`: quick taps. */
+  | { kind: 'tap'; count?: number; burst?: boolean }
+
+/**
+ * What a touch does (Phase 43): a different friendly move every time (never the same twice in
+ * a row), and a little giggle-jump when the child taps quickly. It never earns anything.
+ */
+export const TAP_MOVES: readonly { gesture: Gesture; emotion: Performance['emotion'] }[] = [
+  { gesture: 'wave', emotion: 'happy' },
+  { gesture: 'surprised', emotion: 'surprised' },
+  { gesture: 'nod', emotion: 'happy' },
+  { gesture: 'look_around', emotion: 'curious' },
+  { gesture: 'encourage', emotion: 'happy' },
+]
+
+export function tapPerformance(count = 0, burst = false): Performance {
+  if (burst) return { gesture: 'jump', emotion: 'excited', priority: PRIORITY.interaction, rank: 2 }
+  const move = TAP_MOVES[((count % TAP_MOVES.length) + TAP_MOVES.length) % TAP_MOVES.length]!
+  return { ...move, priority: PRIORITY.interaction, rank: 1 }
+}
 
 export interface ReactionState {
   mascot: MascotId
@@ -77,9 +98,7 @@ export function composed(perf: Performance): Performance {
 }
 
 function resolve(signal: Signal, state: ReactionState): Performance | null {
-  if (signal.kind === 'tap') {
-    return { gesture: 'wave', emotion: 'happy', priority: PRIORITY.interaction, rank: 1 }
-  }
+  if (signal.kind === 'tap') return tapPerformance(signal.count, signal.burst)
   if (signal.kind === 'mood') return fromMood(signal.mood, state)
   return fromEvent(signal.event, state)
 }

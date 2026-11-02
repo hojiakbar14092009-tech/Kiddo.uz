@@ -89,11 +89,19 @@ export function BasketTask({
     if (!moved || overBasket(e.clientX, e.clientY)) put(id)
   }
 
+  // ten objects stand in four rows on the smallest phone: a little smaller (still 44 px to
+  // touch) and closer, so the basket and "Done" stay on screen without scrolling
+  const crowded = slots.length > 9
+  const tile = clsx('size-12 sm:size-18 short:size-14', crowded && 'max-sm:size-11')
+
   return (
     <div className="flex w-full flex-col items-center gap-3 max-sm:gap-2 short:flex-row short:justify-center short:gap-3">
       <div className="grid w-full max-w-3xl grid-cols-[1fr_auto] items-center gap-3 max-sm:gap-2 short:gap-2">
         <ul
-          className="flex min-h-16 flex-wrap content-center justify-center gap-2 rounded-panel bg-surface/70 p-3 max-sm:gap-1.5 max-sm:p-2 short:p-2"
+          className={clsx(
+            'flex min-h-16 flex-wrap content-center justify-center gap-2 rounded-panel bg-surface/70 p-3 max-sm:p-2 short:p-2',
+            crowded ? 'max-sm:gap-1' : 'max-sm:gap-1.5',
+          )}
           data-testid="lab-tray"
         >
           {slots.map((id) => {
@@ -103,7 +111,7 @@ export function BasketTask({
                 <li
                   key={id}
                   aria-hidden="true"
-                  className="size-12 rounded-tile border-2 border-dashed border-line-strong sm:size-18 short:size-14"
+                  className={clsx('rounded-tile border-2 border-dashed border-line-strong', tile)}
                 />
               )
             }
@@ -125,7 +133,8 @@ export function BasketTask({
                     dragging ? { transform: `translate(${drag.dx}px, ${drag.dy}px)` } : undefined
                   }
                   className={clsx(
-                    'relative flex size-12 touch-none items-center justify-center rounded-tile bg-white shadow-press-sm select-none sm:size-18 short:size-14',
+                    'relative flex touch-none items-center justify-center rounded-tile bg-white shadow-press-sm select-none',
+                    tile,
                     dragging && 'z-10 scale-110 shadow-press-lg',
                   )}
                 >

@@ -8,6 +8,7 @@ import type { PetId } from '@/features/pets/pets'
 import { useMascotStore } from './mascotStore'
 import { MascotThoughtBubble } from './MascotThoughtBubble'
 import { MascotFigure } from './MascotFigure'
+import { useRestHours, useTapMood } from './useMascotLife'
 
 interface MascotProps {
   /** Width classes for the robot, e.g. `w-24 sm:w-36`. */
@@ -58,12 +59,20 @@ export function Mascot({
   const mood = useMascotStore((state) => state.mood)
   const message = useMascotStore((state) => state.message)
   const reactionKey = useMascotStore((state) => state.reactionKey)
-  const shownMood =
+  const resting = useRestHours()
+  const spoken =
     speaking && TALKS_IN.has(mood)
       ? 'talk'
       : talkOnlyWhileSpeaking && !speaking && mood === 'talk'
         ? 'idle'
         : mood
+  // a touch answers only while the robot is at rest (an answer's reaction stays as it is);
+  // in the rest hours a robot with nothing to do dozes
+  const atRest = spoken === 'idle' || spoken === 'sleepy'
+  const { tapMood, onTap } = useTapMood(atRest)
+  // dozing only with nothing on the screen to read (not in the middle of a lesson)
+  const dozing = spoken === 'idle' && resting && !message
+  const shownMood = atRest && tapMood ? tapMood : dozing ? 'sleepy' : spoken
 
   return (
     <div
@@ -84,6 +93,7 @@ export function Mascot({
           wearing={wearing ?? ownWearing}
           mood={shownMood}
           reactionKey={reactionKey}
+          onPictureTap={onTap}
           className="h-auto w-full"
         />
         {pet && <PetCompanion key={pet} pet={pet} mood={mood} />}

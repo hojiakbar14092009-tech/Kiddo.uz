@@ -740,3 +740,14 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   reduced motion).
 - Verification: unit 1424/1424, build PASS, browser 52/54 → board size fix → 30/30; screenshots checked; Critic REJECT
   (close letters passed, arrows, overlapping numbers, landscape) → fixed.
+
+## Phase 43 — COMPLETE (2026-11-02) – mascot: memory, touch, rest hours, voice-driven mouth
+
+- life.ts mascotMemory + robotBond (progressStore, uncapped, PetBridge records a day on activity.completed);
+  Home lines missed / friend3–100 / yesterday.{letters,numbers,explore,play} (uz/ru/en, ≤ 8 words, pending list).
+- TapTracker (varied moves, bursts, ≤ 3 per 10 s); 2D useTapMood (wave/happy, only at rest, onClick, KidoBot only).
+- useRestHours: dozing 22–05 (Mascot only without a message; RoamingMascot always).
+- voiceLevel.ts analyser (connected only while speaking) → Syllables.step(dt, speaking, level); RobotFace TalkingMouth.
+- Found by a night run: ten math-lab objects overflowed 320×568 → BasketTask `crowded` tiles (max-sm:size-11);
+  the small-phone e2e now fixes the clock and has a night case.
+- Docs: docs/architecture/living-mascots.md (Phase 43).

@@ -35,6 +35,11 @@ export interface MascotFigureProps extends RobotProps {
   mascot?: MascotId
   /** Home and celebrations: spontaneous idle gestures. Lessons stay calm. */
   lively?: boolean
+  /**
+   * A touch on the picture (the 2D robot or a poster). The 3D characters answer touches
+   * themselves (Character3D), so this is not called for them.
+   */
+  onPictureTap?: () => void
 }
 
 /**
@@ -44,7 +49,12 @@ export interface MascotFigureProps extends RobotProps {
  * robot for KidoBot). Starts once the page's own content is up (onIdle), and
  * a page that shows a 3D model of its own keeps the picture (content3d.ts).
  */
-export function MascotFigure({ mascot: chosen, lively = false, ...input }: MascotFigureProps) {
+export function MascotFigure({
+  mascot: chosen,
+  lively = false,
+  onPictureTap,
+  ...input
+}: MascotFigureProps) {
   const context = usePageContext()
   const mascot = chosen ?? mascotFor(context)
   const [failed, setFailed] = useState(false)
@@ -65,7 +75,7 @@ export function MascotFigure({ mascot: chosen, lively = false, ...input }: Masco
     setReady(false)
   }
 
-  const picture =
+  const drawn =
     mascot === 'kidobot' ? (
       <Robot
         {...input}
@@ -80,6 +90,16 @@ export function MascotFigure({ mascot: chosen, lively = false, ...input }: Masco
         data-mascot-poster={mascot}
         className={clsx('aspect-[5/6] object-contain select-none', input.className)}
       />
+    )
+  // `contents`: the wrapper adds no box, the picture keeps its own size. Only the 2D robot
+  // shows a touch (a poster cannot move); a click, so a swipe over it is not a touch.
+  const picture =
+    onPictureTap && mascot === 'kidobot' ? (
+      <div className="contents" onClick={onPictureTap} data-mascot-touch>
+        {drawn}
+      </div>
+    ) : (
+      drawn
     )
 
   if (!wants3D || !pageReady) return picture

@@ -70,8 +70,18 @@ export interface ChildProgress {
   pet: PetId | null
   /** Friendship with each pet: days they played together (Phase 27; this device only). */
   petBond?: Partial<Record<PetId, PetBond>>
+  /**
+   * Friendship with the robot (Phase 43; this device only): the days played, never fewer (the
+   * results list is capped, this count is not), and the last friendship day it has said.
+   */
+  robotBond?: RobotBond
   /** Adventure world card stages already shown to the child (Phase 28): a rise is celebrated once. */
   worldStages?: Record<string, number>
+}
+
+export interface RobotBond extends PetBond {
+  /** The friendship day (FRIEND_DAYS) the robot last said, so each is said once. */
+  said?: number
 }
 
 export interface CompletedTask {
@@ -140,6 +150,13 @@ interface ProgressState {
    * heart count when that day added a heart, otherwise null.
    */
   recordPetDay: (childKey: string, day: string) => { pet: PetId; level: number } | null
+  /**
+   * The child played on `day` (once a day). `pastDays`: days played before, from the history,
+   * the starting count for a child who played before the robot counted (seeded once).
+   */
+  recordRobotDay: (childKey: string, day: string, pastDays: number) => void
+  /** The robot said the friendship day `days` (said once). */
+  markRobotFriendSaid: (childKey: string, days: number) => void
   /** Remembers the world card stages the child has seen (only ever raised). */
   markWorldStages: (childKey: string, stages: Readonly<Record<string, number>>) => void
 }
@@ -386,6 +403,37 @@ export const useProgressStore = create<ProgressState>()(
         const level = bondLevel(after.days)
         return level > bondLevel(before?.days ?? 0) ? { pet, level } : null
       },
+
+      recordRobotDay: (childKey, day, pastDays) => {
+        // a child who has only played outside the letter games has no progress yet
+        const current = get().byChild[childKey] ?? EMPTY_PROGRESS
+        const before: RobotBond | undefined =
+          current.robotBond ??
+          (pastDays > 0 ? { days: Math.floor(pastDays), last: '0000-00-00' } : undefined)
+        const after = addBondDay(before, day)
+        if (after === current.robotBond) return
+        set((state) => {
+          const latest = state.byChild[childKey] ?? current
+          return {
+            byChild: {
+              ...state.byChild,
+              [childKey]: { ...latest, robotBond: { ...after, said: before?.said } },
+            },
+          }
+        })
+      },
+
+      markRobotFriendSaid: (childKey, days) =>
+        set((state) => {
+          const latest = state.byChild[childKey]
+          if (!latest?.robotBond || (latest.robotBond.said ?? 0) >= days) return state
+          return {
+            byChild: {
+              ...state.byChild,
+              [childKey]: { ...latest, robotBond: { ...latest.robotBond, said: days } },
+            },
+          }
+        }),
 
       resetChild: (childKey) => {
         clearChildRewards(childKey)

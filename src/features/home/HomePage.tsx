@@ -10,7 +10,8 @@ import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey } from '@/features/tasks/rules'
 import { usePendingActivityHomework, usePendingHomework } from '@/features/tasks/useHomework'
 import { ActivityHomeworkCard } from './ActivityHomeworkCard'
-import { homeLine } from '@/features/mascot/life'
+import { homeLine, mascotMemory } from '@/features/mascot/life'
+import { useUniverseStore } from '@/domain/universe/store'
 import { birthdayWeekYear, tashkentDay } from '@/features/birthday/birthday'
 import { tDynamic } from '@/lib/tDynamic'
 import { CoachMarks } from '@/features/onboarding/CoachMarks'
@@ -21,7 +22,7 @@ import { useSpeaker } from '@/services/audio/useSpeaker'
 import { useReducedMotion } from 'framer-motion'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import { useProgress, useWearing } from '@/store/progressStore'
+import { useChildKey, useProgress, useProgressStore, useWearing } from '@/store/progressStore'
 import { dailyPlanState } from './dailyPlan'
 import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
@@ -45,7 +46,21 @@ export function HomePage() {
 
   // the robot's line follows the child's day (features/mascot/life.ts)
   const [hour] = useState(() => new Date().getHours())
+  // what the robot remembers: only this child's own data, on this device (Phase 43); read
+  // once on arrival, so a friendship day said now does not turn into another line at once
+  const childKey = useChildKey()
+  const runs = useUniverseStore((state) => state.byChild[childKey]?.recent)
+  const bond = useProgressStore((state) => state.byChild[childKey]?.robotBond)
+  const [memory] = useState(() =>
+    mascotMemory({
+      today: dayKey(),
+      bond,
+      resultDays: results.map((result) => result.day),
+      runs: runs ?? [],
+    }),
+  )
   const line = homeLine({
+    memory,
     hour,
     name: child?.name ?? null,
     birthday: child ? birthdayWeekYear(child.birthDate, tashkentDay()) !== null : false,
@@ -53,6 +68,10 @@ export function HomePage() {
     planDone: plan.complete,
   })
   const hello = tDynamic(t, `mascot.life.${line.key}`, line.params)
+  const saidFriendDay = line.key.startsWith('friend') ? memory.friendDay : null
+  useEffect(() => {
+    if (saidFriendDay) useProgressStore.getState().markRobotFriendSaid(childKey, saidFriendDay)
+  }, [saidFriendDay, childKey])
 
   // the day's journey done (anonymous analytics, once a day)
   useEffect(() => {

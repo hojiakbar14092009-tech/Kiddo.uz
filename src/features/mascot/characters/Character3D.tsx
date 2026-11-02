@@ -1,4 +1,5 @@
 import { ContactShadows, Environment, Lightformer } from '@react-three/drei'
+import { voiceLevel } from '@/services/audio/voiceLevel'
 import { Canvas, createPortal, useFrame, useThree } from '@react-three/fiber'
 import clsx from 'clsx'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -15,7 +16,14 @@ import { acquire, release } from './assets'
 import { onMascotSignal } from './bridge'
 import { MascotController, type ModelStats, type Palette } from './controller'
 import type { Emotion } from './emotions'
-import { MascotDirector, PRIORITY, TapGate, type Performance, type Shown } from './director'
+import {
+  MascotDirector,
+  PRIORITY,
+  TapTracker,
+  type Performance,
+  type Shown,
+  type Tap,
+} from './director'
 import { baseGesture, IDLE_VARIATIONS } from './gestures'
 import { resolveReaction, type Signal } from './reactions'
 import { MASCOTS, type MascotContext, type MascotId } from './registry'
@@ -73,7 +81,7 @@ export default function Character3D(props: Character3DProps) {
   const container = useRef<HTMLDivElement>(null)
   const onScreen = useInView(container)
   const [airborne, setAirborne] = useState(false)
-  const [taps] = useState(() => new TapGate())
+  const [taps] = useState(() => new TapTracker())
   const [tapChannel] = useState(() => new TapChannel())
   const { reducedMotion, quality, label, className } = props
   const live = airborne && !reducedMotion && quality === 'high'
@@ -93,7 +101,8 @@ export default function Character3D(props: Character3DProps) {
       className={clsx('relative aspect-[5/6]', className)}
       onPointerDown={() => {
         // a friendly reaction to a tap, rate-limited; it never earns anything
-        if (taps.allow(performance.now())) tapChannel.emit()
+        const tap = taps.press(performance.now())
+        if (tap) tapChannel.emit(tap)
       }}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
@@ -296,7 +305,7 @@ function Scene({
   // world events (Phase 18) through the bridge
   useEffect(() => onMascotSignal((signal) => reactTo.current(signal)), [])
 
-  useEffect(() => taps.listen(() => reactTo.current({ kind: 'tap' })), [taps])
+  useEffect(() => taps.listen((tap) => reactTo.current({ kind: 'tap', ...tap })), [taps])
   useEffect(() => {
     lab?.bind?.((perf) => {
       director.request(perf, clock.current)
@@ -342,8 +351,10 @@ function Scene({
     const shown = director.tick(now)
     c.show(shown, { reducedMotion, calm: !lively, idleTempo: character?.idleTempo })
     const glance = look.current && now - look.current.at < LOOK_MS ? look.current : null
+    const speaking = shown.gesture === 'talk' || Boolean(lab?.speaking)
     c.update(dt, {
-      speaking: shown.gesture === 'talk' || Boolean(lab?.speaking),
+      speaking,
+      level: speaking && !lab ? voiceLevel() : null,
       look: glance,
       reducedMotion,
       calm: !lively,
@@ -376,17 +387,17 @@ function Scene({
 
 /** Taps on the mascot's box, handed to the scene inside the canvas. */
 class TapChannel {
-  private listener: (() => void) | null = null
+  private listener: ((tap: Tap) => void) | null = null
 
-  listen(listener: () => void): () => void {
+  listen(listener: (tap: Tap) => void): () => void {
     this.listener = listener
     return () => {
       if (this.listener === listener) this.listener = null
     }
   }
 
-  emit(): void {
-    this.listener?.()
+  emit(tap: Tap): void {
+    this.listener?.(tap)
   }
 }
 

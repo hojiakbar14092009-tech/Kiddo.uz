@@ -33,6 +33,8 @@ export interface Palette {
 
 export interface FrameInput {
   speaking: boolean
+  /** The voice's loudness 0..1 (null: not measurable, the mouth keeps a syllable rhythm). */
+  level?: number | null
   /** Where to look, in screen terms (x −1 left … 1 right, y −1 up … 1 down), or null. */
   look: { x: number; y: number } | null
   reducedMotion: boolean
@@ -224,7 +226,7 @@ export class MascotController {
       ? input.speaking
         ? 0.3
         : 0
-      : this.syllables.step(step, input.speaking)
+      : this.syllables.step(step, input.speaking, input.level ?? null)
     this.applyFace(blink, mouth)
 
     // glow: a slow breath of light (Lumi, robot lights), brighter in a celebration

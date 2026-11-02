@@ -171,10 +171,20 @@ for (const seed of [7, 4242]) {
 test.describe('a small phone (320×568)', () => {
   test.use({ viewport: { width: 320, height: 568 } })
 
-  for (const seed of [0, 7, 99, 4242]) {
-    test(`the basket shows with all the objects when the task opens (seed ${seed})`, async ({
+  // a fixed clock: the robot's rest hours change how many random numbers it draws first, and so
+  // the task (seed 4242 often gives the biggest one, ten objects in four rows); the night case
+  // checks the dozing robot's screen too
+  for (const [seed, night] of [
+    [0, false],
+    [7, false],
+    [99, false],
+    [4242, false],
+    [4242, true],
+  ] as const) {
+    test(`the basket shows with all the objects when the task opens (seed ${seed}${night ? ', at night' : ''})`, async ({
       page,
     }) => {
+      await page.clock.setFixedTime(new Date(`2026-11-05T${night ? '23:30' : '12:00'}:00`))
       await seedRandom(page, seed)
       await guest(page)
       await page.goto('/math-lab')
@@ -186,7 +196,8 @@ test.describe('a small phone (320×568)', () => {
       // basket, every object and "Done" are on screen without scrolling
       expect(await inView(basket)).toBe(true)
       expect(await inView(page.getByTestId('lab-done'))).toBe(true)
-      for (const object of await page.getByTestId('lab-object').all()) {
+      const objects = await page.getByTestId('lab-object').all()
+      for (const object of objects) {
         expect(await inView(object)).toBe(true)
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
