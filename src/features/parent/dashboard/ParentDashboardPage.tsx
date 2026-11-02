@@ -19,6 +19,7 @@ import { FamilyOverview } from './FamilyOverview'
 import { ExitAlert } from './ExitAlert'
 import { ReportSection } from './ReportSection'
 import { SettingsSection } from './SettingsSection'
+import { WorksheetsPanel } from '@/features/worksheets/WorksheetsPanel'
 import { ConsentGate } from '../login/ConsentGate'
 
 const TABS = ['report', 'profiles', 'homework', 'pro', 'settings'] as const
@@ -150,7 +151,12 @@ export function ParentDashboardPage() {
                 <ReportSection child={child} />
               </div>
             )}
-            {tab === 'homework' && child && <HomeworkSection key={child.id} child={child} />}
+            {tab === 'homework' && child && (
+              <div className="flex flex-col gap-5">
+                <HomeworkSection key={child.id} child={child} />
+                <WorksheetsPanel key={`sheets-${child.id}`} child={child} />
+              </div>
+            )}
             {tab === 'pro' && <ProSection />}
             {tab === 'settings' && <SettingsSection />}
           </div>

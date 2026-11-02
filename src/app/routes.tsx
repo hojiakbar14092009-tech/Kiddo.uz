@@ -71,6 +71,25 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/firstWords/FirstWordsPage')).FirstWordsPage,
                 }),
               },
+              // Phase 49: an own story, three-language words and the find-at-home game
+              {
+                path: '/learn/my-story',
+                lazy: async () => ({
+                  Component: (await import('@/features/myStory/MyStoryPage')).MyStoryPage,
+                }),
+              },
+              {
+                path: '/learn/three-words',
+                lazy: async () => ({
+                  Component: (await import('@/features/threeWords/ThreeWordsPage')).ThreeWordsPage,
+                }),
+              },
+              {
+                path: '/explore/find-home',
+                lazy: async () => ({
+                  Component: (await import('@/features/findHome/FindHomePage')).FindHomePage,
+                }),
+              },
               {
                 path: '/learn/help',
                 lazy: async () => ({
@@ -249,6 +268,13 @@ export const routes: RouteObject[] = [
                 lazy: async () => ({
                   Component: (await import('@/features/parent/dashboard/ParentDashboardPage'))
                     .ParentDashboardPage,
+                }),
+              },
+              // Phase 49: a printable A4 sheet (the browser's print dialog also saves a PDF)
+              {
+                path: 'print/:sheet',
+                lazy: async () => ({
+                  Component: (await import('@/features/worksheets/PrintSheetPage')).PrintSheetPage,
                 }),
               },
             ],

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { getAlphabet } from '@/content/alphabet'
 import { GAME_MIN_LEVEL, isGameSuggested } from '@/features/age/ageLevel'
 import { AppIcon } from '@/features/age/AppIcon'
+import { Img3D } from '@/components/ui/Img3D'
 import { examProgress } from '@/features/exam/exam'
 import { QuestExtras } from '@/features/home/QuestExtras'
 import { GAME_META } from '@/features/tasks/gameMeta'
@@ -59,6 +60,21 @@ export function LearnHub() {
           label={t(GAME_META.memory.titleKey)}
           picture={<AppIcon name="memory" className="size-[70%]" />}
           tint="bg-lilac-soft"
+        />
+        {/* Phase 49: a story of the child's own and one word in three languages */}
+        <PlaceCard
+          to="/learn/my-story"
+          label={t('myStory.title')}
+          detail={t('myStory.cardHint')}
+          picture={<Img3D name="book" className="size-[72%]" />}
+          tint="bg-primary-soft"
+        />
+        <PlaceCard
+          to="/learn/three-words"
+          label={t('threeWords.title')}
+          detail={t('threeWords.cardHint')}
+          picture={<Img3D name="notebook" className="size-[72%]" />}
+          tint="bg-sky-soft"
         />
         {laterGames.map((game) => (
           <PlaceCard

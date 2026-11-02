@@ -4,6 +4,7 @@ import { uzAlphabet } from '@/content/alphabet/uz'
 import type { Language } from '@/content/languages'
 import { NUMBERS } from '@/content/numbers'
 import { LEARN_SPOKEN } from '@/features/learn/spoken'
+import { SPOKEN as THREE_WORDS } from '@/features/threeWords/spoken'
 import { DINO_TEXT } from '@/features/worlds/dino/text'
 import { en } from '@/i18n/locales/en'
 import { ru } from '@/i18n/locales/ru'
@@ -43,6 +44,11 @@ export const SPOKEN_PARTS = [
   'mathLab',
   'tutor',
   'uzbekistan',
+  // Phase 49: the find-at-home prompts and praise, the own-story sentences and
+  // the three-language cards' instruction (the words themselves: threeWords/spoken.ts, added below)
+  'findHome.say',
+  'myStory.say',
+  'threeWords.say',
 ]
 const COUNTS = Array.from({ length: 41 }, (_, i) => i)
 /** While childPhrases runs: the templates it could not fill in. */
@@ -140,6 +146,10 @@ function collect(): {
     }
     // The new learning sections (their own content files).
     LEARN_SPOKEN[language as 'uz' | 'ru' | 'en'].forEach(add)
+    // Phase 49: the three-language cards' words, each said in its own language
+    // (kept apart from LEARN_SPOKEN, whose lines must all be recorded already:
+    // new words wait in pendingRecordings.json until the next recording)
+    THREE_WORDS[language as Language].forEach(add)
     // Cheers are said in English whatever the language (see useMascot).
     if (language === 'en') {
       ;['Yahoooo!', 'Wow!', 'Hooray!', 'Yay!', 'Woohoo!', 'Oops!', 'Uh-oh!', 'Hmm!'].forEach(add)

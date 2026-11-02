@@ -329,6 +329,10 @@ export const useProgressStore = create<ProgressState>()(
         void import('@/features/studio/gallery')
           .then(({ studioGallery }) => studioGallery().removeChild(GUEST_KEY))
           .catch(() => undefined)
+        // and the guest's own stories (Phase 49): a new guest never sees the last one's
+        void import('@/features/myStory/store')
+          .then(({ useMyStoryStore }) => useMyStoryStore.getState().removeChild(GUEST_KEY))
+          .catch(() => undefined)
         set((state) => ({
           byChild: { ...state.byChild, [GUEST_KEY]: freshGuest(state.byChild[GUEST_KEY]) },
         }))

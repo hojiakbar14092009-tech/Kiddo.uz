@@ -36,6 +36,14 @@ export function ExploreHub() {
           picture={<Img3D name="ringed-planet" className="size-[72%]" />}
           tint="bg-lilac-soft"
         />
+        {/* Phase 49: the robot asks for a real thing at home */}
+        <PlaceCard
+          to="/explore/find-home"
+          label={t('findHome.title')}
+          detail={t('findHome.cardHint')}
+          picture={<Img3D name="house" className="size-[72%]" />}
+          tint="bg-girl-soft"
+        />
         <PlaceCard
           to="/shadow-lab"
           label={t('shadowLab.title')}

@@ -226,6 +226,10 @@ export const useFamilyStore = create<FamilyState>()(
         void import('@/features/studio/gallery')
           .then(({ studioGallery }) => studioGallery().removeChild(id))
           .catch(() => undefined)
+        // the child's own stories (Phase 49, loaded on demand like the studio)
+        void import('@/features/myStory/store')
+          .then(({ useMyStoryStore }) => useMyStoryStore.getState().removeChild(id))
+          .catch(() => undefined)
       },
 
       setActiveChild: (id) => set({ activeChildId: id }),
