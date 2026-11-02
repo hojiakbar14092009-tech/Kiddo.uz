@@ -235,6 +235,13 @@ export const routes: RouteObject[] = [
             }),
           },
           {
+            // back from Google or the e-mail sign-in link (Phase 44)
+            path: 'auth',
+            lazy: async () => ({
+              Component: (await import('@/features/parent/login/AuthReturnPage')).AuthReturnPage,
+            }),
+          },
+          {
             element: <RequireParentSession />,
             children: [
               {

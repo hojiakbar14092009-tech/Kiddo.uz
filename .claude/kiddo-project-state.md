@@ -751,3 +751,13 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - Found by a night run: ten math-lab objects overflowed 320×568 → BasketTask `crowded` tiles (max-sm:size-11);
   the small-phone e2e now fixes the clock and has a night case.
 - Docs: docs/architecture/living-mascots.md (Phase 43).
+
+## Phase 44 — COMPLETE (2026-11-02) – accounts: Google / e-mail link, consent, two-way sync, photos, delete
+
+- auth.ts signInWithGoogle / sendSignInLink / completeSignIn (pkce) + AuthReturnPage `/parent/auth`;
+  consent.ts (CONSENT_VERSION, account_consents); login page with consent, Google, link/password.
+- restore.ts (cloud → device: profiles, state, results, learn, reward refs via rememberRewards),
+  run once per sign-in from SyncManager; toast parent.sync.restored.
+- photos.ts + settings cloudPhotos (opt-in) + AccountPanel (photos, delete with DELETE).
+- Server (subagent): 0018_accounts.sql (child-photos bucket + RLS, account_consents), delete-account
+  function (+15 tests), SQL tests 425. Docs: docs/architecture/accounts.md.

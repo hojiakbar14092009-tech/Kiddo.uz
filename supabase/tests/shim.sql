@@ -22,3 +22,11 @@ grant select on storage.buckets to anon, authenticated, service_role;
 grant select, insert, update, delete on storage.objects to anon, authenticated, service_role;
 create publication supabase_realtime;
 create schema supabase_migrations;
+-- storage.foldername as on Supabase: the folder parts of an object name (all but the last).
+create or replace function storage.foldername(name text) returns text[] language plpgsql immutable as $$
+declare _parts text[];
+begin
+  select string_to_array(name, '/') into _parts;
+  return _parts[1:array_length(_parts, 1) - 1];
+end $$;
+grant execute on function storage.foldername(text) to anon, authenticated, service_role;

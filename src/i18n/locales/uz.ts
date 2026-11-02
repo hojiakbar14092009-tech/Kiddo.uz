@@ -308,6 +308,26 @@ export const uz = {
     forYouHint: 'Hamma narsa hamma uchun ochiq: xohlaganingni tanla.',
   },
   parent: {
+    account: {
+      photosTitle: 'Bolalar rasmlari bulutda',
+      photosText:
+        'Yoqilsa, rasmlar faqat sizning hisobingizda yopiq saqlanadi va boshqa qurilmada ham chiqadi. O‘chirilsa, bulutdagi nusxalar o‘chadi, rasmlar shu qurilmada qoladi.',
+      photosToggle: 'Rasmlarni bulutda saqlash',
+      photosFailed: 'Bulutdagi rasmlarni o‘chirib bo‘lmadi. Keyinroq qayta urinib ko‘ring.',
+      photosPending: 'Ba’zi rasmlar hali yuklanmadi. Keyingi kirishda yana yuboriladi.',
+      deleteTitle: 'Hisobni o‘chirish',
+      deleteText:
+        'Hisob, bolalar profillari, natijalar, yong‘oqlar va bulutdagi rasmlar butunlay o‘chadi. Buni qaytarib bo‘lmaydi.',
+      deleteLocal: 'Shu qurilmadagi ma’lumotlarni ham o‘chirish',
+      deleteType: 'Tasdiqlash uchun DELETE deb yozing',
+      deleteButton: 'Hisobni butunlay o‘chirish',
+      deleting: 'O‘chirilmoqda…',
+      deleted: 'Hisob o‘chirildi.',
+      deleteFailed: 'Hisobni o‘chirib bo‘lmadi. Internetni tekshirib, qayta urinib ko‘ring.',
+    },
+    sync: {
+      restored: 'Bulutdan farzandlaringiz qaytarildi: {{count}} ta.',
+    },
     glance: {
       title: '{{name}}: qisqacha',
       more: 'Batafsil',
@@ -379,12 +399,32 @@ export const uz = {
         'Bulutli hisob hali ulanmagan. Barcha ma’lumotlar shu qurilmada saqlanadi – demo rejimda to‘liq ishlaydi.',
       demo: 'Demo rejimda kirish',
       demoHint: 'Demo rejim: hisob ochmasdan, faqat shu qurilmada.',
+      google: 'Google orqali kirish',
+      orEmail: 'yoki elektron pochta bilan',
+      withPassword: 'Parol bilan',
+      withLink: 'Pochtaga havola',
+      sendLink: 'Kirish havolasini yuborish',
+      linkSent: 'Havolani {{email}} manziliga yubordik. Uni shu brauzerda oching.',
+      consent:
+        'Men bolaning ota-onasi yoki vasiysiman. Kiddo farzandimning ismi, tug‘ilgan sanasi va o‘yin natijalarini hisobimda saqlashiga roziman.',
+      consentMore: 'Nimalar saqlanadi?',
+      consentDetails:
+        'Ism, tug‘ilgan sana, jins, o‘yin natijalari, yong‘oqlar va sozlamalar – faqat sizning hisobingizda, boshqa oilalar ko‘rmaydi. Bola rasmi faqat siz yoqsangiz bulutga yuklanadi. Hisob va barcha ma’lumotlarni istalgan vaqtda ota-ona bo‘limidan o‘chirishingiz mumkin.',
+      finishing: 'Kirilmoqda…',
+      backToLogin: 'Kirish sahifasiga qaytish',
+      againTitle: 'Davom etish uchun roziligingiz kerak',
+      accept: 'Roziman, davom etish',
+      acceptFailed: 'Saqlab bo‘lmadi. Internetni tekshirib, qayta urinib ko‘ring.',
       errors: {
         'not-configured': 'Bulutli hisob ulanmagan. Demo rejimdan foydalaning.',
         'invalid-credentials': 'Pochta yoki parol noto‘g‘ri.',
         'confirm-email': 'Pochtangizga xat yubordik. Tasdiqlab, keyin kiring.',
         network: 'Internetga ulanib bo‘lmadi. Keyinroq urinib ko‘ring.',
         'short-password': 'Parol kamida 8 belgidan iborat bo‘lsin.',
+        'link-expired': 'Havola eskirgan yoki allaqachon ishlatilgan. Yangi havola so‘rang.',
+        'other-browser': 'Havolani uni so‘ragan brauzerda oching yoki shu yerda yangisini so‘rang.',
+        consent: 'Davom etish uchun roziligingizni belgilang.',
+        cancelled: 'Kirish bekor qilindi. Xohlasangiz, qaytadan urinib ko‘ring.',
       },
     },
     tabs: {

@@ -20,6 +20,16 @@ interface SettingsState {
   setSlowVoice: (slow: boolean) => void
   /** Instructions and questions are read out on their own (Phase 41); off: only on a tap. */
   autoVoice: boolean
+  /**
+   * The cloud accounts (user ids) whose parent keeps the children's photos in the cloud
+   * (private, Phase 44), so they come back on another device. Per account: another parent
+   * signing in on this device has not turned it on. Otherwise a photo never leaves the device.
+   */
+  cloudPhotosFor: string[]
+  setCloudPhotos: (userId: string, on: boolean) => void
+  /** Cloud photos still to be removed, as `<parent id>/<child id>` (done when that account signs in). */
+  photoRemovals: string[]
+  setPhotoRemovals: (ids: string[]) => void
   setAutoVoice: (on: boolean) => void
 }
 
@@ -40,6 +50,15 @@ export const useSettingsStore = create<SettingsState>()(
       setSlowVoice: (slow) => set({ slowVoice: slow }),
       autoVoice: true,
       setAutoVoice: (on) => set({ autoVoice: on }),
+      cloudPhotosFor: [],
+      setCloudPhotos: (userId, on) =>
+        set((state) => ({
+          cloudPhotosFor: on
+            ? [...new Set([...state.cloudPhotosFor, userId])]
+            : state.cloudPhotosFor.filter((id) => id !== userId),
+        })),
+      photoRemovals: [],
+      setPhotoRemovals: (ids) => set({ photoRemovals: [...new Set(ids)].slice(-50) }),
     }),
     {
       name: 'kiddo.settings',

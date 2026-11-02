@@ -8,6 +8,7 @@ import { isSupabaseConfigured } from '@/services/supabase/client'
 import { useParentGateStore, useParentStore } from '@/store/parentStore'
 import { useLanguage, useSettingsStore } from '@/store/settingsStore'
 import { resetTours } from '@/features/onboarding/tour'
+import { AccountPanel } from './AccountPanel'
 import { AiTutorPanel } from './AiTutorPanel'
 import { ChoiceChips } from './ChoiceChips'
 import { Panel } from './Panel'
@@ -129,15 +130,17 @@ export function SettingsSection() {
 
       <AiTutorPanel />
 
-      <Panel title={t('parent.settings.account')} className="lg:col-span-2">
-        <p>
-          {session?.mode === 'cloud'
-            ? t('parent.settings.cloud', { email: session.email })
-            : isSupabaseConfigured
+      {session?.mode === 'cloud' ? (
+        <AccountPanel email={session.email} userId={session.userId} />
+      ) : (
+        <Panel title={t('parent.settings.account')} className="lg:col-span-2">
+          <p>
+            {isSupabaseConfigured
               ? t('parent.settings.demoCanSignIn')
               : t('parent.settings.demoOffline')}
-        </p>
-      </Panel>
+          </p>
+        </Panel>
+      )}
     </div>
   )
 }

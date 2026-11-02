@@ -108,7 +108,7 @@ export interface ChildProfile {
   homeworks?: Homework[]
   /** Years whose birthday gift (50 coins and a pet) was given (Phase 24). */
   birthdayGifts?: number[]
-  /** The child's photo (a small JPEG data URL made on this device; never synced). */
+  /** The child's photo (a small JPEG data URL made on this device; in the cloud only if the parent turns that on). */
   photo?: string
   /**
    * How many times each guided tour (Phase 25 coach marks: 'home', 'play') was

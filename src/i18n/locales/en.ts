@@ -310,6 +310,26 @@ export const en: Translation = {
     forYouHint: 'Everything is open to everyone: choose what you like.',
   },
   parent: {
+    account: {
+      photosTitle: 'Children’s photos in the cloud',
+      photosText:
+        'When on, photos are kept privately in your account only and appear on your other devices. When turned off, the cloud copies are deleted and the photos stay on this device.',
+      photosToggle: 'Keep photos in the cloud',
+      photosFailed: 'Could not delete the photos from the cloud. Please try again later.',
+      photosPending: 'Some photos were not sent yet. They will be sent at the next sign-in.',
+      deleteTitle: 'Delete account',
+      deleteText:
+        'The account, children’s profiles, results, nuts and cloud photos are deleted for good. This cannot be undone.',
+      deleteLocal: 'Also delete the data on this device',
+      deleteType: 'Type DELETE to confirm',
+      deleteButton: 'Delete the account for good',
+      deleting: 'Deleting…',
+      deleted: 'The account was deleted.',
+      deleteFailed: 'Could not delete the account. Check the internet and try again.',
+    },
+    sync: {
+      restored: 'Children brought back from the cloud: {{count}}.',
+    },
     glance: {
       title: '{{name}} at a glance',
       more: 'Details',
@@ -379,12 +399,33 @@ export const en: Translation = {
         'Cloud accounts are not connected yet. Everything is stored on this device – demo mode works fully.',
       demo: 'Continue in demo mode',
       demoHint: 'Demo mode: no account, this device only.',
+      google: 'Sign in with Google',
+      orEmail: 'or with e-mail',
+      withPassword: 'With a password',
+      withLink: 'E-mail link',
+      sendLink: 'Send me a sign-in link',
+      linkSent: 'We sent a link to {{email}}. Open it in this browser.',
+      consent:
+        'I am the child’s parent or guardian. I agree that Kiddo keeps my child’s name, date of birth and game results in my account.',
+      consentMore: 'What is kept?',
+      consentDetails:
+        'Name, date of birth, gender, game results, nuts and settings – only in your account; other families never see them. The child’s photo goes to the cloud only if you turn that on. You can delete the account and all data at any time in the parent area.',
+      finishing: 'Signing in…',
+      backToLogin: 'Back to sign-in',
+      againTitle: 'Your consent is needed to go on',
+      accept: 'I agree, continue',
+      acceptFailed: 'Could not save it. Check the internet and try again.',
       errors: {
         'not-configured': 'Cloud accounts are not connected. Use demo mode.',
         'invalid-credentials': 'Wrong email or password.',
         'confirm-email': 'We sent you an email. Confirm it, then sign in.',
         network: 'Could not reach the internet. Please try again later.',
         'short-password': 'The password needs at least 8 characters.',
+        'link-expired': 'The link has expired or was already used. Ask for a new one.',
+        'other-browser':
+          'Open the link in the browser that asked for it, or ask for a new one here.',
+        consent: 'Tick the consent box to continue.',
+        cancelled: 'Sign-in was cancelled. Try again if you like.',
       },
     },
     tabs: {

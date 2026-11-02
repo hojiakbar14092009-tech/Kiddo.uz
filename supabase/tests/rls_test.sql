@@ -845,6 +845,146 @@ select pg_temp.expect_error($$select public.nut_rate('crystal')$$, 'permission d
 select pg_temp.expect_error($$select public.building_nut_price('garden',1)$$, 'permission denied');
 commit;
 
+-- ===== Phase 44 (0018): child photos, account consents, account deletion
+-- two fresh families: F1 (child k1) and F2 (child k2)
+insert into auth.users values
+ ('00000000-0000-0000-0000-0000000000f1','f1@x.uz'),
+ ('00000000-0000-0000-0000-0000000000f2','f2@x.uz');
+insert into public.children (id,parent_id,name,age,gender,mascot) values
+ ('k1','00000000-0000-0000-0000-0000000000f1','Aziz',5,'boy','boy'),
+ ('k2','00000000-0000-0000-0000-0000000000f2','Malika',4,'girl','girl');
+insert into public.child_state (child_id,parent_id) values ('k1','00000000-0000-0000-0000-0000000000f1');
+select pg_temp.check((select public = false and file_size_limit = 262144 and allowed_mime_types = array['image/jpeg'] from storage.buckets where id = 'child-photos'), 'photos: bucket is private, 256 KB, JPEG only');
+select pg_temp.check(not exists (
+  select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+    and (coalesce(qual,'') || coalesce(with_check,'')) like '%child-photos%' and not (roles = '{authenticated}')
+), 'photos: every child-photos policy is for authenticated only');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated"}', true);
+insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k1.jpg');
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'child-photos' and name = '00000000-0000-0000-0000-0000000000f1/k1.jpg') = 1, 'photos: a parent adds and reads own child''s photo');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k2.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f2/k1.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f2/k2.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/x/k1.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','x/00000000-0000-0000-0000-0000000000f1/k1.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','/00000000-0000-0000-0000-0000000000f1/k1.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k1.png')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k1.jpg.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k1')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/nobody.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('ads','00000000-0000-0000-0000-0000000000f1/k1.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('voice','00000000-0000-0000-0000-0000000000f1/k1.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('avatars','00000000-0000-0000-0000-0000000000f1/k1.jpg')$$, 'row-level security');
+-- moving the photo onto another path or bucket is refused; replacing it in place is fine
+select pg_temp.expect_error($$update storage.objects set name = '00000000-0000-0000-0000-0000000000f1/k2.jpg' where bucket_id = 'child-photos'$$, 'row-level security');
+select pg_temp.expect_error($$update storage.objects set bucket_id = 'ads' where bucket_id = 'child-photos'$$, 'row-level security');
+with u as (update storage.objects set name = name where bucket_id = 'child-photos' returning 1)
+select pg_temp.check((select count(*) from u) = 1, 'photos: a parent replaces own child''s photo in place');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f2","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'child-photos') = 0, 'photos: another parent cannot read the photo');
+update storage.objects set name = '00000000-0000-0000-0000-0000000000f2/k2.jpg' where bucket_id = 'child-photos';
+delete from storage.objects where bucket_id = 'child-photos';
+insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f2/k2.jpg');
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'child-photos') = 1, 'photos: the other parent sees only their own photo');
+commit;
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'child-photos') = 0, 'photos: anon cannot read photos');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k1.jpg')$$, 'row-level security');
+select pg_temp.expect_error($$select public.is_own_child_photo('x/y.jpg')$$, 'permission denied');
+commit;
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'child-photos' and name = '00000000-0000-0000-0000-0000000000f1/k1.jpg') = 1, 'photos: other clients changed nothing');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated"}', true);
+with d as (delete from storage.objects where bucket_id = 'child-photos' returning name)
+select pg_temp.check((select array_agg(name) from d) = array['00000000-0000-0000-0000-0000000000f1/k1.jpg'], 'photos: a parent deletes own photo (only own)');
+insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k1.jpg');
+commit;
+
+-- a child removed first: its photo can still be read and removed by its parent, by no one else
+insert into public.children (id,parent_id,name,age,gender,mascot) values
+ ('k9','00000000-0000-0000-0000-0000000000f1','Old',5,'boy','boy');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated"}', true);
+insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k9.jpg');
+commit;
+delete from public.children where id = 'k9';
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f2","role":"authenticated"}', true);
+delete from storage.objects where bucket_id = 'child-photos' and name like '%/k9.jpg';
+commit;
+select pg_temp.check((select count(*) from storage.objects where name = '00000000-0000-0000-0000-0000000000f1/k9.jpg') = 1, 'photos: another parent cannot remove a removed child''s photo');
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from storage.objects where bucket_id = 'child-photos') = 2, 'photos: a parent lists every photo in own folder (a removed child''s too)');
+select pg_temp.expect_error($$insert into storage.objects (bucket_id, name) values ('child-photos','00000000-0000-0000-0000-0000000000f1/k9.jpg')$$, 'row-level security');
+with d as (delete from storage.objects where bucket_id = 'child-photos' and name like '%/k9.jpg' returning 1)
+select pg_temp.check((select count(*) from d) = 1, 'photos: a parent removes a removed child''s photo');
+commit;
+
+-- account consents: own row only, server clock, no delete
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated"}', true);
+insert into public.account_consents (version, accepted_at) values ('2026-11', '2000-01-01');
+select pg_temp.check((select count(*) from public.account_consents) = 1 and (select accepted_at > now() - interval '1 minute' from public.account_consents), 'consents: a parent records own consent (server time)');
+update public.account_consents set version = '2026-12', accepted_at = '2000-01-01';
+select pg_temp.check((select version = '2026-12' and accepted_at > now() - interval '1 minute' from public.account_consents), 'consents: a parent updates own consent (server time)');
+select pg_temp.expect_error($$insert into public.account_consents (parent_id, version) values ('00000000-0000-0000-0000-0000000000f2','1')$$, 'row-level security');
+select pg_temp.expect_error($$update public.account_consents set parent_id = '00000000-0000-0000-0000-0000000000f2'$$, 'row-level security');
+select pg_temp.expect_error($$update public.account_consents set version = ''$$, 'account_consents_version_check');
+select pg_temp.expect_error($$update public.account_consents set version = repeat('v', 21)$$, 'account_consents_version_check');
+select pg_temp.expect_error($$delete from public.account_consents$$, 'permission denied');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f2","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from public.account_consents) = 0, 'consents: another parent cannot read it');
+update public.account_consents set version = 'x';
+insert into public.account_consents (version) values ('2026-11');
+select pg_temp.check((select count(*) from public.account_consents) = 1, 'consents: the other parent sees only their own row');
+commit;
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.expect_error($$select * from public.account_consents$$, 'permission denied');
+select pg_temp.expect_error($$insert into public.account_consents (parent_id, version) values ('00000000-0000-0000-0000-0000000000f1','1')$$, 'permission denied');
+commit;
+select pg_temp.check((select version from public.account_consents where parent_id = '00000000-0000-0000-0000-0000000000f1') = '2026-12', 'consents: other clients changed nothing');
+select pg_temp.check((select c.relrowsecurity from pg_class c where c.oid = 'public.account_consents'::regclass), 'account_consents: RLS on');
+
+-- deleting the account removes every family row (here as auth.admin.deleteUser does)
+insert into public.task_results (id,child_id,parent_id,type,language,coins,stars,day,finished_at)
+values ('tr-k1','k1','00000000-0000-0000-0000-0000000000f1','memory','uz',1,3,current_date,now());
+delete from auth.users where id = '00000000-0000-0000-0000-0000000000f1';
+select pg_temp.check(not exists (select 1 from public.children where parent_id = '00000000-0000-0000-0000-0000000000f1')
+  and not exists (select 1 from public.child_state where child_id = 'k1')
+  and not exists (select 1 from public.task_results where child_id = 'k1')
+  and not exists (select 1 from public.account_consents where parent_id = '00000000-0000-0000-0000-0000000000f1')
+  and not exists (select 1 from public.deleted_children where parent_id = '00000000-0000-0000-0000-0000000000f1'),
+  'delete account: children, child_state, results, consent and tombstones cascade');
+select pg_temp.check((select count(*) from public.children where id = 'k2') = 1 and (select count(*) from public.account_consents) = 1, 'delete account: the other family is untouched');
+-- every public table with a person in it cascades from auth.users or children
+select pg_temp.check(not exists (
+  select 1 from pg_class t
+  where t.relkind = 'r' and t.relnamespace = 'public'::regnamespace
+    and exists (select 1 from pg_attribute a where a.attrelid = t.oid and a.attnum > 0
+                and not a.attisdropped and a.attname in ('parent_id','user_id','child_id'))
+    and not exists (select 1 from pg_constraint con where con.conrelid = t.oid and con.contype = 'f'
+                    and con.confdeltype = 'c' and con.confrelid in ('auth.users'::regclass, 'public.children'::regclass))
+), 'delete account: every table with a parent, user or child cascades');
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

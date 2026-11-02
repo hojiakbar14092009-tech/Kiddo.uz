@@ -2,8 +2,9 @@
  * A child's photo (Phase 24): only real images are accepted. The file must
  * say it is PNG, JPEG or WebP, be at most 5 MB, start with that format's own
  * bytes (a renamed file is refused) and decode as a picture. It is then made
- * into a small 256 × 256 JPEG on this device; the original never leaves it,
- * and the photo is never synced.
+ * into a small 256 × 256 JPEG on this device; the original never leaves it.
+ * The small photo goes to the parent's private cloud only when the parent turns
+ * that on (Phase 44, services/sync/photos.ts).
  */
 
 export const PHOTO_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const

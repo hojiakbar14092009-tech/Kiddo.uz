@@ -1,4 +1,5 @@
 export {
+  rememberRewards,
   clearChildRewards,
   clearChildRewards as clearChild,
   grantReward,

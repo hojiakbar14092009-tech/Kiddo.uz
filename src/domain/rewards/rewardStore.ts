@@ -178,6 +178,23 @@ export function ledgerTotal(childKey: string): number {
   return sumLedger(useRewardStore.getState().byChild[childKey], (entry) => entry.coins)
 }
 
+/**
+ * Takes in rewards the server already holds for a child restored from the cloud (Phase 44):
+ * their (reason, refId) count as given, so a run done on another device never pays twice
+ * here. The balance is not changed (the restore sets it) and nothing is sent back.
+ */
+export function rememberRewards(childKey: string, entries: readonly RewardEntry[]): void {
+  if (!childKey || entries.length === 0) return
+  let book = useRewardStore.getState().byChild[childKey]
+  // oldest first, so the history stays newest first
+  for (const entry of [...entries].sort((a, b) => a.at.localeCompare(b.at))) {
+    if (!entry.refId) continue
+    book = appendIdempotent(book, entry, keyOf(entry.reason, entry.refId), REWARD_LIMITS) ?? book
+  }
+  if (book)
+    useRewardStore.setState((state) => ({ byChild: { ...state.byChild, [childKey]: book } }))
+}
+
 /** Forgets a child's ledger (the child was removed, or a guest starts fresh). */
 export function clearChildRewards(childKey: string): void {
   if (!useRewardStore.getState().byChild[childKey]) return
