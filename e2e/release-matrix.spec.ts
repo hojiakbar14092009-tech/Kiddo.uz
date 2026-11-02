@@ -35,7 +35,30 @@ const ROUTES = [
   '/shop',
   '/stories',
   '/parent',
+  // Phase 50: the hubs and the places added since Phase 36
+  '/learn',
+  '/explore',
+  '/my-world',
+  '/learn/my-story',
+  '/learn/three-words',
+  '/explore/find-home',
+  '/learn/help',
+  '/learn/tales',
+  '/studio',
+  '/adventure',
+  '/spaceport',
+  '/science-lab',
 ]
+
+/** Console errors and uncaught exceptions of a page (Phase 50: none on any place). */
+function watchErrors(page: Page) {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`))
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text().slice(0, 200))
+  })
+  return errors
+}
 
 async function seed(page: Page, language: 'ru' | 'uz' | 'en' = 'ru') {
   await page.addInitScript((language) => {
@@ -117,6 +140,7 @@ test.describe('release matrix @matrix', () => {
       page,
     }) => {
       await page.setViewportSize({ width, height })
+      const errors = watchErrors(page)
       await seed(page)
       for (const route of ROUTES) {
         await go(page, route)
@@ -125,6 +149,7 @@ test.describe('release matrix @matrix', () => {
           off: [],
           raw: [],
         })
+        expect.soft(errors.splice(0), `console errors on ${route}`).toEqual([])
       }
     })
   }
@@ -145,11 +170,13 @@ test.describe('release matrix @matrix', () => {
   for (const language of ['uz', 'en'] as const) {
     test(`${language}: the new places show no raw keys`, async ({ page }) => {
       await page.setViewportSize({ width: 360, height: 800 })
+      const errors = watchErrors(page)
       await seed(page, language)
       for (const route of ROUTES) {
         await go(page, route)
         const { raw, overflow } = await page.evaluate(problems)
         expect.soft({ raw, overflow }, route).toEqual({ raw: [], overflow: 0 })
+        expect.soft(errors.splice(0), `console errors on ${route}`).toEqual([])
       }
     })
   }

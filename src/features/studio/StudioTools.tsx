@@ -167,7 +167,7 @@ export function StudioTools({
       )}
 
       {/* pinned to the bottom edge, so Save is never below the fold on a small phone */}
-      <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-center gap-2 bg-cream px-1 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] short:static short:pb-0">
+      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center justify-center gap-2 bg-cream px-1 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] short:static short:pb-0">
         <ToolButton
           label={t('studio.undo')}
           disabled={!canUndo(state.history)}

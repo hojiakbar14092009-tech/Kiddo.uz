@@ -52,20 +52,26 @@ function Menu({ language, onPick }: { language: Language; onPick: (mode: LearnMo
 
   return (
     <LearnShell title={t('learn.sections.help')} speak={[copy.greet]}>
-      <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-5 rounded-[36px] bg-surface p-6 text-center shadow-[0_8px_0_var(--color-line)]">
+      <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-5 rounded-[36px] bg-surface p-4 text-center sm:p-6 shadow-[0_8px_0_var(--color-line)]">
         <Img3D name="paintbrush" className="size-24 sm:size-28" eager />
         <h2 className="font-display text-2xl font-extrabold sm:text-3xl">{copy.choose}</h2>
         <div className="grid w-full gap-4 sm:grid-cols-2">
-          <div className="flex flex-col items-center gap-2">
-            <Button className="w-full" onClick={() => onPick('learn')} data-testid="help-learn">
+          <div className="flex min-w-0 flex-col items-center gap-2">
+            <Button
+              size="md"
+              className="w-full px-4!"
+              onClick={() => onPick('learn')}
+              data-testid="help-learn"
+            >
               {t('learn.learnMode')}
             </Button>
             <p className="text-ink-soft">{copy.learnHint}</p>
           </div>
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex min-w-0 flex-col items-center gap-2">
             <Button
               variant="coin"
-              className="w-full"
+              size="md"
+              className="w-full px-4!"
               onClick={() => onPick('test')}
               data-testid="help-test"
             >

@@ -29,9 +29,26 @@ stage tiles, garden mode icons, the tab touch floor) are capped by the screen wi
 (`[overflow-wrap:anywhere]`) instead of spilling out. The shared Button is not changed on purpose:
 breaking anywhere in every button would let tight rows of buttons break words at normal text size.
 
+## Phase 50: final pass
+
+- The matrix now also walks the hubs and the places added after Phase 36: `/learn`, `/explore`,
+  `/my-world`, `/learn/my-story`, `/learn/three-words`, `/explore/find-home`, `/learn/help`,
+  `/learn/tales`, `/studio`, `/adventure`, `/spaceport`, `/science-lab` (27 places in all).
+- Every place at every viewport, and in Uzbek and English, must log no console error and no uncaught
+  exception (`watchErrors` in the spec).
+- Found and fixed at 200 % text: the Three-language word arrows, the Help-the-mascot mode buttons and
+  the Studio bottom bar pushed a button off a 393 px phone. The rows now wrap (`flex-wrap`), and the
+  help cards use a medium button with less side padding.
+- The printable sheets are checked as a one-page A4 PDF in `e2e/phase49.spec.ts`.
+
 ## Owner actions before a cloud release
 
-- Apply migrations `0014_birthday_no_age_ceiling.sql` and `0015_age_wardrobe.sql` to production
-  (without 0015 the server refuses the 12 new outfits).
+- Apply migrations `0014` to `0019` to production, in order: `0014_birthday_no_age_ceiling`,
+  `0015_age_wardrobe` (without it the server refuses the 12 new outfits), `0016_analytics`,
+  `0017_nuts`, `0018_accounts`, `0019_admin`.
+- Put the server keys in the Supabase function secrets, never in `VITE_*`: the Google sign-in client,
+  the ElevenLabs key (`tts`, `voice-url`) and, later, the Telegram bot tokens (Phases 56–57).
+- Approve the design of the printable sheets (letters, numbers, counting PDFs).
+- Have a lawyer read the privacy text and the parents' consent before a public launch.
 - The future PRO price (24,990 so‘m / month, 238,990 so‘m / year) is kept in
   `src/features/pro/futurePrices.ts` and is deliberately not read anywhere; live prices are the admin's.
