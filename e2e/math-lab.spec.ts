@@ -2,7 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 import { passMathExample, passPlacementAllRight } from './lesson.ts'
 
 /**
- * A repeatable Math.random. `0` is constant (the parent gate then asks 3 × 3);
+ * A repeatable Math.random. `0` is constant (the parent gate then asks 12 × 3);
  * any other seed is a small LCG, so the questions, objects and options differ.
  */
 async function seedRandom(page: Page, seed: number) {
@@ -33,7 +33,8 @@ async function fourYearOld(page: Page) {
   await expect(page).toHaveURL(/\/home$/)
   await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
   await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '9', exact: true }).click()
+  await page.getByRole('button', { name: '3', exact: true }).click()
+  await page.getByRole('button', { name: '6', exact: true }).click()
   await page.getByRole('button', { name: 'Tekshirish' }).click()
   await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
 
@@ -225,13 +226,14 @@ test.describe('no maximum age (Phase 22), on a small phone', () => {
     page,
   }) => {
     test.setTimeout(180_000)
-    // a constant Math.random: the grown-ups question is 3 × 3
+    // a constant Math.random: the grown-ups question is 12 × 3
     await seedRandom(page, 0)
     await page.goto('/')
     await page.getByRole('button', { name: 'O‘zbekcha' }).click()
     await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
     await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-    await page.getByRole('button', { name: '9', exact: true }).click()
+    await page.getByRole('button', { name: '3', exact: true }).click()
+    await page.getByRole('button', { name: '6', exact: true }).click()
     await page.getByRole('button', { name: 'Tekshirish' }).click()
     await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
     await page.getByRole('textbox', { name: 'Ismi' }).fill('Dilshod')

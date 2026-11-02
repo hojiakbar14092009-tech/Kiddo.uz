@@ -51,7 +51,8 @@ function tinyPng(): Buffer {
 async function parentArea(page: Page) {
   await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
   await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '9', exact: true }).click()
+  await page.getByRole('button', { name: '3', exact: true }).click()
+  await page.getByRole('button', { name: '6', exact: true }).click()
   await page.getByRole('button', { name: 'Tekshirish' }).click()
 }
 

@@ -11,8 +11,8 @@ import { renderRoute } from '@/test/renderRoute'
 
 type User = Awaited<ReturnType<typeof renderRoute>>['user']
 
-/** With Math.random() = 0 the gate always asks 3 × 3. */
-async function solveGate(user: User, answer = '9') {
+/** With Math.random() = 0 the gate always asks 12 × 3. */
+async function solveGate(user: User, answer = '36') {
   for (const digit of answer) await user.click(screen.getByRole('button', { name: digit }))
   await user.click(screen.getByRole('button', { name: 'Tekshirish' }))
 }
@@ -22,6 +22,7 @@ describe('Parent gate', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0)
     useSettingsStore.setState({ language: 'uz' })
     useParentGateStore.setState({ openedAt: null })
+    useParentGateStore.getState().unlock()
     useParentStore.setState({ session: null })
   })
   afterEach(() => vi.restoreAllMocks())
@@ -29,7 +30,7 @@ describe('Parent gate', () => {
   it('keeps the parent area closed until the sum is solved', async () => {
     const { router, user } = await renderRoute('/parent/dashboard')
     expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
-    expect(screen.getByText('3 ko‘paytirish 3 nechaga teng?')).toBeInTheDocument()
+    expect(screen.getByText('12 ko‘paytirish 3 nechaga teng?')).toBeInTheDocument()
 
     await solveGate(user, '8')
     expect(screen.getByText('Noto‘g‘ri. Mana yangi misol.')).toBeInTheDocument()
@@ -43,7 +44,7 @@ describe('Parent gate', () => {
     const { user } = await renderRoute('/parent')
     for (let attempt = 0; attempt < 3; attempt += 1) await solveGate(user, '1')
     expect(screen.getByText(/30 soniyadan keyin/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '9' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '6' })).toBeDisabled()
   })
 
   it('goes back to the child area on cancel', async () => {

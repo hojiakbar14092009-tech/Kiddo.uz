@@ -18,7 +18,7 @@ export const enAlphabet = createAlphabet('en', [
   ['n', 'N', 'nose', '👃'],
   ['o', 'O', 'orange', '🍊'],
   ['p', 'P', 'pen', '🖊️'],
-  ['q', 'Q', 'queen', '👸'],
+  ['q', 'Q', 'queen', '👑'],
   ['r', 'R', 'robot', '🤖'],
   ['s', 'S', 'sun', '☀️'],
   ['t', 'T', 'tree', '🌳'],

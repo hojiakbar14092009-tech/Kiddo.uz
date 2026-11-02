@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { expect, test, type Page } from '@playwright/test'
 
-/** A fixed Math.random, so the parent gate asks 3 × 3 (as in kiddo.spec.ts). */
+/** A fixed Math.random, so the parent gate asks 12 × 3 (as in kiddo.spec.ts). */
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     Math.random = () => 0
@@ -10,7 +10,8 @@ test.beforeEach(async ({ page }) => {
 
 async function solveParentGate(page: Page) {
   await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '9', exact: true }).click()
+  await page.getByRole('button', { name: '3', exact: true }).click()
+  await page.getByRole('button', { name: '6', exact: true }).click()
   await page.getByRole('button', { name: 'Tekshirish' }).click()
 }
 

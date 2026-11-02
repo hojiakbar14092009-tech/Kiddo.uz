@@ -19,10 +19,11 @@ async function parentArea(page: Page) {
   await solveGate(page)
 }
 
-/** A fresh page load asks the grown-ups question again (3 × 3 with this Math.random). */
+/** A fresh page load asks the grown-ups question again (12 × 3 with this Math.random). */
 async function solveGate(page: Page) {
   await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '9', exact: true }).click()
+  await page.getByRole('button', { name: '3', exact: true }).click()
+  await page.getByRole('button', { name: '6', exact: true }).click()
   await page.getByRole('button', { name: 'Tekshirish' }).click()
 }
 

@@ -98,3 +98,21 @@ private voice bucket, every Phase 13 fix) on a local PostgreSQL:
   owner's public launch codes (decision in Phase 3).
 - **Rotations**: no real secret was found in the repository or its history
   (Phase 13 scan); nothing needs rotating.
+
+## Parent gate (Phase 46)
+
+- The question is `a × b` with `a` in 12–19 and `b` in 3–9 (56 questions, answers up to 171, no
+  answer more than twice), so typing one number wins at most 1 time in 28. It is never spoken.
+- Three wrong answers in a row rest the keypad for 30 s. The count and the rest live in
+  `useParentGateStore` and on the device (`kiddo.gate.lock`), so closing the gate, opening it
+  from another place (parent area, rest screen, profiles) or reloading does not start afresh.
+  A right answer clears them.
+- A solved gate stays open while the parent works (pointer, keys, scroll refresh it) and closes
+  after 10 idle minutes or on leaving `/parent` (so a child tapping an open parent screen keeps
+  it open: it is the parent's to close with "To the kids"). The open state is memory only: a reload asks again.
+- By design: the language switcher stays on the child's top bar (the owner wants the child to
+  switch it), and `/admin` has its own cloud admin sign-in instead of the gate.
+- Content notes from the Phase 46 audit: `queen` shows a crown (no princess); `йогурт` keeps the
+  glass of milk (no yogurt picture yet); `подъезд` (Ъ) stays as in Russian primers; only capital
+  letters have tracing strokes; the Uzbek ʻ (U+02BB) and ‘ (U+2018) both occur in texts and are
+  left as they are, because recorded clip names follow the texts (to unify with Phase 48).

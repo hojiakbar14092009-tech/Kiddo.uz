@@ -25,7 +25,7 @@ export const ru: Translation = {
   },
   tier: {
     pro: 'PRO',
-    free: 'Free',
+    free: 'Бесплатно',
     proActive: 'Kiddo PRO включён',
     freeActive: 'Бесплатная версия',
     proFeature: 'PRO',

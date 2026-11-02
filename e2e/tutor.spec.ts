@@ -8,7 +8,7 @@ import { passMathExample } from './lesson.ts'
  */
 
 test.beforeEach(async ({ page }) => {
-  // a fixed Math.random: the parent gate asks 3 × 3; questions repeat per run
+  // a fixed Math.random: the parent gate asks 12 × 3; questions repeat per run
   await page.addInitScript(() => {
     let state = 7
     Math.random = () => {
