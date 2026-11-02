@@ -1309,6 +1309,189 @@ select pg_temp.check((select sum(amount) from revenue53) = (select sum(amount) f
 select pg_temp.check((select amount from revenue53 where day = ((now() - interval '3 days') at time zone 'Asia/Tashkent')::date) >= 777,
   'revenue 0021: an earlier day comes from the view');
 
+-- ===== Phase 56 (0022): the parents' Telegram bot
+-- A's child Dilshod (made above) is the one the messages are about; a birth date sets the age
+update public.children set birth_date = ((now() at time zone 'Asia/Tashkent')::date - interval '5 years 2 months')::date
+ where id = 'cd';
+insert into public.child_state (child_id,parent_id) values ('cd','00000000-0000-0000-0000-00000000000a')
+  on conflict (child_id) do nothing;
+select pg_temp.check(not has_table_privilege(r, t, 'select') and not has_table_privilege(r, t, 'insert'),
+    'telegram 0022: ' || r || ' cannot touch ' || t)
+  from unnest(array['anon','authenticated']) r,
+       unnest(array['public.telegram_links','public.telegram_link_codes']) t;
+select pg_temp.check(not has_function_privilege(r, f, 'execute'), 'telegram 0022: ' || r || ' cannot call ' || f)
+  from unnest(array['anon','authenticated']) r,
+       unnest(array['public.telegram_claim(text,bigint)','public.telegram_unlink_chat(bigint)',
+                     'public.telegram_set_language(bigint,text)','public.telegram_chat(bigint)',
+                     'public.telegram_report(bigint,text)','public.telegram_children(uuid)',
+                     'public.enqueue_telegram_messages(timestamptz)','public.telegram_code_hash(text)']) f;
+select pg_temp.check(not has_function_privilege('anon', f, 'execute'), 'telegram 0022: anon cannot call ' || f)
+  from unnest(array['public.telegram_link_code(text)','public.telegram_my_links()',
+                    'public.telegram_unlink(bigint)']) f;
+create temp table codes56 (who text, code text);
+grant select, insert on codes56 to authenticated, service_role;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+insert into codes56 select 'a1', public.telegram_link_code('ru');
+insert into codes56 select 'a2', public.telegram_link_code('uz');
+insert into codes56 select 'a3', public.telegram_link_code('uz');
+select pg_temp.expect_error($$select public.telegram_link_code('de')$$, 'bad_language');
+select pg_temp.check((select count(*) from public.telegram_my_links()) = 0, 'telegram 0022: no chat is linked yet');
+commit;
+select pg_temp.check((select bool_and(code ~ '^[0-9a-f]{32}$') and count(distinct code) = 3 from codes56),
+  'telegram 0022: each code is 32 random hex characters');
+select pg_temp.check(not exists (select 1 from public.telegram_link_codes c join codes56 x on c.code_hash = x.code)
+    and (select count(*) from public.telegram_link_codes c join codes56 x
+           on c.code_hash = encode(sha256(convert_to(x.code, 'UTF8')), 'hex')) = 3,
+  'telegram 0022: only the hash of a code is kept');
+select pg_temp.check((select expires_at between now() + interval '9 minutes' and now() + interval '11 minutes'
+    from public.telegram_link_codes limit 1), 'telegram 0022: a code lasts 10 minutes');
+-- the bot (service role) claims a code once
+begin;
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
+create temp table claim56 as select public.telegram_claim(code, 1001) r from codes56 where who = 'a1';
+select pg_temp.check((select r ->> 'status' = 'linked' and r ->> 'language' = 'ru'
+         and r -> 'children' @> jsonb_build_array(jsonb_build_object('name', 'Dilshod', 'age', 5))
+         and jsonb_array_length(r -> 'children') = (select count(*) from public.children
+                                                    where parent_id = '00000000-0000-0000-0000-00000000000a')
+         and not exists (select 1 from jsonb_array_elements(r -> 'children') c
+                          where (select array_agg(k order by k) from jsonb_object_keys(c) k) <> array['age', 'name'])
+       from claim56),
+  'telegram 0022: a code links the chat and names the children (first name and age only)');
+select pg_temp.check((select public.telegram_claim(code, 1002) from codes56 where who = 'a1') ->> 'status' = 'invalid',
+  'telegram 0022: a used code works no more');
+select pg_temp.check(public.telegram_claim('0123456789abcdef0123456789abcdef', 1003) ->> 'status' = 'invalid'
+    and public.telegram_claim('Ali', 1003) ->> 'status' = 'invalid'
+    and public.telegram_claim(null, 1003) ->> 'status' = 'invalid',
+  'telegram 0022: an unknown code, a name or nothing links nothing');
+commit;
+update public.telegram_link_codes set expires_at = now() - interval '1 second'
+ where code_hash = (select encode(sha256(convert_to(code, 'UTF8')), 'hex') from codes56 where who = 'a2');
+select pg_temp.check((select public.telegram_claim(code, 1004) from codes56 where who = 'a2') ->> 'status' = 'invalid',
+  'telegram 0022: an expired code links nothing');
+select pg_temp.check((select count(*) from public.telegram_links) = 1, 'telegram 0022: one chat is linked');
+-- the parent sees and changes only their own chats; another parent cannot
+create temp table links56 (id bigint);
+grant select, insert on links56 to authenticated;
+create temp table alink56 as select id from public.telegram_links;
+grant select on alink56 to authenticated;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+select pg_temp.check((select count(*) from public.telegram_my_links()) = 0, 'telegram 0022: B sees no chat of A');
+select pg_temp.check(not public.telegram_unlink((select id from alink56)),
+  'telegram 0022: B cannot unlink A''s chat');
+select pg_temp.check(not public.telegram_update_link((select id from alink56), 'en', false, true, false, 8::smallint),
+  'telegram 0022: B cannot change A''s chat');
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+insert into links56 select id from public.telegram_my_links();
+select pg_temp.check((select language = 'ru' and weekly and not daily and reminders and send_hour = 19
+    from public.telegram_my_links()), 'telegram 0022: a new chat gets the weekly report at 19:00');
+select pg_temp.check(public.telegram_update_link((select id from links56), 'uz', true, true, true, 20::smallint),
+  'telegram 0022: A changes the chat''s settings');
+select pg_temp.expect_error($$select public.telegram_update_link((select id from links56), 'uz', true, true, true, 3::smallint)$$, 'bad_settings');
+commit;
+select pg_temp.check((select language = 'uz' and daily and send_hour = 20 from public.telegram_links), 'telegram 0022: the settings are kept');
+-- ten codes an hour
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select public.telegram_link_code('uz') from generate_series(1, 7);
+select pg_temp.expect_error($$select public.telegram_link_code('uz')$$, 'too_many_codes');
+commit;
+-- a chat linked again moves to the new family with fresh settings; five chats per family
+insert into public.telegram_link_codes (code_hash, parent_id, language, expires_at) values
+  (public.telegram_code_hash('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'), '00000000-0000-0000-0000-00000000000b', 'en', now() + interval '10 minutes');
+select pg_temp.check(public.telegram_claim('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 1001) ->> 'status' = 'linked',
+  'telegram 0022: B links a chat that A had linked');
+select pg_temp.check((select parent_id = '00000000-0000-0000-0000-00000000000b' and language = 'en' and not daily and send_hour = 19
+           from public.telegram_links where chat_id = 1001),
+  'telegram 0022: a chat belongs to one family at a time');
+insert into public.telegram_links (parent_id, chat_id) select '00000000-0000-0000-0000-00000000000a', 2000 + n from generate_series(1, 5) n;
+insert into public.telegram_link_codes (code_hash, parent_id, expires_at) values
+  (public.telegram_code_hash('cccccccccccccccccccccccccccccccc'), '00000000-0000-0000-0000-00000000000a', now() + interval '10 minutes');
+select pg_temp.check(public.telegram_claim('cccccccccccccccccccccccccccccccc', 3001) ->> 'status' = 'too_many',
+  'telegram 0022: a sixth chat is refused');
+select pg_temp.check(not exists (select 1 from public.telegram_links where chat_id = 3001),
+  'telegram 0022: a family links at most five chats');
+delete from public.telegram_links where chat_id between 2001 and 2005;
+select pg_temp.check(public.telegram_claim('cccccccccccccccccccccccccccccccc', 3001) ->> 'status' = 'linked',
+  'telegram 0022: a refused code is not spent: it works once a chat is unlinked');
+delete from public.telegram_links where chat_id = 3001;
+-- what the bot says: a week of Ali's play
+insert into public.task_results (id,child_id,parent_id,type,language,letter_ids,mistakes,coins,stars,day,finished_at) values
+ ('tg56-1','cd','00000000-0000-0000-0000-00000000000a','find-letter','uz',array['a','b'],0,5,3,(now() at time zone 'Asia/Tashkent')::date,now()),
+ ('tg56-2','cd','00000000-0000-0000-0000-00000000000a','trace','uz',array['sh'],3,1,1,(now() at time zone 'Asia/Tashkent')::date - 2,now()),
+ ('tg56-3','cd','00000000-0000-0000-0000-00000000000a','find-letter','uz',array['z'],0,5,3,(now() at time zone 'Asia/Tashkent')::date - 10,now());
+update public.child_state set minutes_by_day = jsonb_build_object(
+  ((now() at time zone 'Asia/Tashkent')::date)::text, 12,
+  ((now() at time zone 'Asia/Tashkent')::date - 4)::text, 7,
+  ((now() at time zone 'Asia/Tashkent')::date - 20)::text, 30,
+  'nonsense', 'x',
+  '2026-02-30', 5) where child_id = 'cd';
+-- a surname typed into the name never goes out
+update public.children set name = '  Dilshod Karimov' where id = 'cd';
+insert into public.telegram_links (parent_id, chat_id) values ('00000000-0000-0000-0000-00000000000a', 4001);
+select pg_temp.check((select r -> 'children' @> jsonb_build_array(jsonb_build_object('name', 'Dilshod', 'age', 5, 'days_active', 3,
+         'minutes', 19, 'tasks', 2, 'letters', jsonb_build_array('a', 'b'), 'hard', jsonb_build_array('sh'),
+         'last_day', (now() at time zone 'Asia/Tashkent')::date))
+         and r ->> 'chat_id' = '4001' and r ->> 'days' = '7'
+       from (select public.telegram_report(id, 'weekly') r from public.telegram_links where chat_id = 4001) x),
+  'telegram 0022: the weekly report counts days, minutes, tasks and letters of this week only');
+select pg_temp.check((select c ->> 'tasks' = '1' and c ->> 'minutes' = '12'
+    from public.telegram_links l, jsonb_array_elements(public.telegram_report(l.id, 'daily') -> 'children') c
+    where l.chat_id = 4001 and c ->> 'name' = 'Dilshod'), 'telegram 0022: the daily report counts today only');
+select pg_temp.check(public.telegram_report(-1, 'weekly') is null, 'telegram 0022: a chat no longer linked gets nothing');
+select pg_temp.check(not exists (select 1 from public.telegram_links l,
+      jsonb_array_elements(public.telegram_report(l.id, 'weekly') -> 'children') c
+    where c ->> 'name' like '%Karimov%')
+    and (select public.telegram_children('00000000-0000-0000-0000-00000000000a')::text not like '%Karimov%'),
+  'telegram 0022: only the first name goes out, never a surname');
+select pg_temp.check(not exists (select 1 from public.telegram_links l,
+      jsonb_array_elements(public.telegram_report(l.id, 'weekly') -> 'children') c, jsonb_object_keys(c) k
+    where k not in ('name', 'age', 'days_active', 'minutes', 'tasks', 'letters', 'hard', 'last_day')),
+  'telegram 0022: no photo, birth date or answers in a message');
+select pg_temp.check((select public.telegram_chat(4001) ->> 'language') = 'uz'
+    and public.telegram_chat(4001) -> 'pro' = 'null'::jsonb and public.telegram_chat(999) is null,
+  'telegram 0022: the bot reads a linked chat and its PRO');
+-- the hourly schedule: Sunday at the chat's hour, once
+update public.telegram_links set send_hour = 19, daily = false, reminders = false where chat_id = 4001;
+select pg_temp.check(public.enqueue_telegram_messages('2026-11-08 19:05:00+05') >= 1,
+  'telegram 0022: Sunday at the chosen hour queues messages');
+select public.enqueue_telegram_messages('2026-11-08 19:35:00+05');
+select pg_temp.check((select count(*) from public.jobs where kind = 'telegram_send'
+    and payload = jsonb_build_object('link_id', (select id from public.telegram_links where chat_id = 4001), 'kind', 'weekly')) = 1,
+  'telegram 0022: the weekly report is queued once on Sunday at the chosen hour');
+select pg_temp.check((select count(*) from public.jobs where kind = 'telegram_send' and dedupe_key like 'tg:weekly:%:2026-11-08') = 2,
+  'telegram 0022: both chats at 19:00 get the weekly report');
+select public.enqueue_telegram_messages('2026-11-08 08:05:00+05');
+select pg_temp.check(not exists (select 1 from public.jobs where dedupe_key like 'tg:%' and run_at = '2026-11-08 08:05:00+05'),
+  'telegram 0022: a chat is not messaged at another hour');
+select pg_temp.check(public.enqueue_telegram_messages('2026-11-09 19:05:00+05') = 0,
+  'telegram 0022: nothing is queued on a Monday for this chat');
+select pg_temp.check(not exists (select 1 from public.jobs where kind = 'telegram_send' and dedupe_key like 'tg:weekly:%:2026-11-09'),
+  'telegram 0022: no weekly report on a Monday');
+-- a family that stopped playing gets one "come back" note a week
+update public.telegram_links set reminders = true where chat_id = 4001;
+select public.enqueue_telegram_messages(now() + interval '5 days' - make_interval(hours => extract(hour from (now() at time zone 'Asia/Tashkent'))::int - 19));
+select pg_temp.check((select count(*) from public.jobs where dedupe_key like 'tg:reminder:%') = 1
+    and (select last_reminder_at is not null from public.telegram_links where chat_id = 4001),
+  'telegram 0022: three quiet days queue a reminder (a bad saved day "2026-02-30" is skipped, not fatal)');
+select public.enqueue_telegram_messages(now() + interval '6 days' - make_interval(hours => extract(hour from (now() at time zone 'Asia/Tashkent'))::int - 19));
+select pg_temp.check((select count(*) from public.jobs where dedupe_key like 'tg:reminder:%') = 1,
+  'telegram 0022: not again the next day');
+-- /stop and language
+select pg_temp.check(public.telegram_set_language(4001, 'en') and not public.telegram_set_language(999, 'en'),
+  'telegram 0022: the bot changes a linked chat''s language');
+select pg_temp.check(public.telegram_unlink_chat(4001), 'telegram 0022: /stop unlinks the chat');
+select pg_temp.check(not exists (select 1 from public.telegram_links where chat_id = 4001), 'telegram 0022: the chat is gone');
+-- deleting the account removes the links and the codes
+select pg_temp.check((select count(*) from pg_constraint c
+    where c.conrelid in ('public.telegram_links'::regclass, 'public.telegram_link_codes'::regclass)
+      and c.contype = 'f' and c.confdeltype = 'c') = 2, 'telegram 0022: links and codes go with the account');
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

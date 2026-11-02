@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_VOICE_PRIVATE?: string
   /** 'true' only after owner blocker B5 is resolved and a provider is set on the server. */
   readonly VITE_AI_TUTOR?: string
+  /** The parents' Telegram bot's username without @ (Phase 56), e.g. KiddoBot. Empty: no Telegram in the app. */
+  readonly VITE_TELEGRAM_BOT?: string
 }
 
 interface ImportMeta {

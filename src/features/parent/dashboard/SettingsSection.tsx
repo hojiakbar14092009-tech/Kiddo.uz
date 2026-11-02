@@ -12,6 +12,7 @@ import { AccountPanel } from './AccountPanel'
 import { AiTutorPanel } from './AiTutorPanel'
 import { ChoiceChips } from './ChoiceChips'
 import { Panel } from './Panel'
+import { TelegramPanel } from './TelegramPanel'
 
 /** Family-wide settings. Each child’s time limit lives in their profile. */
 export function SettingsSection() {
@@ -129,6 +130,8 @@ export function SettingsSection() {
       </Panel>
 
       <AiTutorPanel />
+
+      <TelegramPanel cloud={session?.mode === 'cloud'} />
 
       {session?.mode === 'cloud' ? (
         <AccountPanel email={session.email} userId={session.userId} />

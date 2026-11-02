@@ -26,3 +26,8 @@ verify_jwt = false
 # Phase 53: started by pg_cron with its own WORKER_SECRET (not a Supabase JWT).
 [functions.worker]
 verify_jwt = false
+
+# Phase 56: the parents' bot webhook. Telegram sends no Supabase JWT; the function
+# checks the secret given to setWebhook (TELEGRAM_WEBHOOK_SECRET) itself.
+[functions.telegram]
+verify_jwt = false
