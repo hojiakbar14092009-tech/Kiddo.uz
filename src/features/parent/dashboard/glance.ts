@@ -76,12 +76,14 @@ export function gettingStronger(runs: readonly PlayedRun[], now: Date, limit = 3
 export function recentlyMastered(
   skills: Readonly<Record<string, SkillMemory>>,
   now: Date,
+  /** How far back "recently" reaches (the weekly report uses 7). */
+  days: number = RECENT_DAYS,
 ): { mastered: string[]; practising: string[] } {
   // damaged or older saved entries are skipped, never break the dashboard
   const usable = Object.fromEntries(
     Object.entries(skills).filter(([, memory]) => isUsableMemory(memory)),
   )
-  const summary = memorySummary(usable, now.toISOString(), RECENT_DAYS)
+  const summary = memorySummary(usable, now.toISOString(), days)
   return {
     mastered: summary.improved.map((item) => item.skill),
     practising: summary.needsPractice.map((item) => item.skill),
