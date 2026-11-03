@@ -3,6 +3,7 @@ import { Img3D } from '@/components/ui/Img3D'
 import { ACTIVITY_LESSONS } from '@/domain/learning'
 import type { LessonCard, LessonCheck } from '@/features/learn/LessonDeck'
 import { tDynamic } from '@/lib/tDynamic'
+import { RULE_PICTURES } from './RulePictures'
 import type { SciGameId } from './games'
 
 /*
@@ -13,7 +14,11 @@ import type { SciGameId } from './games'
 
 interface Rules {
   lessonId: string
-  cards: readonly { id: string; art: { img3d: string } | { emoji: string } }[]
+  cards: readonly {
+    id: string
+    /** A 3D picture, an emoji, or a picture of the game itself (RULE_PICTURES). */
+    art: { img3d: string } | { emoji: string; picture?: string }
+  }[]
   check: LessonCheck
 }
 
@@ -32,7 +37,7 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
     cards: [
       { id: 'iron', art: { img3d: 'key' } },
       { id: 'notIron', art: { img3d: 'apple' } },
-      { id: 'tap', art: { emoji: '🧲' } },
+      { id: 'tap', art: { picture: 'magnet.tap', emoji: '🧲' } },
     ],
     check: { ask: 'iron', other: 'notIron' },
   },
@@ -41,7 +46,7 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
     cards: [
       { id: 'light', art: { img3d: 'duck' } },
       { id: 'heavy', art: { img3d: 'rock' } },
-      { id: 'guess', art: { emoji: '🤔' } },
+      { id: 'guess', art: { picture: 'float.guess', emoji: '🤔' } },
     ],
     check: { ask: 'light', other: 'heavy' },
   },
@@ -49,7 +54,7 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
     lessonId: ACTIVITY_LESSONS.sciScale,
     cards: [
       { id: 'apples', art: { img3d: 'apple' } },
-      { id: 'blocks', art: { emoji: '🔢' } },
+      { id: 'blocks', art: { picture: 'scale.blocks', emoji: '🔢' } },
       { id: 'even', art: { emoji: '⚖️' } },
     ],
     check: { ask: 'apples', other: 'blocks' },
@@ -57,9 +62,9 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
   robot: {
     lessonId: ACTIVITY_LESSONS.sciRobot,
     cards: [
-      { id: 'arrows', art: { emoji: '➡️' } },
+      { id: 'arrows', art: { picture: 'robot.arrows', emoji: '➡️' } },
       { id: 'battery', art: { emoji: '🔋' } },
-      { id: 'go', art: { emoji: '▶️' } },
+      { id: 'go', art: { picture: 'robot.go', emoji: '▶️' } },
     ],
     check: { ask: 'battery', other: 'arrows' },
   },
@@ -67,16 +72,16 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
     lessonId: ACTIVITY_LESSONS.sciTrain,
     cards: [
       { id: 'picture', art: { img3d: 'apple' } },
-      { id: 'letters', art: { emoji: '🔤' } },
-      { id: 'wagon', art: { emoji: '🚂' } },
+      { id: 'letters', art: { picture: 'train.letters', emoji: '🔤' } },
+      { id: 'wagon', art: { img3d: 'train' } },
     ],
     check: { ask: 'wagon', other: 'letters' },
   },
   shop: {
     lessonId: ACTIVITY_LESSONS.sciShop,
     cards: [
-      { id: 'price', art: { emoji: '🏷️' } },
-      { id: 'coins', art: { emoji: '🪙' } },
+      { id: 'price', art: { picture: 'shop.price', emoji: '🏷️' } },
+      { id: 'coins', art: { picture: 'shop.coins', emoji: '🪙' } },
       { id: 'change', art: { emoji: '🛍️' } },
     ],
     check: { ask: 'coins', other: 'price' },
@@ -85,8 +90,8 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
     lessonId: ACTIVITY_LESSONS.sciShapes,
     cards: [
       { id: 'outline', art: { img3d: 'house' } },
-      { id: 'tray', art: { emoji: '🔺' } },
-      { id: 'glow', art: { emoji: '✨' } },
+      { id: 'tray', art: { picture: 'shapes.tray', emoji: '🔺' } },
+      { id: 'glow', art: { picture: 'shapes.glow', emoji: '✨' } },
     ],
     check: { ask: 'tray', other: 'outline' },
   },
@@ -112,14 +117,16 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
 
 export function sciLessonCards(t: TFunction, game: SciGameId): LessonCard[] {
   return SCI_RULES[game].cards.map(({ id, art }) => {
-    const picture =
-      'img3d' in art ? (
-        <Img3D name={art.img3d} className="size-36 sm:size-44 short:size-24" eager />
-      ) : (
-        <span aria-hidden="true" className="text-8xl leading-none short:text-6xl">
-          {art.emoji}
-        </span>
-      )
+    const literal = 'picture' in art && art.picture ? RULE_PICTURES[art.picture] : undefined
+    const picture = literal ? (
+      literal()
+    ) : 'img3d' in art ? (
+      <Img3D name={art.img3d} className="size-36 sm:size-44 short:size-24" eager />
+    ) : (
+      <span aria-hidden="true" className="text-8xl leading-none short:text-6xl">
+        {art.emoji}
+      </span>
+    )
     return {
       id,
       art: picture,

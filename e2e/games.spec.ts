@@ -194,8 +194,10 @@ test('the shape builder: each glowing outline takes its shape', async ({ page })
       await page.getByTestId(`shape-${shape}`).click()
       await expect(page.getByTestId('shape-picture')).toHaveAttribute('data-filled', `${index + 1}`)
     }
+    // the plan grows into the real picture
+    await expect(page.getByTestId('shape-scene')).toBeVisible()
   }
-  await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 20_000 })
 })
 
 for (const { game, bins, wrong, hint } of [
