@@ -1,14 +1,11 @@
 import clsx from 'clsx'
-import { motion } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import { Screen } from '@/components/layout/Screen'
-import { TitleTopBar } from '@/components/layout/TitleTopBar'
+import { Link, useNavigate } from 'react-router-dom'
+import { ChevronLeftIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { LinkButton } from '@/components/ui/LinkButton'
-import { ProBadge } from '@/components/ui/ProLock'
-import { useFocusTrap } from '@/components/ui/useFocusTrap'
 import { useCanUse } from '@/domain/entitlements'
 import { tDynamic } from '@/lib/tDynamic'
 import { useSpeaker } from '@/services/audio/useSpeaker'
@@ -25,14 +22,21 @@ import {
   type Short,
   type ShortId,
 } from './catalog'
+import { learnedSwipe, markSwipeLearned } from './swipe'
 
 const NO_SHORTS: ShortId[] = []
+/** How long a finished cartoon waits before the hand shows how to swipe on. */
+const HINT_AFTER_END_MS = 2500
+/** A child who has never swiped is shown how this long into the first cartoon. */
+const FIRST_HINT_MS = 7000
 
 /**
- * The cartoons (Phase 60): short vertical films about what Kiddo teaches. One is
- * opened at a time and nothing plays on by itself; after a few the robot suggests
- * playing instead. Free opens two different cartoons (and may watch those again);
- * the rest wait for PRO, explained calmly for a grown-up, never sold to the child.
+ * The cartoons (Phases 60 and 69): a full-screen feed like the ones children know.
+ * The first cartoon plays as soon as the page opens; swiping up brings the next,
+ * and a hand shows how until the child has done it once. Only learning cartoons;
+ * after a few in one sitting the feed ends with an invitation to play. Free opens
+ * two different cartoons (and may rewatch them); the rest show a calm note for a
+ * grown-up, never a purchase for the child.
  */
 export function ShortsPage() {
   const { t } = useTranslation()
@@ -41,305 +45,337 @@ export function ShortsPage() {
   const opened = useShortsStore((state) => state.opened[childKey] ?? NO_SHORTS)
   const open = useShortsStore((state) => state.open)
   const { sayText } = useSpeaker()
-  const [playing, setPlaying] = useState<Short | null>(null)
-  const [sitting, setSitting] = useState(0)
-  const enough = sitting >= PER_SITTING
+  const reduceMotion = useReducedMotion() ?? false
+  const feed = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
+  const [watched, setWatched] = useState<ShortId[]>([])
+  const [hint, setHint] = useState(false)
+  const [swiped, setSwiped] = useState(() => learnedSwipe())
   const left = freeLeft(opened)
+  const enough = watched.length >= PER_SITTING
 
+  // the card in view is the active one (it plays; the others pause)
   useEffect(() => {
-    if (enough) void sayText(t('shorts.say.enough'))
-  }, [enough, sayText, t])
+    const root = feed.current
+    if (!root) return undefined
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting || entry.intersectionRatio < 0.6) continue
+          const index = Number((entry.target as HTMLElement).dataset.index)
+          setActive(index)
+          setHint(false)
+          if (index > 0) {
+            setSwiped(true)
+            markSwipeLearned()
+          }
+        }
+      },
+      { root, threshold: [0.6] },
+    )
+    root.querySelectorAll('[data-index]').forEach((card) => observer.observe(card))
+    return () => observer.disconnect()
+  }, [])
 
-  const proNote = useRef<HTMLElement>(null)
+  // a child who has not swiped yet is shown how, a few seconds into the first cartoon
+  useEffect(() => {
+    if (swiped) return undefined
+    const timer = setTimeout(() => setHint(true), FIRST_HINT_MS)
+    return () => clearTimeout(timer)
+  }, [swiped])
+  useEffect(() => {
+    if (hint && !swiped) void sayText(t('shorts.say.swipe'))
+  }, [hint, sayText, swiped, t])
 
-  const watch = (short: Short) => {
-    if (enough) return
-    if (!mayWatch(short.id, opened, pro)) {
-      // a locked cartoon points to the calm note for a grown-up, never to a purchase
-      proNote.current?.scrollIntoView({ block: 'center' })
-      proNote.current?.focus()
-      return
-    }
-    setPlaying(short)
-  }
+  const started = useCallback(
+    (short: Short) => {
+      open(childKey, short.id)
+      setWatched((list) => (list.includes(short.id) ? list : [...list, short.id]))
+    },
+    [childKey, open],
+  )
 
-  /** A cartoon counts (for Free's two, and the sitting) once it really starts playing. */
-  const started = (short: Short) => {
-    open(childKey, short.id)
-    setSitting((count) => count + 1)
-  }
+  const ended = useCallback(() => {
+    if (!swiped) setTimeout(() => setHint(true), HINT_AFTER_END_MS)
+  }, [swiped])
+
+  const next = useCallback(() => {
+    const root = feed.current
+    if (!root) return
+    root.scrollTo({
+      top: (active + 1) * root.clientHeight,
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    })
+  }, [active, reduceMotion])
 
   return (
-    <Screen
-      header={<TitleTopBar title={t('shorts.title')} back="/explore" />}
-      className="items-center gap-4 px-4 py-5"
-    >
-      {!pro && (
-        <p
-          className="rounded-full bg-coin-soft px-4 py-1.5 font-display text-lg font-bold"
-          data-testid="shorts-free-left"
-        >
-          {left > 0 ? t('shorts.freeLeft', { n: left }) : t('shorts.freeOver')}
-        </p>
-      )}
-
-      {enough && (
-        <section
-          className="flex w-full max-w-xl flex-col items-center gap-3 rounded-[28px] bg-primary-soft p-5 text-center"
-          data-testid="shorts-enough"
-        >
-          <span aria-hidden="true" className="text-5xl">
-            🎮
-          </span>
-          <p className="font-display text-xl font-bold">{t('shorts.enough')}</p>
-          <LinkButton to="/explore" size="md">
-            {t('sciGames.play')}
-          </LinkButton>
-        </section>
-      )}
-
-      <ul className="grid w-full max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-        {SHORTS.map((short) => {
+    <div className="fixed inset-0 z-10 bg-night" data-testid="shorts-feed">
+      <div
+        ref={feed}
+        className="h-dvh snap-y snap-mandatory overflow-y-scroll overscroll-contain [scrollbar-width:none]"
+      >
+        {SHORTS.map((short, index) => {
           const locked = !mayWatch(short.id, opened, pro)
-          const title = tDynamic(t, `shorts.items.${short.id}.title`)
+          const capped = enough && !watched.includes(short.id)
           return (
-            <li key={short.id}>
-              <button
-                type="button"
-                onClick={() => watch(short)}
-                disabled={enough}
-                aria-label={locked ? `${title} (PRO)` : title}
-                data-locked={locked ? 'true' : 'false'}
-                data-testid={`short-${short.id}`}
-                className={clsx(
-                  'relative flex w-full flex-col overflow-hidden rounded-[24px] bg-surface text-left shadow-[0_6px_0_var(--color-line)] transition-transform active:translate-y-1 active:shadow-none disabled:opacity-60',
-                )}
-              >
-                <Poster short={short} dim={locked} />
-                <span className="flex flex-col gap-0.5 p-3">
-                  <span className="font-display text-lg leading-tight font-bold text-balance">
-                    {title}
-                  </span>
-                  <span className="text-sm text-ink-soft">
-                    {tDynamic(t, `shorts.items.${short.id}.text`)}
-                  </span>
-                </span>
-                {locked && (
-                  <span className="absolute top-4 right-4">
-                    <ProBadge size="sm" />
-                  </span>
-                )}
-              </button>
-            </li>
+            <section
+              key={short.id}
+              data-index={index}
+              data-testid={`short-${short.id}`}
+              data-locked={locked ? 'true' : 'false'}
+              className="relative flex h-dvh snap-start snap-always items-center justify-center"
+            >
+              {locked || capped ? (
+                <LockedCard short={short} capped={capped} />
+              ) : (
+                <Player
+                  short={short}
+                  active={active === index}
+                  onStarted={started}
+                  onEnded={ended}
+                  onNext={index + 1 < SHORTS.length ? next : undefined}
+                />
+              )}
+            </section>
           )
         })}
-      </ul>
+      </div>
 
-      {!pro && left === 0 && (
-        <section
-          ref={proNote}
-          tabIndex={-1}
-          className="flex w-full max-w-xl flex-col items-center gap-2 rounded-[28px] bg-cream p-5 text-center outline-none focus-visible:ring-4 focus-visible:ring-focus"
-          data-testid="shorts-pro"
+      {/* the way out, and Free's count */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <Link
+          to="/explore"
+          aria-label={t('common.back')}
+          data-sound="back"
+          className="pointer-events-auto flex size-12 items-center justify-center rounded-full bg-white/90 text-ink shadow-[0_3px_0_rgb(0_0_0/0.25)]"
         >
-          <p className="font-display text-xl font-bold">{t('shorts.proTitle')}</p>
-          <p className="text-ink-soft">{t('shorts.proText')}</p>
-          <LinkButton to="/parent" variant="soft" size="md">
-            {t('shorts.toPro')}
-          </LinkButton>
-        </section>
-      )}
+          <ChevronLeftIcon size={28} />
+        </Link>
+        {!pro && (
+          <p
+            className="rounded-full bg-coin px-3 py-1.5 font-display text-base font-bold text-ink shadow-[0_3px_0_var(--color-coin-shadow)]"
+            data-testid="shorts-free-left"
+          >
+            {left > 0 ? t('shorts.freeLeft', { n: left }) : t('shorts.freeOver')}
+          </p>
+        )}
+      </div>
 
-      {playing && (
-        <Player
-          short={playing}
-          onStarted={() => started(playing)}
-          onClose={() => setPlaying(null)}
-        />
-      )}
-    </Screen>
+      <AnimatePresence>{hint && !swiped && <SwipeHint onNext={next} />}</AnimatePresence>
+    </div>
   )
 }
 
-/** The cartoon's still picture, or its big emoji while there is none. */
-function Poster({ short, dim }: { short: Short; dim: boolean }) {
-  const [failed, setFailed] = useState(false)
+/** A hand sliding up the screen: "swipe up for the next one" (a tap does it too). */
+function SwipeHint({ onNext }: { onNext: () => void }) {
+  const { t } = useTranslation()
+  const reduceMotion = useReducedMotion() ?? false
   return (
-    <span
-      aria-hidden="true"
-      className={clsx(
-        'relative flex aspect-[4/5] w-full items-center justify-center',
-        short.tone,
-        dim && 'opacity-60 grayscale-[40%]',
-      )}
+    <motion.button
+      type="button"
+      onClick={onNext}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-x-0 bottom-[max(7rem,env(safe-area-inset-bottom))] z-30 mx-auto flex w-fit flex-col items-center gap-2 rounded-[2rem] bg-night/75 px-6 py-4 text-white backdrop-blur"
+      data-testid="shorts-swipe-hint"
     >
-      {failed ? (
-        <span className="text-6xl leading-none sm:text-7xl">{short.emoji}</span>
-      ) : (
-        <img
-          src={posterUrl(short.id)}
-          alt=""
-          loading="lazy"
-          onError={() => setFailed(true)}
-          className="size-full object-cover"
-        />
-      )}
-      <span className="absolute bottom-2 left-2 flex size-11 items-center justify-center rounded-full bg-surface/90 text-xl shadow-[0_2px_0_var(--color-line)]">
-        ▶
-      </span>
-    </span>
+      <motion.span
+        aria-hidden="true"
+        className="text-6xl"
+        animate={reduceMotion ? {} : { y: [30, -40, 30], opacity: [0, 1, 0] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        👆
+      </motion.span>
+      <span className="font-display text-xl font-bold">{t('shorts.swipe')}</span>
+    </motion.button>
   )
 }
 
-/** One cartoon, full screen; at the end: play the game it was about, or close. */
+/** One cartoon, full screen: plays while in view; tap to pause; at the end, play its game. */
 function Player({
   short,
+  active,
   onStarted,
-  onClose,
+  onEnded,
+  onNext,
 }: {
   short: Short
-  onStarted: () => void
-  onClose: () => void
+  active: boolean
+  onStarted: (short: Short) => void
+  onEnded: () => void
+  onNext?: () => void
 }) {
   const { t } = useTranslation()
   const language = useLanguage()
   const navigate = useNavigate()
   const video = useRef<HTMLVideoElement>(null)
-  const close = useRef<HTMLButtonElement>(null)
-  const panel = useRef<HTMLDivElement>(null)
   const counted = useRef(false)
-  useFocusTrap(panel, close)
   const [paused, setPaused] = useState(false)
+  const [muted, setMuted] = useState(false)
   const [ended, setEnded] = useState(false)
   const [failed, setFailed] = useState(false)
   const [progress, setProgress] = useState(0)
   const title = tDynamic(t, `shorts.items.${short.id}.title`)
 
+  // in view: play (with sound when the browser lets it; else muted, with a sound button)
   useEffect(() => {
-    close.current?.focus()
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+    const element = video.current
+    if (!element) return
+    if (!active) {
+      element.pause()
+      return
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+    element.muted = false
+    element.play().catch(() => {
+      element.muted = true
+      setMuted(true)
+      void element.play().catch(() => setPaused(true))
+    })
+  }, [active])
 
   const toggle = () => {
     const element = video.current
     if (!element) return
+    if (muted) {
+      element.muted = false
+      setMuted(false)
+      return
+    }
     if (element.paused) void element.play().catch(() => setPaused(true))
     else element.pause()
   }
 
   const again = () => {
-    setEnded(false)
     const element = video.current
     if (!element) return
+    setEnded(false)
     element.currentTime = 0
     void element.play().catch(() => setPaused(true))
   }
 
   return (
-    <motion.div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-night/95 p-[max(0.5rem,env(safe-area-inset-top))_0.5rem_max(0.5rem,env(safe-area-inset-bottom))]"
+    <div
+      className="relative h-full w-full max-w-[min(100%,calc(100dvh*9/16))] overflow-hidden bg-night"
       data-testid="short-player"
-      ref={panel}
+      data-active={active ? 'true' : 'false'}
     >
-      <div className="relative flex h-full max-h-[92dvh] w-full max-w-[min(100%,calc(92dvh*9/16))] flex-col overflow-hidden rounded-[24px] bg-night">
-        {failed ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center text-white">
-            <span aria-hidden="true" className="text-7xl">
-              {short.emoji}
-            </span>
-            <p className="font-display text-xl font-bold" role="alert">
-              {t('shorts.loadError')}
-            </p>
-          </div>
-        ) : (
-          <video
-            ref={video}
-            src={videoUrl(language, short.id)}
-            poster={posterUrl(short.id)}
-            autoPlay
-            playsInline
-            preload="auto"
-            onClick={toggle}
-            onPlay={() => {
-              setPaused(false)
-              if (!counted.current) {
-                counted.current = true
-                onStarted()
-              }
-            }}
-            onPause={() => setPaused(true)}
-            onEnded={() => setEnded(true)}
-            onError={() => setFailed(true)}
-            onTimeUpdate={(event) => {
-              const element = event.currentTarget
-              if (element.duration > 0) setProgress(element.currentTime / element.duration)
-            }}
-            className="size-full flex-1 object-contain"
-          />
-        )}
-
-        {/* progress, then the controls */}
-        <div className="absolute inset-x-3 top-3 h-1.5 overflow-hidden rounded-full bg-white/25">
-          <div className="h-full rounded-full bg-coin" style={{ width: `${progress * 100}%` }} />
+      {failed ? (
+        <div className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center text-white">
+          <img src={posterUrl(short.id)} alt="" className="w-48 rounded-3xl" />
+          <p className="font-display text-xl font-bold" role="alert">
+            {t('shorts.loadError')}
+          </p>
         </div>
-        <button
-          ref={close}
-          type="button"
-          onClick={onClose}
-          aria-label={t('shorts.close')}
-          className="absolute top-6 right-3 flex size-12 items-center justify-center rounded-full bg-white/90 text-2xl text-ink shadow-[0_3px_0_rgb(0_0_0/0.25)]"
-          data-testid="short-close"
-        >
-          ✕
-        </button>
-        {!failed && !ended && (
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label={paused ? t('shorts.watch') : t('shorts.pause')}
-            className={clsx(
-              'absolute bottom-4 left-4 flex size-14 items-center justify-center rounded-full bg-white/90 text-2xl text-ink shadow-[0_3px_0_rgb(0_0_0/0.25)] transition-opacity',
-              paused ? 'opacity-100' : 'opacity-70',
-            )}
-          >
-            {paused ? '▶' : '⏸'}
-          </button>
-        )}
-        {ended && (
-          <div
-            className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 bg-gradient-to-t from-night via-night/80 to-transparent px-4 pt-16 pb-6"
-            data-testid="short-ended"
-          >
-            {short.play && (
-              <Button
-                onClick={() => {
-                  onClose()
-                  void navigate(short.play!)
-                }}
-              >
-                {t('shorts.playGame')}
-              </Button>
-            )}
-            <div className="flex gap-3">
-              <Button variant="soft" size="md" onClick={again} aria-label={t('shorts.again')}>
-                <span aria-hidden="true">↻</span>
-              </Button>
-              <Button variant="soft" size="md" onClick={onClose}>
-                {t('shorts.close')}
-              </Button>
-            </div>
-          </div>
-        )}
+      ) : (
+        <video
+          ref={video}
+          src={videoUrl(language, short.id)}
+          poster={posterUrl(short.id)}
+          playsInline
+          preload={active ? 'auto' : 'metadata'}
+          onClick={toggle}
+          onPlay={() => {
+            setPaused(false)
+            setEnded(false)
+            if (!counted.current) {
+              counted.current = true
+              onStarted(short)
+            }
+          }}
+          onPause={() => setPaused(true)}
+          onEnded={() => {
+            setEnded(true)
+            onEnded()
+          }}
+          onError={() => setFailed(true)}
+          onTimeUpdate={(event) => {
+            const element = event.currentTarget
+            if (element.duration > 0) setProgress(element.currentTime / element.duration)
+          }}
+          className="size-full object-cover"
+        />
+      )}
+
+      <div className="pointer-events-none absolute inset-x-3 top-[max(4.5rem,calc(env(safe-area-inset-top)+4rem))] h-1.5 overflow-hidden rounded-full bg-white/25">
+        <div className="h-full rounded-full bg-coin" style={{ width: `${progress * 100}%` }} />
       </div>
-    </motion.div>
+
+      {/* the title, over a soft shade */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/85 via-night/40 to-transparent px-5 pt-24 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-white">
+        <p className="font-display text-2xl leading-tight font-extrabold">{title}</p>
+        <p className="mt-1 text-base opacity-90">{tDynamic(t, `shorts.items.${short.id}.text`)}</p>
+      </div>
+
+      {!failed && (paused || muted) && !ended && (
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={muted ? t('shorts.sound') : t('shorts.watch')}
+          className="absolute top-1/2 left-1/2 flex size-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-4xl text-ink shadow-[0_4px_0_rgb(0_0_0/0.25)]"
+          data-testid="short-toggle"
+        >
+          {muted ? '🔊' : '▶'}
+        </button>
+      )}
+
+      {ended && (
+        <div
+          className="absolute inset-x-0 bottom-32 flex flex-col items-center gap-3 px-4"
+          data-testid="short-ended"
+        >
+          {short.play && (
+            <Button onClick={() => void navigate(short.play!)}>{t('shorts.playGame')}</Button>
+          )}
+          <div className="flex gap-3">
+            <Button variant="soft" size="md" onClick={again} aria-label={t('shorts.again')}>
+              <span aria-hidden="true">↻</span>
+            </Button>
+            {onNext && (
+              <Button variant="soft" size="md" onClick={onNext}>
+                {t('shorts.next')}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** A cartoon Free has no more room for, or the end of a sitting. */
+function LockedCard({ short, capped }: { short: Short; capped: boolean }) {
+  const { t } = useTranslation()
+  return (
+    <div className="relative flex h-full w-full max-w-[min(100%,calc(100dvh*9/16))] flex-col items-center justify-center overflow-hidden">
+      <img
+        src={posterUrl(short.id)}
+        alt=""
+        className="absolute inset-0 size-full object-cover opacity-40 blur-sm"
+      />
+      <div
+        className={clsx(
+          'relative mx-5 flex flex-col items-center gap-3 rounded-[2rem] p-6 text-center',
+          capped ? 'bg-primary-soft' : 'bg-cream',
+        )}
+        data-testid={capped ? 'shorts-enough' : 'shorts-pro'}
+      >
+        <span aria-hidden="true" className="text-5xl">
+          {capped ? '🎮' : '👑'}
+        </span>
+        <p className="font-display text-xl font-bold">
+          {capped ? t('shorts.enough') : t('shorts.proTitle')}
+        </p>
+        {!capped && <p className="text-ink-soft">{t('shorts.proText')}</p>}
+        <LinkButton
+          to={capped ? '/games' : '/parent'}
+          variant={capped ? 'primary' : 'soft'}
+          size="md"
+        >
+          {capped ? t('sciGames.play') : t('shorts.toPro')}
+        </LinkButton>
+      </div>
+    </div>
   )
 }

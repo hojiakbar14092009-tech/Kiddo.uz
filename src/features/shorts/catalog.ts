@@ -8,7 +8,21 @@ import type { SciGameId } from '@/features/sciGames/games'
  * /video/shorts. Nothing else can appear here: no feed, no links out, no ads.
  */
 
-export type ShortId = 'water' | 'magnet' | 'float' | 'dayNight' | 'planets' | 'seed'
+export type ShortId =
+  | 'water'
+  | 'magnet'
+  | 'float'
+  | 'dayNight'
+  | 'planets'
+  | 'seed'
+  /** Phase 68: one about each of the newer games. */
+  | 'scale'
+  | 'robot'
+  | 'train'
+  | 'shop'
+  | 'shapes'
+  | 'habitats'
+  | 'plate'
 
 export interface Short {
   id: ShortId
@@ -26,6 +40,13 @@ export const SHORTS: readonly Short[] = [
   { id: 'dayNight', emoji: '🌍', tone: 'bg-lilac-soft', play: null },
   { id: 'planets', emoji: '🪐', tone: 'bg-coin-soft', play: '/learn/space' },
   { id: 'seed', emoji: '🌱', tone: 'bg-primary-soft', play: '/science-lab' },
+  { id: 'scale', emoji: '⚖️', tone: 'bg-coin-soft', play: '/sci/scale' },
+  { id: 'robot', emoji: '🤖', tone: 'bg-lilac-soft', play: '/sci/robot' },
+  { id: 'train', emoji: '🚂', tone: 'bg-sky-soft', play: '/sci/train' },
+  { id: 'shop', emoji: '🛍️', tone: 'bg-primary-soft', play: '/sci/shop' },
+  { id: 'shapes', emoji: '🔺', tone: 'bg-oops-soft', play: '/sci/shapes' },
+  { id: 'habitats', emoji: '🦊', tone: 'bg-primary-soft', play: '/sci/habitats' },
+  { id: 'plate', emoji: '🥕', tone: 'bg-coin-soft', play: '/sci/plate' },
 ]
 
 /** Different cartoons a Free child may open (and watch again) before PRO. */

@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")"
 APP=../../public/video/shorts
 mkdir -p out "$APP/posters" "$APP/uz" "$APP/ru" "$APP/en"
-for short in water magnet float dayNight planets seed; do
+for short in ${SHORTS:-water magnet float dayNight planets seed scale robot train shop shapes habitats plate}; do
   for lang in uz ru en; do
     npx remotion render "$short-$lang" "out/$short-$lang.mp4" --crf=18 --log=error
     # the web copy: 720 × 1280 H.264, AAC, starts playing before it is fully loaded
@@ -14,8 +14,8 @@ for short in water magnet float dayNight planets seed; do
       "$APP/$lang/$short.mp4"
     echo "$short-$lang done"
   done
-  # the poster: the title card of the Uzbek cartoon
-  npx remotion still "$short-uz" "out/$short-poster.png" --frame=30 --log=error
+  # the poster: the opening scene with the robot, no words (one for every language)
+  npx remotion still "poster-$short" "out/$short-poster.png" --frame=59 --log=error
   ffmpeg -loglevel error -y -i "out/$short-poster.png" -vf scale=480:-2 -c:v libwebp -quality 78 \
     "$APP/posters/$short.webp"
 done

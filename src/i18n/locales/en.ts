@@ -2709,6 +2709,9 @@ export const en: Translation = {
     },
   },
   shorts: {
+    swipe: 'Swipe up for the next one',
+    sound: 'Turn the sound on',
+    next: 'Next',
     again: 'Watch again',
     pause: 'Pause',
     title: 'Cartoons',
@@ -2724,6 +2727,13 @@ export const en: Translation = {
     enough: 'That’s enough cartoons for now! Let’s play.',
     loadError: 'The cartoon didn’t open. Try again.',
     items: {
+      scale: { title: 'The scale’s secret', text: 'When is a scale level?' },
+      robot: { title: 'Show the robot the way', text: 'A first program made of arrows.' },
+      train: { title: 'The word train', text: 'Building words from letters.' },
+      shop: { title: 'Coins at the shop', text: 'Paying and counting change.' },
+      shapes: { title: 'A world of shapes', text: 'A house and a rocket from shapes.' },
+      habitats: { title: 'Who lives where?', text: 'Forest, sea, desert and ice.' },
+      plate: { title: 'A healthy plate', text: 'Food for every day and for sometimes.' },
       water: { title: 'Where does rain come from?', text: 'A droplet’s trip to the sky and back.' },
       magnet: { title: 'Magnet secrets', text: 'What does a magnet pull, and what not?' },
       float: { title: 'Why do boats float?', text: 'Things that float and things that sink.' },
@@ -2732,6 +2742,7 @@ export const en: Translation = {
       seed: { title: 'From seed to flower', text: 'How does a plant grow?' },
     },
     say: {
+      swipe: 'Swipe up with your finger!',
       enough: 'Enough cartoons for now. Let’s play!',
     },
   },

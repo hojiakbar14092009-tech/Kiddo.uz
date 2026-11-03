@@ -2729,6 +2729,9 @@ export const uz = {
     },
   },
   shorts: {
+    swipe: 'Keyingisi uchun tepaga sur',
+    sound: 'Ovozni yoqish',
+    next: 'Keyingisi',
     again: 'Yana ko‘rish',
     pause: 'Pauza',
     title: 'Multfilmlar',
@@ -2744,6 +2747,13 @@ export const uz = {
     enough: 'Hozircha multfilm yetarli! Endi o‘ynaymiz.',
     loadError: 'Multfilm ochilmadi. Yana bir bor urinib ko‘r.',
     items: {
+      scale: { title: 'Tarozi siri', text: 'Tarozi qachon tekis turadi?' },
+      robot: { title: 'Robotga yo‘l ko‘rsat', text: 'Strelkalar bilan birinchi dastur.' },
+      train: { title: 'So‘z poyezdi', text: 'Harflardan so‘z yig‘amiz.' },
+      shop: { title: 'Do‘konda tangalar', text: 'To‘lash va qaytimni sanash.' },
+      shapes: { title: 'Shakllar olami', text: 'Shakllardan uy va raketa.' },
+      habitats: { title: 'Kim qayerda yashaydi?', text: 'O‘rmon, dengiz, cho‘l va muzlik.' },
+      plate: { title: 'Sog‘lom likopcha', text: 'Har kuni va ba’zan yeyiladigan ovqat.' },
       water: {
         title: 'Yomg‘ir qayerdan keladi?',
         text: 'Tomchining osmonga va qaytib yerga sayohati.',
@@ -2755,6 +2765,7 @@ export const uz = {
       seed: { title: 'Urug‘dan gulgacha', text: 'O‘simlik qanday o‘sadi?' },
     },
     say: {
+      swipe: 'Barmog‘ing bilan tepaga sur!',
       enough: 'Multfilm yetarli. Endi o‘ynaymiz!',
     },
   },

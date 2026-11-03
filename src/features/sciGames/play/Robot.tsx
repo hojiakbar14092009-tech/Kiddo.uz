@@ -127,22 +127,31 @@ export function RobotProgrammer({ onDone }: { onDone: Finish }) {
         <div className="relative size-full">
           <div
             className="grid size-full gap-1.5"
-            style={{ gridTemplateColumns: `repeat(${level.size}, 1fr)` }}
+            // equal rows and columns whatever is in a cell (a rock's picture never makes its row
+            // taller, so the robot and the battery sit exactly on their cells)
+            style={{
+              gridTemplateColumns: `repeat(${level.size}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${level.size}, minmax(0, 1fr))`,
+            }}
           >
             {cells.map((cell) => (
               <div
                 key={`${cell.x}-${cell.y}`}
+                data-testid={`robot-cell-${cell.x}-${cell.y}`}
                 className={clsx(
-                  'flex items-center justify-center rounded-xl',
+                  'flex min-h-0 min-w-0 items-center justify-center overflow-hidden rounded-xl',
                   (cell.x + cell.y) % 2 === 0 ? 'bg-surface' : 'bg-surface/70',
                 )}
               >
-                {isRock(cell) && <Img3D name="rock" className="size-[78%]" eager />}
+                {isRock(cell) && <Img3D name="rock" className="size-[78%] object-contain" eager />}
               </div>
             ))}
           </div>
           {/* the battery glows until the robot reaches it */}
           <motion.span
+            data-testid="robot-battery"
+            data-x={level.battery.x}
+            data-y={level.battery.y}
             aria-hidden="true"
             className="pointer-events-none absolute flex items-center justify-center text-[length:min(9vw,2.5rem)]"
             style={{ ...at(level.battery), ...size }}

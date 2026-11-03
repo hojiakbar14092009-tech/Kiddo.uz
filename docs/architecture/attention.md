@@ -86,3 +86,16 @@ and in the attention helper's offer.
   two sorting games on one screen (`Sort.tsx`, `sortRules.ts`): who lives where
   (forest, sea, desert, ice) and the healthy plate (food for every day, and treats
   for sometimes; never "bad" food). Ten mini-games in all.
+
+## Cartoons as a feed, seven more cartoons (Phases 68–69)
+
+- Thirteen cartoons now, one about each new game too (`marketing/shorts/src/scenes2.tsx`).
+- `/shorts` is a full-screen vertical feed: the cartoon in view plays (with sound
+  when the browser allows, else muted with a sound button), the others pause.
+  Swiping up brings the next; until a child has swiped once on this device a hand
+  shows how (and moving on by tapping it also works, `swipe.ts`). Free's two and
+  the four-per-sitting cap stay; a locked card shows the calm note for a grown-up.
+- Posters are the opening scene with the robot and no words (`poster-<id>`
+  compositions), so one picture serves every language; the app writes the title.
+- Robot programmer: rows and columns of the board are equal whatever a cell holds,
+  so the robot and the battery sit exactly on their cells (checked on every level).

@@ -262,5 +262,271 @@
       "ru": "Проведи опыт в научной лаборатории!",
       "en": "Do an experiment in the Science Lab!"
     }
+  ],
+  "scale": [
+    {
+      "scene": "hook",
+      "uz": "Tarozi qanday ishlaydi? Keling, ko‘ramiz!",
+      "ru": "Как работают весы? Давай посмотрим!",
+      "en": "How does a scale work? Let’s see!"
+    },
+    {
+      "scene": "heavy",
+      "uz": "Og‘ir tomoni pastga tushadi.",
+      "ru": "Тяжёлая сторона опускается вниз.",
+      "en": "The heavy side goes down."
+    },
+    {
+      "scene": "add",
+      "uz": "Uchta olma bor. Ikki va bir qo‘shamiz.",
+      "ru": "Тут три яблока. Кладём два и один.",
+      "en": "There are three apples. We add two and one."
+    },
+    {
+      "scene": "even",
+      "uz": "Ikki tomon teng! Tarozi tekis turibdi.",
+      "ru": "Поровну! Весы стоят ровно.",
+      "en": "Both sides match! The scale is level."
+    },
+    {
+      "scene": "rule",
+      "uz": "Teng bo‘lsa, tarozi tekis bo‘ladi.",
+      "ru": "Когда поровну, весы ровные.",
+      "en": "When it’s equal, the scale is level."
+    },
+    {
+      "scene": "play",
+      "uz": "Sehrli tarozida o‘zing sinab ko‘r!",
+      "ru": "Попробуй сам на волшебных весах!",
+      "en": "Try it yourself on the magic scale!"
+    }
+  ],
+  "robot": [
+    {
+      "scene": "hook",
+      "uz": "Robot batareyani qanday topadi?",
+      "ru": "Как робот найдёт батарейку?",
+      "en": "How will the robot find its battery?"
+    },
+    {
+      "scene": "arrows",
+      "uz": "Strelkalar robotga yo‘l ko‘rsatadi.",
+      "ru": "Стрелки показывают роботу путь.",
+      "en": "Arrows show the robot the way."
+    },
+    {
+      "scene": "plan",
+      "uz": "Avval yo‘lni o‘ylab, strelkalarni teramiz.",
+      "ru": "Сначала думаем и ставим стрелки.",
+      "en": "First we plan, then we line up arrows."
+    },
+    {
+      "scene": "rock",
+      "uz": "To‘siq bo‘lsa, aylanib o‘tamiz.",
+      "ru": "Если камень, обходим его.",
+      "en": "If there’s a rock, we go around it."
+    },
+    {
+      "scene": "win",
+      "uz": "Robot batareyani topdi! Bu dasturlash.",
+      "ru": "Робот нашёл батарейку! Это программирование.",
+      "en": "The robot found its battery! That’s programming."
+    },
+    {
+      "scene": "play",
+      "uz": "Robot-dasturchi o‘yinini o‘yna!",
+      "ru": "Сыграй в игру Робот-программист!",
+      "en": "Play the robot programmer game!"
+    }
+  ],
+  "train": [
+    {
+      "scene": "hook",
+      "uz": "So‘z poyezdi keldi! Tu-tuu!",
+      "ru": "Приехал поезд слов! Ту-туу!",
+      "en": "The word train is here! Choo-choo!"
+    },
+    {
+      "scene": "picture",
+      "uz": "Rasmga qaraymiz. Bu olma.",
+      "ru": "Смотрим на картинку. Это кот.",
+      "en": "We look at the picture. It’s a cat."
+    },
+    {
+      "scene": "letters",
+      "uz": "Har vagonga bitta harf.",
+      "ru": "В каждый вагон по одной букве.",
+      "en": "One letter in each wagon."
+    },
+    {
+      "scene": "order",
+      "uz": "Harflar tartib bilan keladi.",
+      "ru": "Буквы идут по порядку.",
+      "en": "The letters go in order."
+    },
+    {
+      "scene": "go",
+      "uz": "Hamma vagon to‘ldi. Poyezd yurdi!",
+      "ru": "Все вагоны полны. Поезд поехал!",
+      "en": "Every wagon is full. Off it goes!"
+    },
+    {
+      "scene": "play",
+      "uz": "So‘z poyezdida o‘zing so‘z yig‘!",
+      "ru": "Собери слово сам в поезде слов!",
+      "en": "Build a word yourself on the word train!"
+    }
+  ],
+  "shop": [
+    {
+      "scene": "hook",
+      "uz": "Do‘konga boramiz! Tangalarni olamiz.",
+      "ru": "Идём в магазин! Берём монетки.",
+      "en": "Let’s go to the shop! Take the coins."
+    },
+    {
+      "scene": "coins",
+      "uz": "Tangalar bir, ikki va besh bo‘ladi.",
+      "ru": "Монетки бывают один, два и пять.",
+      "en": "Coins are one, two and five."
+    },
+    {
+      "scene": "price",
+      "uz": "Konfet uch tanga turadi.",
+      "ru": "Леденец стоит три монетки.",
+      "en": "The lollipop costs three coins."
+    },
+    {
+      "scene": "pay",
+      "uz": "Ikki va bir, jami uch. To‘ladik!",
+      "ru": "Два и один, всего три. Оплатили!",
+      "en": "Two and one make three. Paid!"
+    },
+    {
+      "scene": "change",
+      "uz": "Besh bersak, ikki tanga qaytim olamiz.",
+      "ru": "Дали пять — сдача две монетки.",
+      "en": "Give five, and get two coins back."
+    },
+    {
+      "scene": "play",
+      "uz": "Kichik do‘konda xarid qil!",
+      "ru": "Сделай покупку в маленьком магазине!",
+      "en": "Go shopping in the little shop!"
+    }
+  ],
+  "shapes": [
+    {
+      "scene": "hook",
+      "uz": "Atrofimizda shakllar ko‘p!",
+      "ru": "Вокруг нас много фигур!",
+      "en": "There are shapes all around us!"
+    },
+    {
+      "scene": "kinds",
+      "uz": "Doira, kvadrat, uchburchak, to‘rtburchak.",
+      "ru": "Круг, квадрат, треугольник, прямоугольник.",
+      "en": "Circle, square, triangle, rectangle."
+    },
+    {
+      "scene": "house",
+      "uz": "Kvadrat va uchburchakdan uy bo‘ladi.",
+      "ru": "Квадрат и треугольник — это дом.",
+      "en": "A square and a triangle make a house."
+    },
+    {
+      "scene": "car",
+      "uz": "Mashinaning g‘ildiraklari doira.",
+      "ru": "У машины круглые колёса.",
+      "en": "A car’s wheels are circles."
+    },
+    {
+      "scene": "rocket",
+      "uz": "Uchburchaklar raketani uchiradi!",
+      "ru": "Треугольники помогают ракете лететь!",
+      "en": "Triangles help the rocket fly!"
+    },
+    {
+      "scene": "play",
+      "uz": "Shakl quruvchida rasm yasa!",
+      "ru": "Собери картинку в строителе фигур!",
+      "en": "Build pictures in the shape builder!"
+    }
+  ],
+  "habitats": [
+    {
+      "scene": "hook",
+      "uz": "Har bir hayvonning o‘z uyi bor.",
+      "ru": "У каждого животного свой дом.",
+      "en": "Every animal has its own home."
+    },
+    {
+      "scene": "forest",
+      "uz": "Tulki va ayiq o‘rmonda yashaydi.",
+      "ru": "Лиса и медведь живут в лесу.",
+      "en": "A fox and a bear live in the forest."
+    },
+    {
+      "scene": "sea",
+      "uz": "Kit va delfin dengizda suzadi.",
+      "ru": "Кит и дельфин плавают в море.",
+      "en": "A whale and a dolphin swim in the sea."
+    },
+    {
+      "scene": "desert",
+      "uz": "Tuya issiq cho‘lda yashaydi.",
+      "ru": "Верблюд живёт в жаркой пустыне.",
+      "en": "A camel lives in the hot desert."
+    },
+    {
+      "scene": "ice",
+      "uz": "Pingvin sovuq muzlikda yashaydi.",
+      "ru": "Пингвин живёт среди льдов.",
+      "en": "A penguin lives on the cold ice."
+    },
+    {
+      "scene": "play",
+      "uz": "Hayvonlarni uyiga olib bor!",
+      "ru": "Отведи животных домой!",
+      "en": "Take the animals home!"
+    }
+  ],
+  "plate": [
+    {
+      "scene": "hook",
+      "uz": "Qaysi ovqat bizni kuchli qiladi?",
+      "ru": "Какая еда делает нас сильными?",
+      "en": "Which food makes us strong?"
+    },
+    {
+      "scene": "fruit",
+      "uz": "Meva va sabzavotni har kuni yeymiz.",
+      "ru": "Фрукты и овощи едим каждый день.",
+      "en": "We eat fruit and vegetables every day."
+    },
+    {
+      "scene": "milk",
+      "uz": "Sut suyaklarni mustahkam qiladi.",
+      "ru": "Молоко делает кости крепкими.",
+      "en": "Milk makes our bones strong."
+    },
+    {
+      "scene": "treats",
+      "uz": "Shirinliklar mazali, lekin ba’zan yeymiz.",
+      "ru": "Сладости вкусные, но их едим иногда.",
+      "en": "Sweets are tasty, but we eat them sometimes."
+    },
+    {
+      "scene": "plate",
+      "uz": "Sog‘lom likopcha rang-barang bo‘ladi!",
+      "ru": "Полезная тарелка — разноцветная!",
+      "en": "A healthy plate is full of colours!"
+    },
+    {
+      "scene": "play",
+      "uz": "Sog‘lom likopcha o‘yinini o‘yna!",
+      "ru": "Сыграй в игру Полезная тарелка!",
+      "en": "Play the healthy plate game!"
+    }
   ]
 }

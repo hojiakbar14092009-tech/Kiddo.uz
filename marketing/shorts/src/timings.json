@@ -244,5 +244,271 @@
       "scenes": ["hook", "soil", "sprout", "sun", "bloom", "rule", "play"],
       "durations": [3.077, 2.891, 3.297, 2.345, 3.541, 3.332, 2.577]
     }
+  },
+  "scale": {
+    "uz": {
+      "lines": [
+        "Tarozi qanday ishlaydi? Keling, ko‘ramiz!",
+        "Og‘ir tomoni pastga tushadi.",
+        "Uchta olma bor. Ikki va bir qo‘shamiz.",
+        "Ikki tomon teng! Tarozi tekis turibdi.",
+        "Teng bo‘lsa, tarozi tekis bo‘ladi.",
+        "Sehrli tarozida o‘zing sinab ko‘r!"
+      ],
+      "scenes": ["hook", "heavy", "add", "even", "rule", "play"],
+      "durations": [2.914, 2.322, 3.158, 2.821, 2.125, 2.833]
+    },
+    "ru": {
+      "lines": [
+        "Как работают весы? Давай посмотрим!",
+        "Тяжёлая сторона опускается вниз.",
+        "Тут три яблока. Кладём два и один.",
+        "Поровну! Весы стоят ровно.",
+        "Когда поровну, весы ровные.",
+        "Попробуй сам на волшебных весах!"
+      ],
+      "scenes": ["hook", "heavy", "add", "even", "rule", "play"],
+      "durations": [3.1, 2.577, 3.715, 3.193, 2.844, 2.705]
+    },
+    "en": {
+      "lines": [
+        "How does a scale work? Let’s see!",
+        "The heavy side goes down.",
+        "There are three apples. We add two and one.",
+        "Both sides match! The scale is level.",
+        "When it’s equal, the scale is level.",
+        "Try it yourself on the magic scale!"
+      ],
+      "scenes": ["hook", "heavy", "add", "even", "rule", "play"],
+      "durations": [2.601, 1.881, 3.193, 2.879, 2.868, 2.287]
+    }
+  },
+  "robot": {
+    "uz": {
+      "lines": [
+        "Robot batareyani qanday topadi?",
+        "Strelkalar robotga yo‘l ko‘rsatadi.",
+        "Avval yo‘lni o‘ylab, strelkalarni teramiz.",
+        "To‘siq bo‘lsa, aylanib o‘tamiz.",
+        "Robot batareyani topdi! Bu dasturlash.",
+        "Robot-dasturchi o‘yinini o‘yna!"
+      ],
+      "scenes": ["hook", "arrows", "plan", "rock", "win", "play"],
+      "durations": [2.264, 2.844, 3.425, 2.461, 3.146, 2.403]
+    },
+    "ru": {
+      "lines": [
+        "Как робот найдёт батарейку?",
+        "Стрелки показывают роботу путь.",
+        "Сначала думаем и ставим стрелки.",
+        "Если камень, обходим его.",
+        "Робот нашёл батарейку! Это программирование.",
+        "Сыграй в игру Робот-программист!"
+      ],
+      "scenes": ["hook", "arrows", "plan", "rock", "win", "play"],
+      "durations": [2.194, 2.438, 3.053, 2.508, 3.646, 2.357]
+    },
+    "en": {
+      "lines": [
+        "How will the robot find its battery?",
+        "Arrows show the robot the way.",
+        "First we plan, then we line up arrows.",
+        "If there’s a rock, we go around it.",
+        "The robot found its battery! That’s programming.",
+        "Play the robot programmer game!"
+      ],
+      "scenes": ["hook", "arrows", "plan", "rock", "win", "play"],
+      "durations": [2.45, 1.997, 2.531, 2.183, 3.355, 2.067]
+    }
+  },
+  "train": {
+    "uz": {
+      "lines": [
+        "So‘z poyezdi keldi! Tu-tuu!",
+        "Rasmga qaraymiz. Bu olma.",
+        "Har vagonga bitta harf.",
+        "Harflar tartib bilan keladi.",
+        "Hamma vagon to‘ldi. Poyezd yurdi!",
+        "So‘z poyezdida o‘zing so‘z yig‘!"
+      ],
+      "scenes": ["hook", "picture", "letters", "order", "go", "play"],
+      "durations": [2.148, 2.543, 2.218, 1.939, 2.949, 2.415]
+    },
+    "ru": {
+      "lines": [
+        "Приехал поезд слов! Ту-туу!",
+        "Смотрим на картинку. Это кот.",
+        "В каждый вагон по одной букве.",
+        "Буквы идут по порядку.",
+        "Все вагоны полны. Поезд поехал!",
+        "Собери слово сам в поезде слов!"
+      ],
+      "scenes": ["hook", "picture", "letters", "order", "go", "play"],
+      "durations": [2.519, 2.949, 2.31, 2.101, 3.425, 2.38]
+    },
+    "en": {
+      "lines": [
+        "The word train is here! Choo-choo!",
+        "We look at the picture. It’s a cat.",
+        "One letter in each wagon.",
+        "The letters go in order.",
+        "Every wagon is full. Off it goes!",
+        "Build a word yourself on the word train!"
+      ],
+      "scenes": ["hook", "picture", "letters", "order", "go", "play"],
+      "durations": [2.519, 2.38, 1.881, 1.498, 3.007, 2.624]
+    }
+  },
+  "shop": {
+    "uz": {
+      "lines": [
+        "Do‘konga boramiz! Tangalarni olamiz.",
+        "Tangalar bir, ikki va besh bo‘ladi.",
+        "Konfet uch tanga turadi.",
+        "Ikki va bir, jami uch. To‘ladik!",
+        "Besh bersak, ikki tanga qaytim olamiz.",
+        "Kichik do‘konda xarid qil!"
+      ],
+      "scenes": ["hook", "coins", "price", "pay", "change", "play"],
+      "durations": [2.717, 2.717, 1.753, 2.519, 2.879, 1.892]
+    },
+    "ru": {
+      "lines": [
+        "Идём в магазин! Берём монетки.",
+        "Монетки бывают один, два и пять.",
+        "Леденец стоит три монетки.",
+        "Два и один, всего три. Оплатили!",
+        "Дали пять — сдача две монетки.",
+        "Сделай покупку в маленьком магазине!"
+      ],
+      "scenes": ["hook", "coins", "price", "pay", "change", "play"],
+      "durations": [3.181, 3.413, 2.635, 5.016, 3.077, 2.74]
+    },
+    "en": {
+      "lines": [
+        "Let’s go to the shop! Take the coins.",
+        "Coins are one, two and five.",
+        "The lollipop costs three coins.",
+        "Two and one make three. Paid!",
+        "Give five, and get two coins back.",
+        "Go shopping in the little shop!"
+      ],
+      "scenes": ["hook", "coins", "price", "pay", "change", "play"],
+      "durations": [2.612, 2.113, 2.171, 2.345, 2.821, 1.683]
+    }
+  },
+  "shapes": {
+    "uz": {
+      "lines": [
+        "Atrofimizda shakllar ko‘p!",
+        "Doira, kvadrat, uchburchak, to‘rtburchak.",
+        "Kvadrat va uchburchakdan uy bo‘ladi.",
+        "Mashinaning g‘ildiraklari doira.",
+        "Uchburchaklar raketani uchiradi!",
+        "Shakl quruvchida rasm yasa!"
+      ],
+      "scenes": ["hook", "kinds", "house", "car", "rocket", "play"],
+      "durations": [1.927, 3.611, 2.694, 2.206, 2.937, 2.601]
+    },
+    "ru": {
+      "lines": [
+        "Вокруг нас много фигур!",
+        "Круг, квадрат, треугольник, прямоугольник.",
+        "Квадрат и треугольник — это дом.",
+        "У машины круглые колёса.",
+        "Треугольники помогают ракете лететь!",
+        "Собери картинку в строителе фигур!"
+      ],
+      "scenes": ["hook", "kinds", "house", "car", "rocket", "play"],
+      "durations": [1.869, 4.621, 3.019, 2.159, 2.902, 2.392]
+    },
+    "en": {
+      "lines": [
+        "There are shapes all around us!",
+        "Circle, square, triangle, rectangle.",
+        "A square and a triangle make a house.",
+        "A car’s wheels are circles.",
+        "Triangles help the rocket fly!",
+        "Build pictures in the shape builder!"
+      ],
+      "scenes": ["hook", "kinds", "house", "car", "rocket", "play"],
+      "durations": [1.602, 3.495, 2.752, 2.02, 2.357, 2.009]
+    }
+  },
+  "habitats": {
+    "uz": {
+      "lines": [
+        "Har bir hayvonning o‘z uyi bor.",
+        "Tulki va ayiq o‘rmonda yashaydi.",
+        "Kit va delfin dengizda suzadi.",
+        "Tuya issiq cho‘lda yashaydi.",
+        "Pingvin sovuq muzlikda yashaydi.",
+        "Hayvonlarni uyiga olib bor!"
+      ],
+      "scenes": ["hook", "forest", "sea", "desert", "ice", "play"],
+      "durations": [2.299, 2.403, 2.159, 2.113, 2.531, 2.473]
+    },
+    "ru": {
+      "lines": [
+        "У каждого животного свой дом.",
+        "Лиса и медведь живут в лесу.",
+        "Кит и дельфин плавают в море.",
+        "Верблюд живёт в жаркой пустыне.",
+        "Пингвин живёт среди льдов.",
+        "Отведи животных домой!"
+      ],
+      "scenes": ["hook", "forest", "sea", "desert", "ice", "play"],
+      "durations": [2.183, 2.949, 2.833, 2.937, 1.927, 1.892]
+    },
+    "en": {
+      "lines": [
+        "Every animal has its own home.",
+        "A fox and a bear live in the forest.",
+        "A whale and a dolphin swim in the sea.",
+        "A camel lives in the hot desert.",
+        "A penguin lives on the cold ice.",
+        "Take the animals home!"
+      ],
+      "scenes": ["hook", "forest", "sea", "desert", "ice", "play"],
+      "durations": [2.403, 2.38, 2.74, 2.136, 2.392, 1.533]
+    }
+  },
+  "plate": {
+    "uz": {
+      "lines": [
+        "Qaysi ovqat bizni kuchli qiladi?",
+        "Meva va sabzavotni har kuni yeymiz.",
+        "Sut suyaklarni mustahkam qiladi.",
+        "Shirinliklar mazali, lekin ba’zan yeymiz.",
+        "Sog‘lom likopcha rang-barang bo‘ladi!",
+        "Sog‘lom likopcha o‘yinini o‘yna!"
+      ],
+      "scenes": ["hook", "fruit", "milk", "treats", "plate", "play"],
+      "durations": [2.334, 3.146, 2.682, 3.251, 2.775, 2.508]
+    },
+    "ru": {
+      "lines": [
+        "Какая еда делает нас сильными?",
+        "Фрукты и овощи едим каждый день.",
+        "Молоко делает кости крепкими.",
+        "Сладости вкусные, но их едим иногда.",
+        "Полезная тарелка — разноцветная!",
+        "Сыграй в игру Полезная тарелка!"
+      ],
+      "scenes": ["hook", "fruit", "milk", "treats", "plate", "play"],
+      "durations": [2.113, 3.019, 2.31, 3.529, 3.448, 2.74]
+    },
+    "en": {
+      "lines": [
+        "Which food makes us strong?",
+        "We eat fruit and vegetables every day.",
+        "Milk makes our bones strong.",
+        "Sweets are tasty, but we eat them sometimes.",
+        "A healthy plate is full of colours!",
+        "Play the healthy plate game!"
+      ],
+      "scenes": ["hook", "fruit", "milk", "treats", "plate", "play"],
+      "durations": [1.881, 2.868, 2.043, 3.077, 2.067, 1.881]
+    }
   }
 }

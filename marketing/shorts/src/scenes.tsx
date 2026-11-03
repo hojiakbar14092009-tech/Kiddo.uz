@@ -2,6 +2,7 @@ import React from 'react'
 import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion'
 import { C, TITLES, W, type Lang, type ShortId } from './data'
 import { DISPLAY } from './fonts'
+import { SCENES2 } from './scenes2'
 import {
   Art,
   BigText,
@@ -37,6 +38,13 @@ const HERO: Record<ShortId, string> = {
   dayNight: 'crescent-moon',
   planets: 'ringed-planet',
   seed: 'seedling',
+  scale: 'apple',
+  robot: 'rocket',
+  train: 'train',
+  shop: 'lollipop',
+  shapes: 'house',
+  habitats: 'fox',
+  plate: 'carrot',
 }
 
 /** The cartoon's title card. */
@@ -95,6 +103,28 @@ const PLAY_TARGET: Record<ShortId, { art: string; label: Record<Lang, string> }>
   seed: {
     art: 'seedling',
     label: { uz: 'Fan laboratoriyasi', ru: 'Научная лаборатория', en: 'Science Lab' },
+  },
+  scale: { art: 'apple', label: { uz: 'Sehrli tarozi', ru: 'Волшебные весы', en: 'Magic scale' } },
+  robot: {
+    art: 'rocket',
+    label: { uz: 'Robot-dasturchi', ru: 'Робот-программист', en: 'Robot programmer' },
+  },
+  train: { art: 'train', label: { uz: 'So‘z poyezdi', ru: 'Поезд слов', en: 'Word train' } },
+  shop: {
+    art: 'lollipop',
+    label: { uz: 'Kichik do‘kon', ru: 'Маленький магазин', en: 'Little shop' },
+  },
+  shapes: {
+    art: 'house',
+    label: { uz: 'Shakl quruvchi', ru: 'Строитель фигур', en: 'Shape builder' },
+  },
+  habitats: {
+    art: 'fox',
+    label: { uz: 'Kim qayerda yashaydi?', ru: 'Кто где живёт?', en: 'Who lives where?' },
+  },
+  plate: {
+    art: 'carrot',
+    label: { uz: 'Sog‘lom likopcha', ru: 'Полезная тарелка', en: 'Healthy plate' },
   },
 }
 
@@ -1232,6 +1262,10 @@ const SEED_RULE = {
 // ---------------------------------------------------------------------------
 
 export const SCENES: Record<ShortId, Record<string, Scene>> = {
+  ...(SCENES2 as Record<
+    'scale' | 'robot' | 'train' | 'shop' | 'shapes' | 'habitats' | 'plate',
+    Record<string, Scene>
+  >),
   water: {
     hook: WaterHook,
     sunSea: WaterSunSea,

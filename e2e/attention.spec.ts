@@ -191,7 +191,10 @@ test.describe('the science games', () => {
 })
 
 test.describe('the cartoons', () => {
-  test('Free opens two cartoons, then the rest wait for PRO', async ({ page }) => {
+  test('a feed: the first plays at once, a hand teaches the swipe, Free gets two', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000)
     await child(page, 'denied')
     // the test browser has no H.264: every cartoon is served as a tiny WebM instead
     const clip = readFileSync(new URL('./fixtures/short.webm', import.meta.url))
@@ -199,28 +202,28 @@ test.describe('the cartoons', () => {
       route.fulfill({ body: clip, contentType: 'video/webm' }),
     )
     await ready(page, '/shorts')
-    await expect(page.getByTestId('shorts-free-left')).toContainText('2')
-    for (const id of ['water', 'magnet']) {
-      await page.getByTestId(`short-${id}`).click()
-      await expect(page.getByTestId('short-player')).toBeVisible()
-      // a cartoon counts once it really plays
-      await expect
-        .poll(() =>
-          page
-            .locator('[data-testid=short-player] video')
-            .evaluate((v) => (v as HTMLVideoElement).currentTime),
-        )
-        .toBeGreaterThan(0)
-      await page.getByTestId('short-close').click()
-      await expect(page.getByTestId('short-player')).toHaveCount(0)
-    }
+    const playing = (id: string) =>
+      page
+        .locator(`[data-testid=short-${id}] video`)
+        .evaluate((v) => (v as HTMLVideoElement).currentTime > 0)
+    // the first cartoon starts by itself
+    await expect.poll(() => playing('water')).toBe(true)
+    await expect(page.getByTestId('shorts-free-left')).toContainText('1')
+    // a child who does not swipe is shown how; the hand also moves on when tapped
+    await expect(page.getByTestId('shorts-swipe-hint')).toBeVisible({ timeout: 15_000 })
+    await page.getByTestId('shorts-swipe-hint').click()
+    await expect.poll(() => playing('magnet')).toBe(true)
+    await expect(page.getByTestId('shorts-swipe-hint')).toHaveCount(0)
     await expect(page.getByTestId('shorts-free-left')).toContainText('tugadi')
+    // the third waits for PRO, calmly
+    await page
+      .getByTestId('shorts-feed')
+      .locator('div')
+      .first()
+      .evaluate((feed) => {
+        feed.scrollTo(0, feed.clientHeight * 2)
+      })
     await expect(page.getByTestId('short-float')).toHaveAttribute('data-locked', 'true')
-    await page.getByTestId('short-float').click()
-    await expect(page.getByTestId('short-player')).toHaveCount(0)
-    // the calm note for a grown-up, focused
-    await expect(page.getByTestId('shorts-pro')).toBeFocused()
-    // the two opened ones can be watched again
-    await expect(page.getByTestId('short-water')).toHaveAttribute('data-locked', 'false')
+    await expect(page.getByTestId('short-float').getByTestId('shorts-pro')).toBeVisible()
   })
 })

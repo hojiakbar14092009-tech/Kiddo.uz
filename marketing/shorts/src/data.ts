@@ -5,8 +5,35 @@ export const W = 720
 export const H = 1280
 
 export type Lang = 'uz' | 'ru' | 'en'
-export type ShortId = 'water' | 'magnet' | 'float' | 'dayNight' | 'planets' | 'seed'
-export const SHORT_IDS: ShortId[] = ['water', 'magnet', 'float', 'dayNight', 'planets', 'seed']
+export type ShortId =
+  | 'water'
+  | 'magnet'
+  | 'float'
+  | 'dayNight'
+  | 'planets'
+  | 'seed'
+  | 'scale'
+  | 'robot'
+  | 'train'
+  | 'shop'
+  | 'shapes'
+  | 'habitats'
+  | 'plate'
+export const SHORT_IDS: ShortId[] = [
+  'water',
+  'magnet',
+  'float',
+  'dayNight',
+  'planets',
+  'seed',
+  'scale',
+  'robot',
+  'train',
+  'shop',
+  'shapes',
+  'habitats',
+  'plate',
+]
 export const LANGS: Lang[] = ['uz', 'ru', 'en']
 
 /** The voice starts this long into its scene, and the scene holds this long after it. */
@@ -64,6 +91,13 @@ export const THEME: Record<ShortId, { top: string; bottom: string; accent: strin
   dayNight: { top: '#3a3f8f', bottom: '#8fb6ff', accent: '#ffc93c' },
   planets: { top: '#120d2e', bottom: '#2c2465', accent: '#ffc93c' },
   seed: { top: '#c9f0b5', bottom: '#fbfff2', accent: '#3f9a3a' },
+  scale: { top: '#ffe9a8', bottom: '#fffaf0', accent: '#e0a419' },
+  robot: { top: '#ddd2fb', bottom: '#f7f3ff', accent: '#6a4fd9' },
+  train: { top: '#bfe6ff', bottom: '#f3fbff', accent: '#e2552d' },
+  shop: { top: '#c9f2e2', bottom: '#f4fffa', accent: '#13917e' },
+  shapes: { top: '#cfe6ff', bottom: '#f6faff', accent: '#2f7fc4' },
+  habitats: { top: '#bfe9c9', bottom: '#f3fff5', accent: '#3f9a3a' },
+  plate: { top: '#ffe3cf', bottom: '#fff9f3', accent: '#ff8a4c' },
 }
 
 /** The title of each cartoon, per language (the app's own wording). */
@@ -78,4 +112,11 @@ export const TITLES: Record<ShortId, Record<Lang, string>> = {
   dayNight: { uz: 'Kun va tun', ru: 'День и ночь', en: 'Day and night' },
   planets: { uz: 'Quyosh oilasi', ru: 'Семья Солнца', en: 'The Sun’s family' },
   seed: { uz: 'Urug‘dan gulgacha', ru: 'Из семечка в цветок', en: 'From seed to flower' },
+  scale: { uz: 'Tarozi siri', ru: 'Секрет весов', en: 'The scale’s secret' },
+  robot: { uz: 'Robotga yo‘l ko‘rsat', ru: 'Покажи роботу путь', en: 'Show the robot the way' },
+  train: { uz: 'So‘z poyezdi', ru: 'Поезд слов', en: 'The word train' },
+  shop: { uz: 'Do‘konda tangalar', ru: 'Монетки в магазине', en: 'Coins at the shop' },
+  shapes: { uz: 'Shakllar olami', ru: 'Мир фигур', en: 'A world of shapes' },
+  habitats: { uz: 'Kim qayerda yashaydi?', ru: 'Кто где живёт?', en: 'Who lives where?' },
+  plate: { uz: 'Sog‘lom likopcha', ru: 'Полезная тарелка', en: 'A healthy plate' },
 }

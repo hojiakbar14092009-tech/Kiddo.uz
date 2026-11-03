@@ -109,8 +109,24 @@ test('the robot programmer: arrows lead it to the battery; a rock stops it', asy
     ['right', 'right', 'right', 'down', 'down', 'down'],
     ['up', 'left', 'left', 'left', 'up', 'up'],
   ]
+  /** The battery (and the robot) stand inside their own cells, on every level. */
+  const onItsCell = async (testId: string) => {
+    const piece = page.getByTestId(testId)
+    const x = await piece.getAttribute('data-x')
+    const y = await piece.getAttribute('data-y')
+    const a = (await piece.boundingBox())!
+    const b = (await page.getByTestId(`robot-cell-${x}-${y}`).boundingBox())!
+    const centre = { x: a.x + a.width / 2, y: a.y + a.height / 2 }
+    expect(centre.x).toBeGreaterThan(b.x)
+    expect(centre.x).toBeLessThan(b.x + b.width)
+    expect(centre.y).toBeGreaterThan(b.y)
+    expect(centre.y).toBeLessThan(b.y + b.height)
+  }
   for (const program of levels) {
     await expect(page.getByTestId('robot-go')).toBeDisabled()
+    await page.waitForTimeout(600)
+    await onItsCell('robot-battery')
+    await onItsCell('robot')
     for (const move of program) await page.getByTestId(`robot-${move}`).click()
     await page.getByTestId('robot-go').click()
     await expect(page.getByText('Zo‘r! Robot batareyani topdi.')).toBeVisible({ timeout: 10_000 })

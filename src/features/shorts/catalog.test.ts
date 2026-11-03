@@ -28,7 +28,7 @@ describe('cartoons', () => {
 
   it('has one video per language and only learning cartoons', () => {
     expect(videoUrl('ru', 'planets')).toBe('/video/shorts/ru/planets.mp4')
-    expect(SHORTS).toHaveLength(6)
+    expect(SHORTS).toHaveLength(13)
     for (const short of SHORTS) expect(short.play === null || short.play.startsWith('/')).toBe(true)
   })
 })
