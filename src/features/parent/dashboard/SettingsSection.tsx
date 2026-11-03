@@ -10,6 +10,7 @@ import { useLanguage, useSettingsStore } from '@/store/settingsStore'
 import { resetTours } from '@/features/onboarding/tour'
 import { AccountPanel } from './AccountPanel'
 import { AiTutorPanel } from './AiTutorPanel'
+import { AttentionPanel } from './AttentionPanel'
 import { ChoiceChips } from './ChoiceChips'
 import { Panel } from './Panel'
 import { TelegramPanel } from './TelegramPanel'
@@ -128,6 +129,8 @@ export function SettingsSection() {
           {t('parent.settings.welcomeReplay')}
         </Button>
       </Panel>
+
+      <AttentionPanel />
 
       <AiTutorPanel />
 

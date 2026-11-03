@@ -11,6 +11,10 @@
         {
           "name": "kiddo.e2e.tours",
           "value": "off"
+        },
+        {
+          "name": "kiddo.attention",
+          "value": "{\"state\":{\"consent\":\"denied\",\"answeredAt\":\"2026-01-01T00:00:00.000Z\",\"camera\":false},\"version\":1}"
         }
       ]
     },
@@ -24,6 +28,10 @@
         {
           "name": "kiddo.e2e.tours",
           "value": "off"
+        },
+        {
+          "name": "kiddo.attention",
+          "value": "{\"state\":{\"consent\":\"denied\",\"answeredAt\":\"2026-01-01T00:00:00.000Z\",\"camera\":false},\"version\":1}"
         }
       ]
     }

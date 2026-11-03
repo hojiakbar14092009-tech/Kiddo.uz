@@ -18,6 +18,8 @@ import { AnalyticsTracker } from './AnalyticsTracker'
 import { NutConversion } from './NutConversion'
 import { SectionWorld } from './SectionWorld'
 import { isAdminPreview } from './preview/adminPreview'
+import { AttentionConsent } from '@/features/attention/AttentionConsent'
+import { AttentionHelper } from '@/features/attention/AttentionHelper'
 
 /** The admin's sandbox bar (Phase 51), only ever downloaded in that tab. */
 const PreviewBanner = lazy(() => import('./preview/PreviewBanner'))
@@ -48,6 +50,8 @@ export function AppShell() {
       <SoundBridge />
       <AnalyticsTracker />
       <Outlet />
+      <AttentionHelper />
+      <AttentionConsent />
       {!pathname.startsWith('/admin') && <SplashScreen />}
       <Toaster />
     </>

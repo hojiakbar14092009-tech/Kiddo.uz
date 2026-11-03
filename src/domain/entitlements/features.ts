@@ -19,6 +19,8 @@ export type ProFeature =
   | 'offlinePacks'
   /** The extra explorations of a world (each world keeps a free part). */
   | 'premiumWorlds'
+  /** Every cartoon (Phase 60); Free watches a couple first. */
+  | 'shorts'
 
 export type EntitlementReason = 'ok' | 'pro' | 'guest'
 
@@ -35,6 +37,7 @@ const NEEDS_PRO: Record<ProFeature, boolean> = {
   aiFriend: true,
   offlinePacks: true,
   premiumWorlds: true,
+  shorts: true,
 }
 
 /** Free for everyone in the demo build: the voice (Phase 20). The entitlement stays for later. */
@@ -44,6 +47,7 @@ const FREE_IN_DEMO: Record<ProFeature, boolean> = {
   aiFriend: false,
   offlinePacks: false,
   premiumWorlds: false,
+  shorts: false,
 }
 
 export function entitlementFor(

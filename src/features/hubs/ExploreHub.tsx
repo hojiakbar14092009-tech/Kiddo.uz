@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Img3D } from '@/components/ui/Img3D'
+import { SCI_GAMES } from '@/features/sciGames/games'
+import { tDynamic } from '@/lib/tDynamic'
 import { HubHeading, HubScreen } from './HubScreen'
 import { BuildingPlaces, PlaceCard, PlaceGroup } from './PlaceGrid'
 
@@ -11,6 +13,8 @@ const EXPLORE_PLACES = [
   'spaceport',
   'science-lab',
 ] as const
+
+const SCI_TINT = { sky: 'bg-sky-soft', coral: 'bg-oops-soft', mint: 'bg-primary-soft' } as const
 
 /**
  * Kashf et (Phase 40): the Adventure Map and every world to discover, each
@@ -49,6 +53,32 @@ export function ExploreHub() {
           label={t('shadowLab.title')}
           picture={<Img3D name="lamp" className="size-[72%]" />}
           tint="bg-coin-soft"
+        />
+      </PlaceGroup>
+      {/* Phase 59: short science games; Phase 60: the cartoons about them */}
+      <PlaceGroup id="explore-science" title={t('sciGames.hubTitle')}>
+        {SCI_GAMES.map((game) => (
+          <PlaceCard
+            key={game.id}
+            to={game.path}
+            label={tDynamic(t, `sciGames.${game.id}.title`)}
+            picture={
+              <span aria-hidden="true" className="text-5xl leading-none sm:text-6xl">
+                {game.emoji}
+              </span>
+            }
+            tint={SCI_TINT[game.tone]}
+          />
+        ))}
+        <PlaceCard
+          to="/shorts"
+          label={t('shorts.open')}
+          picture={
+            <span aria-hidden="true" className="text-5xl leading-none sm:text-6xl">
+              🎬
+            </span>
+          }
+          tint="bg-lilac-soft"
         />
       </PlaceGroup>
     </HubScreen>

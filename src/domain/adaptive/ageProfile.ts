@@ -179,6 +179,14 @@ export function isYoungBand(band: AgeBand): boolean {
   return band === '3-4' || band === '5-6'
 }
 
+/**
+ * How long a learning screen may sit untouched before the attention helper's
+ * robot calls (Phase 58): a little longer for the youngest band.
+ */
+export function idleMsForAge(age: number | null): number {
+  return ageBand(age) === '3-4' ? 30_000 : 25_000
+}
+
 /** Where a strand starts for a real age before any evidence (guest: 2, gently). */
 export function priorLevel(age: number | null): Level {
   if (age === null || !Number.isFinite(age)) return 2

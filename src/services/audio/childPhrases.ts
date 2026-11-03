@@ -49,6 +49,16 @@ export const SPOKEN_PARTS = [
   'findHome.say',
   'myStory.say',
   'threeWords.say',
+  // Phase 58–60: the attention helper's reminders, the science games and the cartoons' page
+  'attention.say',
+  'sciGames.done',
+  'sciGames.water.intro',
+  'sciGames.water.say',
+  'sciGames.magnet.intro',
+  'sciGames.magnet.say',
+  'sciGames.float.intro',
+  'sciGames.float.say',
+  'shorts.say',
 ]
 const COUNTS = Array.from({ length: 41 }, (_, i) => i)
 /** While childPhrases runs: the templates it could not fill in. */

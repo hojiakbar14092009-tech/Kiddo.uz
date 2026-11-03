@@ -110,7 +110,9 @@ export default defineConfig(({ mode }) => {
             // the mascots' still pictures (≈ 0.1 MB): a mascot is never missing offline
             'mascots/posters/*.webp',
           ],
-          globIgnores: ['**/node_modules/**', ...VOICE_GLOB_IGNORES],
+          // the attention helper's face detector (≈ 1.3 MB) is only for families that turned
+          // the camera on: cached when first used, never precached for everyone
+          globIgnores: ['**/node_modules/**', '**/face-api*.js', ...VOICE_GLOB_IGNORES],
           runtimeCaching: [
             ...voiceRuntimeCaching(voicePrivate),
             // 3D mascots (0.2–0.4 MB each) are cached when first met, not precached; a rebuilt
@@ -122,6 +124,17 @@ export default defineConfig(({ mode }) => {
               options: {
                 cacheName: 'kiddo-mascots',
                 expiration: { maxEntries: 20 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              urlPattern: ({ url }: { url: URL }) =>
+                url.pathname.startsWith('/models/face/') ||
+                /\/assets\/face-api[^/]*\.js$/.test(url.pathname),
+              handler: 'CacheFirst' as const,
+              options: {
+                cacheName: 'kiddo-face',
+                expiration: { maxEntries: 8 },
                 cacheableResponse: { statuses: [0, 200] },
               },
             },
@@ -139,8 +152,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      // Only the lazily loaded 3D robot (three.js) is above the default 500 kB.
-      chunkSizeWarningLimit: 1100,
+      // Only the lazily loaded 3D robot (three.js, ≈ 1 MB) and the attention helper's face
+      // detector (≈ 1.3 MB, loaded only when a parent turned the camera on) are above 500 kB.
+      chunkSizeWarningLimit: 1400,
     },
     test: {
       environment: 'jsdom',

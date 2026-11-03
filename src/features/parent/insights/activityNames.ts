@@ -37,6 +37,7 @@ export type ActivityNameKey =
   | 'traceShapes'
   | 'studio'
   | 'scienceLab'
+  | 'sciGames'
   | 'other'
 
 export const ACTIVITY_NAME_KEYS: readonly ActivityNameKey[] = [
@@ -68,6 +69,7 @@ export const ACTIVITY_NAME_KEYS: readonly ActivityNameKey[] = [
   'traceShapes',
   'studio',
   'scienceLab',
+  'sciGames',
   'other',
 ]
 
@@ -162,6 +164,8 @@ export function activityName(activity: unknown): ActivityName {
       return { key: 'studio' }
     case 'science-lab':
       return { key: 'scienceLab' }
+    case 'sci':
+      return { key: 'sciGames' }
     case 'trace':
       // `trace:number:7` / `trace:shape:circle` are the tracing pages,
       // `trace:uz` the letter tracing game.

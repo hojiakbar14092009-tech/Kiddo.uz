@@ -1,0 +1,266 @@
+{
+  "water": [
+    {
+      "scene": "hook",
+      "uz": "Yomg‘ir qayerdan keladi? Keling, bilib olamiz!",
+      "ru": "Откуда берётся дождь? Давай узнаем!",
+      "en": "Where does rain come from? Let’s find out!"
+    },
+    {
+      "scene": "sunSea",
+      "uz": "Quyosh dengizni isitadi. Suv iliq bo‘ladi.",
+      "ru": "Солнце греет море. Вода становится тёплой.",
+      "en": "The sun warms the sea. The water gets warm."
+    },
+    {
+      "scene": "steam",
+      "uz": "Kichkina tomchilar bug‘ bo‘lib, osmonga uchadi.",
+      "ru": "Крошечные капельки становятся паром и летят в небо.",
+      "en": "Tiny droplets turn into steam and fly up to the sky."
+    },
+    {
+      "scene": "cloud",
+      "uz": "Osmonda tomchilar yig‘ilib, bulut bo‘ladi.",
+      "ru": "В небе капельки собираются в облако.",
+      "en": "Up in the sky, the droplets gather into a cloud."
+    },
+    {
+      "scene": "rain",
+      "uz": "Bulut og‘irlashadi va yomg‘ir yog‘adi!",
+      "ru": "Облако тяжелеет, и идёт дождь!",
+      "en": "The cloud gets heavy, and it rains!"
+    },
+    {
+      "scene": "cycle",
+      "uz": "Daryo suvni yana dengizga olib boradi. Bu suvning aylanishi!",
+      "ru": "Река несёт воду обратно в море. Это круговорот воды!",
+      "en": "The river carries the water back to the sea. That is the water cycle!"
+    },
+    {
+      "scene": "play",
+      "uz": "Endi o‘yinda tomchiga o‘zing yordam ber!",
+      "ru": "А теперь помоги капельке в игре!",
+      "en": "Now help the droplet yourself in the game!"
+    }
+  ],
+  "magnet": [
+    {
+      "scene": "hook",
+      "uz": "Bu sehrli magnit! U nimani tortadi?",
+      "ru": "Это волшебный магнит! Что он притягивает?",
+      "en": "This is a magic magnet! What does it pull?"
+    },
+    {
+      "scene": "key",
+      "uz": "Kalit vush etib magnitga yopishdi! Kalit temirdan.",
+      "ru": "Ключ — вжух — прилип к магниту! Ключ железный.",
+      "en": "Whoosh! The key sticks to the magnet. The key is iron."
+    },
+    {
+      "scene": "apple",
+      "uz": "Olma esa joyidan qimirlamaydi. Olma temir emas.",
+      "ru": "А яблоко даже не шевелится. Яблоко не железное.",
+      "en": "But the apple doesn’t move at all. An apple is not iron."
+    },
+    {
+      "scene": "sort",
+      "uz": "Qoshiq, mix, qisqich yopishadi. Qalam, to‘p, barg yopishmaydi.",
+      "ru": "Ложка, болт, скрепка прилипают. Карандаш, мяч, лист — нет.",
+      "en": "A spoon, a bolt, a clip stick. A pencil, a ball, a leaf don’t."
+    },
+    {
+      "scene": "fridge",
+      "uz": "Muzlatkichdagi rasmni ham magnit ushlab turadi!",
+      "ru": "Даже картинку на холодильнике держит магнит!",
+      "en": "A magnet even holds the picture on your fridge!"
+    },
+    {
+      "scene": "rule",
+      "uz": "Esingda bo‘lsin: magnit temirni tortadi.",
+      "ru": "Запомни: магнит притягивает железо.",
+      "en": "Remember: a magnet pulls iron."
+    },
+    {
+      "scene": "play",
+      "uz": "O‘yinda temir narsalarni o‘zing top!",
+      "ru": "Найди железные предметы сам в игре!",
+      "en": "Find the iron things yourself in the game!"
+    }
+  ],
+  "float": [
+    {
+      "scene": "hook",
+      "uz": "Nega kema suzadi, tosh esa cho‘kadi?",
+      "ru": "Почему корабль плывёт, а камень тонет?",
+      "en": "Why does a boat float, but a stone sinks?"
+    },
+    {
+      "scene": "duck",
+      "uz": "O‘yinchoq o‘rdak yengil. U suv ustida suzadi.",
+      "ru": "Игрушечная утка лёгкая. Она плавает.",
+      "en": "A rubber duck is light. It floats on top."
+    },
+    {
+      "scene": "stone",
+      "uz": "Tosh og‘ir. U bul-bul qilib tubiga cho‘kadi.",
+      "ru": "Камень тяжёлый. Буль-буль — и он на дне.",
+      "en": "A stone is heavy. Glug, glug, down it goes."
+    },
+    {
+      "scene": "pairs",
+      "uz": "Olma suzadi, kalit cho‘kadi. Barg suzadi, tanga cho‘kadi.",
+      "ru": "Яблоко плавает, ключ тонет. Лист плавает, монета тонет.",
+      "en": "An apple floats, a key sinks. A leaf floats, a coin sinks."
+    },
+    {
+      "scene": "ship",
+      "uz": "Katta kemaning ichi havoga to‘la. Shuning uchun u suzadi!",
+      "ru": "Внутри большого корабля много воздуха. Поэтому он плывёт!",
+      "en": "A big ship is full of air inside. That’s why it floats!"
+    },
+    {
+      "scene": "rule",
+      "uz": "Yengillar suzadi, og‘irlar cho‘kadi.",
+      "ru": "Лёгкое плавает, тяжёлое тонет.",
+      "en": "Light things float, heavy things sink."
+    },
+    {
+      "scene": "play",
+      "uz": "O‘yinda avval o‘yla, keyin suvga tashla!",
+      "ru": "В игре сначала подумай, потом бросай в воду!",
+      "en": "In the game, think first, then drop it in!"
+    }
+  ],
+  "dayNight": [
+    {
+      "scene": "hook",
+      "uz": "Nega kunduzi yorug‘, kechasi qorong‘i?",
+      "ru": "Почему днём светло, а ночью темно?",
+      "en": "Why is it light by day and dark at night?"
+    },
+    {
+      "scene": "earth",
+      "uz": "Bizning Yerimiz katta shar. U doim aylanadi.",
+      "ru": "Наша Земля — большой шар. Она всё время крутится.",
+      "en": "Our Earth is a big ball. It is always spinning."
+    },
+    {
+      "scene": "day",
+      "uz": "Biz Quyoshga qaraganda, kunduz bo‘ladi.",
+      "ru": "Когда мы повёрнуты к Солнцу, у нас день.",
+      "en": "When we face the Sun, it is daytime."
+    },
+    {
+      "scene": "night",
+      "uz": "Yer aylanib, biz Quyoshdan uzoqlashsak, tun bo‘ladi.",
+      "ru": "Когда Земля поворачивается и мы отворачиваемся от Солнца, наступает ночь.",
+      "en": "When the Earth turns us away from the Sun, it is night."
+    },
+    {
+      "scene": "turn",
+      "uz": "Bir to‘liq aylanish bir kun bo‘ladi.",
+      "ru": "Один полный оборот — это один день.",
+      "en": "One whole turn is one day."
+    },
+    {
+      "scene": "stars",
+      "uz": "Kechasi Oy va yulduzlar ko‘rinadi. Ular juda chiroyli!",
+      "ru": "Ночью видно Луну и звёзды. Как красиво!",
+      "en": "At night we see the Moon and the stars. So pretty!"
+    },
+    {
+      "scene": "play",
+      "uz": "Bugun kechasi osmonga qara!",
+      "ru": "Посмотри сегодня вечером на небо!",
+      "en": "Look up at the sky tonight!"
+    }
+  ],
+  "planets": [
+    {
+      "scene": "hook",
+      "uz": "Quyoshning katta oilasi bor. Ular sayyoralar!",
+      "ru": "У Солнца большая семья. Это планеты!",
+      "en": "The Sun has a big family. They are the planets!"
+    },
+    {
+      "scene": "orbits",
+      "uz": "Sakkizta sayyora Quyosh atrofida aylanadi.",
+      "ru": "Восемь планет кружат вокруг Солнца.",
+      "en": "Eight planets circle around the Sun."
+    },
+    {
+      "scene": "earth",
+      "uz": "Uchinchisi bizning uyimiz, Yer.",
+      "ru": "Третья — наш дом, Земля.",
+      "en": "The third one is our home, the Earth."
+    },
+    {
+      "scene": "jupiter",
+      "uz": "Eng kattasi Yupiter. Saturnning chiroyli halqalari bor.",
+      "ru": "Самая большая — Юпитер. А у Сатурна красивые кольца.",
+      "en": "The biggest is Jupiter. Saturn has beautiful rings."
+    },
+    {
+      "scene": "count",
+      "uz": "Keling, sanaymiz: bir, ikki, uch, to‘rt, besh, olti, yetti, sakkiz!",
+      "ru": "Давай посчитаем: раз, два, три, четыре, пять, шесть, семь, восемь!",
+      "en": "Let’s count: one, two, three, four, five, six, seven, eight!"
+    },
+    {
+      "scene": "rocket",
+      "uz": "Bir kun sen ham raketada uchasan!",
+      "ru": "Однажды и ты полетишь на ракете!",
+      "en": "One day you might fly in a rocket too!"
+    },
+    {
+      "scene": "play",
+      "uz": "Kosmos o‘yinida sayyoralarni kashf et!",
+      "ru": "Открой планеты в космической игре!",
+      "en": "Explore the planets in the space game!"
+    }
+  ],
+  "seed": [
+    {
+      "scene": "hook",
+      "uz": "Bu kichkina urug‘. Undan nima o‘sadi?",
+      "ru": "Это маленькое семечко. Что из него вырастет?",
+      "en": "This is a tiny seed. What will grow from it?"
+    },
+    {
+      "scene": "soil",
+      "uz": "Urug‘ni tuproqqa ekamiz va suv quyamiz.",
+      "ru": "Сажаем семечко в землю и поливаем.",
+      "en": "We plant the seed in the soil and water it."
+    },
+    {
+      "scene": "sprout",
+      "uz": "Ildiz pastga, nihol tepaga o‘sadi.",
+      "ru": "Корешок растёт вниз, а росток — вверх.",
+      "en": "The root grows down, the sprout grows up."
+    },
+    {
+      "scene": "sun",
+      "uz": "Quyosh nur beradi, barglar ochiladi.",
+      "ru": "Солнце светит, и раскрываются листья.",
+      "en": "The sun shines, and the leaves open."
+    },
+    {
+      "scene": "bloom",
+      "uz": "Mana, chiroyli gul ochildi! Ari ham uchib keldi.",
+      "ru": "И вот распустился красивый цветок! Прилетела пчела.",
+      "en": "And here is a beautiful flower! A bee comes to visit."
+    },
+    {
+      "scene": "rule",
+      "uz": "O‘simlikka suv, quyosh va tuproq kerak.",
+      "ru": "Растению нужны вода, солнце и земля.",
+      "en": "A plant needs water, sun and soil."
+    },
+    {
+      "scene": "play",
+      "uz": "Fan laboratoriyasida tajriba qil!",
+      "ru": "Проведи опыт в научной лаборатории!",
+      "en": "Do an experiment in the Science Lab!"
+    }
+  ]
+}
