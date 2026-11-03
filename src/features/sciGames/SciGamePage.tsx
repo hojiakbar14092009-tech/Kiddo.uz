@@ -23,6 +23,8 @@ import { MagicMagnet } from './play/Magnet'
 import { FloatOrSink } from './play/Float'
 import { RobotProgrammer } from './play/Robot'
 import { MagicScale } from './play/Scale'
+import { LittleShop } from './play/Shop'
+import { WordTrain } from './play/Train'
 import { WaterTrip } from './play/Water'
 
 type Phase =
@@ -79,25 +81,7 @@ function SciGameScreen({ game }: { game: SciGame }) {
 
   return (
     <Screen
-      header={
-        <TitleTopBar
-          title={title}
-          back="/games"
-          extra={
-            phase.kind === 'play' ? (
-              <button
-                type="button"
-                onClick={openRules}
-                aria-label={t('sciGames.rules')}
-                data-testid="sci-rules"
-                className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface font-display text-2xl font-extrabold text-primary-ink shadow-[0_3px_0_var(--color-line)]"
-              >
-                ?
-              </button>
-            ) : undefined
-          }
-        />
-      }
+      header={<TitleTopBar title={title} back="/games" />}
       className={clsx(
         'items-center gap-5 bg-gradient-to-b px-4 py-6 text-center short:gap-3 short:py-3',
         TONE[game.tone],
@@ -138,6 +122,20 @@ function SciGameScreen({ game }: { game: SciGame }) {
         </>
       )}
 
+      {/* the rules again, any time during a game (a phone's top bar has no room for it) */}
+      {phase.kind === 'play' && (
+        <div className="-mb-2 flex w-full max-w-xl justify-end short:-mb-1">
+          <button
+            type="button"
+            onClick={openRules}
+            aria-label={t('sciGames.rules')}
+            data-testid="sci-rules"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface font-display text-2xl font-extrabold text-primary-ink shadow-[0_3px_0_var(--color-line)]"
+          >
+            ?
+          </button>
+        </div>
+      )}
       {phase.kind === 'play' && game.id === 'water' && <WaterTrip onDone={finish(phase.run)} />}
       {phase.kind === 'play' && game.id === 'magnet' && <MagicMagnet onDone={finish(phase.run)} />}
       {phase.kind === 'play' && game.id === 'float' && <FloatOrSink onDone={finish(phase.run)} />}
@@ -145,6 +143,8 @@ function SciGameScreen({ game }: { game: SciGame }) {
       {phase.kind === 'play' && game.id === 'robot' && (
         <RobotProgrammer onDone={finish(phase.run)} />
       )}
+      {phase.kind === 'play' && game.id === 'train' && <WordTrain onDone={finish(phase.run)} />}
+      {phase.kind === 'play' && game.id === 'shop' && <LittleShop onDone={finish(phase.run)} />}
 
       {phase.kind === 'done' && (
         <>

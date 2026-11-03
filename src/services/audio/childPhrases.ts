@@ -63,6 +63,11 @@ export const SPOKEN_PARTS = [
   'sciGames.scale.say',
   'sciGames.robot.intro',
   'sciGames.robot.say',
+  // Phase 66: the word train and the little shop
+  'sciGames.train.intro',
+  'sciGames.train.say',
+  'sciGames.shop.intro',
+  'sciGames.shop.say',
   'shorts.say',
 ]
 const COUNTS = Array.from({ length: 41 }, (_, i) => i)

@@ -63,6 +63,24 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
     ],
     check: { ask: 'battery', other: 'arrows' },
   },
+  train: {
+    lessonId: ACTIVITY_LESSONS.sciTrain,
+    cards: [
+      { id: 'picture', art: { img3d: 'apple' } },
+      { id: 'letters', art: { emoji: '🔤' } },
+      { id: 'wagon', art: { emoji: '🚂' } },
+    ],
+    check: { ask: 'wagon', other: 'letters' },
+  },
+  shop: {
+    lessonId: ACTIVITY_LESSONS.sciShop,
+    cards: [
+      { id: 'price', art: { emoji: '🏷️' } },
+      { id: 'coins', art: { emoji: '🪙' } },
+      { id: 'change', art: { emoji: '🛍️' } },
+    ],
+    check: { ask: 'coins', other: 'price' },
+  },
 }
 
 export function sciLessonCards(t: TFunction, game: SciGameId): LessonCard[] {

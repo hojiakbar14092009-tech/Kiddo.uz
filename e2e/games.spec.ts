@@ -117,3 +117,44 @@ test('the robot programmer: arrows lead it to the battery; a rock stops it', asy
   }
   await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
 })
+
+test('the word train: letters in order fill the wagons, five words', async ({ page }) => {
+  test.setTimeout(90_000)
+  await child(page)
+  await ready(page, '/sci/train')
+  await start(page)
+  // a wrong first letter only wobbles
+  await page.locator('[data-testid=tile-m]:enabled').first().click()
+  await expect(page.getByText('Bu harf emas. Boshqasini bos.')).toBeVisible()
+  for (const word of ['ari', 'non', 'olma', 'qor', 'baliq']) {
+    await expect(page.getByTestId('train')).toHaveAttribute('data-word', '')
+    for (const letter of word)
+      await page.locator(`[data-testid=tile-${letter}]:enabled`).first().click()
+    await expect(page.getByTestId('train')).toHaveAttribute('data-word', word)
+  }
+  await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
+})
+
+test('the little shop: pay exactly, then count the change', async ({ page }) => {
+  test.setTimeout(90_000)
+  await child(page)
+  await ready(page, '/sci/shop')
+  await start(page)
+  for (const coins of [
+    [2, 1],
+    [5, 1],
+    [5, 2, 1],
+  ]) {
+    await expect(page.getByTestId('shop-sum')).toContainText('0')
+    for (const coin of coins) await page.getByTestId(`shop-coin-${coin}`).click()
+    await expect(page.getByText('Sotib olding! Rahmat.')).toBeVisible()
+  }
+  await page.getByTestId('shop-change-3').click()
+  await expect(page.getByText('Yana bir sanab ko‘r.')).toBeVisible()
+  await page.getByTestId('shop-change-2').click()
+  await expect(page.getByText('Sotib olding! Rahmat.')).toBeVisible()
+  await expect(page.getByTestId('shop-change-1')).toBeEnabled({ timeout: 5_000 })
+  await expect(page.getByTestId('shop-question')).toContainText('4')
+  await page.getByTestId('shop-change-1').click()
+  await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
+})

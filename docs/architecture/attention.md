@@ -76,3 +76,8 @@ and in the attention helper's offer.
   lead a robot to its battery on a 4 × 4 board: sequences, `robotRules.ts`,
   every level checked solvable). Each mini-game is one file; the shared shell
   (`SciGamePage`) gives rules, play, reward (strand per game, once a day).
+- **More games** (Phase 66): the word train (letters into a word's wagons, in
+  order; three languages, Uzbek words without two-letter sounds, `trainRules.ts`)
+  and the little shop (pay exactly with coins of 1, 2 and 5, then count the
+  change, `shopRules.ts`). The "?" for the rules sits above the game, not in the
+  top bar (a phone's bar has no room).

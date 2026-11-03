@@ -1042,6 +1042,16 @@ export const uz = {
   },
   learnFirst: {
     sci: {
+      train: {
+        picture: { title: 'Rasmga qara', line: 'Rasmdagi narsaning nomini yig‘amiz.' },
+        letters: { title: 'Harflarni tartib bilan', line: 'Birinchi harfdan boshlab bos.' },
+        wagon: { title: 'Vagonlar to‘ladi', line: 'Hamma vagon to‘lsa, poyezd yuradi.' },
+      },
+      shop: {
+        price: { title: 'Narx yorlig‘i', line: 'Yorliqdagi son o‘yinchoq narxi.' },
+        coins: { title: 'Tangalar', line: 'Tangalar bir, ikki va besh bo‘ladi.' },
+        change: { title: 'Qaytim', line: 'Ko‘p bersang, do‘konchi qaytim beradi.' },
+      },
       scale: {
         apples: { title: 'Olmalarni sana', line: 'Chap pallada olmalar bor.' },
         blocks: { title: 'Raqamlarni qo‘y', line: 'O‘ng pallaga raqamli kubiklarni qo‘y.' },
@@ -2498,6 +2508,35 @@ export const uz = {
     },
   },
   sciGames: {
+    train: {
+      title: 'So‘z poyezdi',
+      intro: 'Vagonlarga harflarni joyla va so‘z yig‘!',
+      round: '{{n}} / {{total}}',
+      say: {
+        start: 'Rasmga qara. Harflarni tartib bilan bos.',
+        nope: 'Bu harf emas. Boshqasini bos.',
+        word: 'Tu-tuu! So‘z tayyor.',
+        done: 'Sen so‘z yig‘ishni bilasan!',
+      },
+    },
+    shop: {
+      title: 'Kichik do‘kon',
+      intro: 'Tangalar bilan o‘yinchoq sotib ol!',
+      round: '{{n}} / {{total}}',
+      paid: 'Berding: {{n}}',
+      give: '{{n}} tanga berish',
+      takeBack: '{{n}} tangani qaytarib olish',
+      changeQuestion: '{{paid}} tanga berding, narxi {{price}}. Qaytim nechta?',
+      say: {
+        pay: 'Narxga qara. Shuncha tanga ber.',
+        more: 'Yana tanga kerak.',
+        tooMuch: 'Ko‘p bo‘ldi. Bir tangani qaytarib ol.',
+        change: 'Qaytim nechta bo‘ladi?',
+        wrongChange: 'Yana bir sanab ko‘r.',
+        bought: 'Sotib olding! Rahmat.',
+        done: 'Sen pulni sanashni bilasan!',
+      },
+    },
     scale: {
       title: 'Sehrli tarozi',
       intro: 'Tarozini tenglashtir! Ikki palla teng bo‘lsin.',

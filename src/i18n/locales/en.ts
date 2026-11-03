@@ -1037,6 +1037,16 @@ export const en: Translation = {
   },
   learnFirst: {
     sci: {
+      train: {
+        picture: { title: 'Look at the picture', line: 'We build the name of the picture.' },
+        letters: { title: 'Letters in order', line: 'Start with the first letter.' },
+        wagon: { title: 'Full wagons', line: 'When every wagon is full, the train goes.' },
+      },
+      shop: {
+        price: { title: 'The price tag', line: 'The number on the tag is the price.' },
+        coins: { title: 'Coins', line: 'Coins are one, two and five.' },
+        change: { title: 'Change', line: 'Give too much and you get change back.' },
+      },
       scale: {
         apples: { title: 'Count the apples', line: 'The apples are on the left side.' },
         blocks: { title: 'Put on number blocks', line: 'Put number blocks on the right side.' },
@@ -2483,6 +2493,35 @@ export const en: Translation = {
     },
   },
   sciGames: {
+    train: {
+      title: 'Word train',
+      intro: 'Load the letters into the wagons and make a word!',
+      round: '{{n}} / {{total}}',
+      say: {
+        start: 'Look at the picture. Tap the letters in order.',
+        nope: 'Not that letter. Try another.',
+        word: 'Choo-choo! The word is ready.',
+        done: 'You can build words!',
+      },
+    },
+    shop: {
+      title: 'Little shop',
+      intro: 'Buy a toy with coins!',
+      round: '{{n}} / {{total}}',
+      paid: 'Paid: {{n}}',
+      give: 'Give {{n}}',
+      takeBack: 'Take back {{n}}',
+      changeQuestion: 'You gave {{paid}}, it costs {{price}}. How much change?',
+      say: {
+        pay: 'Look at the price. Give that many coins.',
+        more: 'You need more coins.',
+        tooMuch: 'Too much. Take one coin back.',
+        change: 'How much change comes back?',
+        wrongChange: 'Count once more.',
+        bought: 'You bought it! Thank you.',
+        done: 'You can count money!',
+      },
+    },
     scale: {
       title: 'Magic scale',
       intro: 'Balance the scale! Make both sides the same.',

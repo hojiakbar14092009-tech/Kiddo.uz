@@ -11,7 +11,15 @@ import {
 
 describe('science games', () => {
   it('has three games, each found by its id', () => {
-    expect(SCI_GAMES.map((game) => game.id)).toEqual(['water', 'magnet', 'float', 'scale', 'robot'])
+    expect(SCI_GAMES.map((game) => game.id)).toEqual([
+      'water',
+      'magnet',
+      'float',
+      'scale',
+      'robot',
+      'train',
+      'shop',
+    ])
     expect(sciGame('magnet')?.path).toBe('/sci/magnet')
     expect(sciGame('nope')).toBeNull()
   })

@@ -1,4 +1,5 @@
 import type { AppIconName } from '@/features/age/AppIcon'
+import type { SciGameId } from '@/features/sciGames/games'
 import type { GameType } from '@/features/tasks/games'
 
 /*
@@ -25,7 +26,7 @@ export type GameEntry =
       picture: { img3d: string } | { icon: AppIconName } | { emoji: string }
     }
 
-const sci = (id: 'water' | 'magnet' | 'float' | 'scale' | 'robot', emoji: string): GameEntry => ({
+const sci = (id: SciGameId, emoji: string): GameEntry => ({
   kind: 'page',
   id: `sci-${id}`,
   to: `/sci/${id}`,
@@ -36,6 +37,7 @@ const sci = (id: 'water' | 'magnet' | 'float' | 'scale' | 'robot', emoji: string
 export const GAMES: Readonly<Record<Subject, readonly GameEntry[]>> = {
   math: [
     sci('scale', '⚖️'),
+    sci('shop', '🛍️'),
     { kind: 'building', id: 'math-land' },
     {
       kind: 'page',
@@ -46,6 +48,7 @@ export const GAMES: Readonly<Record<Subject, readonly GameEntry[]>> = {
     },
   ],
   letters: [
+    sci('train', '🚂'),
     { kind: 'task', game: 'find-letter' },
     { kind: 'task', game: 'find-picture' },
     { kind: 'building', id: 'reading-house' },

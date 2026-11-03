@@ -31,6 +31,8 @@ export const ACTIVITY_LESSONS = {
   sciFloat: 'sci.float',
   sciScale: 'sci.scale',
   sciRobot: 'sci.robot',
+  sciTrain: 'sci.train',
+  sciShop: 'sci.shop',
 } as const
 
 export type ActivityLessonId = (typeof ACTIVITY_LESSONS)[keyof typeof ACTIVITY_LESSONS]

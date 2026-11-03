@@ -13,6 +13,9 @@ export type SciGameId =
   /** Phase 65: a balance to even out (adding), and a robot to program (sequences). */
   | 'scale'
   | 'robot'
+  /** Phase 66: letters into a word's wagons; paying and change in a shop. */
+  | 'train'
+  | 'shop'
 
 export interface SciGame {
   id: SciGameId
@@ -42,6 +45,8 @@ export const SCI_GAMES: readonly SciGame[] = [
   game('float', '🛶', 'mint', 'science'),
   game('scale', '⚖️', 'coin', 'number'),
   game('robot', '🤖', 'lilac', 'logic'),
+  game('train', '🚂', 'coral', 'letters'),
+  game('shop', '🛍️', 'mint', 'number'),
 ]
 
 export function sciGame(id: string | undefined): SciGame | null {
