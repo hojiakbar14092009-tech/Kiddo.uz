@@ -158,3 +158,66 @@ test('the little shop: pay exactly, then count the change', async ({ page }) => 
   await page.getByTestId('shop-change-1').click()
   await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
 })
+
+test('the shape builder: each glowing outline takes its shape', async ({ page }) => {
+  test.setTimeout(90_000)
+  await child(page)
+  await ready(page, '/sci/shapes')
+  await start(page)
+  await page.getByTestId('shape-circle').click()
+  await expect(page.getByText('Bu yerga kvadrat kerak.')).toBeVisible()
+  const pictures = [
+    ['square', 'triangle', 'rectangle'],
+    ['triangle', 'triangle', 'square'],
+    ['rectangle', 'square', 'circle', 'circle'],
+    ['rectangle', 'triangle', 'circle', 'triangle', 'triangle'],
+  ]
+  for (const shapes of pictures) {
+    await expect(page.getByTestId('shape-picture')).toHaveAttribute('data-filled', '0')
+    for (const [index, shape] of shapes.entries()) {
+      await page.getByTestId(`shape-${shape}`).click()
+      await expect(page.getByTestId('shape-picture')).toHaveAttribute('data-filled', `${index + 1}`)
+    }
+  }
+  await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
+})
+
+for (const { game, bins, wrong, hint } of [
+  {
+    game: 'habitats',
+    bins: ['forest', 'sea', 'desert', 'ice', 'forest', 'sea', 'desert', 'sea'],
+    wrong: 'sea',
+    hint: 'U daraxtlar orasida yashaydi.',
+  },
+  {
+    game: 'plate',
+    bins: [
+      'everyday',
+      'sometimes',
+      'everyday',
+      'sometimes',
+      'everyday',
+      'sometimes',
+      'everyday',
+      'sometimes',
+    ],
+    wrong: 'sometimes',
+    hint: 'Bu foydali. Uni har kuni yesa bo‘ladi.',
+  },
+]) {
+  test(`sorting (${game}): every thing goes to its place`, async ({ page }) => {
+    test.setTimeout(90_000)
+    await child(page)
+    await ready(page, `/sci/${game}`)
+    await start(page)
+    // a wrong place shakes, and the robot gives a hint
+    await page.getByTestId(`bin-${wrong}`).click()
+    await expect(page.getByText(hint)).toBeVisible()
+    for (const [index, bin] of bins.entries()) {
+      await expect(page.getByTestId('sort-item')).toBeVisible()
+      await expect(page.getByText(`${index + 1} / ${bins.length}`)).toBeVisible()
+      await page.getByTestId(`bin-${bin}`).click()
+    }
+    await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
+  })
+}

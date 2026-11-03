@@ -38,6 +38,7 @@ export const GAMES: Readonly<Record<Subject, readonly GameEntry[]>> = {
   math: [
     sci('scale', '⚖️'),
     sci('shop', '🛍️'),
+    sci('shapes', '🔺'),
     { kind: 'building', id: 'math-land' },
     {
       kind: 'page',
@@ -67,6 +68,7 @@ export const GAMES: Readonly<Record<Subject, readonly GameEntry[]>> = {
     sci('water', '💧'),
     sci('magnet', '🧲'),
     sci('float', '🛶'),
+    sci('habitats', '🦊'),
     { kind: 'building', id: 'garden' },
     { kind: 'building', id: 'science-lab' },
     { kind: 'building', id: 'dino-park' },
@@ -94,7 +96,7 @@ export const GAMES: Readonly<Record<Subject, readonly GameEntry[]>> = {
     { kind: 'task', game: 'memory' },
     { kind: 'building', id: 'robot-workshop' },
   ],
-  health: [{ kind: 'building', id: 'friendship-house' }],
+  health: [sci('plate', '🥕'), { kind: 'building', id: 'friendship-house' }],
 }
 
 export function entryKey(entry: GameEntry): string {

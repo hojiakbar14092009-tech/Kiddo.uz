@@ -81,3 +81,8 @@ and in the attention helper's offer.
   and the little shop (pay exactly with coins of 1, 2 and 5, then count the
   change, `shopRules.ts`). The "?" for the rules sits above the game, not in the
   top bar (a phone's bar has no room).
+- **The last three** (Phase 67): the shape builder (fill a picture's dashed
+  outlines with circles, squares, triangles and rectangles, `shapeRules.ts`), and
+  two sorting games on one screen (`Sort.tsx`, `sortRules.ts`): who lives where
+  (forest, sea, desert, ice) and the healthy plate (food for every day, and treats
+  for sometimes; never "bad" food). Ten mini-games in all.

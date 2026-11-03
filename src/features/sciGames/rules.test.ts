@@ -10,7 +10,7 @@ import {
 } from './rules'
 
 describe('science games', () => {
-  it('has three games, each found by its id', () => {
+  it('has ten games, each found by its id', () => {
     expect(SCI_GAMES.map((game) => game.id)).toEqual([
       'water',
       'magnet',
@@ -19,6 +19,9 @@ describe('science games', () => {
       'robot',
       'train',
       'shop',
+      'shapes',
+      'habitats',
+      'plate',
     ])
     expect(sciGame('magnet')?.path).toBe('/sci/magnet')
     expect(sciGame('nope')).toBeNull()

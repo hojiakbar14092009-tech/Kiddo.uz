@@ -81,6 +81,33 @@ export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
     ],
     check: { ask: 'coins', other: 'price' },
   },
+  shapes: {
+    lessonId: ACTIVITY_LESSONS.sciShapes,
+    cards: [
+      { id: 'outline', art: { img3d: 'house' } },
+      { id: 'tray', art: { emoji: '🔺' } },
+      { id: 'glow', art: { emoji: '✨' } },
+    ],
+    check: { ask: 'tray', other: 'outline' },
+  },
+  habitats: {
+    lessonId: ACTIVITY_LESSONS.sciHabitats,
+    cards: [
+      { id: 'animal', art: { img3d: 'fox' } },
+      { id: 'home', art: { img3d: 'pine' } },
+      { id: 'tap', art: { emoji: '👆' } },
+    ],
+    check: { ask: 'animal', other: 'home' },
+  },
+  plate: {
+    lessonId: ACTIVITY_LESSONS.sciPlate,
+    cards: [
+      { id: 'everyday', art: { img3d: 'carrot' } },
+      { id: 'sometimes', art: { img3d: 'candy' } },
+      { id: 'tap', art: { emoji: '👆' } },
+    ],
+    check: { ask: 'everyday', other: 'sometimes' },
+  },
 }
 
 export function sciLessonCards(t: TFunction, game: SciGameId): LessonCard[] {

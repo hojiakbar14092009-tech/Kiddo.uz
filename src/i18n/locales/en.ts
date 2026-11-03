@@ -1037,6 +1037,21 @@ export const en: Translation = {
   },
   learnFirst: {
     sci: {
+      shapes: {
+        outline: { title: 'A picture in lines', line: 'The picture is made of shapes.' },
+        tray: { title: 'Shapes', line: 'A circle, a square, a triangle and a rectangle.' },
+        glow: { title: 'The glowing place', line: 'Tap the shape for the glowing place.' },
+      },
+      habitats: {
+        animal: { title: 'An animal comes', line: 'One animal comes at a time.' },
+        home: { title: 'Homes', line: 'Forest, sea, desert and ice.' },
+        tap: { title: 'Tap its home', line: 'Tap the place where it lives.' },
+      },
+      plate: {
+        everyday: { title: 'Every day', line: 'Fruit, vegetables and milk are good every day.' },
+        sometimes: { title: 'Sometimes', line: 'We eat sweets sometimes, a little.' },
+        tap: { title: 'Tap where', line: 'Tap the box the food goes in.' },
+      },
       train: {
         picture: { title: 'Look at the picture', line: 'We build the name of the picture.' },
         letters: { title: 'Letters in order', line: 'Start with the first letter.' },
@@ -2493,6 +2508,80 @@ export const en: Translation = {
     },
   },
   sciGames: {
+    sortCount: '{{n}} / {{total}}',
+    shapes: {
+      title: 'Shape builder',
+      intro: 'Let’s build pictures from shapes!',
+      round: '{{n}} / {{total}}',
+      kinds: { circle: 'Circle', square: 'Square', triangle: 'Triangle', rectangle: 'Rectangle' },
+      pictures: { house: 'House', tree: 'Tree', car: 'Car', rocket: 'Rocket' },
+      need: {
+        circle: 'A circle goes here.',
+        square: 'A square goes here.',
+        triangle: 'A triangle goes here.',
+        rectangle: 'A rectangle goes here.',
+      },
+      made: {
+        house: 'The house is ready! Someone can live here.',
+        tree: 'The tree is ready! So pretty.',
+        car: 'The car is ready! Beep beep!',
+        rocket: 'The rocket is ready! Let’s fly!',
+      },
+      say: {
+        start: 'Look at the glowing place. Pick its shape.',
+        done: 'You know your shapes!',
+      },
+    },
+    habitats: {
+      title: 'Who lives where?',
+      intro: 'Take the animals home!',
+      bins: { forest: 'Forest', sea: 'Sea', desert: 'Desert', ice: 'Ice' },
+      items: {
+        fox: 'Fox',
+        whale: 'Whale',
+        camel: 'Camel',
+        penguin: 'Penguin',
+        bear: 'Bear',
+        dolphin: 'Dolphin',
+        lizard: 'Lizard',
+        fish: 'Fish',
+      },
+      hint: {
+        forest: 'It lives among the trees.',
+        sea: 'It swims in the water.',
+        desert: 'It lives in the hot sand.',
+        ice: 'It lives on the cold ice.',
+      },
+      say: {
+        start: 'Where does this animal live?',
+        right: 'Right! You found its home.',
+        done: 'Every animal is home!',
+      },
+    },
+    plate: {
+      title: 'Healthy plate',
+      intro: 'Which food is for every day, and which for sometimes?',
+      bins: { everyday: 'Every day', sometimes: 'Sometimes' },
+      items: {
+        carrot: 'Carrot',
+        candy: 'Sweet',
+        milk: 'Milk',
+        doughnut: 'Doughnut',
+        banana: 'Banana',
+        lollipop: 'Lollipop',
+        cucumber: 'Cucumber',
+        cookie: 'Cookie',
+      },
+      hint: {
+        everyday: 'This is good for you. Eat it every day.',
+        sometimes: 'This is a treat. We eat it sometimes.',
+      },
+      say: {
+        start: 'Every day, or sometimes?',
+        right: 'Right!',
+        done: 'You know healthy food!',
+      },
+    },
     train: {
       title: 'Word train',
       intro: 'Load the letters into the wagons and make a word!',

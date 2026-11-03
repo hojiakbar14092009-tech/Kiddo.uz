@@ -68,6 +68,17 @@ export const SPOKEN_PARTS = [
   'sciGames.train.say',
   'sciGames.shop.intro',
   'sciGames.shop.say',
+  // Phase 67: the shape builder, who lives where, the healthy plate
+  'sciGames.shapes.intro',
+  'sciGames.shapes.need',
+  'sciGames.shapes.made',
+  'sciGames.shapes.say',
+  'sciGames.habitats.intro',
+  'sciGames.habitats.hint',
+  'sciGames.habitats.say',
+  'sciGames.plate.intro',
+  'sciGames.plate.hint',
+  'sciGames.plate.say',
   'shorts.say',
 ]
 const COUNTS = Array.from({ length: 41 }, (_, i) => i)

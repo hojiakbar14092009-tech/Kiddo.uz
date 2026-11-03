@@ -1042,6 +1042,21 @@ export const uz = {
   },
   learnFirst: {
     sci: {
+      shapes: {
+        outline: { title: 'Chiziqli rasm', line: 'Rasm shakllardan iborat.' },
+        tray: { title: 'Shakllar', line: 'Doira, kvadrat, uchburchak va to‘rtburchak.' },
+        glow: { title: 'Yonib turgan joy', line: 'Yonib turgan joyga mos shaklni bos.' },
+      },
+      habitats: {
+        animal: { title: 'Hayvon keladi', line: 'Har safar bitta hayvon keladi.' },
+        home: { title: 'Uylar', line: 'O‘rmon, dengiz, cho‘l va muzlik.' },
+        tap: { title: 'Uyini bos', line: 'Hayvon yashaydigan joyni bos.' },
+      },
+      plate: {
+        everyday: { title: 'Har kuni', line: 'Meva, sabzavot va sut har kuni foydali.' },
+        sometimes: { title: 'Ba’zan', line: 'Shirinliklarni ba’zan, ozgina yeymiz.' },
+        tap: { title: 'Joyini bos', line: 'Ovqat qaysi qutiga borishini bos.' },
+      },
       train: {
         picture: { title: 'Rasmga qara', line: 'Rasmdagi narsaning nomini yig‘amiz.' },
         letters: { title: 'Harflarni tartib bilan', line: 'Birinchi harfdan boshlab bos.' },
@@ -2508,6 +2523,85 @@ export const uz = {
     },
   },
   sciGames: {
+    sortCount: '{{n}} / {{total}}',
+    shapes: {
+      title: 'Shakl quruvchi',
+      intro: 'Shakllardan rasm yasaymiz!',
+      round: '{{n}} / {{total}}',
+      kinds: {
+        circle: 'Doira',
+        square: 'Kvadrat',
+        triangle: 'Uchburchak',
+        rectangle: 'To‘rtburchak',
+      },
+      pictures: { house: 'Uy', tree: 'Archa', car: 'Mashina', rocket: 'Raketa' },
+      need: {
+        circle: 'Bu yerga doira kerak.',
+        square: 'Bu yerga kvadrat kerak.',
+        triangle: 'Bu yerga uchburchak kerak.',
+        rectangle: 'Bu yerga to‘rtburchak kerak.',
+      },
+      made: {
+        house: 'Uy tayyor! Unda yashasa bo‘ladi.',
+        tree: 'Archa tayyor! Qanday chiroyli.',
+        car: 'Mashina tayyor! Bib-bib!',
+        rocket: 'Raketa tayyor! Uchamiz!',
+      },
+      say: {
+        start: 'Yonib turgan joyga qara. Shaklini tanla.',
+        done: 'Sen shakllarni bilasan!',
+      },
+    },
+    habitats: {
+      title: 'Kim qayerda yashaydi?',
+      intro: 'Hayvonlarni uyiga olib bor!',
+      bins: { forest: 'O‘rmon', sea: 'Dengiz', desert: 'Cho‘l', ice: 'Muzlik' },
+      items: {
+        fox: 'Tulki',
+        whale: 'Kit',
+        camel: 'Tuya',
+        penguin: 'Pingvin',
+        bear: 'Ayiq',
+        dolphin: 'Delfin',
+        lizard: 'Kaltakesak',
+        fish: 'Baliq',
+      },
+      hint: {
+        forest: 'U daraxtlar orasida yashaydi.',
+        sea: 'U suvda suzadi.',
+        desert: 'U issiq qumda yashaydi.',
+        ice: 'U sovuq muzda yashaydi.',
+      },
+      say: {
+        start: 'Bu hayvon qayerda yashaydi?',
+        right: 'To‘g‘ri! Uyini topding.',
+        done: 'Hamma hayvon uyida!',
+      },
+    },
+    plate: {
+      title: 'Sog‘lom likopcha',
+      intro: 'Qaysi ovqat har kuni, qaysi biri ba’zan?',
+      bins: { everyday: 'Har kuni', sometimes: 'Ba’zan' },
+      items: {
+        carrot: 'Sabzi',
+        candy: 'Konfet',
+        milk: 'Sut',
+        doughnut: 'Donut',
+        banana: 'Banan',
+        lollipop: 'Ledenets',
+        cucumber: 'Bodring',
+        cookie: 'Pechenye',
+      },
+      hint: {
+        everyday: 'Bu foydali. Uni har kuni yesa bo‘ladi.',
+        sometimes: 'Bu shirinlik. Uni ba’zan yeymiz.',
+      },
+      say: {
+        start: 'Har kuni yeymizmi yoki ba’zan?',
+        right: 'To‘g‘ri!',
+        done: 'Sen sog‘lom ovqatni bilasan!',
+      },
+    },
     train: {
       title: 'So‘z poyezdi',
       intro: 'Vagonlarga harflarni joyla va so‘z yig‘!',

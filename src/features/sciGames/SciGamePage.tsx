@@ -25,6 +25,9 @@ import { RobotProgrammer } from './play/Robot'
 import { MagicScale } from './play/Scale'
 import { LittleShop } from './play/Shop'
 import { WordTrain } from './play/Train'
+import { ShapeBuilder } from './play/Shapes'
+import { SortGame } from './play/Sort'
+import { HABITATS, PLATE } from './play/sortRules'
 import { WaterTrip } from './play/Water'
 
 type Phase =
@@ -145,6 +148,13 @@ function SciGameScreen({ game }: { game: SciGame }) {
       )}
       {phase.kind === 'play' && game.id === 'train' && <WordTrain onDone={finish(phase.run)} />}
       {phase.kind === 'play' && game.id === 'shop' && <LittleShop onDone={finish(phase.run)} />}
+      {phase.kind === 'play' && game.id === 'shapes' && <ShapeBuilder onDone={finish(phase.run)} />}
+      {phase.kind === 'play' && game.id === 'habitats' && (
+        <SortGame set={HABITATS} game="habitats" onDone={finish(phase.run)} />
+      )}
+      {phase.kind === 'play' && game.id === 'plate' && (
+        <SortGame set={PLATE} game="plate" onDone={finish(phase.run)} />
+      )}
 
       {phase.kind === 'done' && (
         <>
