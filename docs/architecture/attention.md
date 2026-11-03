@@ -143,7 +143,9 @@ and in the attention helper's offer.
   words, and a warm close-up sound (EQ, gentle de-essing, a small room); checked
   with a speech recogniser that it stays as clear as before (`synth.py`).
 - **The app's own clips** get the same warm, clear sound at a higher quality
-  (24 kHz, 48 kbps; `generate.py`), re-recorded with `generate.py --force`.
+  (24 kHz, 48 kbps; `generate.py`): every new clip has it; re-recording all ~11 800
+  clips (`generate.py --force`) takes about eight hours on this machine, so it is a
+  separate run, best done together with the premium voices.
 - **Premium voices, when credits are added:** record each line with MiniMax or
   ElevenLabs (Higgsfield / Flashloop), save it as `public/vo/<short>/<lang>-<n>.wav`,
   then `python3 marketing/shorts/synth.py --timings-only` and `render.sh`: every scene
