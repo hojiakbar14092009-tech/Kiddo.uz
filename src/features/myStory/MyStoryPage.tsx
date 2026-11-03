@@ -19,6 +19,7 @@ import {
   type StoryChoices,
 } from './content'
 import { useMyStoryStore, type SavedStory } from './store'
+import { FitWords } from '@/components/ui/FitWords'
 
 const NO_STORIES: readonly SavedStory[] = []
 const TINTS = ['bg-sky-soft', 'bg-coin-soft', 'bg-lilac-soft', 'bg-primary-soft'] as const
@@ -115,9 +116,10 @@ function StoryBuilder({ onDone }: { onDone: (choices: StoryChoices) => void }) {
                 >
                   <Img3D name={CHOICE_PICTURE[current][id]!} className="size-[78%]" eager />
                 </span>
-                <span className="text-center font-display text-lg leading-tight font-bold [overflow-wrap:anywhere]">
-                  {tDynamic(t, `myStory.names.${current}.${id}`)}
-                </span>
+                <FitWords
+                  text={tDynamic(t, `myStory.names.${current}.${id}`)}
+                  className="text-center font-display text-lg leading-tight font-bold"
+                />
               </button>
             </li>
           ))}

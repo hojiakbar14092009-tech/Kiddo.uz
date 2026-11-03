@@ -30,6 +30,7 @@ import { HomeworkCard } from './HomeworkCard'
 import { JourneyPath } from './JourneyPath'
 import { DailyQuestCard } from '@/features/city/DailyQuestCard'
 import { JourneyCard } from '@/features/city/JourneyCard'
+import { FitWords } from '@/components/ui/FitWords'
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -191,10 +192,11 @@ function ContinueButton({ plan }: { plan: ReturnType<typeof dailyPlanState> }) {
           <Img3D name="book" className="size-[70%]" />
         )}
       </span>
-      <span className="flex min-w-0 flex-col text-left">
-        <span className="font-display text-3xl leading-tight font-extrabold sm:text-4xl">
-          {next ? t('home.continue') : t('home.playMore')}
-        </span>
+      <span className="flex min-w-0 flex-1 flex-col text-left">
+        <FitWords
+          text={next ? t('home.continue') : t('home.playMore')}
+          className="font-display text-3xl leading-tight font-extrabold sm:text-4xl"
+        />
         {next && (
           <span className="text-lg font-bold opacity-95">
             {t('home.nextGame', { game: t(GAME_META[next.game].titleKey) })}

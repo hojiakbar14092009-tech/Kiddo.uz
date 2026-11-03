@@ -3,6 +3,7 @@ import { useEffect, type CSSProperties, type ReactNode } from 'react'
 import { Screen } from '@/components/layout/Screen'
 import { SHORT_SCREEN } from '@/components/layout/shortScreen'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
+import { fitSize } from '@/components/ui/fitSize'
 import { Img3D } from '@/components/ui/Img3D'
 import { StepDots } from '@/components/ui/Progress'
 import { SpeakButton } from '@/features/learn/SpeakButton'
@@ -43,9 +44,7 @@ export function DinoPicture({
  * query) so the longest word of the name fits on its line, in every language.
  */
 export function ChoiceName({ name }: { name: string }) {
-  const longest = Math.max(...name.split(/\s+/).map((word) => word.length))
-  // a bold display letter is at most ~0.64 em wide (measured, Cyrillic widest), plus a margin
-  const fit = `${(100 / (Math.max(longest, 6) * 0.66)).toFixed(2)}cqi`
+  const fit = fitSize(name, 6)
   return (
     <span className="@container w-full">
       <span

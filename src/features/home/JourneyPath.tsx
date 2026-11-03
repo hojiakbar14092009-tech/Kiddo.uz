@@ -6,6 +6,7 @@ import { CheckIcon } from '@/components/icons'
 import { AppIcon } from '@/features/age/AppIcon'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import type { DailyPlanState, PlanStepStatus } from './dailyPlan'
+import { FitWords } from '@/components/ui/FitWords'
 
 const STOP_CLASSES: Record<PlanStepStatus, string> = {
   done: 'border-primary bg-primary-soft shadow-[0_7px_0_var(--color-primary-shadow)]',
@@ -57,7 +58,7 @@ export function JourneyPath({ plan }: { plan: DailyPlanState }) {
                   to={`/tasks/${step.game}`}
                   aria-label={`${index + 1}. ${title} — ${status}`}
                   aria-current={step.status === 'next' ? 'step' : undefined}
-                  className="group flex flex-col items-center gap-2 rounded-3xl"
+                  className="group flex w-full flex-col items-center gap-2 rounded-3xl"
                 >
                   <motion.span
                     animate={glow ? { scale: [1, 1.06, 1] } : undefined}
@@ -79,20 +80,21 @@ export function JourneyPath({ plan }: { plan: DailyPlanState }) {
                       </span>
                     )}
                   </motion.span>
-                  <span className="text-center font-display text-base leading-tight font-bold [overflow-wrap:anywhere] hyphens-auto sm:text-xl">
-                    {title}
-                  </span>
+                  <FitWords
+                    text={title}
+                    className="text-center font-display text-base leading-tight font-bold sm:text-xl"
+                  />
                 </Link>
                 <span
                   aria-hidden="true"
                   className={clsx(
-                    'rounded-full px-3 py-0.5 text-center text-sm font-semibold [overflow-wrap:anywhere] sm:text-base',
+                    'w-full rounded-full px-1.5 py-0.5 text-center text-sm font-semibold sm:px-3 sm:text-base',
                     step.status === 'done' && 'bg-primary-soft text-primary-ink',
                     step.status === 'next' && 'bg-coin-soft text-ink',
                     step.status === 'later' && 'text-ink-soft',
                   )}
                 >
-                  {status}
+                  <FitWords text={status} />
                 </span>
               </li>
             )

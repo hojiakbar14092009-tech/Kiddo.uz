@@ -1,7 +1,18 @@
 import clsx from 'clsx'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import type { CSSProperties } from 'react'
 import { useCanUse } from '@/domain/entitlements'
 import type { MascotMessage } from './types'
+
+/**
+ * The bubble text's size at which its longest word fits the room a phone leaves beside
+ * the mascot and the buttons (about the screen width less 13rem; a letter of a long
+ * word is at most ~0.68 em wide in the bubble's font, measured).
+ */
+function bubbleFit(text: string): string {
+  const longest = Math.max(1, ...text.split(/\s+/).map((word) => [...word].length))
+  return `calc((100vw - 13rem) / ${(longest * 0.68).toFixed(2)})`
+}
 
 interface MascotThoughtBubbleProps {
   message: MascotMessage | null
@@ -86,15 +97,22 @@ export function MascotThoughtBubble({
               style={{ transformOrigin: fromLeft ? '0% 100%' : '100% 100%' }}
               className={clsx(
                 // Never wider than the screen; on phones the emoji sits on the corner like a sticker.
-                'relative flex max-w-[min(22rem,calc(100vw-2rem))] min-w-0 items-center gap-3 bg-surface px-4 py-3 shadow-[0_5px_0_var(--color-line)] sm:px-5',
+                'relative flex max-w-[min(22rem,calc(100vw-2rem))] min-w-0 items-center gap-3 bg-surface px-3 py-3 min-[380px]:px-4 shadow-[0_5px_0_var(--color-line)] sm:px-5',
                 isPro ? 'rounded-3xl' : 'rounded-[2.5rem]',
               )}
             >
               {!isPro && <CloudBumps />}
               {/* A readable width, so it never wraps one word per line (but fits small phones).
-                  A word longer than the bubble (large system text) breaks instead of running
-                  under the buttons beside it. */}
-              <span className="relative min-w-[min(8.5rem,calc(100vw-13rem))] font-body break-words text-lg leading-snug font-extrabold sm:min-w-[10rem] sm:text-xl">
+                  On a phone the text shrinks a little (never below 13 px; px, not rem, as the young
+                  children's look enlarges rem) when its longest word
+                  would not fit the room beside the buttons ("Математическ / ая"). A word longer
+                  than the bubble even then (the smallest phones, large system text) is
+                  hyphenated where the language allows, else broken, instead of running under
+                  the buttons beside it. */}
+              <span
+                style={{ '--fit': bubbleFit(message.text) } as CSSProperties}
+                className="relative min-w-[min(8.5rem,calc(100vw-13rem))] font-body text-[length:max(13px,min(1.125rem,var(--fit)))] break-words hyphens-auto leading-snug font-extrabold sm:min-w-[10rem] sm:text-xl"
+              >
                 {message.text}
               </span>
               {message.emoji && (

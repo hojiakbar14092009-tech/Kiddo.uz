@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { Img3D } from '@/components/ui/Img3D'
 import { useWorld } from '@/domain/universe'
 import { tDynamic } from '@/lib/tDynamic'
+import { FitWords } from '@/components/ui/FitWords'
 
 /** A titled group of places in a section. */
 export function PlaceGroup({
@@ -55,9 +56,10 @@ export function PlaceCard({
       >
         {picture}
       </span>
-      <span className="text-center font-display text-lg leading-tight font-bold [overflow-wrap:anywhere] hyphens-auto sm:text-2xl">
-        {label}
-      </span>
+      <FitWords
+        text={label}
+        className="text-center font-display text-lg leading-tight font-bold sm:text-2xl"
+      />
       {detail && (
         <span id={detailId} className="text-center text-sm text-ink-soft sm:text-base">
           {detail}

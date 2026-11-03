@@ -53,7 +53,7 @@ function Card({
           <a
             href={href}
             aria-describedby={`${testId}-title`}
-            className="self-start text-sm font-semibold text-primary-ink underline"
+            className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-primary-ink underline"
           >
             {t('parent.glance.more')}
           </a>
@@ -62,7 +62,7 @@ function Card({
             to={href}
             replace
             aria-describedby={`${testId}-title`}
-            className="self-start text-sm font-semibold text-primary-ink underline"
+            className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-primary-ink underline"
           >
             {t('parent.glance.more')}
           </Link>

@@ -11,6 +11,7 @@ import { useLanguage } from '@/store/settingsStore'
 import { taleById, taleText, talesFor, type AgeLevel, type TaleSpec } from './content'
 import { TaleView } from './TaleView'
 import { TALES_UI } from './ui'
+import { FitWords } from '@/components/ui/FitWords'
 
 function TaleCard({ tale, language }: { tale: TaleSpec; language: Language }) {
   const ui = TALES_UI[language]
@@ -18,14 +19,19 @@ function TaleCard({ tale, language }: { tale: TaleSpec; language: Language }) {
     <Link
       to={`/learn/tales/${tale.id}`}
       data-testid={`tale-${tale.id}`}
-      className="flex flex-col items-center gap-2 rounded-[32px] bg-surface p-4 text-center shadow-[0_7px_0_var(--color-line)] transition-transform active:translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="flex items-center gap-4 rounded-[32px] bg-surface p-4 text-left shadow-[0_7px_0_var(--color-line)] transition-transform active:translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-col sm:gap-2 sm:text-center"
     >
-      <Img3D name={tale.cover} className="size-24 sm:size-28" />
-      <span className="font-display text-xl leading-tight font-bold">
-        {taleText(language, tale.id).title}
-      </span>
-      <span className="rounded-full bg-sky-soft px-3 py-0.5 text-sm font-bold">
-        {ui.forAge(tale.age)}
+      <Img3D name={tale.cover} className="size-20 shrink-0 sm:size-28" />
+      {/* a phone lists the tales one per row, so a long title ("Burunduqchaning") keeps
+          its size beside the picture instead of shrinking into a narrow card */}
+      <span className="flex min-w-0 flex-1 flex-col items-start gap-2 self-stretch justify-center sm:items-center">
+        <FitWords
+          text={taleText(language, tale.id).title}
+          className="font-display text-xl leading-tight font-bold"
+        />
+        <span className="rounded-full bg-sky-soft px-3 py-0.5 text-sm font-bold">
+          {ui.forAge(tale.age)}
+        </span>
       </span>
     </Link>
   )
@@ -43,7 +49,7 @@ function TaleList({ language, level }: { language: Language; level: AgeLevel }) 
     react('greet', { text: ui.intro, emoji: '📚' }, { speak: false })
   }, [react, ui.intro])
 
-  const grid = 'grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6'
+  const grid = 'grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-6'
   return (
     <LearnShell title={t('learn.sections.tales')} voice={false}>
       <h2 className="text-center font-display text-2xl font-bold">{ui.intro}</h2>

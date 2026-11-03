@@ -44,7 +44,7 @@ export function SettingsSection() {
             step={5}
             value={percent}
             onChange={(event) => setVolume(Number(event.target.value) / 100)}
-            className="h-10 w-full accent-primary"
+            className="h-11 w-full accent-primary"
           />
         </label>
         <Button

@@ -103,7 +103,7 @@ function NumberScreen({ index }: { index: number }) {
             {done ? t('number.counted', { count: total }) : t('number.countHint')}
           </p>
           <ul
-            className="grid w-full max-w-xl grid-cols-5 gap-3 rounded-[30px] p-4 sm:gap-4"
+            className="grid w-full max-w-xl grid-cols-4 gap-2 rounded-[30px] p-3 min-[380px]:grid-cols-5 min-[380px]:gap-3 min-[380px]:p-4 sm:gap-4"
             style={{ backgroundColor: palette.background }}
           >
             {Array.from({ length: entry.value }, (_, picture) => {

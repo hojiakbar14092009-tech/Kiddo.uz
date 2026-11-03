@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 import { Img3D } from '@/components/ui/Img3D'
 import { SECTION_TABS, SECTIONS } from './sections'
+import { FitWords } from '@/components/ui/FitWords'
 
 /**
  * The child's four sections as a bar at the bottom of the hub pages (Phase
@@ -38,13 +39,18 @@ export function ChildTabBar() {
                     <span
                       aria-hidden="true"
                       className={clsx(
-                        'flex size-10 items-center justify-center rounded-2xl transition-transform short:size-8',
+                        'flex size-10 shrink-0 items-center justify-center rounded-2xl transition-transform short:size-8',
                         isActive && 'scale-110 bg-primary-soft',
                       )}
                     >
                       <Img3D name={tab.icon} className="size-8 short:size-6" eager />
                     </span>
-                    <span className="[overflow-wrap:anywhere]">{t(`tabs.${section}`)}</span>
+                    {/* a phone held sideways sets the label beside the icon, with room to spare:
+                        there it keeps its own width (no size container) */}
+                    <FitWords
+                      text={t(`tabs.${section}`)}
+                      className="short:w-auto short:[container-type:normal]"
+                    />
                   </>
                 )}
               </NavLink>
