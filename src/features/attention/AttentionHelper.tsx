@@ -104,7 +104,11 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
     if (action.kind !== 'welcomeBack') playCue('alert', { byTap: true })
     clearTimeout(speakTimer.current)
     speakTimer.current = setTimeout(
-      () => void audioManager.speak([{ text }], { language: spoken }),
+      () => {
+        // a lesson's own words may have started meanwhile: the reminder never cuts them off
+        if (action.kind !== 'welcomeBack' && audioManager.getStatus() !== 'idle') return
+        void audioManager.speak([{ text }], { language: spoken })
+      },
       action.kind === 'welcomeBack' ? 0 : SPEAK_AFTER_MS,
     )
   }, [])

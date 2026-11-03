@@ -99,30 +99,49 @@ export function particleAt(
   index: number,
   t: number,
 ): [number, number, number] {
+  return particleInto([0, 0, 0], weather, start, index, t)
+}
+
+function put(out: [number, number, number], x: number, y: number, z: number) {
+  out[0] = x
+  out[1] = y
+  out[2] = z
+  return out
+}
+
+/** The same, written into `out` (the 3D stage calls it every frame: nothing new is made). */
+export function particleInto(
+  out: [number, number, number],
+  weather: Weather,
+  start: readonly [number, number, number],
+  index: number,
+  t: number,
+): [number, number, number] {
   const [x, y, z] = start
   const wrapY = (v: number) => ((v % 5) + 5) % 5
   const wrapX = (v: number) => ((((v + 6) % 12) + 12) % 12) - 6
   const phase = index * 1.7
   switch (weather) {
     case 'snow':
-      return [x + Math.sin(t * 0.8 + phase) * 0.3, wrapY(y - t * 0.45), z]
+      return put(out, x + Math.sin(t * 0.8 + phase) * 0.3, wrapY(y - t * 0.45), z)
     case 'leaves':
     case 'petals':
-      return [x + Math.sin(t * 1.1 + phase) * 0.6, wrapY(y - t * 0.3), z]
+      return put(out, x + Math.sin(t * 1.1 + phase) * 0.6, wrapY(y - t * 0.3), z)
     case 'confetti':
-      return [x + Math.sin(t * 2 + phase) * 0.25, wrapY(y - t * 0.9), z]
+      return put(out, x + Math.sin(t * 2 + phase) * 0.25, wrapY(y - t * 0.9), z)
     case 'bubbles':
-      return [x + Math.sin(t * 1.4 + phase) * 0.15, wrapY(y + t * 0.5), z]
+      return put(out, x + Math.sin(t * 1.4 + phase) * 0.15, wrapY(y + t * 0.5), z)
     case 'dust':
-      return [wrapX(x + t * 0.6), y * 0.4 + Math.sin(t + phase) * 0.1, z]
+      return put(out, wrapX(x + t * 0.6), y * 0.4 + Math.sin(t + phase) * 0.1, z)
     case 'fireflies':
-      return [
+      return put(
+        out,
         x + Math.sin(t * 0.5 + phase) * 0.8,
         0.4 + y * 0.5 + Math.sin(t * 0.9 + phase) * 0.3,
         z,
-      ]
+      )
     case 'stars':
-      return [x * 1.2, 2.6 + y * 0.6, -6]
+      return put(out, x * 1.2, 2.6 + y * 0.6, -6)
   }
 }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { track } from '@/domain/analytics'
 import { useTranslation } from 'react-i18next'
 import { askCamera } from '@/features/attention/askCamera'
 import { useAttentionStore } from '@/store/attentionStore'
@@ -38,7 +39,11 @@ export function AttentionPanel() {
             { value: 'off', label: t('attentionSettings.stateOff') },
           ]}
           value={on ? 'on' : 'off'}
-          onChange={(value) => answer(value === 'on', value === 'on' && camera)}
+          onChange={(value) => {
+            answer(value === 'on', value === 'on' && camera)
+            // the admin's counts see a later "yes" too (each is sent once per device)
+            track(value === 'on' ? 'attention_yes' : 'attention_no')
+          }}
         />
       </div>
       {on && (

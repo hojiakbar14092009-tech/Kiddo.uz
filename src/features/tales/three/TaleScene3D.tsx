@@ -9,6 +9,7 @@ import type { Actor, SceneSpec } from '../content'
 import {
   MOOD_FACE,
   particleAt,
+  particleInto,
   poseAt,
   seededPoints,
   WEATHER_COLOURS,
@@ -402,19 +403,25 @@ function Particles({ weather, reducedMotion }: { weather: Weather; reducedMotion
     })
     return { positions, colours }
   }, [starts, weather])
+  const scratch = useMemo<[number, number, number]>(() => [0, 0, 0], [])
   useFrame(({ clock }) => {
     const node = points.current
+    // stars stand still (only their light twinkles below)
     if (!node || reducedMotion) return
+    if (weather === 'stars') {
+      ;(node.material as THREE.PointsMaterial).opacity =
+        0.65 + Math.sin(clock.elapsedTime * 2.2) * 0.3
+      return
+    }
     const t = clock.elapsedTime
     const attribute = node.geometry.getAttribute('position') as THREE.BufferAttribute
-    starts.forEach((start, index) => {
-      const [x, y, z] = particleAt(weather, start, index, t)
-      attribute.setXYZ(index, x, y, z)
-    })
+    for (let index = 0; index < starts.length; index += 1) {
+      particleInto(scratch, weather, starts[index]!, index, t)
+      attribute.setXYZ(index, scratch[0], scratch[1], scratch[2])
+    }
     attribute.needsUpdate = true
     const material = node.material as THREE.PointsMaterial
-    if (weather === 'fireflies' || weather === 'stars')
-      material.opacity = 0.65 + Math.sin(t * 2.2) * 0.3
+    if (weather === 'fireflies') material.opacity = 0.65 + Math.sin(t * 2.2) * 0.3
   })
   const size = weather === 'confetti' || weather === 'leaves' || weather === 'petals' ? 0.16 : 0.12
   return (
