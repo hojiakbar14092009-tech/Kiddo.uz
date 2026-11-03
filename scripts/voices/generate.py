@@ -48,6 +48,13 @@ VOICES = {
     'en': ('vits-piper-en_GB-cori-high/en_GB-cori-high.onnx', 1.25, 0.45, None),
 }
 
+# The sound of every clip (Phase 72): warm and close, never boomy or hissy.
+CLIP_CHAIN = (
+    'adelay=60,apad=pad_dur=0.12,highpass=f=70,'
+    'equalizer=f=220:t=q:w=1:g=1.5,equalizer=f=3200:t=q:w=1.2:g=1.5,deesser=i=0.3,'
+    'loudnorm=I=-16:TP=-1.5:LRA=11'
+)
+
 # --- the same rules as src/services/audio/phrases.ts -------------------------
 
 def _pictograph(ch: str) -> bool:
@@ -107,9 +114,10 @@ def write_mp3(audio: np.ndarray, rate: int, target: Path) -> None:
         subprocess.run(
             [
                 'ffmpeg', '-loglevel', 'error', '-y', '-i', tmp.name,
-                # a little air before and after, even loudness for every clip
-                '-af', 'adelay=60,apad=pad_dur=0.12,loudnorm=I=-16:TP=-1.5:LRA=11',
-                '-ar', '22050', '-ac', '1', '-c:a', 'libmp3lame', '-b:a', '40k',
+                # a little air before and after, a warmer and clearer voice (Phase 72: body in
+                # the low mids, consonants lifted, no hiss), even loudness for every clip
+                '-af', CLIP_CHAIN,
+                '-ar', '24000', '-ac', '1', '-c:a', 'libmp3lame', '-b:a', '48k',
                 str(target),
             ],
             check=True,

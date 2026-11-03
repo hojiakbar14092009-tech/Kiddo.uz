@@ -127,3 +127,24 @@ and in the attention helper's offer.
   last seven days: call-backs, leaving and coming back, games offered and taken, with
   a bar per day. Counts are kept on this device per child (`attentionStore.log`,
   14 days) and forgotten with the child.
+
+## More natural cartoons and voices (Phase 72)
+
+- **The camera films** every scene: a slow push-in drifting to one side, soft dark
+  corners and a warm light from above (`Camera`, `Lens` in `Cartoon.tsx`). Captions
+  and the robot stay still, outside the camera, so they are always easy to read.
+- **Scenes breathe in** from a soft light, carried by a quiet whoosh; the end card
+  rings with a few bell notes. The sounds are made here (`sfx.py`), ours to use.
+- **The shape cartoon** grows each flat plan into the real 3D picture (a house with
+  smoke and a tree, a car driving off on a road, an upright rocket lifting off among
+  the stars), as the app's shape builder does.
+- Rule cards keep their words inside the card (they wrapped out of it before).
+- **The storyteller voice:** more life in melody and rhythm than the app's careful
+  words, and a warm close-up sound (EQ, gentle de-essing, a small room); checked
+  with a speech recogniser that it stays as clear as before (`synth.py`).
+- **The app's own clips** get the same warm, clear sound at a higher quality
+  (24 kHz, 48 kbps; `generate.py`), re-recorded with `generate.py --force`.
+- **Premium voices, when credits are added:** record each line with MiniMax or
+  ElevenLabs (Higgsfield / Flashloop), save it as `public/vo/<short>/<lang>-<n>.wav`,
+  then `python3 marketing/shorts/synth.py --timings-only` and `render.sh`: every scene
+  stretches to its new line. App clips: `generate.py --engine elevenlabs --force`.

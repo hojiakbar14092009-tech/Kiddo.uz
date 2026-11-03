@@ -294,15 +294,24 @@ export const BigText: React.FC<{
   size?: number
   delay?: number
   color?: string
-}> = ({ text, y, size = 64, delay = 0, color = C.ink }) => {
+  /** Space kept at each side (the text wraps inside it). */
+  inset?: number
+  /** With a height the text is centred in that box (a card's words). */
+  height?: number
+}> = ({ text, y, size = 64, delay = 0, color = C.ink, inset = 30, height }) => {
   const pop = usePop(delay, 13)
   return (
     <div
       style={{
         position: 'absolute',
-        left: 30,
-        right: 30,
+        left: inset,
+        right: inset,
         top: y,
+        height,
+        display: height ? 'flex' : undefined,
+        alignItems: 'center',
+        justifyContent: 'center',
+        textWrap: 'balance',
         textAlign: 'center',
         fontFamily: DISPLAY,
         fontWeight: 800,

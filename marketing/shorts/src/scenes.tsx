@@ -190,7 +190,8 @@ const RuleScene: React.FC<
     <Card x={50} y={330} w={620} h={340} delay={2}>
       <div />
     </Card>
-    <BigText text={text[lang]} y={400} size={58} delay={6} />
+    {/* the rule wraps inside its card, centred below the two pictures (Phase 72) */}
+    <BigText text={text[lang]} y={400} height={250} inset={90} size={58} delay={6} />
     <Art name={left} x={170} y={250} size={170} delay={12} />
     <Art name={right} x={550} y={250} size={170} delay={16} />
   </AbsoluteFill>

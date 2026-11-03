@@ -198,7 +198,8 @@ const RuleCard: React.FC<
   <AbsoluteFill>
     <Sky short={short} />
     <Card x={50} y={330} w={620} h={340} delay={2} />
-    <BigText text={text[lang]} y={410} size={58} delay={6} />
+    {/* the rule wraps inside its card, centred below the two pictures (Phase 72) */}
+    <BigText text={text[lang]} y={400} height={250} inset={90} size={58} delay={6} />
     <Art name={left} x={170} y={250} size={170} delay={12} />
     <Art name={right} x={550} y={250} size={170} delay={16} />
   </AbsoluteFill>
@@ -761,55 +762,188 @@ const ShapesHook: Scene = ({ short }) => (
 
 const ShapesKinds: Scene = (props) => <ShapesHook {...props} />
 
-const ShapesHouse: Scene = ({ short }) => (
-  <AbsoluteFill>
-    <Sky short={short} />
-    <Ground top={860} />
-    <Shape kind="square" x={360} y={640} size={320} colour={C.oops} delay={2} />
-    <Shape kind="triangle" x={360} y={360} size={380} colour="#d93d78" delay={20} />
-    <Shape kind="rectangle" x={360} y={720} size={80} colour={C.primary} delay={38} />
-  </AbsoluteFill>
-)
+/**
+ * The flat plan grows into the real thing (Phase 72), as in the app's shape builder:
+ * the child's shapes first, then a sparkle, and the living picture takes their place.
+ */
+const Becomes: React.FC<{ at: number; flat: React.ReactNode; real: React.ReactNode }> = ({
+  at,
+  flat,
+  real,
+}) => {
+  const frame = useCurrentFrame()
+  const turn = interpolate(frame, [at, at + 14], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  })
+  return (
+    <>
+      <AbsoluteFill style={{ opacity: 1 - turn, scale: String(1 + turn * 0.08) }}>
+        {flat}
+      </AbsoluteFill>
+      <AbsoluteFill style={{ opacity: turn }}>{real}</AbsoluteFill>
+      <Art name="sparkles" x={540} y={300} size={150} delay={at} />
+    </>
+  )
+}
 
-const ShapesCar: Scene = ({ short }) => {
-  const x = interpolate(useProgress(30, 90), [0, 1], [0, 160])
+/** The plan turns real a little before the middle of the scene. */
+const turnAt = (frames: number) => Math.max(40, Math.round(frames * 0.42))
+
+const ShapesHouse: Scene = ({ short, frames }) => {
+  const frame = useCurrentFrame()
+  const at = turnAt(frames)
   return (
     <AbsoluteFill>
       <Sky short={short} />
-      <Ground top={820} color="#9aa6b8" />
-      <div style={{ position: 'absolute', left: x, top: 0, width: 720, height: 1280 }}>
-        <Shape kind="rectangle" x={300} y={640} size={150} colour="#2f7fc4" delay={0} />
-        <Shape kind="square" x={300} y={510} size={130} colour={C.sky} delay={8} />
-        <Shape kind="circle" x={200} y={740} size={110} colour={C.ink} delay={16} />
-        <Shape kind="circle" x={400} y={740} size={110} colour={C.ink} delay={22} />
-      </div>
+      <Ground top={860} />
+      <Becomes
+        at={at}
+        flat={
+          <>
+            <Shape kind="square" x={360} y={640} size={320} colour={C.oops} delay={2} />
+            <Shape kind="triangle" x={360} y={360} size={380} colour="#d93d78" delay={14} />
+            <Shape kind="rectangle" x={360} y={720} size={80} colour={C.primary} delay={26} />
+          </>
+        }
+        real={
+          <>
+            <Art name="pine" x={590} y={720} size={220} delay={at + 6} />
+            <Art name="house" x={340} y={640} size={470} delay={at} />
+            {[0, 1, 2].map((i) => {
+              const t = ((frame - at + i * 18) % 54) / 54
+              return (
+                <div
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    left: 236 - t * 20,
+                    top: 400 - t * 170,
+                    width: 46 + t * 50,
+                    height: 46 + t * 50,
+                    borderRadius: 999,
+                    background: 'white',
+                    opacity: frame < at ? 0 : 0.75 * (1 - t),
+                  }}
+                />
+              )
+            })}
+          </>
+        }
+      />
     </AbsoluteFill>
   )
 }
 
-const ShapesRocket: Scene = ({ short }) => {
-  const y = interpolate(useProgress(30, 90), [0, 1], [0, -500])
+const ShapesCar: Scene = ({ short, frames }) => {
+  const at = turnAt(frames)
+  const drive = interpolate(useProgress(at, frames), [0, 1], [0, 260])
   return (
     <AbsoluteFill>
-      <Sky short={short} night={0.6} />
-      <div style={{ position: 'absolute', left: 0, top: y, width: 720, height: 1280 }}>
-        <Shape kind="triangle" x={360} y={330} size={170} colour="#d93d78" delay={0} />
+      <Sky short={short} />
+      <Ground top={820} color="#9aa6b8" />
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 900,
+          height: 10,
+          background: 'repeating-linear-gradient(90deg, white 0 50px, transparent 50px 100px)',
+          opacity: 0.8,
+        }}
+      />
+      <Becomes
+        at={at}
+        flat={
+          <>
+            <Shape kind="rectangle" x={300} y={640} size={150} colour="#2f7fc4" delay={0} />
+            <Shape kind="square" x={300} y={510} size={130} colour={C.sky} delay={8} />
+            <Shape kind="circle" x={200} y={740} size={110} colour={C.ink} delay={16} />
+            <Shape kind="circle" x={400} y={740} size={110} colour={C.ink} delay={22} />
+          </>
+        }
+        real={
+          <>
+            <Art name="pine" x={600} y={700} size={200} delay={at + 4} />
+            <div
+              style={{ position: 'absolute', left: drive - 40, top: 0, width: 720, height: 1280 }}
+            >
+              <Art name="car" x={300} y={700} size={400} delay={at} />
+            </div>
+          </>
+        }
+      />
+    </AbsoluteFill>
+  )
+}
+
+const ShapesRocket: Scene = ({ short, frames }) => {
+  const at = turnAt(frames)
+  const frame = useCurrentFrame()
+  const lift = interpolate(useProgress(at + 10, frames), [0, 1], [0, -380])
+  return (
+    <AbsoluteFill>
+      <Sky short={short} night={0.75} />
+      {[90, 210, 600, 650, 140, 520].map((x, i) => (
         <div
+          key={i}
           style={{
             position: 'absolute',
-            left: 290,
-            top: 410,
-            width: 140,
-            height: 320,
-            borderRadius: 20,
-            background: '#eeeeee',
+            left: x,
+            top: 120 + ((i * 137) % 420),
+            width: 8,
+            height: 8,
+            borderRadius: 9,
+            background: 'white',
+            opacity: 0.4 + 0.5 * Math.abs(Math.sin((frame + i * 9) / 12)),
           }}
         />
-        <Shape kind="circle" x={360} y={520} size={80} colour={C.sky} delay={8} />
-        <Shape kind="triangle" x={260} y={700} size={110} colour={C.coin} delay={14} />
-        <Shape kind="triangle" x={460} y={700} size={110} colour={C.coin} delay={18} />
-        <Art name="fire" x={360} y={800} size={150} delay={30} />
-      </div>
+      ))}
+      <Becomes
+        at={at}
+        flat={
+          <>
+            <Shape kind="triangle" x={360} y={330} size={170} colour="#d93d78" delay={0} />
+            <div
+              style={{
+                position: 'absolute',
+                left: 290,
+                top: 410,
+                width: 140,
+                height: 320,
+                borderRadius: 20,
+                background: '#eeeeee',
+              }}
+            />
+            <Shape kind="circle" x={360} y={520} size={80} colour={C.sky} delay={8} />
+            <Shape kind="triangle" x={260} y={700} size={110} colour={C.coin} delay={14} />
+            <Shape kind="triangle" x={460} y={700} size={110} colour={C.coin} delay={18} />
+          </>
+        }
+        real={
+          <>
+            <Art name="ringed-planet" x={150} y={260} size={190} delay={at + 6} />
+            <div style={{ position: 'absolute', left: 0, top: lift, width: 720, height: 1280 }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 300,
+                  top: 720,
+                  width: 120,
+                  height: 170 + Math.sin(frame / 2) * 18,
+                  borderRadius: 999,
+                  background: 'radial-gradient(#fff6b0, #ff9a3c 55%, rgba(255,120,40,0) 75%)',
+                }}
+              />
+              {/* the 3D rocket leans to the right; stood upright, its tail meets the flame */}
+              <AbsoluteFill style={{ rotate: '-45deg', transformOrigin: '360px 560px' }}>
+                <Art name="rocket" x={360} y={560} size={420} delay={at} />
+              </AbsoluteFill>
+            </div>
+          </>
+        }
+      />
     </AbsoluteFill>
   )
 }
