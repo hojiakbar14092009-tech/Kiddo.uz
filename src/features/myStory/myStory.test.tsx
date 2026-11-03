@@ -85,8 +85,8 @@ describe('own story sentences', () => {
 
   it('every sentence exists in all three languages, complete and short (≤ 8 words)', () => {
     const keys = allStoryLineKeys()
-    // 4 prompts + ready + 4 heroes + dream + 2×(4 places + 4 helpers + 3 endings) + the end
-    expect(keys).toHaveLength(4 + 1 + 4 + 1 + 2 * (4 + 4 + 3) + 1)
+    // 4 prompts + ready + 12 heroes + dream + 2×(12 places + 12 helpers + 12 endings) + the end
+    expect(keys).toHaveLength(4 + 1 + 12 + 1 + 2 * (12 + 12 + 12) + 1)
     for (const [language, locale] of Object.entries(LOCALES)) {
       for (const key of keys) {
         const text = lookup(locale, key)

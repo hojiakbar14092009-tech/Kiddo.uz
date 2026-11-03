@@ -3,7 +3,8 @@ import type { StoryBackdrop } from '@/features/stories/backdrops'
 
 /*
  * «O‘z ertagim» (Phase 49): the child makes a story from picture cards in
- * four steps – a hero, a place, a helper and an ending. Every spoken
+ * four steps – a hero, a place, a helper and an ending (twelve cards each since
+ * Phase 73). Every spoken
  * sentence is fixed and complete (no blanks filled in at run time), so each
  * can be recorded once: every choice has its own sentences in the locales
  * (myStory.say.<step>.<id>), the shared ones speak of "our friend", and the
@@ -13,10 +14,62 @@ import type { StoryBackdrop } from '@/features/stories/backdrops'
 export const STORY_STEPS = ['hero', 'place', 'helper', 'ending'] as const
 export type StoryStep = (typeof STORY_STEPS)[number]
 
-export const HEROES = ['rabbit', 'cat', 'dog', 'penguin'] as const
-export const PLACES = ['forest', 'space', 'sea', 'city'] as const
-export const HELPERS = ['umbrella', 'lantern', 'key', 'balloon'] as const
-export const ENDINGS = ['party', 'home', 'friend'] as const
+export const HEROES = [
+  'rabbit',
+  'cat',
+  'dog',
+  'penguin',
+  'bear',
+  'fox',
+  'elephant',
+  'lion',
+  'turtle',
+  'owl',
+  'unicorn',
+  'dinosaur',
+] as const
+export const PLACES = [
+  'forest',
+  'space',
+  'sea',
+  'city',
+  'mountains',
+  'desert',
+  'north',
+  'garden',
+  'castle',
+  'farm',
+  'bazaar',
+  'island',
+] as const
+export const HELPERS = [
+  'umbrella',
+  'lantern',
+  'key',
+  'balloon',
+  'kite',
+  'telescope',
+  'boat',
+  'bicycle',
+  'book',
+  'bell',
+  'paintbrush',
+  'trumpet',
+] as const
+export const ENDINGS = [
+  'party',
+  'home',
+  'friend',
+  'treasure',
+  'wish',
+  'rainbow',
+  'picnic',
+  'concert',
+  'sleep',
+  'plant',
+  'prize',
+  'lights',
+] as const
 
 export type HeroId = (typeof HEROES)[number]
 export type PlaceId = (typeof PLACES)[number]
@@ -47,10 +100,62 @@ export const STEP_PROMPT: Record<StoryStep, string> = {
 
 /** The picture (public/3d) of each choice card. */
 export const CHOICE_PICTURE: Record<StoryStep, Record<string, string>> = {
-  hero: { rabbit: 'rabbit', cat: 'cat', dog: 'dog', penguin: 'penguin' },
-  place: { forest: 'tree', space: 'ringed-planet', sea: 'wave', city: 'house' },
-  helper: { umbrella: 'umbrella', lantern: 'lamp', key: 'key', balloon: 'balloon' },
-  ending: { party: 'gift', home: 'house', friend: 'hedgehog' },
+  hero: {
+    rabbit: 'rabbit',
+    cat: 'cat',
+    dog: 'dog',
+    penguin: 'penguin',
+    bear: 'bear',
+    fox: 'fox',
+    elephant: 'elephant',
+    lion: 'lion',
+    turtle: 'turtle',
+    owl: 'owl',
+    unicorn: 'unicorn',
+    dinosaur: 'dinosaur',
+  },
+  place: {
+    forest: 'tree',
+    space: 'ringed-planet',
+    sea: 'wave',
+    city: 'house',
+    mountains: 'mountain',
+    desert: 'cactus',
+    north: 'snowflake',
+    garden: 'sunflower',
+    castle: 'castle',
+    farm: 'tractor',
+    bazaar: 'watermelon',
+    island: 'volcano',
+  },
+  helper: {
+    umbrella: 'umbrella',
+    lantern: 'lamp',
+    key: 'key',
+    balloon: 'balloon',
+    kite: 'kite',
+    telescope: 'telescope',
+    boat: 'boat',
+    bicycle: 'bicycle',
+    book: 'book',
+    bell: 'bell',
+    paintbrush: 'paintbrush',
+    trumpet: 'trumpet',
+  },
+  ending: {
+    party: 'gift',
+    home: 'house',
+    friend: 'hedgehog',
+    treasure: 'crown',
+    wish: 'shooting-star',
+    rainbow: 'rainbow',
+    picnic: 'pie',
+    concert: 'guitar',
+    sleep: 'crescent-moon',
+    plant: 'seedling',
+    prize: 'trophy',
+    lights: 'sparkles',
+  },
 }
 
 /** Each place's look in the story pictures (the stories' own backdrops) and what stands in it. */
@@ -81,6 +186,62 @@ const PLACE_SCENE: Record<PlaceId, { backdrop: StoryBackdrop; props: PagePicture
     props: [
       { asset: 'house', x: -2.5, z: -1.5, size: 1.5 },
       { asset: 'bus', x: 2.4, z: -1, size: 1.2 },
+    ],
+  },
+  mountains: {
+    backdrop: 'mountains',
+    props: [
+      { asset: 'mountain', x: -2.5, z: -1.5, size: 1.6 },
+      { asset: 'pine', x: 2.5, z: -1, size: 1.3 },
+    ],
+  },
+  desert: {
+    backdrop: 'steppe',
+    props: [
+      { asset: 'cactus', x: -2.4, z: -1, size: 1.3 },
+      { asset: 'camel', x: 2.4, z: -1.5, size: 1.4 },
+    ],
+  },
+  north: {
+    backdrop: 'winter',
+    props: [
+      { asset: 'snowman', x: -2.4, z: -1, size: 1.3 },
+      { asset: 'penguin', x: 2.4, z: -1.5, size: 1.0 },
+    ],
+  },
+  garden: {
+    backdrop: 'garden',
+    props: [
+      { asset: 'sunflower', x: -2.5, z: -1, size: 1.4 },
+      { asset: 'tulip', x: 2.4, z: -1, size: 1.0 },
+    ],
+  },
+  castle: {
+    backdrop: 'evening',
+    props: [
+      { asset: 'castle', x: 2.3, z: -1.8, size: 1.8 },
+      { asset: 'crown', x: -2.4, y: 2.6, z: -2, size: 0.7 },
+    ],
+  },
+  farm: {
+    backdrop: 'farm',
+    props: [
+      { asset: 'tractor', x: -2.4, z: -1, size: 1.3 },
+      { asset: 'cow', x: 2.5, z: -1.5, size: 1.2 },
+    ],
+  },
+  bazaar: {
+    backdrop: 'bazaar',
+    props: [
+      { asset: 'watermelon', x: -2.4, z: -1, size: 1.0 },
+      { asset: 'melon', x: 2.4, z: -1, size: 1.0 },
+    ],
+  },
+  island: {
+    backdrop: 'pond',
+    props: [
+      { asset: 'volcano', x: 2.4, z: -1.8, size: 1.6 },
+      { asset: 'crab', x: -2.3, z: -0.5, size: 0.8 },
     ],
   },
 }

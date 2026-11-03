@@ -98,19 +98,19 @@ function StoryBuilder({ onDone }: { onDone: (choices: StoryChoices) => void }) {
         >
           {prompt}
         </h2>
-        <ul className="grid w-full grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+        <ul className="grid w-full grid-cols-2 gap-3 min-[420px]:grid-cols-3 sm:grid-cols-4 sm:gap-4">
           {STEP_OPTIONS[current].map((id, index) => (
             <li key={id}>
               <button
                 type="button"
                 onClick={() => pick(id)}
                 data-testid={`my-story-choice-${id}`}
-                className="flex h-full min-h-40 w-full flex-col items-center justify-center gap-2 rounded-[28px] bg-surface p-3 shadow-[0_7px_0_var(--color-line)] transition-transform active:translate-y-1"
+                className="flex h-full min-h-32 w-full flex-col items-center justify-center gap-1.5 rounded-3xl bg-surface p-2 shadow-[0_6px_0_var(--color-line)] transition-transform active:translate-y-1 sm:min-h-40 sm:gap-2 sm:p-3"
               >
                 <span
                   aria-hidden="true"
                   className={clsx(
-                    'flex size-20 items-center justify-center rounded-3xl sm:size-24',
+                    'flex size-20 items-center justify-center rounded-2xl sm:size-24',
                     TINTS[index % TINTS.length],
                   )}
                 >
@@ -118,7 +118,7 @@ function StoryBuilder({ onDone }: { onDone: (choices: StoryChoices) => void }) {
                 </span>
                 <FitWords
                   text={tDynamic(t, `myStory.names.${current}.${id}`)}
-                  className="text-center font-display text-lg leading-tight font-bold"
+                  className="text-center font-display text-base leading-tight font-bold sm:text-lg"
                 />
               </button>
             </li>

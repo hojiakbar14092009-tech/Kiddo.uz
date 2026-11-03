@@ -73,6 +73,23 @@ test('own story: four picture steps, then the story plays to the end', async ({ 
   await expect(page.getByTestId('my-story-again')).toBeVisible()
 })
 
+test('own story: twelve cards at every step, new heroes and endings fit a small phone', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 640 })
+  await child(page)
+  await page.goto('/learn/my-story')
+  for (const id of ['unicorn', 'castle', 'paintbrush', 'treasure']) {
+    await expect(page.getByRole('list').first().getByRole('button')).toHaveCount(12)
+    await page.getByTestId(`my-story-choice-${id}`).click()
+  }
+  const text = page.getByTestId('my-story-text')
+  await expect(text).toContainText('Bir bor ekan, sehrli yakkashox bor ekan.')
+  for (let card = 0; card < 3; card += 1) await page.getByTestId('my-story-next').click()
+  await expect(text).toContainText('Do‘stimiz oltin xazina topdi.')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+})
+
 test('three-language word: each word in its own language, tapped one by one', async ({ page }) => {
   await child(page)
   await page.goto('/learn')
