@@ -18,8 +18,33 @@ import { AnalyticsTracker } from './AnalyticsTracker'
 import { NutConversion } from './NutConversion'
 import { SectionWorld } from './SectionWorld'
 import { isAdminPreview } from './preview/adminPreview'
-import { AttentionConsent } from '@/features/attention/AttentionConsent'
-import { AttentionHelper } from '@/features/attention/AttentionHelper'
+import { useAttentionStore } from '@/store/attentionStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { toursOff } from '@/features/onboarding/tour'
+
+/**
+ * The attention helper (Phase 58) and its one-time question: downloaded only for a
+ * family that turned it on, or while the question is still to be asked, so the
+ * first screen stays light.
+ */
+const AttentionHelper = lazy(async () => ({
+  default: (await import('@/features/attention/AttentionHelper')).AttentionHelper,
+}))
+const AttentionConsent = lazy(async () => ({
+  default: (await import('@/features/attention/AttentionConsent')).AttentionConsent,
+}))
+
+function Attention() {
+  const consent = useAttentionStore((state) => state.consent)
+  const onboarded = useSettingsStore((state) => state.onboarded)
+  // the question waits for the welcome tour (and is off in other features' browser tests)
+  if (consent === 'denied' || (consent === 'unasked' && (!onboarded || toursOff()))) return null
+  return (
+    <Suspense fallback={null}>
+      {consent === 'granted' ? <AttentionHelper /> : <AttentionConsent />}
+    </Suspense>
+  )
+}
 
 /** The admin's sandbox bar (Phase 51), only ever downloaded in that tab. */
 const PreviewBanner = lazy(() => import('./preview/PreviewBanner'))
@@ -50,8 +75,7 @@ export function AppShell() {
       <SoundBridge />
       <AnalyticsTracker />
       <Outlet />
-      <AttentionHelper />
-      <AttentionConsent />
+      <Attention />
       {!pathname.startsWith('/admin') && <SplashScreen />}
       <Toaster />
     </>

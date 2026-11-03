@@ -20,8 +20,12 @@ const BUDGET_KB = {
    * living mascot (taps, lip sync from the voice level, memory of the days,
    * Phase 43) and the admin's rest hours and seasons on the home line (Phase 45,
    * +1.9 KB against Phase 44). The admin panel itself stays out (lazy route).
+   * Raised to 364 on 2026-11-03 (Phases 58–61), measured at 357.7 KB: the words of
+   * the attention helper's question, the science games and the cartoons are in the
+   * language's text chunk. The helper itself, its question, the games and the face
+   * detector load on demand.
    */
-  scripts: 352,
+  scripts: 364,
   /**
    * All images of the first screen: the city icons in view, so it grows with
    * the screen (134 KB at 393×852, 169 KB on the test tablet incl. the splash
