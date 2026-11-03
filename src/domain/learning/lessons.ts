@@ -25,6 +25,12 @@ export const ACTIVITY_LESSONS = {
   uzPatterns: 'uz.patterns',
   /** The Science Lab's plant experiment: what a plant needs, how it grows. */
   scienceLab: 'lab.plant',
+  /** The science games (Phase 63): each one's rules, then a try. */
+  sciWater: 'sci.water',
+  sciMagnet: 'sci.magnet',
+  sciFloat: 'sci.float',
+  sciScale: 'sci.scale',
+  sciRobot: 'sci.robot',
 } as const
 
 export type ActivityLessonId = (typeof ACTIVITY_LESSONS)[keyof typeof ACTIVITY_LESSONS]

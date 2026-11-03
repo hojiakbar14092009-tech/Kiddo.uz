@@ -57,7 +57,7 @@ export function sciRun(
     id,
     childKey,
     activity: game.activity,
-    strand: 'science',
+    strand: game.strand,
     correct: total,
     total,
     independent: Math.max(0, Math.min(total, firstTry)),

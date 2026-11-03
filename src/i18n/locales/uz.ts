@@ -1041,6 +1041,33 @@ export const uz = {
     numbers: '6 dan 10 gacha sonlar',
   },
   learnFirst: {
+    sci: {
+      scale: {
+        apples: { title: 'Olmalarni sana', line: 'Chap pallada olmalar bor.' },
+        blocks: { title: 'Raqamlarni qo‘y', line: 'O‘ng pallaga raqamli kubiklarni qo‘y.' },
+        even: { title: 'Teng bo‘lsin', line: 'Ikki tomon teng bo‘lsa, tarozi tekis turadi.' },
+      },
+      robot: {
+        arrows: { title: 'Strelka yo‘l ko‘rsatadi', line: 'Har strelka robotni bir qadam yuradi.' },
+        battery: { title: 'Batareyani top', line: 'Robot batareyaga yetsa, yutding.' },
+        go: { title: 'Yur tugmasi', line: 'Strelkalarni terib, Yur tugmasini bos.' },
+      },
+      water: {
+        sun: { title: 'Quyosh suvni isitadi', line: 'Iliq suv bug‘ bo‘lib, osmonga uchadi.' },
+        cloud: { title: 'Bug‘dan bulut bo‘ladi', line: 'Bulutni bossang, u kattalashadi.' },
+        rain: { title: 'Bulutdan yomg‘ir yog‘adi', line: 'Og‘ir bulutni bos, yomg‘ir yog‘adi.' },
+      },
+      magnet: {
+        iron: { title: 'Temir yopishadi', line: 'Kalit temir. Magnit uni tortadi.' },
+        notIron: { title: 'Temir emas', line: 'Olma temir emas. U yopishmaydi.' },
+        tap: { title: 'Bos va tekshir', line: 'Narsani bos. Yopishsa, u temir.' },
+      },
+      float: {
+        light: { title: 'Yengil suzadi', line: 'O‘rdak yengil. U suv ustida qoladi.' },
+        heavy: { title: 'Og‘ir cho‘kadi', line: 'Tosh og‘ir. U tubiga tushadi.' },
+        guess: { title: 'Avval o‘yla', line: 'Suzadi yoki Cho‘kadi tugmasini bos.' },
+      },
+    },
     checkPicture: 'Rasm: {{title}}',
     check: 'Eslaysanmi? «{{title}}» qaysi biri?',
     checkDone: 'To‘g‘ri! Endi o‘ynasak bo‘ladi.',
@@ -2471,6 +2498,38 @@ export const uz = {
     },
   },
   sciGames: {
+    scale: {
+      title: 'Sehrli tarozi',
+      intro: 'Tarozini tenglashtir! Ikki palla teng bo‘lsin.',
+      round: '{{n}} / {{total}}',
+      putOn: '{{n}} ni qo‘yish',
+      takeOff: '{{n}} ni olish',
+      say: {
+        start: 'Olmalar qancha? Shuncha qilib qo‘y!',
+        more: 'Yana ozgina qo‘sh.',
+        less: 'Ko‘p bo‘lib ketdi. Bittasini ol.',
+        even: 'Teng bo‘ldi! Tarozi tekis.',
+        done: 'Sen qo‘shishni bilasan. Barakalla!',
+      },
+    },
+    robot: {
+      title: 'Robot-dasturchi',
+      intro: 'Robotni batareyaga olib bor! Strelkalarni ter.',
+      level: '{{n}} / {{total}}',
+      program: 'Dastur',
+      empty: 'Strelkalarni bos',
+      run: 'Yur!',
+      undo: 'O‘chirish',
+      dir: { up: 'Tepaga', down: 'Pastga', left: 'Chapga', right: 'O‘ngga' },
+      say: {
+        start: 'Strelkalarni ter, keyin Yur tugmasini bos.',
+        win: 'Zo‘r! Robot batareyani topdi.',
+        bump: 'Voy, to‘siq! Strelkani o‘zgartir.',
+        short: 'Biroz yetmadi. Yana strelka qo‘sh.',
+        done: 'Sen haqiqiy dasturchisan!',
+      },
+    },
+    rules: 'Qoidalar',
     hubTitle: 'Ilmiy o‘yinlar',
     play: 'O‘ynash',
     again: 'Yana o‘ynash',
@@ -2576,6 +2635,20 @@ export const uz = {
     cameraHint: 'Tasvir saqlanmaydi va hech kimga yuborilmaydi.',
     cameraDenied: 'Brauzer kameraga ruxsat bermadi. Brauzer sozlamalarida kameraga ruxsat bering.',
     voiceFree: 'Bepul tarifda ogohlantirish ovozsiz bo‘ladi.',
+  },
+  games: {
+    title: 'O‘yinlar',
+    text: 'Har bir fanni o‘ynab o‘rgan va mashq qil.',
+    linkText: 'Hamma fanlar bo‘yicha o‘yinlar',
+    all: 'Hamma o‘yinlar',
+    subjects: {
+      math: 'Matematika',
+      letters: 'Harflar va so‘zlar',
+      science: 'Tabiat va fan',
+      space: 'Kosmos',
+      logic: 'Mantiq',
+      health: 'Sog‘liq va do‘stlik',
+    },
   },
 }
 

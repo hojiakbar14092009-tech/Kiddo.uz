@@ -1,10 +1,18 @@
+import type { Strand } from '@/domain/universe/types'
+
 /*
- * The three short science games (Phase 59). The attention helper offers all
- * three at once when a child keeps drifting away; they are also reachable from
- * the Explore hub. Each takes about two minutes and teaches one real idea.
+ * Kiddo's mini-games (Phases 59 and 65–67): short games that each teach one real
+ * idea in a couple of minutes, with their rules and a try first. They live on the
+ * Games page by subject; the attention helper offers the most unusual ones.
  */
 
-export type SciGameId = 'water' | 'magnet' | 'float'
+export type SciGameId =
+  | 'water'
+  | 'magnet'
+  | 'float'
+  /** Phase 65: a balance to even out (adding), and a robot to program (sequences). */
+  | 'scale'
+  | 'robot'
 
 export interface SciGame {
   id: SciGameId
@@ -12,17 +20,30 @@ export interface SciGame {
   /** The big picture on its card (an emoji, so it reads without words). */
   emoji: string
   /** Card colour (a theme token). */
-  tone: 'sky' | 'coral' | 'mint'
+  tone: 'sky' | 'coral' | 'mint' | 'coin' | 'lilac'
   /** The universe activity id. */
   activity: `sci:${SciGameId}`
+  /** What it practises (the universe strand). */
+  strand: Strand
 }
 
+const game = (id: SciGameId, emoji: string, tone: SciGame['tone'], strand: Strand): SciGame => ({
+  id,
+  path: `/sci/${id}`,
+  emoji,
+  tone,
+  activity: `sci:${id}`,
+  strand,
+})
+
 export const SCI_GAMES: readonly SciGame[] = [
-  { id: 'water', path: '/sci/water', emoji: '💧', tone: 'sky', activity: 'sci:water' },
-  { id: 'magnet', path: '/sci/magnet', emoji: '🧲', tone: 'coral', activity: 'sci:magnet' },
-  { id: 'float', path: '/sci/float', emoji: '🛶', tone: 'mint', activity: 'sci:float' },
+  game('water', '💧', 'sky', 'science'),
+  game('magnet', '🧲', 'coral', 'science'),
+  game('float', '🛶', 'mint', 'science'),
+  game('scale', '⚖️', 'coin', 'number'),
+  game('robot', '🤖', 'lilac', 'logic'),
 ]
 
 export function sciGame(id: string | undefined): SciGame | null {
-  return SCI_GAMES.find((game) => game.id === id) ?? null
+  return SCI_GAMES.find((item) => item.id === id) ?? null
 }

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
+import { passLesson } from './lesson.ts'
 
 /*
  * Phases 58–60: the attention helper (asked once, a grown-up's answer, the robot
@@ -64,6 +65,13 @@ async function solveParentGate(page: Page) {
   await page.getByRole('button', { name: 'Tekshirish' }).click()
 }
 
+/** A science game: its rules and the try first (the first time), then it starts. */
+async function startSci(page: Page) {
+  await expect(page.getByTestId('lesson-deck').or(page.getByTestId('sci-start'))).toBeVisible()
+  if (await page.getByTestId('lesson-deck').isVisible()) await passLesson(page)
+  else await page.getByTestId('sci-start').click()
+}
+
 const stored = (page: Page) =>
   page.evaluate(() => JSON.parse(localStorage.getItem('kiddo.attention') ?? '{}').state?.consent)
 
@@ -113,7 +121,7 @@ test.describe('the attention helper', () => {
     await page.clock.install()
     await child(page, 'granted')
     await ready(page, '/sci/magnet')
-    await page.getByTestId('sci-start').click()
+    await startSci(page)
     const nudge = page.getByTestId('attention-nudge')
     await page.clock.runFor(26_000)
     await expect(nudge).toContainText('Hoy, men shu yerdaman!')
@@ -123,7 +131,8 @@ test.describe('the attention helper', () => {
     await page.clock.runFor(26_000)
     const offer = page.getByTestId('attention-offer')
     await expect(offer).toBeVisible()
-    await expect(offer.getByRole('button')).toHaveCount(4) // three games and “later”
+    await expect(offer.getByRole('button')).toHaveCount(7) // the top five, “all games” and “later”
+    await expect(page.getByTestId('attention-all-games')).toBeVisible()
     await offer.getByRole('button', { name: 'Suzadimi, cho‘kadimi?' }).click()
     await expect(page).toHaveURL(/\/sci\/float$/)
   })
@@ -142,7 +151,7 @@ test.describe('the science games', () => {
   test('the magnet picks up only iron', async ({ page }) => {
     await child(page, 'denied')
     await ready(page, '/sci/magnet')
-    await page.getByTestId('sci-start').click()
+    await startSci(page)
     await page.getByTestId('magnet-apple').click()
     await expect(page.getByText('Yopishmadi. Bu temir emas.')).toBeVisible()
     for (const id of ['key', 'clip', 'spoon', 'bolt'])
@@ -153,7 +162,7 @@ test.describe('the science games', () => {
   test('float or sink: guess, watch, and finish', async ({ page }) => {
     await child(page, 'denied')
     await ready(page, '/sci/float')
-    await page.getByTestId('sci-start').click()
+    await startSci(page)
     for (const floats of [true, false, true, false, true, false]) {
       const button = page.getByTestId(floats ? 'float-guess-float' : 'float-guess-sink')
       await expect(button).toBeEnabled()
@@ -165,7 +174,7 @@ test.describe('the science games', () => {
   test('a droplet’s trip goes round the water cycle', async ({ page }) => {
     await child(page, 'denied')
     await ready(page, '/sci/water')
-    await page.getByTestId('sci-start').click()
+    await startSci(page)
     await page.getByTestId('water-sun').click()
     const cloud = page.getByTestId('water-cloud')
     await expect(cloud).toBeEnabled()

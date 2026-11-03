@@ -56,3 +56,23 @@ and in the attention helper's offer.
   and `render.sh` again: every scene stretches to its line. The app's own new
   sentences (attention, games, cartoons page) are recorded the same way as the
   rest (`scripts/voices`), and can be re-recorded with a premium engine.
+
+## Games page, rules first, top five (Phases 62–65)
+
+- **`/games`** (`features/games`): every game and practice by subject (maths,
+  letters and words, nature and science, space, logic, health and friends). A
+  catalog, not a copy: buildings come from the world (name, picture, lock), the
+  task games from their meta, other pages from their own words. Reached from a
+  big yellow button on Home and at the top of O‘rgan and Kashf et (a fifth tab did
+  not fit a 320 px phone's labels). A new game is added to `GAMES` once.
+- **Rules, then a try** (Phase 63): every mini-game opens with its rules on the
+  Learn Before Play deck (two or three cards, read aloud) and a try (find the
+  first card again); only then the game starts. "Rules" and the "?" in the top
+  bar show them again (`sciGames/lessons.tsx`, lesson ids `sci.*`).
+- **When a child keeps drifting** (Phase 64) the robot offers the five most
+  unusual games (`TOP_GAMES`) and "All games".
+- **New games** (Phase 65), in `sciGames/play/`: the magic scale (number blocks
+  even out apples: adding, `scaleRules.ts`) and the robot programmer (arrows
+  lead a robot to its battery on a 4 × 4 board: sequences, `robotRules.ts`,
+  every level checked solvable). Each mini-game is one file; the shared shell
+  (`SciGamePage`) gives rules, play, reward (strand per game, once a day).

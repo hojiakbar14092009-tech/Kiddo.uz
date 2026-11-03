@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { MascotFigure } from '@/features/mascot/MascotFigure'
 import { MascotThoughtBubble } from '@/features/mascot/MascotThoughtBubble'
-import { SCI_GAMES, type SciGame } from '@/features/sciGames/games'
+import { TOP_GAMES } from '@/features/games/catalog'
 import { tDynamic } from '@/lib/tDynamic'
 import { audioManager } from '@/services/audio/audioManager'
 import { useAttentionStore } from '@/store/attentionStore'
@@ -30,12 +30,6 @@ import {
 const SHOWN_MS = 6500
 /** Touches, keys and scrolling all mean the child is there. */
 const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const
-
-const TONE: Record<SciGame['tone'], string> = {
-  sky: 'bg-sky-soft',
-  coral: 'bg-oops-soft',
-  mint: 'bg-primary-soft',
-}
 
 /**
  * The attention helper (Phase 58, docs/architecture/attention.md). Runs only after a
@@ -164,9 +158,9 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
     }
   }, [camera, fire, learning, visible])
 
-  const pick = (game: SciGame) => {
+  const go = (to: string) => {
     setOffer(false)
-    void navigate(game.path)
+    void navigate(to)
   }
 
   return (
@@ -181,24 +175,37 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
           size="lg"
           testId="attention-offer"
         >
-          <ul className="mt-4 grid gap-3 min-[420px]:grid-cols-3">
-            {SCI_GAMES.map((game) => (
+          <ul className="mt-4 grid grid-cols-2 gap-3 min-[560px]:grid-cols-3">
+            {TOP_GAMES.map((game) => (
               <li key={game.id}>
                 <button
                   type="button"
-                  onClick={() => pick(game)}
+                  onClick={() => go(game.to)}
                   className={clsx(
-                    'flex min-h-28 w-full flex-col items-center justify-center gap-2 rounded-3xl p-3 text-center font-display text-lg font-bold shadow-[0_5px_0_var(--color-line)] transition-transform active:translate-y-1 active:shadow-none',
-                    TONE[game.tone],
+                    'flex min-h-28 w-full flex-col items-center justify-center gap-2 rounded-3xl p-3 text-center font-display text-lg leading-tight font-bold shadow-[0_5px_0_var(--color-line)] transition-transform active:translate-y-1 active:shadow-none',
+                    game.tint,
                   )}
                 >
                   <span aria-hidden="true" className="text-5xl leading-none">
                     {game.emoji}
                   </span>
-                  {t(`sciGames.${game.id}.title`)}
+                  {tDynamic(t, game.labelKey)}
                 </button>
               </li>
             ))}
+            <li>
+              <button
+                type="button"
+                onClick={() => go('/games')}
+                data-testid="attention-all-games"
+                className="flex min-h-28 w-full flex-col items-center justify-center gap-2 rounded-3xl bg-coin p-3 text-center font-display text-lg leading-tight font-bold shadow-[0_5px_0_var(--color-coin-shadow)] transition-transform active:translate-y-1 active:shadow-none"
+              >
+                <span aria-hidden="true" className="text-5xl leading-none">
+                  🎮
+                </span>
+                {t('games.all')}
+              </button>
+            </li>
           </ul>
           <Button variant="soft" size="md" className="mt-4" onClick={() => setOffer(false)}>
             {t('attention.later')}

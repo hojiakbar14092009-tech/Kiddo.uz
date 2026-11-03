@@ -231,6 +231,13 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/scienceLab/ScienceLabPage')).ScienceLabPage,
                 }),
               },
+              // Phase 62: every game and practice, by subject
+              {
+                path: '/games',
+                lazy: async () => ({
+                  Component: (await import('@/features/games/GamesPage')).GamesPage,
+                }),
+              },
               // Phase 59: the three short science games (the attention helper offers them too)
               {
                 path: '/sci/:id',

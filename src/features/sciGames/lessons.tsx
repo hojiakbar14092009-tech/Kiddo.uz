@@ -1,0 +1,85 @@
+import type { TFunction } from 'i18next'
+import { Img3D } from '@/components/ui/Img3D'
+import { ACTIVITY_LESSONS } from '@/domain/learning'
+import type { LessonCard, LessonCheck } from '@/features/learn/LessonDeck'
+import { tDynamic } from '@/lib/tDynamic'
+import type { SciGameId } from './games'
+
+/*
+ * Each science game's rules (Phase 63), on the Learn Before Play deck: two or
+ * three cards that show what happens and what to tap, then a short try (find the
+ * first card again). Only then the game starts; "Rules" shows them again.
+ */
+
+interface Rules {
+  lessonId: string
+  cards: readonly { id: string; art: { img3d: string } | { emoji: string } }[]
+  check: LessonCheck
+}
+
+export const SCI_RULES: Readonly<Record<SciGameId, Rules>> = {
+  water: {
+    lessonId: ACTIVITY_LESSONS.sciWater,
+    cards: [
+      { id: 'sun', art: { img3d: 'sun' } },
+      { id: 'cloud', art: { img3d: 'cloud' } },
+      { id: 'rain', art: { img3d: 'rain-cloud' } },
+    ],
+    check: { ask: 'sun', other: 'cloud' },
+  },
+  magnet: {
+    lessonId: ACTIVITY_LESSONS.sciMagnet,
+    cards: [
+      { id: 'iron', art: { img3d: 'key' } },
+      { id: 'notIron', art: { img3d: 'apple' } },
+      { id: 'tap', art: { emoji: '🧲' } },
+    ],
+    check: { ask: 'iron', other: 'notIron' },
+  },
+  float: {
+    lessonId: ACTIVITY_LESSONS.sciFloat,
+    cards: [
+      { id: 'light', art: { img3d: 'duck' } },
+      { id: 'heavy', art: { img3d: 'rock' } },
+      { id: 'guess', art: { emoji: '🤔' } },
+    ],
+    check: { ask: 'light', other: 'heavy' },
+  },
+  scale: {
+    lessonId: ACTIVITY_LESSONS.sciScale,
+    cards: [
+      { id: 'apples', art: { img3d: 'apple' } },
+      { id: 'blocks', art: { emoji: '🔢' } },
+      { id: 'even', art: { emoji: '⚖️' } },
+    ],
+    check: { ask: 'apples', other: 'blocks' },
+  },
+  robot: {
+    lessonId: ACTIVITY_LESSONS.sciRobot,
+    cards: [
+      { id: 'arrows', art: { emoji: '➡️' } },
+      { id: 'battery', art: { emoji: '🔋' } },
+      { id: 'go', art: { emoji: '▶️' } },
+    ],
+    check: { ask: 'battery', other: 'arrows' },
+  },
+}
+
+export function sciLessonCards(t: TFunction, game: SciGameId): LessonCard[] {
+  return SCI_RULES[game].cards.map(({ id, art }) => {
+    const picture =
+      'img3d' in art ? (
+        <Img3D name={art.img3d} className="size-36 sm:size-44 short:size-24" eager />
+      ) : (
+        <span aria-hidden="true" className="text-8xl leading-none short:text-6xl">
+          {art.emoji}
+        </span>
+      )
+    return {
+      id,
+      art: picture,
+      title: tDynamic(t, `learnFirst.sci.${game}.${id}.title`),
+      lines: [tDynamic(t, `learnFirst.sci.${game}.${id}.line`)],
+    }
+  })
+}

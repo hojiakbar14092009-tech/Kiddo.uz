@@ -1,3 +1,4 @@
+import { GamesLink } from '@/features/games/GamesLink'
 import { track } from '@/domain/analytics'
 import { Img3D } from '@/components/ui/Img3D'
 import { AppIcon } from '@/features/age/AppIcon'
@@ -138,6 +139,9 @@ export function HomePage() {
       <ContinueButton plan={plan} />
 
       <JourneyPath plan={plan} />
+
+      {/* Phase 62: every game, by subject */}
+      <GamesLink />
 
       <DailyQuestCard />
 

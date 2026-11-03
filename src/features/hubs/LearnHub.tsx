@@ -4,6 +4,7 @@ import { GAME_MIN_LEVEL, isGameSuggested } from '@/features/age/ageLevel'
 import { AppIcon } from '@/features/age/AppIcon'
 import { Img3D } from '@/components/ui/Img3D'
 import { examProgress } from '@/features/exam/exam'
+import { GamesLink } from '@/features/games/GamesLink'
 import { QuestExtras } from '@/features/home/QuestExtras'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { GAME_TYPES } from '@/features/tasks/games'
@@ -44,6 +45,7 @@ export function LearnHub() {
   return (
     <HubScreen className="gap-8 py-6 sm:gap-10 sm:py-8">
       <HubHeading title={t('hubs.learn.title')} text={t('hubs.learn.text')} />
+      <GamesLink />
       <QuestExtras />
       <PlaceGroup id="learn-places" title={t('hubs.learn.places')}>
         <BuildingPlaces ids={LEARN_PLACES} />

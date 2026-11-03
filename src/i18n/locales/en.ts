@@ -1036,6 +1036,33 @@ export const en: Translation = {
     numbers: 'Numbers 6 to 10',
   },
   learnFirst: {
+    sci: {
+      scale: {
+        apples: { title: 'Count the apples', line: 'The apples are on the left side.' },
+        blocks: { title: 'Put on number blocks', line: 'Put number blocks on the right side.' },
+        even: { title: 'Make them the same', line: 'When both sides match, the scale is level.' },
+      },
+      robot: {
+        arrows: { title: 'Arrows lead the robot', line: 'Each arrow moves the robot one step.' },
+        battery: { title: 'Find the battery', line: 'Reach the battery and you win.' },
+        go: { title: 'The Go button', line: 'Line up the arrows, then press Go.' },
+      },
+      water: {
+        sun: { title: 'The sun warms the water', line: 'Warm water rises to the sky as steam.' },
+        cloud: { title: 'Steam makes a cloud', line: 'Tap the cloud to make it grow.' },
+        rain: { title: 'Rain falls from the cloud', line: 'Tap the heavy cloud to make it rain.' },
+      },
+      magnet: {
+        iron: { title: 'Iron sticks', line: 'A key is iron. The magnet pulls it.' },
+        notIron: { title: 'Not iron', line: 'An apple is not iron. It won’t stick.' },
+        tap: { title: 'Tap and check', line: 'Tap a thing. If it sticks, it is iron.' },
+      },
+      float: {
+        light: { title: 'Light things float', line: 'A duck is light. It stays on top.' },
+        heavy: { title: 'Heavy things sink', line: 'A stone is heavy. It goes down.' },
+        guess: { title: 'Think first', line: 'Tap “Floats” or “Sinks”.' },
+      },
+    },
     checkPicture: 'Picture: {{title}}',
     check: 'Remember? Which one is “{{title}}”?',
     checkDone: 'Right! Now we can play.',
@@ -2456,6 +2483,38 @@ export const en: Translation = {
     },
   },
   sciGames: {
+    scale: {
+      title: 'Magic scale',
+      intro: 'Balance the scale! Make both sides the same.',
+      round: '{{n}} / {{total}}',
+      putOn: 'Put on {{n}}',
+      takeOff: 'Take off {{n}}',
+      say: {
+        start: 'How many apples? Put on the same!',
+        more: 'Add a little more.',
+        less: 'Too much. Take one off.',
+        even: 'The same! The scale is level.',
+        done: 'You can add numbers. Well done!',
+      },
+    },
+    robot: {
+      title: 'Robot programmer',
+      intro: 'Lead the robot to its battery! Line up the arrows.',
+      level: '{{n}} / {{total}}',
+      program: 'Program',
+      empty: 'Tap the arrows',
+      run: 'Go!',
+      undo: 'Undo',
+      dir: { up: 'Up', down: 'Down', left: 'Left', right: 'Right' },
+      say: {
+        start: 'Line up the arrows, then press Go.',
+        win: 'Great! The robot found its battery.',
+        bump: 'Oops, a rock! Change an arrow.',
+        short: 'Not quite there. Add an arrow.',
+        done: 'You are a real programmer!',
+      },
+    },
+    rules: 'Rules',
     hubTitle: 'Science games',
     play: 'Play',
     again: 'Play again',
@@ -2558,5 +2617,19 @@ export const en: Translation = {
     cameraHint: 'No picture is kept or sent anywhere.',
     cameraDenied: 'The browser blocked the camera. Allow it in the browser settings.',
     voiceFree: 'In the free version the reminders have no voice.',
+  },
+  games: {
+    title: 'Games',
+    text: 'Learn and practise every subject by playing.',
+    linkText: 'Games for every subject',
+    all: 'All games',
+    subjects: {
+      math: 'Maths',
+      letters: 'Letters and words',
+      science: 'Nature and science',
+      space: 'Space',
+      logic: 'Logic',
+      health: 'Health and friends',
+    },
   },
 }

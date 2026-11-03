@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Img3D } from '@/components/ui/Img3D'
+import { GamesLink } from '@/features/games/GamesLink'
 import { SCI_GAMES } from '@/features/sciGames/games'
 import { tDynamic } from '@/lib/tDynamic'
 import { HubHeading, HubScreen } from './HubScreen'
@@ -14,7 +15,13 @@ const EXPLORE_PLACES = [
   'science-lab',
 ] as const
 
-const SCI_TINT = { sky: 'bg-sky-soft', coral: 'bg-oops-soft', mint: 'bg-primary-soft' } as const
+const SCI_TINT = {
+  sky: 'bg-sky-soft',
+  coral: 'bg-oops-soft',
+  mint: 'bg-primary-soft',
+  coin: 'bg-coin-soft',
+  lilac: 'bg-lilac-soft',
+} as const
 
 /**
  * Kashf et (Phase 40): the Adventure Map and every world to discover, each
@@ -25,6 +32,7 @@ export function ExploreHub() {
   return (
     <HubScreen className="gap-8 py-6 sm:gap-10 sm:py-8">
       <HubHeading title={t('hubs.explore.title')} text={t('hubs.explore.text')} />
+      <GamesLink />
       <PlaceGroup id="explore-places" title={t('hubs.explore.places')}>
         <PlaceCard
           to="/adventure"
@@ -57,7 +65,7 @@ export function ExploreHub() {
       </PlaceGroup>
       {/* Phase 59: short science games; Phase 60: the cartoons about them */}
       <PlaceGroup id="explore-science" title={t('sciGames.hubTitle')}>
-        {SCI_GAMES.map((game) => (
+        {SCI_GAMES.filter((game) => game.strand === 'science').map((game) => (
           <PlaceCard
             key={game.id}
             to={game.path}

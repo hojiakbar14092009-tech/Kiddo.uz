@@ -58,6 +58,11 @@ export const SPOKEN_PARTS = [
   'sciGames.magnet.say',
   'sciGames.float.intro',
   'sciGames.float.say',
+  // Phase 65: the magic scale and the robot programmer
+  'sciGames.scale.intro',
+  'sciGames.scale.say',
+  'sciGames.robot.intro',
+  'sciGames.robot.say',
   'shorts.say',
 ]
 const COUNTS = Array.from({ length: 41 }, (_, i) => i)
