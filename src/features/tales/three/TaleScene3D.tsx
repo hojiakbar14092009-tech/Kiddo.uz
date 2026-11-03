@@ -6,6 +6,15 @@ import { useInView } from '@/components/three/useInView'
 import { prepareRenderer } from '@/components/three/prepareRenderer'
 import { BACKDROPS, type BackdropLook } from '../backdrops'
 import type { Actor, SceneSpec } from '../content'
+import {
+  MOOD_FACE,
+  particleAt,
+  poseAt,
+  seededPoints,
+  WEATHER_COLOURS,
+  type Mood,
+  type Weather,
+} from './life'
 
 /*
  * A small real 3D world for a tale scene: rounded low-poly ground, hills,
@@ -13,7 +22,19 @@ import type { Actor, SceneSpec } from '../content'
  * (flat pictures) standing in it as billboards – they hop along the path and
  * the camera drifts gently for depth. Everything made here (geometries,
  * materials, textures, the renderer) is released when the scene closes.
+ *
+ * Since Phase 74 the same stage also plays the child's own stories: the hero
+ * breathes, squashes and stretches, and shows how it feels (happy, curious,
+ * surprised, joyful, sleepy) with a small face above its head; the place has its
+ * weather (falling leaves, snow, bubbles, fireflies, confetti…), mountain peaks
+ * and market stalls (life.ts holds the motion, tested on its own).
  */
+
+/** A place's look on the 3D stage: the tales' looks, with the stories' extras. */
+export interface StageLook extends BackdropLook {
+  awnings?: boolean
+  peaks?: string
+}
 
 export interface TaleScene3DProps {
   scene: SceneSpec
@@ -97,17 +118,48 @@ function ReleaseOnClose() {
 const ease = (p: number) => 1 - Math.pow(1 - p, 3)
 const WALK_SECONDS = 2.8
 
+/** An emoji drawn once into a texture (the hero's feeling above its head). */
+function useFaceTexture(face: string | null) {
+  const texture = useMemo(() => {
+    if (!face || typeof document === 'undefined') return null
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = 128
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+    ctx.fillStyle = 'rgba(255,255,255,0.95)'
+    ctx.beginPath()
+    ctx.arc(64, 64, 60, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.font = '84px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(face, 64, 70)
+    const made = new THREE.CanvasTexture(canvas)
+    made.colorSpace = THREE.SRGBColorSpace
+    return made
+  }, [face])
+  useEffect(() => () => texture?.dispose(), [texture])
+  return texture
+}
+
 function ActorSprite({
   actor,
   texture,
   reducedMotion,
+  mood,
 }: {
   actor: Actor
   texture: THREE.Texture | undefined
   reducedMotion: boolean
+  /** The hero's feeling (only the hopping hero has one). */
+  mood?: Mood
 }) {
   const group = useRef<THREE.Group>(null)
+  const body = useRef<THREE.Group>(null)
+  const bubble = useRef<THREE.Group>(null)
   const started = useRef<number | null>(null)
+  const feeling = actor.hop && mood ? mood : undefined
+  const face = useFaceTexture(feeling ? MOOD_FACE[feeling] : null)
   const size = (actor.size ?? 1) * 1.25
   const y = actor.y ?? 0
   const z = actor.z ?? 0
@@ -123,6 +175,16 @@ function ActorSprite({
     const progress = actor.toX === undefined ? 1 : Math.min(1, local / WALK_SECONDS)
     const walking = progress < 1
     const x = actor.x + (endX - actor.x) * ease(progress)
+    if (feeling && !walking) {
+      const pose = poseAt(feeling, local)
+      node.position.set(x + pose.shift, y + pose.lift * size, z)
+      body.current?.scale.set(pose.sx, pose.sy, 1)
+      if (body.current) body.current.rotation.z = pose.lean
+      // the feeling pops up a moment after the page opens
+      const pop = Math.min(1, Math.max(0, (local - 0.4) / 0.25))
+      bubble.current?.scale.setScalar(pop * (1 + Math.sin(local * 3) * 0.04))
+      return
+    }
     const bounce = walking
       ? Math.abs(Math.sin(local * 7)) * 0.2
       : actor.hop
@@ -140,21 +202,35 @@ function ActorSprite({
         </mesh>
       )}
       <Billboard lockX lockZ>
-        <mesh position={[0, size / 2, 0]}>
-          <planeGeometry args={[size, size]} />
-          {/* a new material once the picture has loaded (a compiled material would not pick up a new map) */}
-          {texture ? (
-            <meshBasicMaterial
-              key={texture.uuid}
-              map={texture}
-              transparent
-              alphaTest={0.08}
-              toneMapped={false}
-            />
-          ) : (
-            <meshBasicMaterial key="empty" transparent opacity={0} />
-          )}
-        </mesh>
+        {face && (
+          <group
+            ref={bubble}
+            position={[size * 0.42, size * 1.08, 0.01]}
+            scale={reducedMotion ? 1 : 0}
+          >
+            <mesh>
+              <planeGeometry args={[size * 0.36, size * 0.36]} />
+              <meshBasicMaterial map={face} transparent toneMapped={false} depthWrite={false} />
+            </mesh>
+          </group>
+        )}
+        <group ref={body}>
+          <mesh position={[0, size / 2, 0]}>
+            <planeGeometry args={[size, size]} />
+            {/* a new material once the picture has loaded (a compiled material would not pick up a new map) */}
+            {texture ? (
+              <meshBasicMaterial
+                key={texture.uuid}
+                map={texture}
+                transparent
+                alphaTest={0.08}
+                toneMapped={false}
+              />
+            ) : (
+              <meshBasicMaterial key="empty" transparent opacity={0} />
+            )}
+          </mesh>
+        </group>
       </Billboard>
     </group>
   )
@@ -234,13 +310,145 @@ const STAR_SPOTS: [number, number, number][] = [
   [-5.4, 3.6, -9],
 ]
 
-function World({ look, reducedMotion }: { look: BackdropLook; reducedMotion: boolean }) {
+/** Far snowy peaks behind the hills (the mountains). */
+function Peaks({ colour }: { colour: string }) {
+  return (
+    <>
+      {[
+        [-4.5, -11, 4.2],
+        [0.5, -12, 5.2],
+        [5.5, -10.5, 3.8],
+      ].map(([x, z, h], index) => (
+        <group key={index} position={[x!, 0, z!]}>
+          <mesh position={[0, h! / 2, 0]}>
+            <coneGeometry args={[h! * 0.75, h!, 6]} />
+            <meshStandardMaterial color={colour} flatShading roughness={1} />
+          </mesh>
+          <mesh position={[0, h! * 0.82, 0]}>
+            <coneGeometry args={[h! * 0.75 * 0.36, h! * 0.36, 6]} />
+            <meshStandardMaterial color="#FFFFFF" flatShading roughness={1} />
+          </mesh>
+        </group>
+      ))}
+    </>
+  )
+}
+
+/** Market stalls with striped roofs at the back (the bazaar). */
+function Stalls() {
+  return (
+    <>
+      {[
+        [-3.6, -3.2, '#E8604C'],
+        [0, -3.8, '#F5C04A'],
+        [3.6, -3.2, '#4FAE8C'],
+      ].map(([x, z, colour], index) => (
+        <group key={index} position={[x as number, 0, z as number]}>
+          <mesh position={[0, 0.45, 0]}>
+            <boxGeometry args={[1.8, 0.9, 0.8]} />
+            <meshStandardMaterial color="#C99A62" roughness={1} />
+          </mesh>
+          <mesh position={[0, 1.75, 0]} rotation-y={Math.PI / 4}>
+            <coneGeometry args={[1.45, 0.6, 4]} />
+            <meshStandardMaterial color={colour as string} flatShading roughness={0.9} />
+          </mesh>
+          {[-0.75, 0.75].map((side) => (
+            <mesh key={side} position={[side, 0.95, 0.3]}>
+              <cylinderGeometry args={[0.04, 0.04, 1.6, 6]} />
+              <meshStandardMaterial color="#8A5A34" />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </>
+  )
+}
+
+/** A soft round dot for the particles. */
+function useDotTexture() {
+  const texture = useMemo(() => {
+    if (typeof document === 'undefined') return null
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = 32
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+    const glow = ctx.createRadialGradient(16, 16, 0, 16, 16, 16)
+    glow.addColorStop(0, 'rgba(255,255,255,1)')
+    glow.addColorStop(0.55, 'rgba(255,255,255,0.85)')
+    glow.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = glow
+    ctx.fillRect(0, 0, 32, 32)
+    return new THREE.CanvasTexture(canvas)
+  }, [])
+  useEffect(() => () => texture?.dispose(), [texture])
+  return texture
+}
+
+const PARTICLES = 70
+
+/** The place's weather: leaves, snow, bubbles, fireflies, stars, dust or confetti. */
+function Particles({ weather, reducedMotion }: { weather: Weather; reducedMotion: boolean }) {
+  const points = useRef<THREE.Points>(null)
+  const dot = useDotTexture()
+  const starts = useMemo(() => seededPoints(PARTICLES, weather.length * 31), [weather])
+  const { positions, colours } = useMemo(() => {
+    const palette = WEATHER_COLOURS[weather].map((hex) => new THREE.Color(hex))
+    const positions = new Float32Array(PARTICLES * 3)
+    const colours = new Float32Array(PARTICLES * 3)
+    starts.forEach((start, index) => {
+      positions.set(particleAt(weather, start, index, 0), index * 3)
+      const colour = palette[index % palette.length]!
+      colours.set([colour.r, colour.g, colour.b], index * 3)
+    })
+    return { positions, colours }
+  }, [starts, weather])
+  useFrame(({ clock }) => {
+    const node = points.current
+    if (!node || reducedMotion) return
+    const t = clock.elapsedTime
+    const attribute = node.geometry.getAttribute('position') as THREE.BufferAttribute
+    starts.forEach((start, index) => {
+      const [x, y, z] = particleAt(weather, start, index, t)
+      attribute.setXYZ(index, x, y, z)
+    })
+    attribute.needsUpdate = true
+    const material = node.material as THREE.PointsMaterial
+    if (weather === 'fireflies' || weather === 'stars')
+      material.opacity = 0.65 + Math.sin(t * 2.2) * 0.3
+  })
+  const size = weather === 'confetti' || weather === 'leaves' || weather === 'petals' ? 0.16 : 0.12
+  return (
+    <points ref={points}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colours, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={size}
+        map={dot ?? undefined}
+        vertexColors
+        transparent
+        depthWrite={false}
+        sizeAttenuation
+        toneMapped={false}
+      />
+    </points>
+  )
+}
+
+function World({ look, reducedMotion }: { look: StageLook; reducedMotion: boolean }) {
   return (
     <>
       <color attach="background" args={[look.sky]} />
       <fog attach="fog" args={[look.skyLow, 10, 24]} />
       <hemisphereLight args={[look.skyLow, look.ground, look.stars ? 0.9 : 1.25]} />
-      <directionalLight position={[3, 6, 4]} intensity={look.stars ? 0.6 : 1.3} />
+      <directionalLight
+        position={[3, 6, 4]}
+        intensity={look.stars ? 0.6 : 1.3}
+        color={look.stars ? '#C9D6FF' : '#FFF4E0'}
+      />
+      {look.peaks && <Peaks colour={look.peaks} />}
+      {look.awnings && <Stalls />}
       {/* ground and a sandy path the characters walk along */}
       <mesh rotation-x={-Math.PI / 2}>
         <circleGeometry args={[16, 48]} />
@@ -305,31 +513,59 @@ function CameraDrift({ reducedMotion }: { reducedMotion: boolean }) {
   return null
 }
 
-function Actors({ scene, sceneKey, reducedMotion }: Omit<TaleScene3DProps, 'label' | 'onFail'>) {
-  const assets = useMemo(() => [...new Set(scene.actors.map((actor) => actor.asset))], [scene])
+function Actors({
+  actors,
+  sceneKey,
+  reducedMotion,
+  mood,
+}: {
+  actors: readonly Actor[]
+  sceneKey: string
+  reducedMotion: boolean
+  mood?: Mood
+}) {
+  const assets = useMemo(() => [...new Set(actors.map((actor) => actor.asset))], [actors])
   const textures = useTextures(assets)
   return (
     <>
-      {scene.actors.map((actor, index) => (
+      {actors.map((actor, index) => (
         <ActorSprite
           key={`${sceneKey}-${index}`}
           actor={actor}
           texture={textures.get(actor.asset)}
           reducedMotion={reducedMotion}
+          mood={mood}
         />
       ))}
     </>
   )
 }
 
-export default function TaleScene3D({
-  scene,
+export interface Stage3DProps {
+  look: StageLook
+  actors: readonly Actor[]
+  /** Changes when the page changes, so the characters start again. */
+  sceneKey: string
+  label: string
+  reducedMotion: boolean
+  onFail: () => void
+  /** How the hero (the hopping character) feels on this page. */
+  mood?: Mood
+  /** The place's weather. */
+  weather?: Weather
+}
+
+/** The 3D stage: a place, its characters, and (for the stories) feelings and weather. */
+export function Stage3D({
+  look,
+  actors,
   sceneKey,
   label,
   reducedMotion,
   onFail,
-}: TaleScene3DProps) {
-  const look = BACKDROPS[scene.backdrop]
+  mood,
+  weather,
+}: Stage3DProps) {
   const frame = useRef<HTMLDivElement>(null)
   const inView = useInView(frame)
   return (
@@ -346,11 +582,31 @@ export default function TaleScene3D({
           }}
         >
           <World look={look} reducedMotion={reducedMotion} />
-          <Actors scene={scene} sceneKey={sceneKey} reducedMotion={reducedMotion} />
+          {weather && <Particles key={weather} weather={weather} reducedMotion={reducedMotion} />}
+          <Actors actors={actors} sceneKey={sceneKey} reducedMotion={reducedMotion} mood={mood} />
           <CameraDrift reducedMotion={reducedMotion} />
           <ReleaseOnClose />
         </Canvas>
       </div>
     </SceneErrorBoundary>
+  )
+}
+
+export default function TaleScene3D({
+  scene,
+  sceneKey,
+  label,
+  reducedMotion,
+  onFail,
+}: TaleScene3DProps) {
+  return (
+    <Stage3D
+      look={BACKDROPS[scene.backdrop]}
+      actors={scene.actors}
+      sceneKey={sceneKey}
+      label={label}
+      reducedMotion={reducedMotion}
+      onFail={onFail}
+    />
   )
 }

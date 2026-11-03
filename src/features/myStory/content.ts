@@ -1,5 +1,6 @@
 import type { PagePicture } from '@/features/stories/types'
 import type { StoryBackdrop } from '@/features/stories/backdrops'
+import type { Mood, Weather } from '@/features/tales/three/life'
 
 /*
  * «O‘z ertagim» (Phase 49): the child makes a story from picture cards in
@@ -246,8 +247,48 @@ const PLACE_SCENE: Record<PlaceId, { backdrop: StoryBackdrop; props: PagePicture
   },
 }
 
+/** The weather of each place on the 3D stage (Phase 74). */
+export const PLACE_WEATHER: Record<PlaceId, Weather | undefined> = {
+  forest: 'leaves',
+  space: 'stars',
+  sea: 'bubbles',
+  city: undefined,
+  mountains: 'snow',
+  desert: 'dust',
+  north: 'snow',
+  garden: 'petals',
+  castle: 'fireflies',
+  farm: 'petals',
+  bazaar: undefined,
+  island: 'bubbles',
+}
+
+/** Endings that are a celebration get confetti; the quiet ones twinkle. */
+const ENDING_WEATHER: Partial<Record<EndingId, Weather>> = {
+  party: 'confetti',
+  treasure: 'confetti',
+  prize: 'confetti',
+  concert: 'confetti',
+  lights: 'fireflies',
+  wish: 'stars',
+  sleep: 'stars',
+  rainbow: 'petals',
+}
+
+/** How the hero feels on each page: glad to start, curious, surprised, then joyful. */
+export const STEP_MOOD: Record<StoryStep, Mood> = {
+  hero: 'happy',
+  place: 'curious',
+  helper: 'surprised',
+  ending: 'joyful',
+}
+
 export interface StoryCard {
   id: StoryStep
+  /** How the hero feels (the 3D stage shows it). */
+  mood: Mood
+  /** The weather on the 3D stage. */
+  weather?: Weather
   /** i18n keys of the card's sentences, in order (each is a fixed, recordable sentence). */
   lines: readonly string[]
   picture: PagePicture
@@ -264,21 +305,30 @@ export function storyCards(choices: StoryChoices): StoryCard[] {
   return [
     {
       id: 'hero',
+      mood: STEP_MOOD.hero,
+      weather: undefined,
       lines: [`myStory.say.hero.${choices.hero}`, 'myStory.say.heroDream'],
       picture: { backdrop: 'mahalla', actors: [{ ...hero, x: 0 }] },
     },
     {
       id: 'place',
+      mood: STEP_MOOD.place,
+      weather: PLACE_WEATHER[choices.place],
       lines: [`myStory.say.place.${choices.place}.a`, `myStory.say.place.${choices.place}.b`],
       picture: at([]),
     },
     {
       id: 'helper',
+      mood: STEP_MOOD.helper,
+      weather: PLACE_WEATHER[choices.place],
       lines: [`myStory.say.helper.${choices.helper}.a`, `myStory.say.helper.${choices.helper}.b`],
       picture: at([{ asset: CHOICE_PICTURE.helper[choices.helper]!, x: 1, z: 0.5, size: 0.8 }]),
     },
     {
       id: 'ending',
+      // a sleepy ending is calm; every other ending is pure joy
+      mood: choices.ending === 'sleep' ? 'sleepy' : STEP_MOOD.ending,
+      weather: ENDING_WEATHER[choices.ending] ?? PLACE_WEATHER[choices.place],
       lines: [
         `myStory.say.ending.${choices.ending}.a`,
         `myStory.say.ending.${choices.ending}.b`,

@@ -224,3 +224,14 @@ describe('the own story page', () => {
     expect(screen.getByTestId('my-story-note')).toHaveTextContent(en.learn.voiceLocked)
   })
 })
+
+describe('the story on the 3D stage (Phase 74)', () => {
+  it('the hero feels its way through the story, and the place has its weather', () => {
+    const cards = storyCards({ hero: 'fox', place: 'north', helper: 'boat', ending: 'party' })
+    expect(cards.map((card) => card.mood)).toEqual(['happy', 'curious', 'surprised', 'joyful'])
+    expect(cards[1]!.weather).toBe('snow')
+    expect(cards[3]!.weather).toBe('confetti')
+    const calm = storyCards({ hero: 'owl', place: 'forest', helper: 'book', ending: 'sleep' })
+    expect(calm[3]!.mood).toBe('sleepy')
+  })
+})

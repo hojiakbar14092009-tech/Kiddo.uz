@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
 import { LearnShell } from '@/features/learn/LearnShell'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
-import { StoryPicture } from '@/features/stories/StoryPicture'
 import { useNarration, type NarrationProblem } from '@/features/stories/useNarration'
 import { tDynamic } from '@/lib/tDynamic'
 import { useChildKey } from '@/store/progressStore'
@@ -19,6 +18,7 @@ import {
   type StoryChoices,
 } from './content'
 import { useMyStoryStore, type SavedStory } from './store'
+import { StoryStage } from './StoryStage'
 import { FitWords } from '@/components/ui/FitWords'
 
 const NO_STORIES: readonly SavedStory[] = []
@@ -210,7 +210,7 @@ function StoryPlay({ choices, onAgain }: { choices: StoryChoices; onAgain: () =>
         className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4"
       >
         <div className="aspect-[4/3] w-full overflow-hidden rounded-[28px] shadow-[0_7px_0_var(--color-line)]">
-          <StoryPicture picture={card.picture} label={t('myStory.pictureLabel')} />
+          <StoryStage card={card} label={t('myStory.pictureLabel')} />
         </div>
         <div
           data-testid="my-story-text"

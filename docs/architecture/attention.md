@@ -148,3 +148,27 @@ and in the attention helper's offer.
   ElevenLabs (Higgsfield / Flashloop), save it as `public/vo/<short>/<lang>-<n>.wav`,
   then `python3 marketing/shorts/synth.py --timings-only` and `render.sh`: every scene
   stretches to its new line. App clips: `generate.py --engine elevenlabs --force`.
+
+## My Story: twelve of everything (Phase 73)
+
+- Twelve heroes, places, helpers and endings (`myStory/content.ts`), each with its own
+  fixed, recorded sentences in uz/ru/en (≤ 8 words; Russian heroes all masculine so
+  the shared lines fit). Every place has its own look and things standing in it.
+- Two columns of cards on a 320–419 px phone (long names never break), three from
+  420 px, four on a tablet.
+
+## My Story on a living 3D stage (Phase 74)
+
+- The story pages play on the tales' 3D stage (`Stage3D` in `TaleScene3D.tsx`, loaded
+  only when a story plays); the flat picture stands in while it loads, without WebGL
+  or if 3D fails.
+- The hero has feelings that follow the story: happy at the start, curious in a new
+  place, surprised when trouble comes, joyful at the end (sleepy for "sweet dreams").
+  It breathes, squashes when it lands and stretches in the air, leans to look round,
+  trembles after a fright; a small face above its head shows the feeling.
+- Each place has its weather (falling leaves and petals, snow, bubbles, fireflies,
+  stars, desert dust); celebrations end in confetti. Mountains get snowy peaks, the
+  bazaar its striped stalls. The motion is pure and tested (`life.ts`).
+- Reduced motion: everything stands still, the feeling shows at once.
+- Fully rigged 3D animals (real walking and faces) need 3D models: Higgsfield
+  `generate_3d` (credits) or bought rigged models can replace the picture cards later.
