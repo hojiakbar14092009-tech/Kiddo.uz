@@ -31,3 +31,8 @@ verify_jwt = false
 # checks the secret given to setWebhook (TELEGRAM_WEBHOOK_SECRET) itself.
 [functions.telegram]
 verify_jwt = false
+
+# Phase 57: the owner's work bot webhook. It checks OWNER_BOT_WEBHOOK_SECRET itself and
+# answers only OWNER_TELEGRAM_ID.
+[functions.owner-bot]
+verify_jwt = false

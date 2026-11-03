@@ -1,0 +1,519 @@
+# The owner's work bot (Phase 57): one task from Telegram, done by Claude Code on
+# its own branch. Started only by the bot (supabase/functions/owner-bot), which
+# passes the task as an input. Nothing here pushes to the main branch: the owner's
+# "Asosiyga qo‘shish" button merges the PR. Setup: docs/architecture/owner-bot.md.
+#
+# The change's code is untrusted, so it never runs on a runner that holds a key:
+#   * claude: holds the Anthropic key (and the bot token for the plan message).
+#     Claude plans with read-only tools, then edits files with no shell. The change
+#     is saved as a patch. No code of the repo or of the change runs in this job.
+#   * checks, build, unit: fresh runners, no secrets, read-only. Each applies the
+#     patch and runs its checks; the runner records each step's pass/fail. Build
+#     and unit tests are separate jobs, so one cannot fake the other.
+#   * publish: a fresh checkout of the base. Its scripts are copied before the patch
+#     is applied and only that copy runs. It refuses forbidden paths, pushes
+#     owner-task/<id>, opens the PR and sends the report. It runs nothing from the
+#     change and installs nothing.
+#   * nochange / failed: a short message, from a fresh checkout of the base.
+# The task text reaches the shell only as an env variable, never as code.
+name: Owner task
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: The owner's task, in plain words
+        required: true
+        type: string
+      task_id:
+        description: Short id from the bot (branch owner-task/<id>)
+        required: true
+        type: string
+      project:
+        description: The project name in the bot's list
+        required: true
+        type: string
+
+permissions: {}
+
+# one task at a time in this repository; a second one waits, it is not cancelled
+concurrency:
+  group: owner-task
+  cancel-in-progress: false
+
+env:
+  TASK: ${{ inputs.task }}
+  TASK_ID: ${{ inputs.task_id }}
+  PROJECT: ${{ inputs.project }}
+  BASE: ${{ github.ref_name }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  # the owner can change the limits in the repo's Actions variables
+  BUDGET_USD: ${{ vars.OWNER_TASK_BUDGET_USD || '5' }}
+  MAX_TURNS: ${{ vars.OWNER_TASK_MAX_TURNS || '60' }}
+  WORK_MINUTES: '30'
+  CLAUDE_CODE_VERSION: '2.1.316'
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+    outputs:
+      started: ${{ steps.inputs.outputs.started }}
+      changed: ${{ steps.patch.outputs.changed }}
+      reason: ${{ steps.guard.outputs.reason || steps.plan.outputs.reason || steps.work.outputs.reason }}
+    env:
+      DISABLE_AUTOUPDATER: '1'
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1'
+      # Claude edits only inside the project (acceptEdits, no blanket Edit/Write rule).
+      # As a second layer it may not read the process environment (its own key), the
+      # runner or system files, nor write anything that git, the shell, Claude Code or
+      # later steps would run.
+      NO_READ: >-
+        Read(//proc/**),Read(//sys/**),Read(//etc/**),Read(//root/**),Read(//home/runner/work/_temp/**),
+        Read(//home/runner/work/_actions/**),Read(//home/runner/runners/**)
+      NO_WRITE: >-
+        Edit(.git/**),Write(.git/**),Edit(**/.git/**),Write(**/.git/**),
+        Edit(.claude/**),Write(.claude/**),Edit(.mcp.json),Write(.mcp.json),
+        Edit(//home/runner/*),Write(//home/runner/*),Edit(//home/runner/.*/**),Write(//home/runner/.*/**),
+        Edit(//home/runner/.claude/**),Write(//home/runner/.claude/**),
+        Edit(//home/runner/.gitconfig),Write(//home/runner/.gitconfig),
+        Edit(//home/runner/.bashrc),Write(//home/runner/.bashrc),
+        Edit(//home/runner/work/_actions/**),Write(//home/runner/work/_actions/**),
+        Edit(//home/runner/work/_tool/**),Write(//home/runner/work/_tool/**),
+        Edit(//home/runner/runners/**),Write(//home/runner/runners/**),
+        Edit(//home/runner/work/_temp/**),Write(//home/runner/work/_temp/**),
+        Edit(//tmp/**),Write(//tmp/**),Edit(//etc/**),Write(//etc/**),Edit(//opt/**),Write(//opt/**),
+        Edit(//usr/**),Write(//usr/**),Edit(//var/**),Write(//var/**),Edit(//root/**),Write(//root/**)
+    steps:
+      - name: Check the inputs
+        id: inputs
+        run: |
+          echo "started=$(date +%s)" >> "$GITHUB_OUTPUT"
+          {
+            # the runner context is not available in env: the paths are set here
+            echo "OUT=$RUNNER_TEMP/out"
+            echo "PLAN_FILE=$RUNNER_TEMP/out/plan.json"
+            echo "WORK_FILE=$RUNNER_TEMP/out/work.json"
+          } >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/out"
+          [[ "$TASK_ID" =~ ^[a-z0-9]{4,16}$ ]] || { echo "bad task_id"; exit 1; }
+          [[ "$PROJECT" =~ ^[A-Za-z0-9_-]{1,20}$ ]] || { echo "bad project"; exit 1; }
+          [ "${#TASK}" -ge 5 ] && [ "${#TASK}" -le 1500 ] || { echo "bad task length"; exit 1; }
+          [[ "$BUDGET_USD" =~ ^[0-9]{1,3}(\.[0-9]{1,2})?$ ]] || { echo "bad budget"; exit 1; }
+          [[ "$MAX_TURNS" =~ ^[0-9]{1,3}$ ]] || { echo "bad turns"; exit 1; }
+
+      - name: One task at a time
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # the bot checks too; this catches two tasks sent seconds apart. Only older runs
+          # count: a newer one waits in the concurrency group and stops itself here later.
+          others="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow owner-task.yml --limit 20 \
+            --json databaseId,status --jq "[.[] | select(.status != \"completed\" and .databaseId < $GITHUB_RUN_ID)] | length")"
+          open="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json headRefName --jq '[.[] | select(.headRefName | startswith("owner-task/"))] | length')"
+          if [ "$others" != "0" ] || [ "$open" != "0" ]; then
+            echo "reason=boshqa vazifa hali tugamagan yoki javob kutyapti" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Claude Code only: the repo's own packages are not installed in this job
+      - name: Install Claude Code
+        id: install
+        run: |
+          npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+          cp -r scripts/owner-task "$RUNNER_TEMP/tools"
+          echo "TOOLS=$RUNNER_TEMP/tools" >> "$GITHUB_ENV"
+          # the base's git data, kept where Claude cannot write: the patch is taken from it
+          cp -a .git "$RUNNER_TEMP/git-base"
+          echo "tools=$(cd "$RUNNER_TEMP/tools" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)" >> "$GITHUB_OUTPUT"
+          # What runs after Claude in this job (actions, tools, these scripts, the git copy)
+          # is made read-only. Claude has no shell to undo that.
+          chmod -R a-w "$RUNNER_TEMP/tools" "$RUNNER_TEMP/git-base" "$RUNNER_WORKSPACE/../_actions"
+          # the Claude Code install itself (the rest of the tool cache is outside the workspace)
+          chmod -R a-w "$(npm root -g)/@anthropic-ai"
+
+      - name: Plan (Claude reads, changes nothing)
+        id: plan
+        timeout-minutes: 8
+        env:
+          KEY_API: ${{ secrets.ANTHROPIC_API_KEY }}
+          KEY_OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [ -n "$KEY_API" ] && export ANTHROPIC_API_KEY="$KEY_API"
+          [ -n "$KEY_OAUTH" ] && export CLAUDE_CODE_OAUTH_TOKEN="$KEY_OAUTH"
+          unset KEY_API KEY_OAUTH
+          node "$TOOLS/run.mjs" prompt plan | claude -p \
+            --allowedTools "Read,Glob,Grep" \
+            --disallowedTools "Bash,Edit,Write,NotebookEdit,WebFetch,WebSearch,${NO_READ//[[:space:]]/}" \
+            --setting-sources user --strict-mcp-config \
+            --max-turns 15 --max-budget-usd 1 \
+            --output-format json --json-schema "$(node "$TOOLS/run.mjs" schema plan)" \
+            > "$PLAN_FILE" || true
+          if ! node "$TOOLS/run.mjs" check "$PLAN_FILE" > "$RUNNER_TEMP/check.txt"; then
+            cat "$RUNNER_TEMP/check.txt"
+            echo "reason=$(sed -n 's/^reason=//p' "$RUNNER_TEMP/check.txt")" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/check.txt"
+          node "$TOOLS/run.mjs" pages "$PLAN_FILE" > "$OUT/pages.txt"
+
+      - name: Send the plan
+        env:
+          OWNER_BOT_TOKEN: ${{ secrets.OWNER_BOT_TOKEN }}
+          OWNER_TELEGRAM_ID: ${{ secrets.OWNER_TELEGRAM_ID }}
+        run: node "$TOOLS/run.mjs" notify plan
+
+      - name: Work (Claude edits files, runs nothing)
+        id: work
+        timeout-minutes: 30
+        env:
+          KEY_API: ${{ secrets.ANTHROPIC_API_KEY }}
+          KEY_OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [ -n "$KEY_API" ] && export ANTHROPIC_API_KEY="$KEY_API"
+          [ -n "$KEY_OAUTH" ] && export CLAUDE_CODE_OAUTH_TOKEN="$KEY_OAUTH"
+          unset KEY_API KEY_OAUTH
+          # the scripts must be the ones copied before Claude started
+          hash="$(cd "$TOOLS" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)"
+          [ "$hash" = "${{ steps.install.outputs.tools }}" ] || { echo "tools changed"; exit 1; }
+          node "$TOOLS/run.mjs" prompt work | claude -p \
+            --permission-mode acceptEdits --allowedTools "Read,Glob,Grep,TodoWrite" \
+            --disallowedTools "Bash,NotebookEdit,WebFetch,WebSearch,${NO_READ//[[:space:]]/},${NO_WRITE//[[:space:]]/}" \
+            --setting-sources user --strict-mcp-config \
+            --max-turns "$MAX_TURNS" --max-budget-usd "$BUDGET_USD" \
+            --output-format json --json-schema "$(node "$TOOLS/run.mjs" schema work)" \
+            > "$WORK_FILE" || true
+          hash="$(cd "$TOOLS" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)"
+          if [ "$hash" != "${{ steps.install.outputs.tools }}" ]; then
+            echo "reason=ish skriptlari o‘zgartirildi" >> "$GITHUB_OUTPUT"; exit 1
+          fi
+          if ! node "$TOOLS/run.mjs" check "$WORK_FILE" > "$RUNNER_TEMP/check.txt"; then
+            cat "$RUNNER_TEMP/check.txt"
+            echo "reason=$(sed -n 's/^reason=//p' "$RUNNER_TEMP/check.txt")" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/check.txt"
+
+      - name: Save the change
+        id: patch
+        env:
+          # no user or system git config: only the base's own, from before Claude
+          GIT_CONFIG_GLOBAL: /dev/null
+          GIT_CONFIG_NOSYSTEM: '1'
+        run: |
+          chmod -R u+w "$RUNNER_TEMP/git-base"
+          g() {
+            git --git-dir="$RUNNER_TEMP/git-base" --work-tree=. -c core.fsmonitor=false \
+              -c core.hooksPath=/dev/null -c diff.external= "$@"
+          }
+          g add -A
+          g diff --cached --binary --no-ext-diff --no-textconv > "$OUT/change.patch"
+          if [ -s "$OUT/change.patch" ]; then echo "changed=true"; else echo "changed=false"; fi >> "$GITHUB_OUTPUT"
+          g diff --cached --stat --no-ext-diff
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claude
+          path: |
+            ${{ runner.temp }}/out/plan.json
+            ${{ runner.temp }}/out/work.json
+            ${{ runner.temp }}/out/pages.txt
+            ${{ runner.temp }}/out/change.patch
+          retention-days: 7
+
+  # The three check jobs: no secrets, read-only, each on its own runner. A step's
+  # pass/fail is its outcome, which the runner sets.
+  checks:
+    needs: claude
+    if: needs.claude.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      format: ${{ steps.format.outcome }}
+      lint: ${{ steps.lint.outcome }}
+      types: ${{ steps.types.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4.1.8
+        with:
+          name: claude
+          path: ${{ runner.temp }}/in
+      - name: Apply the change
+        run: |
+          git apply --index --binary "$RUNNER_TEMP/in/change.patch"
+          npm ci
+      - name: Check formatting
+        id: format
+        continue-on-error: true
+        run: npx prettier --check .
+      - name: Check lint
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+      - name: Check types
+        id: types
+        continue-on-error: true
+        run: npx tsc -b
+
+  build:
+    needs: claude
+    if: needs.claude.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    outputs:
+      build: ${{ steps.build.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4.1.8
+        with:
+          name: claude
+          path: ${{ runner.temp }}/in
+      - name: Install
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          cp -r scripts/owner-task "$RUNNER_TEMP/tools"
+      - name: Screenshots before
+        continue-on-error: true
+        run: |
+          npm run build
+          mv dist "$RUNNER_TEMP/dist-before"
+          node "$RUNNER_TEMP/tools/shots.mjs" "$RUNNER_TEMP/dist-before" "$RUNNER_TEMP/shots/before" "$RUNNER_TEMP/in/pages.txt"
+      - name: Apply the change
+        run: |
+          git apply --index --binary "$RUNNER_TEMP/in/change.patch"
+          npm ci
+      - name: Check build
+        id: build
+        continue-on-error: true
+        run: npx vite build
+      # taken from the change's own build: shown as what it looks like, not as a check
+      - name: Screenshots after
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: node "$RUNNER_TEMP/tools/shots.mjs" dist "$RUNNER_TEMP/shots/after" "$RUNNER_TEMP/in/pages.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots
+          path: ${{ runner.temp }}/shots
+          if-no-files-found: ignore
+          retention-days: 7
+
+  unit:
+    needs: claude
+    if: needs.claude.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      unit: ${{ steps.unit.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4.1.8
+        with:
+          name: claude
+          path: ${{ runner.temp }}/in
+      - name: Apply the change
+        run: |
+          git apply --index --binary "$RUNNER_TEMP/in/change.patch"
+          npm ci
+      - name: Check unit tests
+        id: unit
+        continue-on-error: true
+        run: npx vitest run
+
+  publish:
+    needs: [claude, checks, build, unit]
+    if: >-
+      !cancelled() && needs.claude.result == 'success' && needs.claude.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      deployments: read
+    outputs:
+      pr: ${{ steps.pr.outputs.number }}
+      reason: ${{ steps.review.outputs.reason || steps.pr.outputs.reason }}
+    steps:
+      # the base branch as it is
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v4.1.8
+        with:
+          name: claude
+          path: ${{ runner.temp }}/in/claude
+
+      # missing when the build failed: the report then says no screenshots were taken
+      - uses: actions/download-artifact@v4.1.8
+        continue-on-error: true
+        with:
+          name: shots
+          path: ${{ runner.temp }}/in/shots
+
+      - name: Apply and review the change
+        id: review
+        env:
+          REVIEW_FILE: ${{ runner.temp }}/review.json
+          KEY_API: ${{ secrets.ANTHROPIC_API_KEY }}
+          KEY_OAUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          # the base's own scripts, copied before the change can replace them; only these run
+          cp -r scripts/owner-task "$RUNNER_TEMP/tools"
+          echo "TOOLS=$RUNNER_TEMP/tools" >> "$GITHUB_ENV"
+          git switch -c "owner-task/$TASK_ID"
+          # git apply refuses paths outside the repo, inside .git and through symlinks
+          if ! git apply --index --binary "$RUNNER_TEMP/in/claude/change.patch"; then
+            echo "reason=o‘zgarishni qo‘llab bo‘lmadi" >> "$GITHUB_OUTPUT"; exit 1
+          fi
+          for key in "$KEY_API" "$KEY_OAUTH"; do
+            if [ -n "$key" ] && git diff --cached | grep -qF -- "$key"; then
+              echo "reason=o‘zgarishda maxfiy kalit bor" >> "$GITHUB_OUTPUT"; exit 1
+            fi
+          done
+          if ! node "$RUNNER_TEMP/tools/run.mjs" review > "$RUNNER_TEMP/review.txt"; then
+            cat "$RUNNER_TEMP/review.txt"
+            echo "reason=$(sed -n 's/^reason=//p' "$RUNNER_TEMP/review.txt")" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/review.txt"
+          git diff --cached --stat
+
+      - name: Push the branch and open the PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="$(node -e 'import(process.argv[1]).then(m => process.stdout.write(m.titleFrom(process.env.TASK)))' "$TOOLS/lib.mjs")"
+          git -c user.name="kiddo-owner-task[bot]" -c user.email="owner-task@users.noreply.github.com" \
+            -c core.hooksPath=/dev/null commit -q --no-verify -m "owner-task: $title"
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git -c core.hooksPath=/dev/null push -q --no-verify "$remote" "HEAD:refs/heads/owner-task/$TASK_ID"
+          printf '%s\n\nTask from the owner bot. Run: %s\n' "$TASK" "$RUN_URL" > "$RUNNER_TEMP/pr-body.md"
+          if ! url="$(gh pr create --repo "$GITHUB_REPOSITORY" --base "$BASE" --head "owner-task/$TASK_ID" \
+            --title "$title" --body-file "$RUNNER_TEMP/pr-body.md")"; then
+            # no PR: the branch would only be left behind
+            git -c core.hooksPath=/dev/null push -q --no-verify "$remote" --delete "owner-task/$TASK_ID" || true
+            echo "reason=PR ochib bo‘lmadi (Actions’ga PR ochish ruxsatini bering)" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          {
+            echo "url=$url"
+            echo "number=${url##*/}"
+            echo "sha=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Wait for the Vercel preview
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: echo "url=$(node "$TOOLS/run.mjs" preview "$SHA")" >> "$GITHUB_OUTPUT"
+
+      - name: Send the report
+        env:
+          OWNER_BOT_TOKEN: ${{ secrets.OWNER_BOT_TOKEN }}
+          OWNER_TELEGRAM_ID: ${{ secrets.OWNER_TELEGRAM_ID }}
+          REVIEW_FILE: ${{ runner.temp }}/review.json
+          PLAN_FILE: ${{ runner.temp }}/in/claude/plan.json
+          WORK_FILE: ${{ runner.temp }}/in/claude/work.json
+          SHOTS_DIR: ${{ runner.temp }}/in/shots
+          STARTED_AT: ${{ needs.claude.outputs.started }}
+          GATE_FORMAT: ${{ needs.checks.outputs.format }}
+          GATE_LINT: ${{ needs.checks.outputs.lint }}
+          GATE_TYPES: ${{ needs.checks.outputs.types }}
+          GATE_BUILD: ${{ needs.build.outputs.build }}
+          GATE_UNIT: ${{ needs.unit.outputs.unit }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          HEAD_SHA: ${{ steps.pr.outputs.sha }}
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: node "$TOOLS/run.mjs" notify report
+
+  nochange:
+    needs: claude
+    if: needs.claude.result == 'success' && needs.claude.outputs.changed == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/owner-task
+      - uses: actions/download-artifact@v4.1.8
+        with:
+          name: claude
+          path: ${{ runner.temp }}/in
+      - name: Tell the owner nothing changed
+        env:
+          OWNER_BOT_TOKEN: ${{ secrets.OWNER_BOT_TOKEN }}
+          OWNER_TELEGRAM_ID: ${{ secrets.OWNER_TELEGRAM_ID }}
+          PLAN_FILE: ${{ runner.temp }}/in/plan.json
+          WORK_FILE: ${{ runner.temp }}/in/work.json
+        run: node scripts/owner-task/run.mjs notify nochange
+
+  # any job failed or was stopped, and no report went out
+  failed:
+    needs: [claude, checks, build, unit, publish]
+    if: >-
+      always() && needs.publish.result != 'success' &&
+      (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/owner-task
+      - name: Tell the owner it did not finish
+        env:
+          OWNER_BOT_TOKEN: ${{ secrets.OWNER_BOT_TOKEN }}
+          OWNER_TELEGRAM_ID: ${{ secrets.OWNER_TELEGRAM_ID }}
+          FAIL_REASON: ${{ needs.claude.outputs.reason || needs.publish.outputs.reason }}
+          PR_NUMBER: ${{ needs.publish.outputs.pr }}
+          JOB_STATUS: ${{ contains(needs.*.result, 'cancelled') && 'cancelled' || 'failure' }}
+        run: node scripts/owner-task/run.mjs notify failure

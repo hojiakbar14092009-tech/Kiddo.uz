@@ -76,8 +76,11 @@ export function CountUp({
       return undefined
     }
     let frame = 0
-    const start = performance.now()
+    // timed from the first frame's own timestamp: performance.now() may count from a
+    // different origin than the frame times (it does in jsdom), which stalled the count
+    let start = -1
     const step = (now: number) => {
+      if (start < 0) start = now
       const t = Math.min(1, (now - start) / COUNT_UP_MS)
       const next = t >= 1 ? value : from + (value - from) * easeOutCubic(t)
       current.current = next
