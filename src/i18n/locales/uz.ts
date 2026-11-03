@@ -853,6 +853,7 @@ export const uz = {
         back: 'Orqaga',
         correct: 'To‘g‘ri javob',
         tryAgain: 'Yana urinib ko‘r',
+        alert: 'Diqqat chaqiruvi',
       },
       testSound: 'Tekshirib eshitish',
       voiceNote:
@@ -2493,7 +2494,7 @@ export const uz = {
       camera:
         'Kamera faqat dars va o‘yin sahifalarida, faqat shu qurilmaning o‘zida ishlaydi. Tasvir saqlanmaydi, hech kimga yuborilmaydi va ko‘rsatilmaydi: ilova faqat yuz ekranga qaraganini yoki qaramaganini biladi. Kamera ishlayotganda ekranda kichik belgi turadi.',
       voice:
-        'PRO tarifda robot ovoz bilan ogohlantiradi. Bepul tarifda ovoz yo‘q: robot ko‘rinib, pufakchada yozib eslatadi.',
+        'PRO tarifda robot bolani ismi bilan chaqirib, ovoz bilan ogohlantiradi. Bepul tarifda robot gapirmaydi: qisqa chaqiruv ovozi chiqadi, robot ko‘rinib, pufakchada yozib eslatadi.',
       later:
         'Javobingizni istalgan vaqtda ota-onalar bo‘limidagi Sozlamalardan o‘zgartirishingiz mumkin.',
       yes: 'Ha, ruxsat beraman',
@@ -2778,7 +2779,17 @@ export const uz = {
     camera: 'Kamera bilan kuzatish (faqat shu qurilmada)',
     cameraHint: 'Tasvir saqlanmaydi va hech kimga yuborilmaydi.',
     cameraDenied: 'Brauzer kameraga ruxsat bermadi. Brauzer sozlamalarida kameraga ruxsat bering.',
-    voiceFree: 'Bepul tarifda ogohlantirish ovozsiz bo‘ladi.',
+    voiceFree: 'Bepul tarifda robot gapirmaydi: faqat qisqa chaqiruv ovozi va yozuv bo‘ladi.',
+    reportTitle: 'Diqqat hisoboti: {{name}}',
+    reportGuest: 'Diqqat hisoboti',
+    reportHint: 'Oxirgi 7 kun. Faqat sonlar saqlanadi, kamera tasviri hech qachon saqlanmaydi.',
+    reportEmpty: 'Hali hech narsa yo‘q. Robot bolani chaqirsa, shu yerda ko‘rinadi.',
+    reminders: 'Robot chaqirdi',
+    away: 'Ilovadan chiqib qaytdi',
+    offers: 'O‘yin taklif qilindi',
+    games: 'Taklifdan o‘yin tanladi',
+    chart: 'Kunlar bo‘yicha chaqiruvlar',
+    dayCount: '{{day}}: {{count}}',
   },
   games: {
     title: 'O‘yinlar',

@@ -4,8 +4,10 @@ import {
   idleMsFor,
   initialTracker,
   lineFor,
+  LOOK_AWAY_MS,
   noteDistraction,
   WINDOW_MS,
+  withName,
 } from './tracker'
 
 describe('attention tracker', () => {
@@ -58,5 +60,22 @@ describe('attention tracker', () => {
     expect(lineFor({ kind: 'offerGames' }, 5)).toBe('offer')
     expect(lineFor({ kind: 'welcomeBack' }, 1)).toBe('back2')
     expect(lineFor({ kind: 'nudge', level: 2, cause: 'idle' }, 0)).toBe('again1')
+  })
+})
+
+describe('the reminder with the child’s name (Phase 71)', () => {
+  it('puts the name first, so the child turns at once', () => {
+    expect(withName('Ali', 'Bu yoqqa qara!')).toBe('Ali! Bu yoqqa qara!')
+    expect(withName('  Malika ', 'Look here!')).toBe('Malika! Look here!')
+  })
+
+  it('without a name the line is said as it is', () => {
+    expect(withName(null, 'Look here!')).toBe('Look here!')
+    expect(withName(' ', 'Look here!')).toBe('Look here!')
+  })
+
+  it('notices looking away within about a second and a half', () => {
+    expect(LOOK_AWAY_MS).toBeLessThanOrEqual(1500)
+    expect(LOOK_AWAY_MS).toBeGreaterThanOrEqual(1000)
   })
 })

@@ -36,8 +36,11 @@ export const OFFER_AT = 3
 export const COOLDOWN_MS = 15_000
 /** Leaving the app this long counts (a quick glance at a notification does not). */
 export const AWAY_MIN_MS = 4_000
-/** Looking away this long counts. */
-export const LOOK_AWAY_MS = 4_000
+/**
+ * Looking away this long counts (Phase 71: at once, about a second and a half – long
+ * enough that a blink or a glance at the parent does not, short enough to catch a drift).
+ */
+export const LOOK_AWAY_MS = 1_500
 
 /** No touch on a learning screen for this long counts; a little longer for the youngest. */
 export function idleMsFor(age: number | null): number {
@@ -94,4 +97,10 @@ export function lineFor(action: AttentionAction, turn: number): string {
           : 'idle'
   const lines = LINES[group]
   return lines[((turn % lines.length) + lines.length) % lines.length]!
+}
+
+/** The reminder with the child's own name in front: "Ali! Look here!" (Phase 71). */
+export function withName(name: string | null | undefined, line: string): string {
+  const clean = name?.trim()
+  return clean ? `${clean}! ${line}` : line
 }

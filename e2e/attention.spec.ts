@@ -83,7 +83,7 @@ test.describe('the attention helper', () => {
     await expect(consent).toBeVisible()
     // why it exists, why it helps, the camera and the free version are explained
     await expect(consent).toContainText('Nega bu foydali?')
-    await expect(consent).toContainText('Bepul tarifda ovoz yo‘q')
+    await expect(consent).toContainText('Bepul tarifda robot gapirmaydi')
     // no way past it: Escape does nothing and there is no close button
     await page.keyboard.press('Escape')
     await expect(consent).toBeVisible()
@@ -124,7 +124,8 @@ test.describe('the attention helper', () => {
     await startSci(page)
     const nudge = page.getByTestId('attention-nudge')
     await page.clock.runFor(26_000)
-    await expect(nudge).toContainText('Hoy, men shu yerdaman!')
+    // the child's own name comes first (Phase 71)
+    await expect(nudge).toContainText('Bek! Hoy, men shu yerdaman!')
     await page.clock.runFor(26_000)
     // the second time the robot is warmer ("you can do it")
     await expect(nudge).toContainText(/Ozgina qoldi|Sen zo‘rsan|birga davom/)
@@ -135,6 +136,39 @@ test.describe('the attention helper', () => {
     await expect(page.getByTestId('attention-all-games')).toBeVisible()
     await offer.getByRole('button', { name: 'Suzadimi, cho‘kadimi?' }).click()
     await expect(page).toHaveURL(/\/sci\/float$/)
+
+    // the parent's report keeps it all, for this child only, as counts
+    const day = await page.evaluate(() => {
+      const log = JSON.parse(localStorage.getItem('kiddo.attention') ?? '{}').state?.log ?? {}
+      return Object.values(log.k ?? {})[0]
+    })
+    expect(day).toEqual({ reminders: 2, away: 0, offers: 1, games: 1 })
+  })
+
+  test('the parent sees the attention report for the child', async ({ page }) => {
+    await child(page, 'granted')
+    await page.addInitScript(() => {
+      const raw = JSON.parse(localStorage.getItem('kiddo.attention') ?? '{}')
+      if (raw.state?.log) return
+      const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tashkent' }).format(new Date())
+      raw.state = {
+        ...raw.state,
+        log: { k: { [day]: { reminders: 3, away: 1, offers: 1, games: 1 } } },
+      }
+      localStorage.setItem('kiddo.attention', JSON.stringify(raw))
+    })
+    await ready(page, '/parent/dashboard?tab=settings')
+    await solveParentGate(page)
+    await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
+    await page.goto('/parent/dashboard?tab=settings')
+    const gate = page.getByRole('dialog', { name: 'Faqat kattalar uchun' })
+    await expect(gate.or(page.getByTestId('attention-setting'))).toBeVisible()
+    if (await gate.isVisible()) await solveParentGate(page)
+    const report = page.getByTestId('attention-report')
+    await expect(report).toContainText('Diqqat hisoboti: Bek')
+    await expect(page.getByTestId('attention-total-reminders')).toHaveText('3')
+    await expect(page.getByTestId('attention-total-away')).toHaveText('1')
+    await expect(page.getByTestId('attention-total-games')).toHaveText('1')
   })
 
   test('without consent the robot never reminds', async ({ page }) => {

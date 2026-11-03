@@ -1492,6 +1492,25 @@ select pg_temp.check((select count(*) from pg_constraint c
     where c.conrelid in ('public.telegram_links'::regclass, 'public.telegram_link_codes'::regclass)
       and c.contype = 'f' and c.confdeltype = 'c') = 2, 'telegram 0022: links and codes go with the account');
 
+-- ===== 0023: the attention helper, as counts only
+begin;
+set local role service_role;
+select set_config('request.jwt.claims', '{"role":"service_role"}', true);
+select pg_temp.check(public.add_analytics_events(('['||'{"id":"att-00000001","install":"install-0005","name":"attention_yes","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"att-00000002","install":"install-0005","name":"attention_nudge","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||','||'{"id":"att-00000003","install":"install-0005","name":"attention_video","day":"'||(now() at time zone 'Asia/Tashkent')::date||'","at":"'||now()||'"}'||']')::jsonb) = 2, 'attention: the helper''s events are accepted, unknown ones skipped');
+commit;
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
+select pg_temp.expect_error($$select * from public.admin_attention_stats(30)$$, 'not_admin');
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ad","role":"authenticated"}', true);
+select pg_temp.check((select installs from public.admin_attention_stats(30) where name='attention_nudge') = 1 and (select days from public.admin_attention_stats(30) where name='attention_yes') = 1 and not exists (select 1 from public.admin_attention_stats(30) where name='app_opened'), 'attention: the admin sees counts per event, nothing else');
+commit;
+begin;
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select pg_temp.expect_error($$select * from public.admin_attention_stats(30)$$, 'permission denied');
+commit;
+
 -- ===== every security definer function pins search_path
 select pg_temp.check(not exists (
   select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace

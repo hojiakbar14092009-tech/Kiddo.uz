@@ -848,6 +848,7 @@ export const en: Translation = {
         back: 'Back',
         correct: 'Right answer',
         tryAgain: 'Try again',
+        alert: 'Attention call',
       },
       testSound: 'Play a test sound',
       voiceNote:
@@ -2479,7 +2480,7 @@ export const en: Translation = {
       camera:
         'The camera works only on lesson and game pages, and only on this device. No picture is kept, sent anywhere or shown: the app only knows whether a face is turned to the screen. While the camera is on, a small sign is shown.',
       voice:
-        'With PRO the robot reminds out loud. The free version has no voice: the robot appears and writes its reminder in a bubble.',
+        'With PRO the robot calls your child by name and reminds out loud. In the free version the robot does not talk: a short call sound plays and the robot writes its reminder in a bubble.',
       later: 'You can change your answer any time in Settings in the parents’ area.',
       yes: 'Yes, allow it',
       no: 'No, thanks',
@@ -2755,7 +2756,18 @@ export const en: Translation = {
     camera: 'Use the camera (on this device only)',
     cameraHint: 'No picture is kept or sent anywhere.',
     cameraDenied: 'The browser blocked the camera. Allow it in the browser settings.',
-    voiceFree: 'In the free version the reminders have no voice.',
+    voiceFree:
+      'In the free version the robot does not talk: just a short call sound and the words.',
+    reportTitle: 'Attention report: {{name}}',
+    reportGuest: 'Attention report',
+    reportHint: 'The last 7 days. Only numbers are kept; no camera picture is ever saved.',
+    reportEmpty: 'Nothing yet. When the robot calls your child back, it shows here.',
+    reminders: 'Robot called back',
+    away: 'Left and came back',
+    offers: 'Games offered',
+    games: 'Picked a game from the offer',
+    chart: 'Call-backs by day',
+    dayCount: '{{day}}: {{count}}',
   },
   games: {
     title: 'Games',

@@ -19,6 +19,7 @@ import { audio, playTone } from './synth'
  *  back      a short soft step down       – going back
  *  correct   a soft three-note tune up    – a right answer (Phase 42)
  *  tryAgain  two gentle notes, a question – a wrong answer: never a buzzer (Phase 42)
+ *  alert     a bright "ding-ding" call     – the attention helper calls the child back (Phase 71)
  *
  * Since Phase 42 "coin" is the nut roll: four quick wooden knocks rolling up.
  *
@@ -40,6 +41,7 @@ export const SOUND_CUES = [
   'back',
   'correct',
   'tryAgain',
+  'alert',
 ] as const
 export type SoundCue = (typeof SOUND_CUES)[number]
 
@@ -130,6 +132,13 @@ const CUES: Record<SoundCue, readonly CueNote[]> = {
     { at: 0, step: 2, duration: 0.12, gain: 0.35 },
     { at: 0.11, step: 3, duration: 0.2, gain: 0.3 },
   ],
+  // "look here!": a bright doorbell call, high and clear but soft, never an alarm (Phase 71)
+  alert: [
+    { at: 0, step: 7, duration: 0.16, gain: 0.8 },
+    { at: 0.16, step: 5, duration: 0.16, gain: 0.7 },
+    { at: 0.36, step: 7, duration: 0.14, gain: 0.8 },
+    { at: 0.5, step: 9, duration: 0.3, gain: 0.85 },
+  ],
 }
 
 /** Rare, big moments (played softly under the voice); the rest are small and frequent. */
@@ -165,6 +174,7 @@ const RANK: Record<SoundCue, number> = {
   spend: 0,
   back: 0,
   tryAgain: 0,
+  alert: 5,
 }
 
 export function strongestCue(cues: readonly SoundCue[]): SoundCue | null {

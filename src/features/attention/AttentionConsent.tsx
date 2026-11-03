@@ -1,3 +1,4 @@
+import { track } from '@/domain/analytics'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
@@ -45,7 +46,10 @@ export function AttentionConsent() {
     const granted = pending === 'yes'
     setPending(null)
     if (granted) setCameraStep(true)
-    else answer(false, false)
+    else {
+      answer(false, false)
+      track('attention_no')
+    }
   }
 
   const withCamera = async () => {
@@ -54,6 +58,7 @@ export function AttentionConsent() {
     const camera = await askCamera()
     setBusy(false)
     answer(true, camera)
+    track('attention_yes')
   }
 
   if (cameraStep) {
@@ -75,7 +80,15 @@ export function AttentionConsent() {
           <Button variant="primary" size="md" disabled={busy} onClick={() => void withCamera()}>
             {t('attention.consent.cameraYes')}
           </Button>
-          <Button variant="soft" size="md" disabled={busy} onClick={() => answer(true, false)}>
+          <Button
+            variant="soft"
+            size="md"
+            disabled={busy}
+            onClick={() => {
+              answer(true, false)
+              track('attention_yes')
+            }}
+          >
             {t('attention.consent.cameraNo')}
           </Button>
         </div>

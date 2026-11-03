@@ -11,6 +11,7 @@ import {
 } from '@/domain/analytics'
 import { tashkentDay } from '@/lib/dates'
 import { Panel } from './AdminSections'
+import { AttentionStats } from './AttentionStats'
 import { screenName, STEP_LABELS } from './analyticsLabels'
 
 /*
@@ -132,6 +133,8 @@ export function AnalyticsSection({ source }: { source: 'device' | 'cloud' }) {
         )}
         {load.status === 'ready' && <Funnel rows={load.funnel} />}
       </Panel>
+
+      <AttentionStats source={source} days={days} />
 
       <Panel title="Ilova qayerda yopilgan">
         <p className="mb-3 text-sm text-[var(--a-ink-soft)]">

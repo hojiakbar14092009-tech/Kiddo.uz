@@ -12,6 +12,12 @@ export const STEP_LABELS: Record<AnalyticsEventName, string> = {
   returned_day2: 'Ertasi kuni qaytdi',
   returned_day7: 'Bir haftadan keyin qaytdi',
   app_closed: 'Ilovani yopdi',
+  attention_yes: 'Diqqat yordamchisiga ruxsat berdi',
+  attention_no: 'Diqqat yordamchisini rad etdi',
+  attention_camera: 'Kamera bilan kuzatish ishladi',
+  attention_nudge: 'Robot bolani chaqirdi',
+  attention_offer: 'Robot o‘yin taklif qildi',
+  attention_offer_taken: 'Bola taklif qilingan o‘yinni tanladi',
 }
 
 const SCREEN_NAMES: Record<string, string> = {

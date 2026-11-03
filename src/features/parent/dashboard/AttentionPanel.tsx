@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { askCamera } from '@/features/attention/askCamera'
 import { useAttentionStore } from '@/store/attentionStore'
+import { AttentionReport } from './AttentionReport'
 import { ChoiceChips } from './ChoiceChips'
 import { Panel } from './Panel'
 
@@ -60,6 +61,7 @@ export function AttentionPanel() {
         </div>
       )}
       <p className="text-sm text-ink-soft">{t('attentionSettings.voiceFree')}</p>
+      {on && <AttentionReport />}
     </Panel>
   )
 }

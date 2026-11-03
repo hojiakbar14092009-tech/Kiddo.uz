@@ -99,3 +99,31 @@ and in the attention helper's offer.
   compositions), so one picture serves every language; the app writes the title.
 - Robot programmer: rows and columns of the board are equal whatever a cell holds,
   so the robot and the battery sit exactly on their cells (checked on every level).
+
+## The finish of the shape builder, clearer rule cards (Phase 70)
+
+- When every shape is in, the plan grows into the real thing (`ShapeScene.tsx`): the
+  picture's world (sky, ground, a companion) with the 3D house, tree, car or rocket
+  alive in it; the child's own shapes stay small in the corner. Reduced motion: no
+  movement, just the picture.
+- Rule cards show what the child will really see (`RulePictures.tsx`): numbered
+  blocks, the arrow chips, the green ▶ button, letter tiles, the price tag, coins.
+
+## Faster, by name, with a sound; the reports (Phase 71)
+
+- Looking away counts after 1.5 s (was 4 s; `LOOK_AWAY_MS`), so the robot notices
+  at once, but a blink or a glance at a parent does not.
+- Every reminder starts with a short call sound (`alert` cue, in every tier: it is
+  not speech), then the robot's words; Free sees the words, PRO hears them.
+- The robot calls the child by name: "Bek! Hoy, men shu yerdaman!". The name is never
+  recorded; the device voice says it, the rest is the recorded line (`planSpeech`).
+- **The admin never sees a camera.** The picture never leaves the child's device,
+  which is the promise made to parents in the consent and the law's expectation for
+  children's images. The admin's Analitika has a "Diqqat yordamchisi" panel with
+  counts only: devices that allowed or declined it, used the camera, were called back,
+  were offered games and took one (anonymous analytics events `attention_*`, at most
+  once a day per device; `admin_attention_stats`, migration `0023_attention.sql`).
+- **The parent's report** (Settings → Diqqat yordamchisi): for the active child, the
+  last seven days: call-backs, leaving and coming back, games offered and taken, with
+  a bar per day. Counts are kept on this device per child (`attentionStore.log`,
+  14 days) and forgotten with the child.

@@ -16,6 +16,13 @@ export const ANALYTICS_EVENTS = [
   'returned_day2',
   'returned_day7',
   'app_closed',
+  // the attention helper (Phase 71): only that it happened, never what the camera saw
+  'attention_yes',
+  'attention_no',
+  'attention_camera',
+  'attention_nudge',
+  'attention_offer',
+  'attention_offer_taken',
 ] as const
 export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[number]
 
@@ -46,6 +53,12 @@ export const ANALYTICS_ONCE: Record<AnalyticsEventName, 'ever' | 'day' | 'each'>
   returned_day2: 'ever',
   returned_day7: 'ever',
   app_closed: 'each',
+  attention_yes: 'ever',
+  attention_no: 'ever',
+  attention_camera: 'day',
+  attention_nudge: 'day',
+  attention_offer: 'day',
+  attention_offer_taken: 'day',
 }
 
 /**

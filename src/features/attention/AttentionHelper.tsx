@@ -8,8 +8,11 @@ import { Dialog } from '@/components/ui/Dialog'
 import { MascotFigure } from '@/features/mascot/MascotFigure'
 import { MascotThoughtBubble } from '@/features/mascot/MascotThoughtBubble'
 import { TOP_GAMES } from '@/features/games/catalog'
+import { track } from '@/domain/analytics'
+import { tashkentDay } from '@/lib/dates'
 import { tDynamic } from '@/lib/tDynamic'
 import { audioManager } from '@/services/audio/audioManager'
+import { playCue } from '@/services/audio/soundLanguage'
 import { useAttentionStore } from '@/store/attentionStore'
 import { childAge, useActiveChild, useMascotModel } from '@/store/familyStore'
 import { useChildKey, useWearing } from '@/store/progressStore'
@@ -24,10 +27,14 @@ import {
   LOOK_AWAY_MS,
   noteDistraction,
   type Distraction,
+  withName,
 } from './tracker'
 
 /** How long the robot's reminder stays on screen. */
 const SHOWN_MS = 6500
+/** The call sound first, then the robot's words (so the two never overlap). */
+const SPEAK_AFTER_MS = 700
+
 /** Touches, keys and scrolling all mean the child is there. */
 const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const
 
@@ -50,6 +57,8 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
   const language = useLanguage()
   const navigate = useNavigate()
   const child = useActiveChild()
+  const childKey = useChildKey()
+  const note = useAttentionStore((state) => state.note)
   const age = child ? childAge(child) : null
   const learning = isLearningScreen(pathname)
 
@@ -61,10 +70,12 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
   const [visible, setVisible] = useState(() => document.visibilityState === 'visible')
 
   // the latest words and language, so the reminders' effects never restart over them
-  const say = useRef({ t, language })
+  const say = useRef({ t, language, name: child?.name, childKey, note })
   useEffect(() => {
-    say.current = { t, language }
-  }, [language, t])
+    say.current = { t, language, name: child?.name, childKey, note }
+  }, [child?.name, childKey, language, note, t])
+  const speakTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(speakTimer.current), [])
 
   const fire = useCallback((cause: Distraction) => {
     // nothing counts while the app is hidden, and a reminder never talks over the robot
@@ -74,12 +85,28 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
     const { state, action } = noteDistraction(tracker.current, cause, Date.now())
     tracker.current = state
     if (!action) return
-    const { t: translate, language: spoken } = say.current
-    const text = tDynamic(translate, `attention.say.${lineFor(action, turn.current++)}`)
-    if (action.kind === 'offerGames') setOffer(true)
-    else setShown({ key: Date.now(), text })
-    // the voice is PRO's (or the demo's); Free sees the robot and its bubble only
-    void audioManager.speak([{ text }], { language: spoken })
+    const { t: translate, language: spoken, name, childKey: key, note: log } = say.current
+    const line = tDynamic(translate, `attention.say.${lineFor(action, turn.current++)}`)
+    // the child's own name comes first: nothing turns a head faster (Phase 71)
+    const text = action.kind === 'welcomeBack' ? line : withName(name, line)
+    const day = tashkentDay()
+    if (action.kind === 'offerGames') {
+      setOffer(true)
+      log(key, day, 'offers')
+      track('attention_offer')
+    } else {
+      setShown({ key: Date.now(), text })
+      log(key, day, action.kind === 'welcomeBack' ? 'away' : 'reminders')
+      if (action.kind === 'nudge') track('attention_nudge')
+    }
+    // a short call sound in every tier (it is not speech), then the voice: PRO's (or the
+    // demo's), the name itself said by the device voice; Free sees the robot and its bubble
+    if (action.kind !== 'welcomeBack') playCue('alert', { byTap: true })
+    clearTimeout(speakTimer.current)
+    speakTimer.current = setTimeout(
+      () => void audioManager.speak([{ text }], { language: spoken }),
+      action.kind === 'welcomeBack' ? 0 : SPEAK_AFTER_MS,
+    )
   }, [])
 
   // the reminder hides on its own
@@ -139,7 +166,9 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
       },
       // the sign shows as soon as the camera is open, before the detector has loaded
       () => {
-        if (!cancelled) setCameraOn(true)
+        if (cancelled) return
+        setCameraOn(true)
+        track('attention_camera')
       },
     )
       .then((started) => {
@@ -160,6 +189,8 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
 
   const go = (to: string) => {
     setOffer(false)
+    note(childKey, tashkentDay(), 'games')
+    track('attention_offer_taken')
     void navigate(to)
   }
 

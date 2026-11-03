@@ -17,6 +17,7 @@ import { clearUniverseChild } from '@/domain/universe/store'
 import { useLearnStore } from '@/features/learn/learnStore'
 import { useActivityStore } from './activityStore'
 import { useScreenTimeStore } from './screenTimeStore'
+import { useAttentionStore } from './attentionStore'
 import { useShortsStore } from './shortsStore'
 import {
   ageOn,
@@ -220,6 +221,7 @@ export const useFamilyStore = create<FamilyState>()(
         useActivityStore.getState().forgetChild(id)
         useScreenTimeStore.getState().forgetChild(id)
         useShortsStore.getState().forgetChild(id)
+        useAttentionStore.getState().forgetChild(id)
         // the parent's AI-helper choice for this child (the tutor code loads on demand)
         void import('@/domain/tutor/aiClient')
           .then(({ useAiConsentStore }) => useAiConsentStore.getState().forget(id))
