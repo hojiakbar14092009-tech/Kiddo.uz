@@ -75,7 +75,8 @@ function mascot3D(page: Page, id: string) {
 test('every mascot is a real rigged 3D character with clips and a face (Mascot Lab)', async ({
   page,
 }) => {
-  test.setTimeout(180_000)
+  // ten models in software WebGL, then eight signature moves (Phase 77)
+  test.setTimeout(360_000)
   await seed(page)
   await page.goto('/dev/mascots')
   const stage = page.getByTestId('lab-stage')
@@ -91,12 +92,36 @@ test('every mascot is a real rigged 3D character with clips and a face (Mascot L
     // the back is modelled too: turn it round
     await page.getByTestId('lab-view-180').click()
     // the shared command "wave": each mascot waves its own way (Ziyo welcomes)
-    await page.getByTestId('lab-clip-wave').click()
-    await expect(stage).toHaveAttribute('data-clip', id === 'ziyo' ? 'welcome' : 'wave')
+    // (a model that has just appeared may still be settling into its idle: ask again)
+    await expect(async () => {
+      await page.getByTestId('lab-clip-wave').click()
+      await expect(stage).toHaveAttribute('data-clip', id === 'ziyo' ? 'welcome' : 'wave', {
+        timeout: 2_000,
+      })
+    }).toPass({ timeout: 15_000 })
+  }
+  // Phase 77: the signature moves from the owner's sheets are real clips
+  for (const [id, clip] of [
+    ['dinoo', 'roar'],
+    ['lumi', 'sparkle_jump'],
+    ['lumi', 'hug'],
+    ['ziyo', 'bow'],
+    ['ziyo', 'clap'],
+    ['kidobot', 'thumbs_up'],
+    ['astro', 'thumbs_up'],
+    ['story', 'hug'],
+  ] as const) {
+    await page.getByTestId(`lab-mascot-${id}`).click()
+    await expect(stage).toHaveAttribute('data-ready', 'true', { timeout: 30_000 })
+    await expect(async () => {
+      await page.getByTestId(`lab-clip-${clip}`).click()
+      await expect(stage).toHaveAttribute('data-clip', clip, { timeout: 2_000 })
+    }).toPass({ timeout: 15_000 })
   }
   // Phase 76: drag the model round, the arrow keys turn it, Home faces it front
   await page.getByTestId('lab-view-0').click()
   const yaw = page.getByTestId('lab-yaw')
+  await stage.scrollIntoViewIfNeeded()
   const box = (await stage.boundingBox())!
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()

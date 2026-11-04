@@ -119,12 +119,27 @@ export function LittleShop({ onDone }: { onDone: Finish }) {
         className="relative flex w-full max-w-xs flex-col items-center rounded-[2rem] bg-surface p-4 shadow-[0_6px_0_var(--color-line)]"
       >
         <Img3D name={round.item} className="size-28 short:size-20" eager />
-        <span
-          className="absolute top-3 right-3 rotate-6 rounded-xl bg-oops px-3 py-1 font-display text-2xl font-extrabold text-white shadow-[0_3px_0_#d96a30]"
+        {/* the tag says what it is: the word "price" over the number, swinging gently
+            like a real shop tag so the child's eye goes to it */}
+        <motion.span
+          className="absolute top-3 right-3 flex origin-top flex-col items-center rounded-xl bg-oops px-3 pt-1 pb-1.5 font-display font-extrabold text-white shadow-[0_3px_0_#d96a30]"
           data-testid="shop-price"
+          initial={{ rotate: 6 }}
+          animate={reduceMotion ? { rotate: 6 } : { rotate: [6, -4, 6] }}
+          transition={
+            reduceMotion ? undefined : { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }
+          }
         >
-          {round.price} 🪙
-        </span>
+          <motion.span
+            data-testid="shop-price-word"
+            className="text-sm leading-tight tracking-wide uppercase"
+            animate={reduceMotion ? undefined : { scale: [1, 1.12, 1] }}
+            transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 1.2 }}
+          >
+            {t('sciGames.shop.priceWord')}
+          </motion.span>
+          <span className="text-2xl leading-none">{round.price} 🪙</span>
+        </motion.span>
         {sold && (
           <motion.span
             aria-hidden="true"

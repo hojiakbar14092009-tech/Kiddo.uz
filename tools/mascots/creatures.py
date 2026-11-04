@@ -226,9 +226,10 @@ def build_lumi(ch):
     ch.bone("Sprout", (0, 0.0, 2.22), "Head")  # the curl on the head
     ch.bone("Tail_1", (0, 0.3, 0.72), "Hips")
 
-    cream = ch.mat("skin", "#FFF4DE", rough=0.4, coat=0.3)
-    glow = ch.mat("glow", "#FFC93C", rough=0.4, emit="#FFC93C", strength=1.1)
-    soft = ch.mat("glow_soft", "#FFE68A", rough=0.4, emit="#FFE27A", strength=1.4)
+    cream = ch.mat("skin", "#FFEDCC", rough=0.4, coat=0.3)
+    # Phase 77 (the "Starbit" sheet): the ears, palms and soles shine brighter and warmer
+    glow = ch.mat("glow", "#FFB21E", rough=0.35, emit="#FFB800", strength=2.2)
+    soft = ch.mat("glow_soft", "#FFD34D", rough=0.35, emit="#FFD040", strength=2.2)
     gold = ch.mat("gold", "#F2B53A", rough=0.3, metal=0.3)
 
     body_w = blend("Hips", "Chest", (0, 0, 0.45), (0, 0, 1.1))

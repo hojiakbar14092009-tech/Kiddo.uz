@@ -2732,6 +2732,7 @@ export const en: Translation = {
       },
     },
     shop: {
+      priceWord: 'Price',
       title: 'Little shop',
       intro: 'Buy a toy with coins!',
       round: '{{n}} / {{total}}',

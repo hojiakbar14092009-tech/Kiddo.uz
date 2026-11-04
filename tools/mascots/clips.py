@@ -544,3 +544,87 @@ def _keys_loc(seconds, period, amp, base=0.0):
         t = seconds * i / 8
         out.append((t, (0, 0, base + amp * math.sin(2 * math.pi * t / period))))
     return out
+
+
+# --- Phase 77: the signature moves from the owner's character sheets ----------------
+
+
+def roar(style):
+    """Dinoo: a small friendly roar. Anticipation (crouch and breathe in), the roar
+    (head up, mouth open, claws up), a tail swish, then back to rest."""
+    c = Clip(2.2, False)
+    c.l("Hips", [(0, (0, 0, 0)), (0.4, (0, 0, -0.05)), (0.7, (0, 0, 0.02)), (1.6, (0, 0, 0.02)), (2.2, (0, 0, 0))])
+    c.r("Spine", [(0, (0, 0, 0)), (0.4, (10, 0, 0)), (0.7, (-12, 0, 0)), (1.6, (-10, 0, 0)), (2.2, (0, 0, 0))])
+    c.r("Head", [(0, (0, 0, 0)), (0.4, (12, 0, 0)), (0.7, (-22, 0, 0)), (1.1, (-18, 0, 6)), (1.6, (-18, 0, -6)), (2.2, (0, 0, 0))])
+    if "Jaw" in style.get("extra_bones", ()):
+        c.r("Jaw", [(0, (0, 0, 0)), (0.6, (0, 0, 0)), (0.75, (-18, 0, 0)), (1.6, (-14, 0, 0)), (1.9, (0, 0, 0))])
+    for s in (1, -1):
+        arm(c, s, [(0, 0, 0, 6, 0), (0.4, 10, 10, 50, 0), (0.7, 60, 30, 70, 0), (1.6, 55, 30, 70, 0), (2.2, 0, 0, 6, 0)])
+    for i, bone in enumerate(style.get("tail", ())):
+        c.r(bone, [(0, (0, 0, 0)), (0.7, (0, 0, 0)), (1.0 + 0.08 * i, (0, 0, 22)), (1.3 + 0.08 * i, (0, 0, -22)), (1.6 + 0.08 * i, (0, 0, 10)), (2.2, (0, 0, 0))])
+    return c
+
+
+def clap(style):
+    """Ziyo: claps three times, smiling, with a little bounce on each clap."""
+    c = Clip(2.0, False)
+    keys = [(0, 0, 0, 6, 0)]
+    for i in range(3):
+        t = 0.35 + i * 0.42
+        keys += [(t, 20, 70, 60, 0), (t + 0.21, 10, 45, 60, 0)]
+    keys += [(2.0, 0, 0, 6, 0)]
+    for s in (1, -1):
+        arm(c, s, keys)
+    c.l("Hips", [(0, (0, 0, 0))] + [(0.35 + i * 0.42, (0, 0, 0.025)) for i in range(3)] + [(2.0, (0, 0, 0))])
+    c.r("Head", [(0, (0, 0, 0)), (0.35, (-6, 0, 0)), (1.6, (-6, 0, 0)), (2.0, (0, 0, 0))])
+    return c
+
+
+def bow(style):
+    """Ziyo: a respectful bow with the right hand on the heart (the sheet's "bow")."""
+    c = Clip(2.4, False)
+    arm(c, -1, [(0, 0, 0, 6, 0), (0.4, 12, 35, 115, 0), (1.9, 12, 35, 115, 0), (2.4, 0, 0, 6, 0)])
+    c.r("Spine", [(0, (0, 0, 0)), (0.5, (0, 0, 0)), (0.9, (22, 0, 0)), (1.5, (22, 0, 0)), (1.9, (0, 0, 0))])
+    c.r("Head", [(0, (0, 0, 0)), (0.5, (0, 0, 0)), (0.9, (14, 0, 0)), (1.5, (14, 0, 0)), (1.9, (0, 0, 0))])
+    return c
+
+
+def sparkle_jump(style):
+    """Lumi: anticipation, a light jump with arms flung up, a soft landing and settle."""
+    c = Clip(1.8, False)
+    h = style.get("hop", 0.2) * 1.6
+    c.l("Hips", [(0, (0, 0, 0)), (0.3, (0, 0, -0.06)), (0.7, (0, 0, h)), (1.1, (0, 0, h * 0.9)), (1.4, (0, 0, -0.04)), (1.8, (0, 0, 0))])
+    for s in (1, -1):
+        arm(c, s, [(0, 0, 0, 6, 0), (0.3, 10, 0, 20, 0), (0.7, 160, 20, 10, 0), (1.1, 150, 20, 10, 0), (1.4, 20, 10, 20, 0), (1.8, 0, 0, 6, 0)])
+        c.r(f"UpperLeg_{'L' if s == 1 else 'R'}", [(0, (0, 0, 0)), (0.3, (-25, 0, 0)), (0.7, (-10, 0, 0)), (1.1, (-30, 0, 0)), (1.4, (-25, 0, 0)), (1.8, (0, 0, 0))])
+        c.r(f"LowerLeg_{'L' if s == 1 else 'R'}", [(0, (0, 0, 0)), (0.3, (40, 0, 0)), (0.7, (10, 0, 0)), (1.1, (45, 0, 0)), (1.4, (40, 0, 0)), (1.8, (0, 0, 0))])
+    c.r("Head", [(0, (0, 0, 0)), (0.3, (8, 0, 0)), (0.7, (-14, 0, 0)), (1.4, (6, 0, 0)), (1.8, (0, 0, 0))])
+    secondary(c, style, 1.8, 1.6)
+    return c
+
+
+def float_forward(style):
+    """Lumi: floats forward, leaning into the flight, legs trailing (loops)."""
+    c = Clip(2.4, True)
+    c.l("Hips", _keys_loc(2.4, 2.4, 0.05, base=0.14))
+    c.r("Spine", [(0, (14, 0, 0)), (2.4, (14, 0, 0))])
+    c.r("Head", [(0, (-10, 0, 0)), (1.2, (-6, 0, 0)), (2.4, (-10, 0, 0))])
+    for s in (1, -1):
+        arm(c, s, [(0, 20, 30, 10, 0), (1.2, 26, 34, 14, 0), (2.4, 20, 30, 10, 0)])
+    c.r("UpperLeg_L", [(0, (20, 0, 0)), (2.4, (20, 0, 0))])
+    c.r("UpperLeg_R", [(0, (26, 0, 0)), (2.4, (26, 0, 0))])
+    c.r("LowerLeg_L", [(0, (30, 0, 0)), (2.4, (30, 0, 0))])
+    c.r("LowerLeg_R", [(0, (36, 0, 0)), (2.4, (36, 0, 0))])
+    secondary(c, style, 2.4, 1.4)
+    return c
+
+
+def hug(style):
+    """Lumi / Story: arms open, then close round a friend, a happy squeeze and let go."""
+    c = Clip(2.6, False)
+    for s in (1, -1):
+        arm(c, s, [(0, 0, 0, 6, 0), (0.45, 60, 50, 10, 0), (0.9, 70, 85, 70, 0), (1.9, 70, 85, 70, 0), (2.6, 0, 0, 6, 0)])
+    c.r("Spine", [(0, (0, 0, 0)), (0.9, (8, 0, 0)), (1.3, (8, 0, 4)), (1.6, (8, 0, -4)), (1.9, (8, 0, 0)), (2.6, (0, 0, 0))])
+    c.r("Head", [(0, (0, 0, 0)), (0.9, (6, 0, 10)), (1.9, (6, 0, 10)), (2.6, (0, 0, 0))])
+    secondary(c, style, 2.6, 1.0)
+    return c

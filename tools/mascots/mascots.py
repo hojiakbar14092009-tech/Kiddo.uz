@@ -14,10 +14,10 @@ def _robot(cid):
 
 
 MASCOTS = {
-    "kidobot": {"build": _robot("kidobot"), "style": {**ROBOT_STYLE}},
+    "kidobot": {"build": _robot("kidobot"), "style": {**ROBOT_STYLE, "specials": {"thumbs_up": c.thumbs_up}}},
     "astro": {
         "build": _robot("astro"),
-        "style": {**ROBOT_STYLE, "specials": {"float": c.float_zero_g, "telescope": c.telescope_look}},
+        "style": {**ROBOT_STYLE, "specials": {"float": c.float_zero_g, "telescope": c.telescope_look, "thumbs_up": c.thumbs_up}},
     },
     "melo": {
         "build": _robot("melo"),
@@ -35,7 +35,7 @@ MASCOTS.update(
     {
         "dinoo": {
             "build": creatures.build_dinoo,
-            "style": {**CREATURE_STYLE, "energy": 1.15, "tail": ("Tail_1", "Tail_2", "Tail_3"), "specials": {"tail_wag": c.tail_wag, "stomp": c.stomp, "sniff": c.sniff, "happy_hop": c.happy_hop}},
+            "style": {**CREATURE_STYLE, "energy": 1.15, "tail": ("Tail_1", "Tail_2", "Tail_3"), "specials": {"tail_wag": c.tail_wag, "stomp": c.stomp, "sniff": c.sniff, "happy_hop": c.happy_hop, "roar": c.roar}},
             "face_target": (0, -0.2, 1.75),
         },
         "leafy": {
@@ -45,7 +45,7 @@ MASCOTS.update(
         },
         "lumi": {
             "build": creatures.build_lumi,
-            "style": {**CREATURE_STYLE, "energy": 0.8, "ears": ("Ear_L", "Ear_R"), "sprouts": ("Sprout",), "tail": ("Tail_1",), "specials": {"hover": c.hover, "illuminate": c.illuminate}},
+            "style": {**CREATURE_STYLE, "energy": 0.8, "ears": ("Ear_L", "Ear_R"), "sprouts": ("Sprout",), "tail": ("Tail_1",), "specials": {"hover": c.hover, "illuminate": c.illuminate, "sparkle_jump": c.sparkle_jump, "float_forward": c.float_forward, "hug": c.hug}},
             "face_target": (0, -0.2, 1.74),
         },
     }
@@ -55,7 +55,7 @@ MASCOTS.update(
     {
         "ziyo": {
             "build": human.build_ziyo,
-            "style": {"energy": 0.9, "arm_rest_out": 4, "hop": 0.16, "sit_drop": 0.22, "specials": {"welcome": c.welcome, "present": c.present}},
+            "style": {"energy": 0.9, "arm_rest_out": 4, "hop": 0.16, "sit_drop": 0.22, "specials": {"welcome": c.welcome, "present": c.present, "clap": c.clap, "bow": c.bow}},
             "face_target": (0, -0.2, 1.82),
         },
         "scribble": {
@@ -65,7 +65,7 @@ MASCOTS.update(
         },
         "story": {
             "build": props.build_story,
-            "style": {"energy": 0.9, "arm_rest_out": 8, "hop": 0.16, "specials": {"page_flutter": c.page_flutter, "read": c.read, "storytell": c.storytell, "present": c.present}},
+            "style": {"energy": 0.9, "arm_rest_out": 8, "hop": 0.16, "specials": {"page_flutter": c.page_flutter, "read": c.read, "storytell": c.storytell, "present": c.present, "hug": c.hug}},
             "face_target": (0, -0.2, 1.1),
         },
     }

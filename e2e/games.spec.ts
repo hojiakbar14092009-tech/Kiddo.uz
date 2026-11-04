@@ -156,6 +156,8 @@ test('the little shop: pay exactly, then count the change', async ({ page }) => 
   await child(page)
   await ready(page, '/sci/shop')
   await start(page)
+  // the tag names itself: the word "price" over the number
+  await expect(page.getByTestId('shop-price-word')).toHaveText('Narxi')
   for (const coins of [
     [2, 1],
     [5, 1],

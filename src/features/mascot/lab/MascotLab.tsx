@@ -48,6 +48,7 @@ export function MascotLab() {
   const [yaw, setYaw] = useState<number | null>(initial.yaw)
   const [spin, setSpin] = useState(false)
   const drag = useRef<{ x: number; yaw: number } | null>(null)
+  const presses = useRef(0)
   const [size, setSize] = useState(420)
   const [emotion, setEmotion] = useState<Emotion>(initial.emotion)
   const [skeleton, setSkeleton] = useState(false)
@@ -298,8 +299,15 @@ export function MascotLab() {
                   key={clip}
                   type="button"
                   data-testid={`lab-clip-${clip}`}
+                  // each press outranks the one before, so a clip plays at once instead of
+                  // queueing behind the one still playing (Phase 77)
                   onClick={() =>
-                    play?.({ gesture: clip, emotion, priority: PRIORITY.critical, rank: 9 })
+                    play?.({
+                      gesture: clip,
+                      emotion,
+                      priority: PRIORITY.critical + ++presses.current,
+                      rank: 9,
+                    })
                   }
                   className="rounded border bg-white px-2 py-0.5"
                 >

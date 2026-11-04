@@ -2749,6 +2749,7 @@ export const uz = {
       },
     },
     shop: {
+      priceWord: 'Narxi',
       title: 'Kichik do‘kon',
       intro: 'Tangalar bilan o‘yinchoq sotib ol!',
       round: '{{n}} / {{total}}',

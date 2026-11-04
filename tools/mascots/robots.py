@@ -173,9 +173,11 @@ def build_robot(ch, cfg):
     if antenna in ("ball", "saturn"):
         ch.add(tube([(0, 0, 2.52), (0, 0.01, 2.68), (0, 0.03, 2.8)], 0.022, 10), joint, rigid("Antenna"))
         ch.add(cylinder(0.07, 0.05, 0.06, 20), accent, rigid("Head"), transform((0, 0, 2.56)))
-        ch.add(sphere(0.085, 20, 12), ch.mat("antenna", cfg.get("antenna_color", cfg["accent"]), rough=0.3, coat=0.5), rigid("Antenna"), transform((0, 0.03, 2.86)))
+        # Phase 77 (the "Spark" sheet): Astro's antenna is a small solid blue planet with a ring
+        ball = 0.12 if antenna == "saturn" else 0.085
+        ch.add(sphere(ball, 24, 14), ch.mat("antenna", cfg.get("antenna_color", cfg["accent"]), rough=0.3, coat=0.5), rigid("Antenna"), transform((0, 0.03, 2.86 + (ball - 0.085))))
         if antenna == "saturn":
-            ch.add(torus(0.2, 0.028, 36, 10), light, rigid("Antenna"), transform((0, 0.03, 2.86), (70, 18, 0)))
+            ch.add(torus(0.21, 0.03, 36, 10), accent, rigid("Antenna"), transform((0, 0.03, 2.9), (70, 18, 0)))
     if antenna == "headphones":
         # band over the head and big cups with a glowing music note
         band = [(math.cos(a) * 0.82, 0.0, 1.94 + math.sin(a) * 0.74) for a in [math.pi * i / 16 for i in range(17)]]

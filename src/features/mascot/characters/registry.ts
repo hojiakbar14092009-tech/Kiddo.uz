@@ -127,7 +127,8 @@ export const MASCOTS: Readonly<Record<MascotId, MascotDefinition>> = {
       blendMs: 220,
       idleEvery: [9, 16],
     },
-    style: {},
+    // Phase 77 (its sheet): a thumbs up to cheer the child on
+    style: { encourage: ['thumbs_up', 'encourage'] },
     glow: ROBOT_GLOW,
     airborne: AIR,
   }),
@@ -141,7 +142,11 @@ export const MASCOTS: Readonly<Record<MascotId, MascotDefinition>> = {
       blendMs: 260,
       idleEvery: [10, 18],
     },
-    style: { point: ['point_up', 'point'], look_around: ['telescope', 'look_around'] },
+    style: {
+      point: ['point_up', 'point'],
+      look_around: ['telescope', 'look_around'],
+      encourage: ['thumbs_up', 'encourage'],
+    },
     idleIn: { space: 'float' },
     glow: ROBOT_GLOW,
     airborne: [...AIR, 'float'],
@@ -159,6 +164,8 @@ export const MASCOTS: Readonly<Record<MascotId, MascotDefinition>> = {
     style: {
       celebrate: ['happy_hop', 'celebrate'],
       encourage: ['tail_wag', 'encourage'],
+      // Phase 77: a small friendly roar when something surprises it
+      surprised: ['roar', 'surprised'],
       look_around: ['sniff', 'look_around'],
     },
     glow: [],
@@ -174,7 +181,13 @@ export const MASCOTS: Readonly<Record<MascotId, MascotDefinition>> = {
       blendMs: 300,
       idleEvery: [11, 18],
     },
-    style: { wave: ['welcome', 'wave'], point: ['present', 'point'] },
+    style: {
+      wave: ['welcome', 'wave'],
+      point: ['present', 'point'],
+      // Phase 77 (its sheet): a respectful bow, and claps for a success
+      nod: ['bow', 'nod'],
+      celebrate: ['clap', 'celebrate'],
+    },
     glow: [],
     airborne: AIR,
   }),
@@ -188,10 +201,15 @@ export const MASCOTS: Readonly<Record<MascotId, MascotDefinition>> = {
       blendMs: 380,
       idleEvery: [12, 20],
     },
-    style: { celebrate: ['illuminate', 'celebrate'], encourage: ['illuminate', 'encourage'] },
+    // Phase 77 (the Starbit sheet): a sparkle jump, a hug, floating forward instead of walking
+    style: {
+      celebrate: ['sparkle_jump', 'illuminate', 'celebrate'],
+      encourage: ['hug', 'illuminate', 'encourage'],
+      walk: ['float_forward', 'walk'],
+    },
     idleIn: { light: 'hover' },
     glow: ['glow', 'glow_soft'],
-    airborne: [...AIR, 'hover', 'illuminate'],
+    airborne: [...AIR, 'hover', 'illuminate', 'sparkle_jump', 'float_forward'],
   }),
   leafy: def('leafy', {
     rigFamily: 'creature',
@@ -276,6 +294,8 @@ export const MASCOTS: Readonly<Record<MascotId, MascotDefinition>> = {
       point: ['present', 'point'],
       idle_alt: ['read', 'idle_alt'],
       encourage: ['storytell', 'encourage'],
+      // Phase 77 (the Book Buddy sheet): a warm hug when a day's plan is done
+      celebrate: ['hug', 'celebrate'],
     },
     glow: [],
     airborne: AIR,

@@ -16,6 +16,7 @@ export const LOOPING: ReadonlySet<string> = new Set([
   'sleep',
   'float',
   'hover',
+  'float_forward',
   'dance',
   'rhythm',
   'tail_wag',

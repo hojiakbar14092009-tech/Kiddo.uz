@@ -2712,6 +2712,7 @@ export const ru: Translation = {
       },
     },
     shop: {
+      priceWord: 'Цена',
       title: 'Маленький магазин',
       intro: 'Купи игрушку за монетки!',
       round: '{{n}} / {{total}}',

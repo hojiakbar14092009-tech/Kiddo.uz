@@ -115,3 +115,16 @@ at a child's eye height in front.
   pictures with six feelings each; not part of Phases 76–86.
 - **"Bola tarbiyasi"** has no content or characters yet: its page and 30 days come
   in Phase 83; its characters are chosen then from this list.
+
+## Phase 77: the mascots after the owner's sheets
+
+- The models already followed the sheets (Astro is "Spark", Lumi is "Starbit").
+  Astro's antenna is now a solid blue planet with a ring; Lumi's ears, palms and
+  soles shine warmer and brighter, and her body is a warmer cream.
+- New signature moves, each a real skeletal clip (`tools/mascots/clips.py`): Dinoo
+  `roar` (crouch, roar with the jaw, claws up, tail swish), Ziyo `bow` and `clap`,
+  Lumi `sparkle_jump`, `float_forward` (her walk) and `hug`, Story `hug`, KidoBot and
+  Astro `thumbs_up`. They are wired to the shared gestures in the registry (Dinoo
+  roars when surprised, Ziyo bows to nod and claps to celebrate, Lumi floats instead
+  of walking…); with reduced motion they become the calm pose.
+- Mascot Lab: a clip button plays at once instead of waiting behind the one playing.

@@ -194,6 +194,12 @@ const MOVING = new Set([
   'float',
   'illuminate',
   'stomp',
+  // Phase 77
+  'roar',
+  'clap',
+  'sparkle_jump',
+  'float_forward',
+  'hug',
 ])
 
 export function calm(perf: Performance, mascot?: MascotId): Performance {
