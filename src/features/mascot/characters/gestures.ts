@@ -22,6 +22,9 @@ export const LOOPING: ReadonlySet<string> = new Set([
   'tail_wag',
   'read',
   'headphone_listen',
+  // Phase 79: the owl's flight and the elephant's fanning ears
+  'fly',
+  'ear_flap',
 ])
 
 /** The clip a mascot plays for a gesture (or one of its own clips); 'idle' if it has none. */

@@ -6,8 +6,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { FACE_TARGETS } from '@/features/mascot/characters/emotions'
-import { storyCards } from '@/features/myStory/content'
-import { ANIMAL_IDS, ANIMALS, animalModel, MOOD_PERFORMANCE } from './animals'
+import { HEROES, storyCards } from '@/features/myStory/content'
+import { ANIMAL_IDS, ANIMALS, animalModel, isAnimal, MOOD_PERFORMANCE } from './animals'
 
 /*
  * The story animals (Phase 78) keep the controller's contract: skinned, the shared
@@ -82,13 +82,13 @@ describe.each(ANIMAL_IDS)('%s model', (id) => {
 })
 
 describe('story heroes', () => {
-  it('plays the six animals with their 3D models and keeps pictures for the rest', () => {
+  it('plays every animal hero with its 3D model', () => {
     const base = { place: 'forest', helper: 'kite', ending: 'treasure' } as const
     for (const hero of ANIMAL_IDS) {
       const card = storyCards({ ...base, hero })[1]!
       expect(card.picture.actors.find((a) => a.hop)?.model).toBe(hero)
     }
-    const elephant = storyCards({ ...base, hero: 'elephant' })[1]!
-    expect(elephant.picture.actors.some((a) => a.model)).toBe(false)
+    // since Phase 79 every hero of the own story has its model
+    for (const hero of HEROES) expect(isAnimal(hero), hero).toBe(true)
   })
 })

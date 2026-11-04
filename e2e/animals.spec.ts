@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 /*
  * Phase 78: the story animals are real rigged 3D characters on the story stage.
  * A chosen animal hero loads its own model (public/animals), the stage plays it,
- * and a hero without a model (the elephant, until Phase 79) keeps its picture.
+ * and when a model cannot load the flat picture stays and the story goes on.
  */
 
 test.use({ launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } })
@@ -58,9 +58,20 @@ test('a fox hero walks the story stage as a rigged 3D model', async ({ page }, i
   await stage.screenshot({ path: info.outputPath('fox-stage.png') })
 })
 
-test('a hero without a model keeps its picture on the stage', async ({ page }) => {
+test('when a model cannot load, the stage keeps the picture and the story goes on', async ({
+  page,
+}) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  await page.route('**/animals/*.glb', (route) => route.abort())
   await page.goto('/learn/my-story')
   for (const id of ['elephant', 'forest', 'kite', 'treasure'])
     await page.getByTestId(`my-story-choice-${id}`).click()
-  await expect(page.getByTestId('my-story-stage')).toHaveAttribute('data-hero-model', 'none')
+  const stage = page.getByTestId('my-story-stage')
+  await expect(stage).toHaveAttribute('data-hero-model', 'elephant')
+  await page.waitForTimeout(1500)
+  await expect(stage).toBeVisible()
+  await page.getByTestId('my-story-next').click()
+  await expect(page.getByTestId('my-story-text')).toBeVisible()
+  expect(errors).toEqual([])
 })

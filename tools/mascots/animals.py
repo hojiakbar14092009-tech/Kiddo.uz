@@ -405,11 +405,13 @@ def build_penguin(ch):
 
 def trot(style, run=False):
     """Quadrupeds: tip forward onto four legs and trot with diagonal pairs (loops, in place)."""
-    period = 0.5 if run else 0.8
-    n = 2 if run else 2
+    # style["gait"]: a heavy elephant or a slow turtle steps slower and less high
+    gait = style.get("gait", {})
+    period = (0.5 if run else 0.8) * gait.get("slow", 1.0)
+    n = 2
     seconds = period * n
     lean, lift, reach = (46, 0.1, 44) if run else (40, 0.06, 40)
-    swing = 30 if run else 20
+    swing = (30 if run else 20) * gait.get("stride", 1.0)
     clip = c.Clip(seconds, True)
     steps = 16
     ts = [seconds * i / steps for i in range(steps + 1)]
@@ -564,3 +566,8 @@ ANIMALS = {
         "face_target": (0, -0.3, 1.7),
     },
 }
+
+# Phase 79: the other six (elephant, lion, turtle, owl, unicorn, dinosaur)
+from animals_more import MORE  # noqa: E402
+
+ANIMALS.update(MORE)

@@ -8,10 +8,27 @@ import type { Mood } from './three/life'
  * plays both. Plain data here: tests and the story content read it without three.js.
  *
  * Quadrupeds (rabbit, cat, dog, fox) sit upright at rest and walk on four legs
- * (the rabbit hops); the bear walks upright and the penguin waddles.
+ * (the rabbit hops); the bear walks upright and the penguin waddles. Since
+ * Phase 79 the elephant steps heavily and sprays with its trunk, the lion roars,
+ * the turtle walks slowly, hops only a little and hides in its shell, the owl
+ * turns its head and flies, the unicorn prances, the dinosaur stomps and roars.
  */
 
-export const ANIMAL_IDS = ['rabbit', 'cat', 'dog', 'fox', 'bear', 'penguin'] as const
+export const ANIMAL_IDS = [
+  'rabbit',
+  'cat',
+  'dog',
+  'fox',
+  'bear',
+  'penguin',
+  // Phase 79
+  'elephant',
+  'lion',
+  'turtle',
+  'owl',
+  'unicorn',
+  'dinosaur',
+] as const
 
 export type AnimalId = (typeof ANIMAL_IDS)[number]
 
@@ -62,6 +79,42 @@ export const ANIMALS: Readonly<Record<AnimalId, Performer>> = {
     id: 'animal-penguin',
     personality: personality(1),
     style: { celebrate: ['flap', 'celebrate'] },
+    glow: [],
+  },
+  elephant: {
+    id: 'animal-elephant',
+    personality: personality(0.85),
+    style: { celebrate: ['spray', 'celebrate'], idle_alt: ['ear_flap', 'idle_alt'] },
+    glow: [],
+  },
+  lion: {
+    id: 'animal-lion',
+    personality: personality(1.05),
+    style: { surprised: ['roar', 'surprised'], encourage: ['tail_wag', 'encourage'] },
+    glow: [],
+  },
+  turtle: {
+    id: 'animal-turtle',
+    personality: personality(0.8),
+    style: { surprised: ['hide', 'surprised'] },
+    glow: [],
+  },
+  owl: {
+    id: 'animal-owl',
+    personality: personality(0.95),
+    style: { celebrate: ['flap', 'celebrate'], look_around: ['head_turn', 'look_around'] },
+    glow: [],
+  },
+  unicorn: {
+    id: 'animal-unicorn',
+    personality: personality(1.05),
+    style: { celebrate: ['sparkle', 'celebrate'] },
+    glow: [],
+  },
+  dinosaur: {
+    id: 'animal-dinosaur',
+    personality: personality(1.1),
+    style: { celebrate: ['roar', 'celebrate'], encourage: ['tail_wag', 'encourage'] },
     glow: [],
   },
 }

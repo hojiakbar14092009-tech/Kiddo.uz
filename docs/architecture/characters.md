@@ -48,15 +48,14 @@ listen, encourage, jump, and the mascot's own).
 
 Until Phase 78 each was a flat 3D-rendered picture (`public/3d/<id>.webp`) standing on the
 story stage (Phase 74: breathing, squash and stretch, a feeling above its head).
-Since Phase 78 the first six are real rigged 3D models (`public/animals/<id>.glb`, built
+Since Phase 78 (the first six) and Phase 79 (the other six) all twelve are real rigged 3D models (`public/animals/<id>.glb`, built
 by `tools/mascots/animals.py`: `npm run mascots:build -- animals && npm run mascots:optimize`).
 They share the mascots' bone names, clips and face morph targets, so the same controller
 plays them (`src/features/tales/animals.ts`, `three/AnimalActor.tsx`). The quadrupeds sit
 upright at rest like the sheets; their front legs use the arm bones, so a wave lifts a front
 paw, and their walk tips the body onto four legs with diagonal pairs. On the story stage the
 hero walks in, turns to the child, shows the page's feeling with body and face, then rests;
-the picture stands in while the model loads or if it fails. The others are still pictures
-(Phase 79). Sheets: `docs/reference/sheets/`.
+the picture stands in while the model loads or if it fails. Sheets: `docs/reference/sheets/`.
 
 | Id       | Name         | Sheet                    | State        | Body and motion it needs                                                  |
 | -------- | ------------ | ------------------------ | ------------ | ------------------------------------------------------------------------- |
@@ -66,12 +65,12 @@ the picture stands in while the model loads or if it fails. The others are still
 | penguin  | Pingvincha   | ✓ (hat, goggles, scarf)  | Model ✓ (78) | waddle, flipper flap, belly slide                                         |
 | bear     | Ayiqcha      | ✓ (cap, scarf, backpack) | Model ✓ (78) | upright walk, wave, hug, sniff (climb: later, needs a tree prop)          |
 | fox      | Tulkicha     | ✓ (bandana)              | Model ✓ (78) | trot and run, tail wag, sniff; bushy tail follows                         |
-| elephant | Filcha       | ✓ (bandana)              | Reference    | weighty steps, trunk, ear sway, water spray                               |
-| lion     | Sherbola     | ✓ (bandana)              | Reference    | confident walk, crouch, gentle roar                                       |
-| turtle   | Toshbaqacha  | ✓ (cap)                  | Reference    | slow steps, neck stretch, hide in shell                                   |
-| owl      | Boyo‘g‘licha | ✓ (cap, glasses, book)   | Reference    | head turn, blink, wing flap, short flight                                 |
-| unicorn  | Yakkashox    | ✓                        | Reference    | elegant walk, mane, magic sparkle                                         |
-| dinosaur | Dinozavrcha  | ✓ (cap, bandana)         | Reference    | walk with tail balance, stomp, small roar                                 |
+| elephant | Filcha       | ✓ (bandana)              | Model ✓ (79) | slow heavy steps, trunk spray, fanning ears                               |
+| lion     | Sherbola     | ✓ (bandana)              | Model ✓ (79) | trot and run, gentle roar, tail wag, sniff                                |
+| turtle   | Toshbaqacha  | ✓ (cap)                  | Model ✓ (79) | slow walk, tiny hop only, hides in its shell                              |
+| owl      | Boyo‘g‘licha | ✓ (cap, glasses, book)   | Model ✓ (79) | waddle, wing flap, hovering flight, head turn                             |
+| unicorn  | Yakkashox    | ✓                        | Model ✓ (79) | prance, run, rears up with a sparkle; rainbow mane and tail               |
+| dinosaur | Dinozavrcha  | ✓ (cap, bandana)         | Model ✓ (79) | waddle, stomp, small roar, tail wag, sniff                                |
 
 ## The 12 helpers (objects)
 
