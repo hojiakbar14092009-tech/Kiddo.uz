@@ -5,6 +5,7 @@ import { canUse } from '@/store/subscriptionStore'
 import { speech, type SpeakOptions } from './speech'
 import { useFamilyStore } from '@/store/familyStore'
 import { planSpeech, type SpeechPart, type VoiceClip } from './voiceLibrary'
+import { kidVoiceFor } from './kidVoices'
 import { resolveClips, voiceMode } from './voiceSource'
 import { requestTts } from './remoteTts'
 import { noteSuccessSound, setNarrating } from './soundLanguage'
@@ -134,11 +135,14 @@ class AudioManager {
     if (volume <= 0) return 'muted'
 
     const family = useFamilyStore.getState()
-    const name = family.children.find((child) => child.id === family.activeChildId)?.name
+    const child = family.children.find((entry) => entry.id === family.activeChildId)
+    const name = child?.name
     const generation = this.cancelCurrent()
     this.setStatus('loading')
     // In private voice mode clips come as signed URLs, checked for PRO on the server.
     const isPrivate = voiceMode() === 'private'
+    // a girl hears the girl's voice, a boy the boy's (where recorded; not in private mode)
+    const kidVoice = isPrivate ? null : kidVoiceFor(child?.gender)
     // An English cheer (“Yahoooo!”) in any language uses the English recordings.
     const clipLanguage = options.locale?.startsWith('en') ? 'en' : options.language
     let played = 0
@@ -150,7 +154,7 @@ class AudioManager {
       const pauses = new Map<number, number>()
       const spoken = items.filter((item) => item.text.trim())
       for (const [index, item] of spoken.entries()) {
-        parts.push(...(await planSpeech(clipLanguage, item.text, name)))
+        parts.push(...(await planSpeech(clipLanguage, item.text, name, kidVoice)))
         const pause = Math.max(0, Math.min(MAX_PAUSE_MS, item.pauseAfterMs ?? 0))
         if (pause > 0 && index < spoken.length - 1 && parts.length > 0) {
           pauses.set(parts.length - 1, pause)

@@ -14,6 +14,13 @@ The working voice system (recorded clips by phrase hash, one voice at a time,
 With `VITE_VOICE_PRIVATE=true` the build leaves `public/audio/voice` out of
 `dist`, so the clips are no longer downloadable from the site.
 
+Children's voices (ElevenLabs, a girl's and a boy's: `scripts/voices/kid_voices.py`,
+`src/services/audio/kidVoices.ts`) live in the same folder, at
+`/audio/voice/kid/<girl|boy>/<lang>/<key>.mp3`, so the private build drops them too
+and the service worker caches them like any clip. A girl hears the girl's recording
+and a boy the boy's where one exists; any other sentence, and private mode, use the
+standard clips.
+
 ## Server contract (Supabase Edge Functions)
 
 Both functions: `Authorization: Bearer <user access token>` + `apikey: <anon key>`.

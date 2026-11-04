@@ -191,3 +191,25 @@ function collect(): {
   }
   return { phrases: out, templates }
 }
+
+/**
+ * The sentences of some interface parts only, per language (for recording a
+ * part first, e.g. praise and instructions in the children's voices).
+ */
+export function phrasesOfParts(prefixes: readonly string[]): Record<Language, string[]> {
+  const out = {} as Record<Language, string[]>
+  for (const [language, { tree, alphabet }] of Object.entries(sources)) {
+    const phrases = new Set<string>()
+    const spokenNames = alphabet.letters.map((letter) => letter.spoken)
+    for (const [key, value] of leaves(tree)) {
+      if (!prefixes.some((prefix) => key === prefix || key.startsWith(`${prefix}.`))) continue
+      expand(
+        value,
+        spokenNames,
+        alphabet.letters.map((letter) => letter.word),
+      ).forEach((text) => splitSentences(text).forEach((sentence) => phrases.add(sentence)))
+    }
+    out[language as Language] = [...phrases]
+  }
+  return out
+}

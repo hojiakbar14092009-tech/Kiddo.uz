@@ -1,5 +1,6 @@
 import type { Language } from '@/content/languages'
 import { phraseKey, remoteSafeText, splitSentences, withoutName } from './phrases'
+import { kidClipUrl, loadKidManifest, type KidVoice } from './kidVoices'
 import { publicClipUrl } from './voicePaths'
 
 export type VoiceKind = 'letters' | 'words' | 'numbers' | 'phrases'
@@ -48,12 +49,18 @@ export async function planSpeech(
   language: Language,
   text: string,
   childName?: string | null,
+  /** The child's own voice (girl or boy) when its recording exists; public mode only. */
+  kidVoice?: KidVoice | null,
 ): Promise<SpeechPart[]> {
   const recorded = (await loadManifest())[language]
+  const kid = kidVoice ? (await loadKidManifest())[kidVoice][language] : null
   return splitSentences(text).map((sentence): SpeechPart => {
     for (const candidate of [sentence, withoutName(sentence, childName)]) {
       if (!candidate) continue
       const key = phraseKey(language, candidate)
+      if (kidVoice && kid?.has(key)) {
+        return { kind: 'clip', url: kidClipUrl(kidVoice, language, key), language, key }
+      }
       if (recorded.has(key)) {
         return { kind: 'clip', url: publicClipUrl(language, key), language, key }
       }
