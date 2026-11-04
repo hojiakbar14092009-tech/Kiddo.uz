@@ -94,6 +94,20 @@ test('every mascot is a real rigged 3D character with clips and a face (Mascot L
     await page.getByTestId('lab-clip-wave').click()
     await expect(stage).toHaveAttribute('data-clip', id === 'ziyo' ? 'welcome' : 'wave')
   }
+  // Phase 76: drag the model round, the arrow keys turn it, Home faces it front
+  await page.getByTestId('lab-view-0').click()
+  const yaw = page.getByTestId('lab-yaw')
+  const box = (await stage.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width / 2 + 150, box.y + box.height / 2, { steps: 5 })
+  await page.mouse.up()
+  await expect(yaw).toHaveValue('90')
+  await stage.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(yaw).toHaveValue('105')
+  await page.keyboard.press('Home')
+  await expect(yaw).toHaveValue('0')
   // one model in memory at a time: the others were released
   await page.waitForTimeout(500)
   expect(

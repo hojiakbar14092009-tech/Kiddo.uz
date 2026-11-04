@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import type { LabHooks } from '../characters/Character3D'
 import { cacheStats } from '../characters/assets'
 import type { ModelStats } from '../characters/controller'
@@ -47,6 +47,7 @@ export function MascotLab() {
   const [mascot, setMascot] = useState<MascotId>(initial.mascot)
   const [yaw, setYaw] = useState<number | null>(initial.yaw)
   const [spin, setSpin] = useState(false)
+  const drag = useRef<{ x: number; yaw: number } | null>(null)
   const [size, setSize] = useState(420)
   const [emotion, setEmotion] = useState<Emotion>(initial.emotion)
   const [skeleton, setSkeleton] = useState(false)
@@ -139,8 +140,33 @@ export function MascotLab() {
       )}
       <div className="flex flex-wrap items-start gap-4">
         <div
-          className="relative rounded-2xl bg-white"
+          className="relative touch-none rounded-2xl bg-white outline-offset-4 focus-visible:outline-2"
           style={{ width: size }}
+          // Phase 76: turn the model by dragging (mouse or finger), with the arrow keys,
+          // and back to the front with a double tap or Home
+          tabIndex={0}
+          aria-label="Model: drag or use the arrow keys to turn it, Home to face front"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId)
+            drag.current = { x: event.clientX, yaw: yaw ?? 0 }
+            setSpin(false)
+          }}
+          onPointerMove={(event) => {
+            if (!drag.current) return
+            setYaw(
+              (((drag.current.yaw + (event.clientX - drag.current.x) * 0.6) % 360) + 360) % 360,
+            )
+          }}
+          onPointerUp={() => {
+            drag.current = null
+          }}
+          onDoubleClick={() => setYaw(0)}
+          onKeyDown={(event) => {
+            const step = event.key === 'ArrowLeft' ? -15 : event.key === 'ArrowRight' ? 15 : 0
+            if (step) setYaw(((((yaw ?? 0) + step) % 360) + 360) % 360)
+            if (event.key === 'Home') setYaw(0)
+            if (step || event.key === 'Home') event.preventDefault()
+          }}
           data-testid="lab-stage"
           data-ready={ready ? 'true' : 'false'}
           data-failed={failed ? 'true' : 'false'}
@@ -203,6 +229,7 @@ export function MascotLab() {
             <label className="flex items-center gap-2">
               Rotate
               <input
+                data-testid="lab-yaw"
                 type="range"
                 min={0}
                 max={359}
