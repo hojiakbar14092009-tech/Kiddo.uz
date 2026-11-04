@@ -43,10 +43,7 @@ export function ReportSection({ child }: { child: ChildProfile }) {
     { label: t('parent.report.coins'), value: today.coins },
     {
       label: t('parent.report.minutes'),
-      value: t('parent.report.minutesOf', {
-        minutes: today.minutes,
-        limit: child.dailyLimitMinutes,
-      }),
+      value: t('parent.report.minutesOf', { minutes: today.minutes }),
     },
     { label: t('parent.report.mistakes'), value: today.mistakes },
   ]
@@ -102,7 +99,7 @@ export function ReportSection({ child }: { child: ChildProfile }) {
       <FocusPanel child={child} />
       <MemoryPanel child={child} />
       <PlayedPanel child={child} insights={insights} />
-      <HealthPanel child={child} insights={insights} />
+      <HealthPanel insights={insights} />
 
       <Panel title={t('parent.report.mistakesTitle')}>
         {pairs.length === 0 && struggling.length === 0 ? (

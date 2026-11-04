@@ -134,7 +134,9 @@ test.describe('the attention helper', () => {
     await expect(offer).toBeVisible()
     await expect(offer.getByRole('button')).toHaveCount(7) // the top five, “all games” and “later”
     await expect(page.getByTestId('attention-all-games')).toBeVisible()
-    await offer.getByRole('button', { name: 'Suzadimi, cho‘kadimi?' }).click()
+    // the fake clock also holds requestAnimationFrame, which Playwright's "stable" check
+    // waits on; the dialog is still and in place (its box does not move), so click it as is
+    await offer.getByRole('button', { name: 'Suzadimi, cho‘kadimi?' }).click({ force: true })
     await expect(page).toHaveURL(/\/sci\/float$/)
 
     // the parent's report keeps it all, for this child only, as counts
@@ -216,11 +218,14 @@ test.describe('the science games', () => {
     await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
   })
 
-  test('the Explore hub shows the games and the cartoons', async ({ page }) => {
+  test('the cartoons are a big button at the top of Kashf et and of Home', async ({ page }) => {
     await child(page, 'denied')
     await ready(page, '/explore')
-    await expect(page.getByRole('link', { name: 'Magnit sehri' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Multfilmlar' })).toBeVisible()
+    await expect(page.getByTestId('explore-shorts')).toBeInViewport()
+    await ready(page, '/home')
+    await expect(page.getByTestId('home-shorts')).toBeInViewport()
+    await page.getByTestId('home-shorts').click()
+    await expect(page).toHaveURL(/\/shorts$/)
   })
 })
 

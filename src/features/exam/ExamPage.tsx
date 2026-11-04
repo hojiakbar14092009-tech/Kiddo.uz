@@ -20,7 +20,6 @@ import {
   type TaskOutcome,
 } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
-import { useScreenTime } from '@/features/rest/useScreenTime'
 import { CertificateCard } from './CertificateCard'
 import {
   EXAM_ROUNDS,
@@ -53,7 +52,6 @@ export function ExamPage() {
   const [phase, setPhase] = useState<Phase>({ kind: 'intro' })
   const [rounds, setRounds] = useState(() => generateExamRounds(letters))
   const name = child?.name ?? t('exam.certificate.guestName')
-  const { over: timeIsUp } = useScreenTime()
 
   useEffect(() => {
     if (phase.kind !== 'intro') return
@@ -110,7 +108,7 @@ export function ExamPage() {
           name={name}
           language={language}
           passedAt={phase.passedAt}
-          onAgain={timeIsUp ? undefined : startAgain}
+          onAgain={startAgain}
           onHome={() => navigate('/home')}
         />
       ) : (
@@ -119,7 +117,7 @@ export function ExamPage() {
             <TrophyIcon size={44} aria-hidden="true" />
             {t('exam.title')}
           </h1>
-          {unlocked && !timeIsUp ? (
+          {unlocked ? (
             <>
               <p className="max-w-md text-xl text-ink-soft">
                 {t('exam.intro', { count: EXAM_ROUNDS })}

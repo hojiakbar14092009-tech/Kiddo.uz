@@ -142,7 +142,7 @@ test('the first journey links maths, space, the garden, biology and the lab', as
     .getByRole('navigation', { name: 'Bo‘limlar' })
     .getByRole('link', { name: 'Kashf et' })
     .click()
-  await page.getByRole('link', { name: 'Dinozavrlar bog‘i' }).click()
+  await page.getByRole('link', { name: 'Dinozavrlar', exact: true }).click()
   await page.getByTestId('dino-mode-quiz').click()
   await passLessonIfShown(page, 'quiz-start')
   await page.getByTestId('quiz-start').click()

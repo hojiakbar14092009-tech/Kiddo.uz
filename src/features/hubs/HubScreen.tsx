@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TopBar } from '@/components/layout/TopBar'
+import { ParentLockLink } from '@/features/parent/ParentAreaLink'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { useActiveChild, useFamilyStore } from '@/store/familyStore'
 import { ChildTabBar } from './ChildTabBar'
@@ -36,7 +37,17 @@ export function ChildSwitchLink() {
 export function HubScreen({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <Screen
-      header={<TopBar showHome={false} start={<ChildSwitchLink />} />}
+      header={
+        <TopBar
+          showHome={false}
+          start={
+            <>
+              <ChildSwitchLink />
+              <ParentLockLink />
+            </>
+          }
+        />
+      }
       footer={<ChildTabBar />}
       className={clsx('items-center px-4 pb-32 sm:pb-36 short:pb-24', className)}
     >

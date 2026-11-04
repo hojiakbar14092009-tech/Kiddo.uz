@@ -11,7 +11,6 @@ import { WelcomePage } from '@/features/onboarding/WelcomePage'
 import { RequireParentGate } from '@/features/parent/gate/RequireParentGate'
 import { RequireParentSession } from '@/features/parent/RequireParentSession'
 import { ChildSelectPage } from '@/features/profiles/ChildSelectPage'
-import { RestPage } from '@/features/rest/RestPage'
 import { ScreenTimeGuard } from '@/features/rest/ScreenTimeGuard'
 import { GamePage } from '@/features/tasks/GamePage'
 import { RewardPage } from '@/features/tasks/RewardPage'
@@ -258,7 +257,8 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/collection/CollectionPage')).CollectionPage,
                 }),
               },
-              { path: '/rest', element: <RestPage /> },
+              // no daily limit since Phase 75: an old link to the rest screen goes home
+              { path: '/rest', element: <Navigate to="/home" replace /> },
             ],
           },
         ],

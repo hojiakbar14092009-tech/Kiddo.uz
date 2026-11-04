@@ -52,6 +52,9 @@ beforeEach(() => {
   useRewardStore.setState({ byChild: {} })
 })
 
+/** The city itself (the top of My world also has big buttons to the shop, museum and studio). */
+const city = () => screen.getByRole('region', { name: 'Kiddo shahri' })
+
 describe('Kiddo City', () => {
   it('shows every building as an open door, plus the writing school and the map', async () => {
     await renderRoute('/my-world')
@@ -62,7 +65,10 @@ describe('Kiddo City', () => {
       'href',
       '/math-lab',
     )
-    expect(screen.getByRole('link', { name: 'Ijod ustaxonasi' })).toHaveAttribute('href', '/studio')
+    expect(within(city()).getByRole('link', { name: 'Ijod ustaxonasi' })).toHaveAttribute(
+      'href',
+      '/studio',
+    )
     expect(screen.getByRole('link', { name: 'Yozuv maktabi' })).toHaveAttribute('href', '/trace')
     expect(screen.getByRole('link', { name: 'Do‘stlik uyi' })).toHaveAttribute('href', '/feelings')
     expect(screen.getByRole('link', { name: 'Sarguzashtlar xaritasi' })).toHaveAttribute(
@@ -168,7 +174,7 @@ describe('Kiddo City', () => {
     })
     await renderRoute('/my-world')
     expect(screen.queryByRole('button', { name: 'Muzey: kattalashtirish' })).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Muzey' })).toHaveAccessibleDescription(
+    expect(within(city()).getByRole('link', { name: 'Muzey' })).toHaveAccessibleDescription(
       'Eng katta daraja',
     )
   })

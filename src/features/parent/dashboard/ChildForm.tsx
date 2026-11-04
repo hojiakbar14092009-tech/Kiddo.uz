@@ -14,7 +14,6 @@ import {
 } from '@/features/age/ageLevel'
 import { tashkentDay } from '@/lib/dates'
 import {
-  DAILY_LIMIT_OPTIONS,
   DEFAULT_DAILY_LIMIT_MINUTES,
   MAX_NAME_LENGTH,
   type ChildProfile,
@@ -59,7 +58,8 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
   const age = isAllowedBirthDate(birthDate, today) ? ageOn(birthDate, today) : null
   const [gender, setGender] = useState<Gender>(initial?.gender ?? 'girl')
   const [mascot, setMascot] = useState<MascotModel>(initial?.mascot ?? 'girl')
-  const [limit, setLimit] = useState(initial?.dailyLimitMinutes ?? DEFAULT_DAILY_LIMIT_MINUTES)
+  // no daily limit since Phase 75; the stored value is kept as it was (older apps read it)
+  const limit = initial?.dailyLimitMinutes ?? DEFAULT_DAILY_LIMIT_MINUTES
   const [nameError, setNameError] = useState(false)
   const [photo, setPhoto] = useState<string | undefined>(
     isStoredPhoto(initial?.photo) ? initial?.photo : undefined,
@@ -239,16 +239,6 @@ export function ChildForm({ initial, onSave, onCancel }: ChildFormProps) {
             : t('parent.profiles.photoHint')}
         </p>
       </fieldset>
-
-      <ChoiceChips
-        label={t('parent.profiles.limit')}
-        options={DAILY_LIMIT_OPTIONS.map((value) => ({
-          value,
-          label: t('parent.profiles.minutes', { count: value }),
-        }))}
-        value={limit}
-        onChange={setLimit}
-      />
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" size="md">

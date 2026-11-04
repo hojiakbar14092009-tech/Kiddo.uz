@@ -1,4 +1,3 @@
-import { GamesLink } from '@/features/games/GamesLink'
 import { track } from '@/domain/analytics'
 import { Img3D } from '@/components/ui/Img3D'
 import { AppIcon } from '@/features/age/AppIcon'
@@ -6,6 +5,7 @@ import { HubScreen } from '@/features/hubs/HubScreen'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { RoamingMascot } from '@/features/mascot/RoamingMascot'
+import { QuickTiles } from '@/features/hubs/QuickTiles'
 import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey } from '@/features/tasks/rules'
@@ -88,7 +88,7 @@ export function HomePage() {
   }, [plan.complete])
 
   return (
-    <HubScreen className="gap-8 py-6 sm:gap-10 sm:py-10">
+    <HubScreen className="gap-5 py-4 sm:gap-8 sm:py-8">
       <h1 className="text-center font-display text-4xl font-extrabold sm:text-5xl">
         {child ? t('home.greeting', { name: child.name }) : t('home.greetingNoName')}
       </h1>
@@ -100,11 +100,11 @@ export function HomePage() {
       <div
         data-roam="home-greet"
         className={clsx(
-          '-mt-5 flex w-full max-w-3xl items-center justify-center sm:-mt-7',
+          '-mt-3 flex w-full max-w-3xl items-center justify-center sm:-mt-7',
           // the room is kept only while a robot can greet in it (none with reduced
           // motion); on a phone held sideways it is smaller, but still there, so the
           // bubble never has to cover the heading or the plan
-          !reduceMotion && 'min-h-32 sm:min-h-40 short:min-h-28',
+          !reduceMotion && 'min-h-24 sm:min-h-40 short:min-h-24',
         )}
       >
         {child && Number.isFinite(childAge(child)) && (
@@ -138,17 +138,54 @@ export function HomePage() {
       {/* one big way on: the next step of today's plan (Phase 40) */}
       <ContinueButton plan={plan} />
 
-      <JourneyPath plan={plan} />
+      {/* Phase 75: the four places a child looks for most, right under the plan */}
+      <QuickTiles
+        label={t('home.quick.label')}
+        tiles={[
+          {
+            to: '/games',
+            label: t('games.title'),
+            picture: <Img3D name="ball" className="size-[74%]" />,
+            tint: 'bg-coin-soft',
+            testId: 'games-link',
+          },
+          {
+            to: '/shorts',
+            label: t('shorts.open'),
+            picture: (
+              <span aria-hidden="true" className="text-3xl leading-none sm:text-5xl">
+                🎬
+              </span>
+            ),
+            tint: 'bg-lilac-soft',
+            testId: 'home-shorts',
+          },
+          {
+            to: '/stories',
+            label: t('home.quick.tales'),
+            picture: <Img3D name="book" className="size-[74%]" />,
+            tint: 'bg-girl-soft',
+            testId: 'home-tales',
+          },
+          {
+            to: '/learn/my-story',
+            label: t('myStory.title'),
+            picture: <Img3D name="castle" className="size-[74%]" />,
+            tint: 'bg-primary-soft',
+            testId: 'home-my-story',
+          },
+        ]}
+      />
 
-      {/* Phase 62: every game, by subject */}
-      <GamesLink />
+      <JourneyPath plan={plan} />
 
       <DailyQuestCard />
 
       {/* the big adventure across the worlds: its next step */}
       <JourneyCard />
 
-      <ParentAreaLink />
+      {/* the smallest phones: no room for the lock in the top bar, so the card stays here */}
+      <ParentAreaLink className="min-[360px]:hidden" />
 
       <RoamingMascot
         model={mascotModel}

@@ -62,8 +62,7 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
               <div className="flex min-w-0 flex-col">
                 <span className="truncate font-display text-xl font-extrabold">{child.name}</span>
                 <span className="text-ink-soft">
-                  {t('childSelect.age', { count: childAge(child) })} ·{' '}
-                  {t('parent.profiles.minutes', { count: child.dailyLimitMinutes })}
+                  {t('childSelect.age', { count: childAge(child) })}
                 </span>
               </div>
             </div>

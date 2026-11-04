@@ -7,22 +7,36 @@ import { useWorld } from '@/domain/universe'
 import { tDynamic } from '@/lib/tDynamic'
 import { FitWords } from '@/components/ui/FitWords'
 
-/** A titled group of places in a section. */
+/**
+ * A titled group of places in a section: a grid, or (Phase 75) one row that
+ * slides sideways, so a section stays short and the big buttons above it stay
+ * in view.
+ */
 export function PlaceGroup({
   id,
   title,
   children,
+  row = false,
 }: {
   id: string
   title: string
   children: ReactNode
+  row?: boolean
 }) {
   return (
-    <section aria-labelledby={id} className="flex w-full max-w-4xl flex-col gap-4">
+    <section aria-labelledby={id} className="flex w-full max-w-4xl flex-col gap-3 sm:gap-4">
       <h2 id={id} className="font-display text-2xl font-extrabold sm:text-3xl">
         {title}
       </h2>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">{children}</ul>
+      <ul
+        className={
+          row
+            ? '-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pt-1 pb-3 [scrollbar-width:none] sm:gap-4 [&>li]:w-36 [&>li]:shrink-0 [&>li]:snap-start sm:[&>li]:w-44'
+            : 'grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5'
+        }
+      >
+        {children}
+      </ul>
     </section>
   )
 }

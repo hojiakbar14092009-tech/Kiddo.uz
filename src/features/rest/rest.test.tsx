@@ -46,53 +46,16 @@ describe('Rest screen', () => {
   })
   afterEach(() => vi.restoreAllMocks())
 
-  it('takes over once the daily limit is used up', async () => {
-    usedToday(30)
-    const { router } = await renderRoute('/home')
-    expect(router.state.location.pathname).toBe('/rest')
-    expect(screen.getByRole('heading', { name: 'Endi dam olamiz!' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Bosh sahifa' })).not.toBeInTheDocument()
-  })
-
-  it('lets the game in progress finish and show its reward, but nothing new', async () => {
-    usedToday(29)
+  it('never stops a child: there is no daily limit (Phase 75)', async () => {
+    usedToday(600)
     const { router } = await renderRoute('/tasks/trace')
-    act(() => usedToday(30))
     expect(router.state.location.pathname).toBe('/tasks/trace')
-
-    const outcome = { coins: 5, bonus: 0, stars: 3, stickerId: null, mistakes: 0 }
-    await act(() =>
-      router.navigate('/reward', { replace: true, state: { taskType: 'trace', outcome } }),
-    )
-    expect(router.state.location.pathname).toBe('/reward')
-
-    await act(() => router.navigate('/tasks/trace'))
-    await waitFor(() => expect(router.state.location.pathname).toBe('/rest'))
+    expect(screen.queryByText(/dam olamiz/)).not.toBeInTheDocument()
   })
 
-  it('sends a reloaded game straight to rest once time is up', async () => {
-    usedToday(30)
-    const { router } = await renderRoute('/tasks/trace')
-    expect(router.state.location.pathname).toBe('/rest')
-  })
-
-  it('warns gently two minutes before', async () => {
-    usedToday(28.5)
-    await renderRoute('/home')
-    expect(screen.getByText(/Yana 2 daqiqadan keyin dam olamiz/)).toBeInTheDocument()
-  })
-
-  it('only a parent can give extra time', async () => {
-    usedToday(30)
-    const { router, user } = await renderRoute('/rest')
-    await user.click(screen.getByRole('button', { name: 'Ota-onalar uchun' }))
-    await user.click(screen.getByRole('button', { name: '3' }))
-    await user.click(screen.getByRole('button', { name: '6' }))
-    await user.click(screen.getByRole('button', { name: 'Tekshirish' }))
-    await user.click(screen.getByRole('button', { name: '+10 daqiqa' }))
-    expect(router.state.location.pathname).toBe('/home')
-    // The answer unlocked only the rest screen, never the parent area.
-    expect(useParentGateStore.getState().openedAt).toBeNull()
+  it('an old link to the rest screen goes home', async () => {
+    const { router } = await renderRoute('/rest')
+    await waitFor(() => expect(router.state.location.pathname).toBe('/home'))
   })
 
   it('counts time only while the screen is visible', async () => {

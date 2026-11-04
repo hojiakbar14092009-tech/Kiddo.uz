@@ -174,3 +174,23 @@ and in the attention helper's offer.
 - Reduced motion: everything stands still, the feeling shows at once.
 - Fully rigged 3D animals (real walking and faces) need 3D models: Higgsfield
   `generate_3d` (credits) or bought rigged models can replace the picture cards later.
+
+## Gathered sections, no daily limit (Phase 75)
+
+- **No daily time limit.** The parents decided Kiddo never stops a child with a rest
+  screen: the limit setting is gone from the child form, the profile line and the
+  report; the time a child spends is still counted for the parents' report. An old
+  link to `/rest` goes home. The stored `dailyLimitMinutes` is kept as it was (older
+  app versions and the cloud row still read it).
+- **Big buttons first.** Every section page starts with its most used places as big
+  picture buttons (`QuickTiles`): Home has Games, Cartoons, Stories and My Story right
+  under "Davom etish"; O‘rgan has six (Alphabet, Numbers, Words, Writing, Stories,
+  Games); Kashf et has the Adventure Map, Cartoons, Dinosaurs and Uzbekistan; My world
+  has the Shop, Museum and Art studio before the city.
+- The rest of a section waits in short rows by subject that slide sideways
+  (`PlaceGroup row`), so no section is five screens long any more. The science games
+  are only on the Games page (they were on Kashf et as well).
+- The parents' area is a lock at the top of every section page (`ParentLockLink`),
+  not a card at the bottom of Home.
+- A test checks that O‘rgan and Kashf et still lead to every learning building.
+- Reference pictures for the coming 3D work are kept in `docs/reference/`.

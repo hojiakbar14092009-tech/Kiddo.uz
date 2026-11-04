@@ -321,7 +321,7 @@ export function PracticePanel({
 
 // ------------------------------------------------------------ healthy play
 
-export function HealthPanel({ child, insights }: { child: ChildProfile; insights: ChildInsights }) {
+export function HealthPanel({ insights }: { insights: ChildInsights }) {
   const { t } = useTranslation()
   const { health } = insights
   return (
@@ -344,15 +344,7 @@ export function HealthPanel({ child, insights }: { child: ChildProfile; insights
           </div>
         </dl>
       )}
-      <p className="font-semibold">
-        {t('parent.insights.health.limit', { count: child.dailyLimitMinutes })}
-      </p>
       <p className="text-ink-soft">{t('parent.insights.health.guide')}</p>
-      <p className="text-ink-soft">{t('parent.insights.health.rest')}</p>
-      <Link to={PROFILES} className={`${QUIET_LINK} self-start`}>
-        {t('parent.insights.health.editLimit')}
-        <ChevronRightIcon size={18} />
-      </Link>
     </Panel>
   )
 }

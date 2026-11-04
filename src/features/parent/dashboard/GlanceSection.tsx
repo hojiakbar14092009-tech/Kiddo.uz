@@ -144,10 +144,7 @@ export function GlanceSection({
             <>
               <p>{t('parent.glance.todayActivities', { count: todayRuns })}</p>
               <p className="text-ink-soft">
-                {t('parent.glance.todayMinutes', {
-                  minutes: today.minutes,
-                  limit: child.dailyLimitMinutes,
-                })}
+                {t('parent.glance.todayMinutes', { minutes: today.minutes })}
               </p>
             </>
           )}

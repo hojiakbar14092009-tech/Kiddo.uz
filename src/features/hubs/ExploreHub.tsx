@@ -1,92 +1,69 @@
 import { useTranslation } from 'react-i18next'
 import { Img3D } from '@/components/ui/Img3D'
-import { GamesLink } from '@/features/games/GamesLink'
-import { SCI_GAMES } from '@/features/sciGames/games'
-import { tDynamic } from '@/lib/tDynamic'
+import { useBuildingTiles } from './buildingTiles'
 import { HubHeading, HubScreen } from './HubScreen'
 import { BuildingPlaces, PlaceCard, PlaceGroup } from './PlaceGrid'
-
-/** The worlds to discover (the science lab opens when the Mars flower blooms). */
-const EXPLORE_PLACES = [
-  'dino-park',
-  'uzbekistan-gate',
-  'observatory',
-  'spaceport',
-  'science-lab',
-] as const
-
-const SCI_TINT = {
-  sky: 'bg-sky-soft',
-  coral: 'bg-oops-soft',
-  mint: 'bg-primary-soft',
-  coin: 'bg-coin-soft',
-  lilac: 'bg-lilac-soft',
-} as const
+import { QuickTiles, type Tile } from './QuickTiles'
 
 /**
- * Kashf et (Phase 40): the Adventure Map and every world to discover, each
- * with its own place; the space labs sit next to the observatory.
+ * Kashf et (Phase 40; Phase 75: gathered). The Adventure Map, the cartoons and
+ * the two big worlds are buttons at the top; space and science wait in short
+ * rows. The science games live on the Games page, not here as well.
  */
 export function ExploreHub() {
   const { t } = useTranslation()
+  const worlds = useBuildingTiles([
+    ['dino-park', 'bg-primary-soft'],
+    ['uzbekistan-gate', 'bg-coin-soft'],
+  ])
+  const tiles: Tile[] = [
+    {
+      to: '/adventure',
+      label: t('hubs.tiles.adventure'),
+      picture: <Img3D name="mountain" className="size-[74%]" />,
+      tint: 'bg-sky-soft',
+    },
+    {
+      to: '/shorts',
+      label: t('shorts.open'),
+      picture: (
+        <span aria-hidden="true" className="text-4xl leading-none sm:text-5xl">
+          🎬
+        </span>
+      ),
+      tint: 'bg-lilac-soft',
+      testId: 'explore-shorts',
+    },
+    ...worlds,
+  ]
+
   return (
-    <HubScreen className="gap-8 py-6 sm:gap-10 sm:py-8">
-      <HubHeading title={t('hubs.explore.title')} text={t('hubs.explore.text')} />
-      <GamesLink />
-      <PlaceGroup id="explore-places" title={t('hubs.explore.places')}>
-        <PlaceCard
-          to="/adventure"
-          label={t('city.adventure')}
-          detail={t('city.adventureHint')}
-          picture={<Img3D name="mountain" className="size-[72%]" />}
-          tint="bg-primary-soft"
-        />
-        <BuildingPlaces ids={EXPLORE_PLACES} />
+    <HubScreen className="gap-6 py-5 sm:gap-8 sm:py-8">
+      <HubHeading title={t('hubs.explore.title')} />
+      <QuickTiles tiles={tiles} label={t('hubs.explore.title')} />
+      <PlaceGroup id="explore-space" title={t('hubs.explore.groups.space')} row>
+        <BuildingPlaces ids={['observatory', 'spaceport']} />
         <PlaceCard
           to="/scale-portal"
           label={t('scalePortal.card')}
           picture={<Img3D name="ringed-planet" className="size-[72%]" />}
           tint="bg-lilac-soft"
         />
-        {/* Phase 49: the robot asks for a real thing at home */}
-        <PlaceCard
-          to="/explore/find-home"
-          label={t('findHome.title')}
-          detail={t('findHome.cardHint')}
-          picture={<Img3D name="house" className="size-[72%]" />}
-          tint="bg-girl-soft"
-        />
+      </PlaceGroup>
+      <PlaceGroup id="explore-science" title={t('hubs.explore.groups.science')} row>
+        <BuildingPlaces ids={['science-lab']} />
         <PlaceCard
           to="/shadow-lab"
           label={t('shadowLab.title')}
           picture={<Img3D name="lamp" className="size-[72%]" />}
           tint="bg-coin-soft"
         />
-      </PlaceGroup>
-      {/* Phase 59: short science games; Phase 60: the cartoons about them */}
-      <PlaceGroup id="explore-science" title={t('sciGames.hubTitle')}>
-        {SCI_GAMES.filter((game) => game.strand === 'science').map((game) => (
-          <PlaceCard
-            key={game.id}
-            to={game.path}
-            label={tDynamic(t, `sciGames.${game.id}.title`)}
-            picture={
-              <span aria-hidden="true" className="text-5xl leading-none sm:text-6xl">
-                {game.emoji}
-              </span>
-            }
-            tint={SCI_TINT[game.tone]}
-          />
-        ))}
+        {/* Phase 49: the robot asks for a real thing at home */}
         <PlaceCard
-          to="/shorts"
-          label={t('shorts.open')}
-          picture={
-            <span aria-hidden="true" className="text-5xl leading-none sm:text-6xl">
-              🎬
-            </span>
-          }
-          tint="bg-lilac-soft"
+          to="/explore/find-home"
+          label={t('findHome.title')}
+          picture={<Img3D name="house" className="size-[72%]" />}
+          tint="bg-girl-soft"
         />
       </PlaceGroup>
     </HubScreen>

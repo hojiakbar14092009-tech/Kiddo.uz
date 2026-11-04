@@ -55,7 +55,7 @@ describe('Parent gate', () => {
 
   it('is reached from the home screen', async () => {
     const { router, user } = await renderRoute('/home')
-    await user.click(screen.getByRole('link', { name: 'Ota-ona bo‘limi' }))
+    await user.click(screen.getByTestId('parent-lock'))
     expect(router.state.location.pathname).toBe('/parent')
     expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
   })
@@ -84,7 +84,6 @@ describe('Parent dashboard', () => {
     expect(useFamilyStore.getState().children).toHaveLength(0)
     fireEvent.change(birthday, { target: { value: birthDateForAge(4, dayKey()) } })
     await user.click(screen.getByRole('radio', { name: 'O‘g‘il' }))
-    await user.click(screen.getByRole('radio', { name: '45 daqiqa' }))
     await user.click(screen.getByRole('button', { name: 'Saqlash' }))
 
     const [child] = useFamilyStore.getState().children
@@ -94,7 +93,7 @@ describe('Parent dashboard', () => {
       gender: 'boy',
       mascot: 'boy',
     })
-    expect(child?.dailyLimitMinutes).toBe(45)
+    expect(screen.queryByText('Kunlik vaqt')).not.toBeInTheDocument()
   })
 
   it('does not save a profile without a name', async () => {

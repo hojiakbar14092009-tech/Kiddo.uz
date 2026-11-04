@@ -130,7 +130,7 @@ test('a free story is read with a choice to the questions and the reward', async
     .getByRole('navigation', { name: 'Bo‘limlar' })
     .getByRole('link', { name: 'O‘rgan' })
     .click()
-  await page.getByRole('link', { name: 'Ertaklar kutubxonasi', exact: true }).click()
+  await page.getByRole('link', { name: 'Ertaklar', exact: true }).click()
   await expect(page).toHaveURL(/\/stories$/)
   await page.getByTestId('story-card-lost-lamb').click()
   await expect(page).toHaveURL(/\/stories\/lost-lamb$/)

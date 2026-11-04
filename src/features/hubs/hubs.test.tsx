@@ -5,6 +5,7 @@ import { useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { useUniverseStore } from '@/domain/universe/store'
 import { renderRoute } from '@/test/renderRoute'
+import { BUILDINGS } from '@/domain/universe/world'
 import { hubOf, sectionOf } from './sections'
 
 describe('sections', () => {
@@ -72,21 +73,15 @@ describe('the four section pages', () => {
       'href',
       '/math-lab',
     )
-    expect(screen.getByRole('link', { name: 'Ertaklar kutubxonasi' })).toHaveAttribute(
-      'href',
-      '/stories',
-    )
-    expect(screen.getByRole('heading', { name: 'Yana nima qilamiz?' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ertaklar' })).toHaveAttribute('href', '/stories')
+    expect(screen.getByRole('heading', { name: 'Harflar va so‘zlar' })).toBeInTheDocument()
     expect(document.documentElement.dataset.world).toBe('learn')
   })
 
   it('Kashf et has the map and the worlds; a closed world says what opens it', async () => {
     await renderRoute('/explore')
-    expect(screen.getByRole('link', { name: /Sarguzashtlar xaritasi/ })).toHaveAttribute(
-      'href',
-      '/adventure',
-    )
-    expect(screen.getByRole('link', { name: 'Dinozavrlar bog‘i' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Xarita' })).toHaveAttribute('href', '/adventure')
+    expect(screen.getByRole('link', { name: 'Dinozavrlar' })).toHaveAttribute(
       'href',
       '/worlds/dino',
     )
@@ -99,5 +94,30 @@ describe('the four section pages', () => {
     expect(screen.getByTestId('resource-bar')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Kiddo shahri' })).toBeInTheDocument()
     expect(document.documentElement.dataset.world).toBe('mine')
+  })
+
+  it("Home gathers the four most used places and the parents' lock at the top (Phase 75)", async () => {
+    await renderRoute('/home')
+    const quick = screen.getByRole('navigation', { name: 'Eng kerakli joylar' })
+    for (const [name, href] of [
+      ['O‘yinlar', '/games'],
+      ['Multfilmlar', '/shorts'],
+      ['Ertaklar', '/stories'],
+      ['O‘z ertagim', '/learn/my-story'],
+    ])
+      expect(within(quick).getByRole('link', { name })).toHaveAttribute('href', href)
+    expect(screen.getByTestId('parent-lock')).toHaveAttribute('href', '/parent')
+  })
+
+  it('no place is lost: O‘rgan and Kashf et still lead to every learning building', async () => {
+    const hrefs = new Set<string>()
+    for (const route of ['/learn', '/explore']) {
+      const { unmount } = await renderRoute(route)
+      screen.getAllByRole('link').forEach((link) => hrefs.add(link.getAttribute('href') ?? ''))
+      unmount()
+    }
+    const own = new Set(['shop', 'museum', 'art-studio'])
+    for (const building of BUILDINGS.filter((item) => !own.has(item.id)))
+      expect(hrefs, building.id).toContain(building.route)
   })
 })

@@ -4,7 +4,6 @@ import { GAME_MIN_LEVEL, isGameSuggested } from '@/features/age/ageLevel'
 import { AppIcon } from '@/features/age/AppIcon'
 import { Img3D } from '@/components/ui/Img3D'
 import { examProgress } from '@/features/exam/exam'
-import { GamesLink } from '@/features/games/GamesLink'
 import { QuestExtras } from '@/features/home/QuestExtras'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { GAME_TYPES } from '@/features/tasks/games'
@@ -12,25 +11,15 @@ import { isFinalTestUnlocked } from '@/features/tasks/rules'
 import { useAgeLevel } from '@/store/familyStore'
 import { useProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
+import { useBuildingTiles } from './buildingTiles'
 import { HubHeading, HubScreen } from './HubScreen'
 import { BuildingPlaces, PlaceCard, PlaceGroup } from './PlaceGrid'
-
-/** The learning places, from first letters and numbers to stories and feelings. */
-const LEARN_PLACES = [
-  'reading-house',
-  'math-land',
-  'word-workshop',
-  'writing-school',
-  'story-library',
-  'friendship-house',
-  'garden',
-  'mistake-garden',
-  'robot-workshop',
-] as const
+import { QuickTiles, type Tile } from './QuickTiles'
 
 /**
- * O‘rgan (Phase 40): every learning place in one calm grid, today's extra
- * practice first, then the small games and the big letter test.
+ * O‘rgan (Phase 40; Phase 75: gathered). The six places a child needs most are
+ * big buttons at the top; everything else waits in short rows by subject that
+ * slide sideways, so the page is no longer five screens long.
  */
 export function LearnHub() {
   const { t } = useTranslation()
@@ -42,20 +31,39 @@ export function LearnHub() {
   // games suggested from an older age: playable now, with a calm note
   const laterGames = GAME_TYPES.filter((game) => !isGameSuggested(game, level))
 
+  const [alphabet, words, writing, tales] = useBuildingTiles([
+    ['reading-house', 'bg-sky-soft'],
+    ['word-workshop', 'bg-lilac-soft'],
+    ['writing-school', 'bg-primary-soft'],
+    ['story-library', 'bg-girl-soft'],
+  ])
+  const numbers: Tile = {
+    to: '/alphabet?tab=numbers',
+    label: t('home.numbers'),
+    picture: <AppIcon name="numbers" className="size-[70%]" />,
+    tint: 'bg-coin-soft',
+  }
+  const games: Tile = {
+    to: '/games',
+    label: t('games.title'),
+    picture: <Img3D name="ball" className="size-[74%]" />,
+    tint: 'bg-coin-soft',
+  }
+  const tiles = [alphabet, numbers, words, writing, tales, games].filter(
+    (tile): tile is Tile => tile !== undefined,
+  )
+
   return (
-    <HubScreen className="gap-8 py-6 sm:gap-10 sm:py-8">
-      <HubHeading title={t('hubs.learn.title')} text={t('hubs.learn.text')} />
-      <GamesLink />
+    <HubScreen className="gap-6 py-5 sm:gap-8 sm:py-8">
+      <HubHeading title={t('hubs.learn.title')} />
+      <QuickTiles tiles={tiles} label={t('hubs.learn.title')} />
       <QuestExtras />
-      <PlaceGroup id="learn-places" title={t('hubs.learn.places')}>
-        <BuildingPlaces ids={LEARN_PLACES} />
-      </PlaceGroup>
-      <PlaceGroup id="more-title" title={t('home.more')}>
+      <PlaceGroup id="learn-words" title={t('hubs.learn.groups.words')} row>
         <PlaceCard
-          to="/alphabet?tab=numbers"
-          label={t('home.numbers')}
-          picture={<AppIcon name="numbers" className="size-[70%]" />}
-          tint="bg-coin-soft"
+          to="/learn/three-words"
+          label={t('threeWords.title')}
+          picture={<Img3D name="notebook" className="size-[72%]" />}
+          tint="bg-sky-soft"
         />
         <PlaceCard
           to="/tasks/memory"
@@ -63,20 +71,11 @@ export function LearnHub() {
           picture={<AppIcon name="memory" className="size-[70%]" />}
           tint="bg-lilac-soft"
         />
-        {/* Phase 49: a story of the child's own and one word in three languages */}
         <PlaceCard
           to="/learn/my-story"
           label={t('myStory.title')}
-          detail={t('myStory.cardHint')}
           picture={<Img3D name="book" className="size-[72%]" />}
           tint="bg-primary-soft"
-        />
-        <PlaceCard
-          to="/learn/three-words"
-          label={t('threeWords.title')}
-          detail={t('threeWords.cardHint')}
-          picture={<Img3D name="notebook" className="size-[72%]" />}
-          tint="bg-sky-soft"
         />
         {laterGames.map((game) => (
           <PlaceCard
@@ -100,6 +99,12 @@ export function LearnHub() {
               : `⭐ ${t('exam.progress', { learned: exam.learned, total: exam.total })}`
           }
         />
+      </PlaceGroup>
+      <PlaceGroup id="learn-numbers" title={t('hubs.learn.groups.numbers')} row>
+        <BuildingPlaces ids={['math-land', 'robot-workshop', 'mistake-garden']} />
+      </PlaceGroup>
+      <PlaceGroup id="learn-life" title={t('hubs.learn.groups.life')} row>
+        <BuildingPlaces ids={['friendship-house', 'garden']} />
       </PlaceGroup>
     </HubScreen>
   )

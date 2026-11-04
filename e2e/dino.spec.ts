@@ -44,7 +44,7 @@ test('a guest explores a dinosaur, digs up bones and finishes the quiz', async (
     .getByRole('navigation', { name: 'Bo‘limlar' })
     .getByRole('link', { name: 'Kashf et' })
     .click()
-  await page.getByRole('link', { name: 'Dinozavrlar bog‘i' }).click()
+  await page.getByRole('link', { name: 'Dinozavrlar', exact: true }).click()
   await expect(page).toHaveURL(/\/worlds\/dino$/)
 
   // explore: with WebGL the model opens in 3D (by itself or with the button) and is built;
