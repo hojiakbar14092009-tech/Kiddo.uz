@@ -241,3 +241,24 @@ for (const { game, bins, wrong, hint } of [
     await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
   })
 }
+
+test('the big buttons keep their names on one line on a wide computer screen', async ({ page }) => {
+  // the owner saw "Игры", "Мультики"… written one letter under another at 1920 px
+  await page.setViewportSize({ width: 1920, height: 1000 })
+  await child(page, 'ru')
+  for (const path of ['/home', '/learn', '/explore', '/my-world']) {
+    await ready(page, path)
+    const tiles = page
+      .getByRole('navigation')
+      .filter({ has: page.locator('ul li a') })
+      .first()
+    const links = tiles.locator('li a')
+    await expect(links.first()).toBeVisible()
+    for (let i = 0; i < (await links.count()); i += 1) {
+      const name = links.nth(i).locator('span').last()
+      const box = (await name.boundingBox())!
+      expect(box.height, `${path} tile ${i}`).toBeLessThan(box.width + 4)
+      expect(box.height, `${path} tile ${i}`).toBeLessThan(80)
+    }
+  }
+})

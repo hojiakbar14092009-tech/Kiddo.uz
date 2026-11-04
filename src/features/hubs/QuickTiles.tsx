@@ -57,8 +57,8 @@ export function QuickTiles({ tiles, label }: { tiles: readonly Tile[]; label: st
                 className={clsx(
                   'font-display leading-tight font-bold sm:text-center sm:text-xl',
                   wide
-                    ? 'w-full min-w-0 text-center text-sm min-[380px]:w-auto min-[380px]:flex-1 min-[380px]:text-left min-[380px]:text-base'
-                    : 'text-center text-sm min-[380px]:text-base',
+                    ? 'w-full min-w-0 text-center text-sm min-[380px]:w-auto min-[380px]:flex-1 min-[380px]:text-left min-[380px]:text-base sm:w-full sm:flex-none sm:text-center'
+                    : 'w-full min-w-0 text-center text-sm min-[380px]:text-base',
                 )}
               />
             </Link>
