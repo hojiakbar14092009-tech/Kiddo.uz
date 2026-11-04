@@ -39,6 +39,31 @@ describe('children voices', () => {
     expect(none).toMatchObject({ kind: 'clip', url: `/audio/voice/uz/${key}.mp3` })
   })
 
+  it('leaves out the labels the app never says, but keeps a sentence a spoken key also says', async () => {
+    const { phrasesOfParts } = await import('./childPhrases')
+    const all = phrasesOfParts(['task', 'mascot']).uz
+    const said = phrasesOfParts(['task', 'mascot'], ['task.traceCanvas', 'mascot.praise']).uz
+    expect(all).toContain('A harfini chizish maydoni')
+    expect(said).not.toContain('A harfini chizish maydoni')
+    // mascot.praise ("Barakalla!") is silent, but mascot.praises says the same word
+    expect(said).toContain('Barakalla!')
+  })
+
+  it('names only keys that exist as silent keys of the children voices', async () => {
+    const { leaves } = await import('./childPhrases')
+    const { uz } = await import('@/i18n/locales/uz')
+    const script = fs.readFileSync(path.resolve('scripts/voices/kid_voices.py'), 'utf8')
+    const block = /SILENT_KEYS = \[([\s\S]*?)\n\]/.exec(script)?.[1] ?? ''
+    const silent = [...block.matchAll(/'([\w.]+)'/g)].map((match) => match[1]!)
+    expect(silent.length).toBeGreaterThan(40)
+    const keys = leaves(uz as never).map(([key]) => key)
+    for (const key of silent)
+      expect(
+        keys.some((k) => k === key || k.startsWith(`${key}.`)),
+        key,
+      ).toBe(true)
+  })
+
   it('lists only clips that are in the build', () => {
     for (const voice of KID_VOICES)
       for (const [language, keys] of Object.entries(manifest[voice]))

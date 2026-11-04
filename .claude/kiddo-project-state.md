@@ -771,3 +771,21 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   ContentSection (+ seasons: features/seasons/seasons.ts, mascot.life.season.*), TeamSection (adminTeam.ts),
   rest hours (appSettings.restHours → useRestHours + homeLine resting), Telegram status panel.
 - Docs: docs/architecture/admin.md.
+
+## Bolalar ovozi (ElevenLabs) — uz COMPLETE (2026-11-05)
+
+- Qiz bola qizcha ovozini ("Candy", Nggzl2QAXh3OijoXD116), o‘g‘il bola o‘g‘ilcha ovozini ("Teddy Twinkle",
+  XjGYkUkzth8BPs29fmcV) eshitadi: `src/services/audio/kidVoices.ts` + `kidVoiceManifest.json`, kliplar
+  `public/audio/voice/kid/<girl|boy>/uz/<key>.mp3`. Yozilmagan jumla va ru/en oddiy ovozda qoladi.
+- uz: 1320 klip (qizcha 660, o‘g‘ilcha 660), ~13 650 kredit. Hamma bo‘limlar tugagan: reward, sciGames.done,
+  attention.say, task, mascot, tutor, learnFirst, feelings, myStory.say va hisoblagichlar.
+  Har klip tekshirilgan: faster-whisper large-v3-turbo (uz) bilan matn, jimlik/davomiylik; balandlik −16 LUFS.
+- Skript: `scripts/voices/kid_voices.py` (model `eleven_v4`: eleven_v3 `language_code: uz` ni rad etadi;
+  `ELEVENLABS_MODEL` bilan almashtiriladi). Tartib: maqtov → sciGames.done → attention.say → task → qolganlari;
+  hisoblagichlar (bir jumlaning 3+ raqamli varianti) eng oxirida; aytilmaydigan yorliq/tugma kalitlari
+  (`SILENT_KEYS`, `collect.ts --except`) yozilmaydi. Testlar: `python -m unittest scripts/voices/test_kid_voices.py`,
+  `kidVoices.test.ts`.
+- Tarif: Starter (Free tarifda kutubxona ovozlari API'da ishlamaydi: 402 paid_plan_required). API kalitning o‘z
+  kredit limiti ham bor (ElevenLabs → API Keys): u tugasa 401 quota_exceeded.
+- Keyingi oy: `python scripts/voices/kid_voices.py --languages ru,en --budget 28000` (bor kliplar o‘tkazib
+  yuboriladi; uz yangi jumlalari uchun `--languages uz`).

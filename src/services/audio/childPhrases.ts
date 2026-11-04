@@ -194,15 +194,22 @@ function collect(): {
 
 /**
  * The sentences of some interface parts only, per language (for recording a
- * part first, e.g. praise and instructions in the children's voices).
+ * part first, e.g. praise and instructions in the children's voices). Keys under
+ * `except` are left out (labels and buttons the app never says aloud); a
+ * sentence another key of the parts says stays.
  */
-export function phrasesOfParts(prefixes: readonly string[]): Record<Language, string[]> {
+export function phrasesOfParts(
+  prefixes: readonly string[],
+  except: readonly string[] = [],
+): Record<Language, string[]> {
+  const under = (key: string, list: readonly string[]) =>
+    list.some((prefix) => key === prefix || key.startsWith(`${prefix}.`))
   const out = {} as Record<Language, string[]>
   for (const [language, { tree, alphabet }] of Object.entries(sources)) {
     const phrases = new Set<string>()
     const spokenNames = alphabet.letters.map((letter) => letter.spoken)
     for (const [key, value] of leaves(tree)) {
-      if (!prefixes.some((prefix) => key === prefix || key.startsWith(`${prefix}.`))) continue
+      if (!under(key, prefixes) || under(key, except)) continue
       expand(
         value,
         spokenNames,

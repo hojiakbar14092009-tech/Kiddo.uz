@@ -126,18 +126,17 @@ def write_mp3(audio: np.ndarray, rate: int, target: Path) -> None:
 
 def write_from_mp3(mp3: bytes, target: Path) -> None:
     """A clip from another engine, brought to the same loudness and format."""
-    with tempfile.NamedTemporaryFile(suffix='.mp3') as tmp:
-        tmp.write(mp3)
-        tmp.flush()
-        subprocess.run(
-            [
-                'ffmpeg', '-loglevel', 'error', '-y', '-i', tmp.name,
-                '-af', 'adelay=60,apad=pad_dur=0.12,loudnorm=I=-16:TP=-1.5:LRA=11',
-                '-ar', '22050', '-ac', '1', '-c:a', 'libmp3lame', '-b:a', '48k',
-                str(target),
-            ],
-            check=True,
-        )
+    # through stdin, not a temp file: Windows does not let ffmpeg open a file Python holds open
+    subprocess.run(
+        [
+            'ffmpeg', '-loglevel', 'error', '-y', '-i', 'pipe:0',
+            '-af', 'adelay=60,apad=pad_dur=0.12,loudnorm=I=-16:TP=-1.5:LRA=11',
+            '-ar', '22050', '-ac', '1', '-c:a', 'libmp3lame', '-b:a', '48k',
+            str(target),
+        ],
+        input=mp3,
+        check=True,
+    )
 
 
 def main() -> None:
