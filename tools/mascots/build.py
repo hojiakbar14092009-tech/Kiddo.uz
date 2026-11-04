@@ -18,6 +18,7 @@ import bpy  # noqa: E402
 
 import clips as cliplib  # noqa: E402
 import kit  # noqa: E402
+from animals import ANIMALS  # noqa: E402
 from mascots import MASCOTS  # noqa: E402
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out")
@@ -67,7 +68,8 @@ def apply_clips(arm, library):
 
 
 def build(cid, render=False):
-    spec = MASCOTS[cid]
+    """cid: a mascot id, or animal-<id> for a story animal (Phase 78)."""
+    spec = ANIMALS[cid[len("animal-"):]] if cid.startswith("animal-") else MASCOTS[cid]
     kit.reset_scene()
     ch = kit.Character(cid)
     spec["build"](ch)
@@ -91,5 +93,7 @@ def build(cid, render=False):
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if args == ["animals"]:
+        args = [f"animal-{a}" for a in ANIMALS]
     for cid in args or list(MASCOTS):
         build(cid, render="--render" in sys.argv)

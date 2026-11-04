@@ -4,6 +4,7 @@
  *   python3 tools/mascots/build.py && npm run mascots:optimize
  *
  * tools/mascots/out/<id>.glb  ->  public/mascots/<id>.glb
+ * tools/mascots/out/animal-<id>.glb  ->  public/animals/<id>.glb (story animals, Phase 78: they walk too)
  *
  * - drops animation channels that never leave the rest pose (most bones in most clips),
  * - merges redundant keyframes (resample), deduplicates and prunes unused data,
@@ -22,6 +23,8 @@ import path from 'node:path'
 
 const SRC = 'tools/mascots/out'
 const OUT = 'public/mascots'
+const ANIMAL_OUT = 'public/animals'
+const ANIMAL_CLIPS = ['walk', 'run', 'jump', 'sleep', 'sit']
 const REQUIRED_CLIPS = [
   'idle',
   'wave',
@@ -98,8 +101,8 @@ function contract(doc, id) {
   const root = doc.getRoot()
   const problems = []
   const clips = root.listAnimations().map((a) => a.getName())
-  for (const clip of REQUIRED_CLIPS)
-    if (!clips.includes(clip)) problems.push(`missing clip ${clip}`)
+  const required = id.startsWith('animal-') ? [...REQUIRED_CLIPS, ...ANIMAL_CLIPS] : REQUIRED_CLIPS
+  for (const clip of required) if (!clips.includes(clip)) problems.push(`missing clip ${clip}`)
   const bones = new Set(root.listSkins().flatMap((s) => s.listJoints().map((j) => j.getName())))
   for (const bone of REQUIRED_BONES) if (!bones.has(bone)) problems.push(`missing bone ${bone}`)
   const morphs = new Set(root.listMeshes().flatMap((m) => m.getExtras()?.targetNames ?? []))
@@ -110,6 +113,7 @@ function contract(doc, id) {
 }
 
 fs.mkdirSync(OUT, { recursive: true })
+fs.mkdirSync(ANIMAL_OUT, { recursive: true })
 const ids = process.argv.slice(2).length
   ? process.argv.slice(2)
   : fs
@@ -136,7 +140,10 @@ for (const id of ids) {
     console.error(messages.filter((m) => m.severity <= 1).slice(0, 10))
     throw new Error(`${id}: ${numErrors} glTF validation errors, ${numWarnings} warnings`)
   }
-  fs.writeFileSync(path.join(OUT, `${id}.glb`), bytes)
+  const target = id.startsWith('animal-')
+    ? path.join(ANIMAL_OUT, `${id.slice('animal-'.length)}.glb`)
+    : path.join(OUT, `${id}.glb`)
+  fs.writeFileSync(target, bytes)
   const tris = doc
     .getRoot()
     .listMeshes()

@@ -46,24 +46,32 @@ listen, encourage, jump, and the mascot's own).
 
 ## The 12 story animals ("O‘z ertagim")
 
-Today each is a flat 3D-rendered picture (`public/3d/<id>.webp`) standing on the
+Until Phase 78 each was a flat 3D-rendered picture (`public/3d/<id>.webp`) standing on the
 story stage (Phase 74: breathing, squash and stretch, a feeling above its head).
-None has its own model yet. Sheets: `docs/reference/sheets/`.
+Since Phase 78 the first six are real rigged 3D models (`public/animals/<id>.glb`, built
+by `tools/mascots/animals.py`: `npm run mascots:build -- animals && npm run mascots:optimize`).
+They share the mascots' bone names, clips and face morph targets, so the same controller
+plays them (`src/features/tales/animals.ts`, `three/AnimalActor.tsx`). The quadrupeds sit
+upright at rest like the sheets; their front legs use the arm bones, so a wave lifts a front
+paw, and their walk tips the body onto four legs with diagonal pairs. On the story stage the
+hero walks in, turns to the child, shows the page's feeling with body and face, then rests;
+the picture stands in while the model loads or if it fails. The others are still pictures
+(Phase 79). Sheets: `docs/reference/sheets/`.
 
-| Id       | Name         | Sheet                    | State     | Body and motion it needs                    |
-| -------- | ------------ | ------------------------ | --------- | ------------------------------------------- |
-| rabbit   | Quyoncha     | ✓                        | Reference | small hops, nose twitch, ear flick          |
-| cat      | Mushukcha    | ✓                        | Reference | soft paw walk, tail sway, stretch, pounce   |
-| dog      | Kuchukcha    | ✓                        | Reference | trot, sniff, tail wag, sit                  |
-| penguin  | Pingvincha   | ✓ (hat, goggles, scarf)  | Reference | waddle, flipper flap, belly slide           |
-| bear     | Ayiqcha      | ✓ (cap, scarf, backpack) | Reference | heavy cute walk, wave, climb                |
-| fox      | Tulkicha     | ✓ (bandana)              | Reference | light steps, ear turns, tail flow, sniff    |
-| elephant | Filcha       | ✓ (bandana)              | Reference | weighty steps, trunk, ear sway, water spray |
-| lion     | Sherbola     | ✓ (bandana)              | Reference | confident walk, crouch, gentle roar         |
-| turtle   | Toshbaqacha  | ✓ (cap)                  | Reference | slow steps, neck stretch, hide in shell     |
-| owl      | Boyo‘g‘licha | ✓ (cap, glasses, book)   | Reference | head turn, blink, wing flap, short flight   |
-| unicorn  | Yakkashox    | ✓                        | Reference | elegant walk, mane, magic sparkle           |
-| dinosaur | Dinozavrcha  | ✓ (cap, bandana)         | Reference | walk with tail balance, stomp, small roar   |
+| Id       | Name         | Sheet                    | State        | Body and motion it needs                                                  |
+| -------- | ------------ | ------------------------ | ------------ | ------------------------------------------------------------------------- |
+| rabbit   | Quyoncha     | ✓                        | Model ✓ (78) | hops on four legs (walk/run), happy hop, sniff; ears and puff tail follow |
+| cat      | Mushukcha    | ✓                        | Model ✓ (78) | trot and run on four legs, stretch, tail wag, sniff, whiskers             |
+| dog      | Kuchukcha    | ✓                        | Model ✓ (78) | trot and run, tail wag, happy hop, sniff; floppy ears follow              |
+| penguin  | Pingvincha   | ✓ (hat, goggles, scarf)  | Model ✓ (78) | waddle, flipper flap, belly slide                                         |
+| bear     | Ayiqcha      | ✓ (cap, scarf, backpack) | Model ✓ (78) | upright walk, wave, hug, sniff (climb: later, needs a tree prop)          |
+| fox      | Tulkicha     | ✓ (bandana)              | Model ✓ (78) | trot and run, tail wag, sniff; bushy tail follows                         |
+| elephant | Filcha       | ✓ (bandana)              | Reference    | weighty steps, trunk, ear sway, water spray                               |
+| lion     | Sherbola     | ✓ (bandana)              | Reference    | confident walk, crouch, gentle roar                                       |
+| turtle   | Toshbaqacha  | ✓ (cap)                  | Reference    | slow steps, neck stretch, hide in shell                                   |
+| owl      | Boyo‘g‘licha | ✓ (cap, glasses, book)   | Reference    | head turn, blink, wing flap, short flight                                 |
+| unicorn  | Yakkashox    | ✓                        | Reference    | elegant walk, mane, magic sparkle                                         |
+| dinosaur | Dinozavrcha  | ✓ (cap, bandana)         | Reference    | walk with tail balance, stomp, small roar                                 |
 
 ## The 12 helpers (objects)
 

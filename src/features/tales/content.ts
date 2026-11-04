@@ -1,3 +1,4 @@
+import type { AnimalId } from './animals'
 import type { Language } from '@/content/languages'
 import { TALE_TEXT_EN } from './text.en'
 import { TALE_TEXT_RU } from './text.ru'
@@ -34,6 +35,8 @@ export interface Actor {
   toX?: number
   /** Keeps hopping gently in place. */
   hop?: boolean
+  /** A story animal with a real 3D model (Phase 78): played rigged on the 3D stage. */
+  model?: AnimalId
 }
 
 /**

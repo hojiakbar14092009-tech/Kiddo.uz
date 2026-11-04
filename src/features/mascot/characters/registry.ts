@@ -77,6 +77,15 @@ export interface Personality {
   idleEvery: readonly [number, number]
 }
 
+/**
+ * What the controller needs to perform a character: a mascot, or a story animal (Phase 78),
+ * which shares the bone names, clips and face morphs but is not a guide.
+ */
+export type Performer = Pick<MascotDefinition, 'style' | 'personality' | 'glow'> & {
+  /** The prefix of its material names in the model ("kidobot", "animal-rabbit"). */
+  id: string
+}
+
 export interface MascotDefinition {
   id: MascotId
   /** Runtime asset, fetched only when this mascot is shown. */

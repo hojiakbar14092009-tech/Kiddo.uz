@@ -12,7 +12,7 @@ import {
   type FaceWeights,
 } from './emotions'
 import { clipFor, LOOPING } from './gestures'
-import type { MascotDefinition } from './registry'
+import type { Performer } from './registry'
 
 /*
  * Drives one 3D mascot: the skeleton through an AnimationMixer (crossfaded
@@ -78,13 +78,9 @@ export class MascotController {
   private pitch = 0
   private time = 0
 
-  private readonly def: MascotDefinition
+  private readonly def: Performer
 
-  constructor(
-    def: MascotDefinition,
-    gltf: GLTF,
-    options: { palette?: Palette; seed?: number } = {},
-  ) {
+  constructor(def: Performer, gltf: GLTF, options: { palette?: Palette; seed?: number } = {}) {
     this.def = def
     this.root = cloneSkinned(gltf.scene)
     this.blinker = new Blinker(options.seed ?? 1)

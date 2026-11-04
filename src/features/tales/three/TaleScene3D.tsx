@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { useInView } from '@/components/three/useInView'
 import { prepareRenderer } from '@/components/three/prepareRenderer'
 import { BACKDROPS, type BackdropLook } from '../backdrops'
+import { AnimalActor } from './AnimalActor'
 import type { Actor, SceneSpec } from '../content'
 import {
   MOOD_FACE,
@@ -535,15 +536,29 @@ function Actors({
   const textures = useTextures(assets)
   return (
     <>
-      {actors.map((actor, index) => (
-        <ActorSprite
-          key={`${sceneKey}-${index}`}
-          actor={actor}
-          texture={textures.get(actor.asset)}
-          reducedMotion={reducedMotion}
-          mood={mood}
-        />
-      ))}
+      {actors.map((actor, index) => {
+        const sprite = (
+          <ActorSprite
+            key={`${sceneKey}-${index}`}
+            actor={actor}
+            texture={textures.get(actor.asset)}
+            reducedMotion={reducedMotion}
+            mood={mood}
+          />
+        )
+        return actor.model ? (
+          <AnimalActor
+            key={`${sceneKey}-${index}-3d`}
+            animal={actor.model}
+            actor={actor}
+            mood={actor.hop ? mood : undefined}
+            reducedMotion={reducedMotion}
+            fallback={sprite}
+          />
+        ) : (
+          sprite
+        )
+      })}
     </>
   )
 }

@@ -1,4 +1,4 @@
-import type { Gesture, MascotContext, MascotDefinition } from './registry'
+import type { Gesture, MascotContext, MascotDefinition, Performer } from './registry'
 
 /*
  * Shared animation semantics: `play('celebrate')` means a celebration for
@@ -26,7 +26,7 @@ export const LOOPING: ReadonlySet<string> = new Set([
 
 /** The clip a mascot plays for a gesture (or one of its own clips); 'idle' if it has none. */
 export function clipFor(
-  def: MascotDefinition,
+  def: Pick<Performer, 'style'>,
   gesture: string,
   available: ReadonlySet<string>,
 ): string {

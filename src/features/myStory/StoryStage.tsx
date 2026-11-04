@@ -31,6 +31,7 @@ export function StoryStage({ card, label }: { card: StoryCard; label: string }) 
         data-testid="my-story-stage"
         data-mood={card.mood}
         data-weather={card.weather ?? 'none'}
+        data-hero-model={card.picture.actors.find((actor) => actor.model)?.model ?? 'none'}
       >
         <Stage3D
           look={STORY_BACKDROPS[card.picture.backdrop]}

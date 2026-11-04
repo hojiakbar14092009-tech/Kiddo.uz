@@ -1,5 +1,6 @@
 import type { PagePicture } from '@/features/stories/types'
 import type { StoryBackdrop } from '@/features/stories/backdrops'
+import { isAnimal } from '@/features/tales/animals'
 import type { Mood, Weather } from '@/features/tales/three/life'
 
 /*
@@ -297,7 +298,13 @@ export interface StoryCard {
 /** The made story as four picture cards with their sentences. */
 export function storyCards(choices: StoryChoices): StoryCard[] {
   const scene = PLACE_SCENE[choices.place]
-  const hero = { asset: CHOICE_PICTURE.hero[choices.hero]!, x: -0.6, z: 0.5, hop: true }
+  const hero = {
+    asset: CHOICE_PICTURE.hero[choices.hero]!,
+    x: -0.6,
+    z: 0.5,
+    hop: true,
+    ...(isAnimal(choices.hero) ? { model: choices.hero } : {}),
+  }
   const at = (extra: PagePicture['actors']): PagePicture => ({
     backdrop: scene.backdrop,
     actors: [...scene.props, hero, ...extra],
