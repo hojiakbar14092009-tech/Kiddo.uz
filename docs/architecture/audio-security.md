@@ -18,8 +18,22 @@ Children's voices (ElevenLabs, a girl's and a boy's: `scripts/voices/kid_voices.
 `src/services/audio/kidVoices.ts`) live in the same folder, at
 `/audio/voice/kid/<girl|boy>/<lang>/<key>.mp3`, so the private build drops them too
 and the service worker caches them like any clip. A girl hears the girl's recording
-and a boy the boy's where one exists; any other sentence, and private mode, use the
-standard clips.
+and a boy the boy's where one exists; a guest, or a profile without a gender, hears
+the voice of the robot on screen (`kidVoiceOf`). Any other sentence, and private mode,
+use the standard clips, and a sentence recorded nowhere goes to the device voice (only
+in its own language); the app never shows "the voice could not be played" for it.
+
+Sentences with numbers, maths signs or lists ("Savatda 3 ta olma bor edi.", "3 − 1 = 2",
+"Dasturxonga osh, non va choy qo‘y!") are not recorded whole: they are said from recorded
+pieces in the child's voice (`pieces.ts`: the fixed words, each number's words, the signs'
+words "minus", "teng", each named thing, 100 ms apart). `collect.ts` lists exactly those
+pieces. The phrase key keeps the maths operators (U+2200–22FF), so "3 − 1 = 2" is not
+"3 1 = 2". The table round names its foods always in the same order.
+
+The child's name in a parent's own voice (attention helper, `features/attention/nameVoice.ts`)
+is a recording made in the profile and kept only in this device's IndexedDB: never
+uploaded, never synced, deleted with the profile. It is played as it is
+(`Utterance.recording`), before the robot's recorded line.
 
 ## Server contract (Supabase Edge Functions)
 
@@ -102,19 +116,15 @@ The recorded clips (`public/audio/voice/<lang>/<key>.mp3`, recorded offline by
 endpoint above:
 
 - `ru` and `en` are read by native Piper voices (ru_RU irina, en_GB cori).
-- **Uzbek clips are currently synthesised with a Kazakh Piper model via
-  transliteration** (`scripts/voices/uzbek.py` writes the Uzbek text in Kazakh
-  Cyrillic; the kk_KZ ISSAI model reads it). There is no open Uzbek neural voice
-  yet. This is the owner's decision (Phase 8): the clips are kept, and the app
-  says so openly – next to "Read to me" in the stories when the language is
-  Uzbek (`stories.syntheticVoice`), on the PRO screen (`pro.uzVoiceNote`) and in
-  the parent settings (`parent.settings.voiceNote`): the Uzbek voice is a
-  temporary synthetic voice, not a native Uzbek voice. The app never claims "a
-  real voice" for Uzbek.
-- **To be replaced by a real Uzbek voice (owner blocker B4)**: when a native
-  Uzbek voice is available (recorded speaker or a provider with a real Uzbek
-  voice), the `uz` clips are recorded again with `generate.py --force` and the
-  disclosure texts are removed.
+- **Uzbek** is read by AI-generated children's voices (ElevenLabs, a girl's and a
+  boy's, `kid_voices.py`) wherever a sentence has been recorded in them; the rest
+  still uses the older standard clips, synthesised with a Kazakh Piper model via
+  transliteration (`scripts/voices/uzbek.py`), until they are recorded month by
+  month. The app says so openly – next to "Read to me" in the stories
+  (`stories.syntheticVoice`), on the PRO screen (`pro.uzVoiceNote`) and in the
+  parent settings (`parent.settings.voiceNote`): AI-generated children's voices,
+  and the earlier synthetic voice for lines not recorded yet. It never claims a
+  human speaker.
 
 ## Client
 

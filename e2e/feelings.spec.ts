@@ -33,6 +33,8 @@ async function playRun(page: Page) {
 test('a child plays a feelings game from the Friendship House and gets a reward', async ({
   page,
 }) => {
+  // each answer's words are said before the next question comes (afterVoice)
+  test.setTimeout(90_000)
   await chooseUzbek(page)
   await page
     .getByRole('navigation', { name: 'Bo‘limlar' })
@@ -58,6 +60,8 @@ test('a child plays a feelings game from the Friendship House and gets a reward'
 test('“What could you do?” shows a picture for every idea and ends with a reward', async ({
   page,
 }) => {
+  // each answer's words are said before the next question comes (afterVoice)
+  test.setTimeout(90_000)
   await chooseUzbek(page)
   await page.goto('/feelings/kindness')
   await passLesson(page)

@@ -20,6 +20,7 @@ import { STORIES_ROOT } from './StoryLibrary'
 import { StoryFrame } from './StoryFrame'
 import type { AnswerPicture, StorySpec, StoryText } from './types'
 import type { StoriesUi } from './ui'
+import { useAfterVoice } from '@/services/audio/afterVoice'
 
 /** How long the praise stays before the next question (not a time limit). */
 export const NEXT_QUESTION_MS = 1100
@@ -70,7 +71,8 @@ export function StoryQuestions({
   const [finished, setFinished] = useState<Finished | null>(null)
   const missed = useRef(false)
   const emitted = useRef(false)
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  // the next step waits for the praise to be said (and a short quiet moment)
+  const { goOn } = useAfterVoice()
   const { say } = useLearnMascot()
   const question = questions[index]
   const words = question ? text.questions[question.id] : undefined
@@ -78,8 +80,6 @@ export function StoryQuestions({
 
   // the speaker button reads exactly the question on screen
   useSpeakable(finished ? null : [words?.prompt], SPEAK_PRIORITY.content)
-
-  useEffect(() => () => clearTimeout(timer.current), [])
 
   // the question itself is the heading below; the bubble only sets the scene (no double text)
   useEffect(() => {
@@ -130,7 +130,7 @@ export function StoryQuestions({
     const last = index + 1 >= questions.length
     // counted the moment the last answer is right, so leaving during the praise loses nothing
     if (last) finish(score)
-    timer.current = setTimeout(() => {
+    goOn(() => {
       if (last) return
       missed.current = false
       setStatuses({})

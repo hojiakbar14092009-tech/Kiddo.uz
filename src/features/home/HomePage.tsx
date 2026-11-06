@@ -12,6 +12,7 @@ import { dayKey } from '@/features/tasks/rules'
 import { usePendingActivityHomework, usePendingHomework } from '@/features/tasks/useHomework'
 import { ActivityHomeworkCard } from './ActivityHomeworkCard'
 import { homeLine, mascotMemory } from '@/features/mascot/life'
+import { hasGreeted, markGreeted } from '@/features/mascot/greetOnce'
 import { useUniverseStore } from '@/domain/universe/store'
 import { birthdayWeekYear, tashkentDay } from '@/features/birthday/birthday'
 import { tDynamic } from '@/lib/tDynamic'
@@ -77,6 +78,8 @@ export function HomePage() {
     planDone: plan.complete,
   })
   const hello = tDynamic(t, `mascot.life.${line.key}`, line.params)
+  // the hello is said once per app launch, not on every return to Home
+  const [greets] = useState(() => !hasGreeted())
   const saidFriendDay = line.key.startsWith('friend') ? memory.friendDay : null
   useEffect(() => {
     if (saidFriendDay) useProgressStore.getState().markRobotFriendSaid(childKey, saidFriendDay)
@@ -192,9 +195,10 @@ export function HomePage() {
         wearing={wearing}
         mode="tour"
         group="home"
-        greeting={hello}
+        greeting={greets ? hello : undefined}
         greetAt="home-greet"
         onGreet={(inStage) => {
+          markGreeted()
           setGreetingInStage(inStage)
           void sayHello(hello)
         }}

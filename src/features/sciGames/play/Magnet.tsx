@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { tDynamic } from '@/lib/tDynamic'
-import { useLater, useLine, type Finish } from './hooks'
+import { useAfterSaid, useLine, type Finish } from './hooks'
 import { Line } from './kit'
 import { IRON_COUNT, MAGNET_THINGS, type MagnetThing } from '../rules'
 
@@ -19,7 +19,8 @@ export function MagicMagnet({ onDone }: { onDone: Finish }) {
   const [wiggle, setWiggle] = useState<{ id: MagnetThing; n: number } | null>(null)
   const [wrong, setWrong] = useState(0)
 
-  const later = useLater()
+  // the next round waits for the line just said to be heard
+  const later = useAfterSaid()
   /** What already sticks, as of the last tap (two taps in one frame see each other). */
   const stuckNow = useRef<MagnetThing[]>([])
   const reduceMotion = useReducedMotion() ?? false

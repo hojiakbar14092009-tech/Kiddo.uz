@@ -789,3 +789,24 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
   kredit limiti ham bor (ElevenLabs → API Keys): u tugasa 401 quota_exceeded.
 - Keyingi oy: `python scripts/voices/kid_voices.py --languages ru,en --budget 28000` (bor kliplar o‘tkazib
   yuboriladi; uz yangi jumlalari uchun `--languages uz`).
+
+## Ovozdan keyin o‘tish (afterVoice) va o‘zi o‘qish (2026-11-06)
+
+- Keyingi savol/sahifa/raund aytilgan gap tugagach keladi: `src/services/audio/afterVoice.ts` (`whenVoiceDone`):
+  minMs + ovoz 0,8 s jim (`QUIET_MS`); gapirayotgan ovoz ko‘pi bilan 15 s kutiladi (`MAX_WAIT_MS`);
+  klip 3,5 s ichida boshlanmasa (`LOADING_MAX_MS`, faqat "loading" holati) — kutmasdan o‘tadi.
+- Ertak sahifalari o‘zi o‘qiladi va o‘zi varaqlanadi (Sozlamalar: "faqat bosilganda" — qo‘lda).
+- E2E (1 ishchi, tablet+phone, 11 spec): 126 o‘tdi, 20 yiqildi; 19 tasi HEAD 628ff21b'da ham bor edi,
+  shakl quruvchi testi yangi tezlikka moslashtirildi (`games.spec` 24/24).
+
+### Ochiq muammolar (HEAD'dan qolgan, bu ishga bog‘liq emas)
+
+- `e2e/attention.spec.ts:151` — o‘yin taklifi (game offer) ba’zan chiqmaydi (HEAD'da tablet+phone yiqilgan;
+  bu yugurishda o‘tdi — beqaror).
+- `e2e/kiddo.spec.ts:47` — "to‘g‘ri javob maqtovi": kirish (intro) ko‘rinmay qoladi.
+- Math Lab qotishi: `e2e/math-lab.spec.ts:140`, `:192` (seed 7/4242), `:230` (320×568, hamma seed) —
+  to‘g‘ri javobdan keyin keyingi savol kelmaydi; sababi topilmagan.
+- `e2e/speech.spec.ts:294` — 320px maketda karnay tugmasi boshqa narsaga tegadi.
+- `e2e/dino.spec.ts:39`, `e2e/feelings.spec.ts:36/63` — planshetda (HEAD'da yiqilgan; bu yugurishda o‘tdi).
+- vitest to‘liq yugurishda 5 ta yuklama beqarorligi (admin, adminPin, analytics, analyticsCloud, myStory):
+  alohida yugurilsa o‘tadi.

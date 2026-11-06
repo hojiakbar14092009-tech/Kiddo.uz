@@ -9,7 +9,15 @@ import { DINO_TEXT } from '@/features/worlds/dino/text'
 import { en } from '@/i18n/locales/en'
 import { ru } from '@/i18n/locales/ru'
 import { uz } from '@/i18n/locales/uz'
+import {
+  feelingsSpoken,
+  fillsFor,
+  fillTemplate,
+  type Params,
+  uzbekistanSpoken,
+} from './phraseFills'
 import { splitSentences, tidyPhrase } from './phrases'
+import { hasNumbers, numberWords, templatePieces } from './pieces'
 
 /*
  * Every sentence Kiddo can say to a child (Phase 41): the letters and their
@@ -93,8 +101,17 @@ export function leaves(tree: Tree, prefix = ''): [string, string][] {
   )
 }
 
-function expand(template: string, letters: readonly string[], words: readonly string[]): string[] {
-  let texts = [template]
+function expand(
+  template: string,
+  letters: readonly string[],
+  words: readonly string[],
+  /** The template's real values (phraseFills); none: filled below or left as a template. */
+  params: readonly Params[] | undefined,
+  language: Language,
+): string[] {
+  let texts = params ? params.map((values) => fillTemplate(template, values)) : [template]
+  // every value put in, for a template said from pieces (numbers, lists)
+  const used: (string | number)[] = (params ?? []).flatMap((values) => Object.values(values))
   if (template.includes('{{word}}')) {
     texts = letters.map((letter, index) =>
       template
@@ -105,7 +122,8 @@ function expand(template: string, letters: readonly string[], words: readonly st
     )
   }
   const fill = (name: string, values: readonly (string | number)[]) => {
-    if (!template.includes(`{{${name}}}`)) return
+    if (!texts.some((text) => text.includes(`{{${name}}}`))) return
+    used.push(...values)
     texts = texts.flatMap((text) =>
       values.map((value) => text.split(`{{${name}}}`).join(String(value))),
     )
@@ -124,7 +142,19 @@ function expand(template: string, letters: readonly string[], words: readonly st
   // from the screen (a city, a number, a noun): it cannot be listed sentence by
   // sentence here, so it is kept apart as a template (childTemplates)
   if (texts.some((text) => /\{\{/.test(text))) unfilled?.add(template)
-  return texts.filter((text) => !/\{\{/.test(text))
+  const filled = texts.filter((text) => !/\{\{/.test(text))
+  // a sentence with numbers or a list is not recorded whole (there would be thousands):
+  // its fixed words, the numbers' words and the named things are recorded as pieces
+  const pieced =
+    /\{\{/.test(template) &&
+    filled.length > 0 &&
+    used.some((value) => hasNumbers(String(value)) || String(value).includes(', '))
+  return pieced ? templatePieces(template, used, language) : filled
+}
+
+/** The words of every number 0–100: the pieces a number is said with. */
+function allNumberWords(language: Language): string[] {
+  return [...new Set(Array.from({ length: 101 }, (_, n) => numberWords(n, language) ?? []).flat())]
 }
 
 const sources = {
@@ -133,6 +163,42 @@ const sources = {
   en: { tree: en as unknown as Tree, alphabet: enAlphabet },
 } as const
 
+/**
+ * What the app says from content files rather than the i18n tree, as named
+ * parts (collect.ts --parts content.feelings, or "content" for all of them).
+ */
+export const CONTENT_PARTS: Record<string, (language: Language) => string[]> = {
+  'content.alphabet': (language) =>
+    sources[language].alphabet.letters.flatMap((letter) => [letter.spoken, letter.word]),
+  // the numbers' own cards, and every word a number up to 100 is said with (pieces.ts)
+  'content.numbers': (language) => [
+    ...NUMBERS.map((entry) => entry.words[language]),
+    ...allNumberWords(language),
+  ],
+  // the learning sections' own lines
+  'content.learn': (language) => LEARN_SPOKEN[language],
+  // Phase 49: the three-language cards' words, each said in its own language
+  'content.threeWords': (language) => [...THREE_WORDS[language]],
+  // the dinosaur world's own texts; {{name}} there is the dinosaur's, not the child's
+  'content.dino': (language) => {
+    const fills = fillsFor(language)
+    const names = sources[language].alphabet.letters.map((letter) => letter.spoken)
+    return leaves(DINO_TEXT[language] as unknown as Tree).flatMap(([key, value]) =>
+      expand(value, names, [], fills.get(`worlds.dino.${key}`), language),
+    )
+  },
+  'content.feelings': feelingsSpoken,
+  'content.uzbekistan': uzbekistanSpoken,
+  // Cheers are said in English whatever the language (see useMascot).
+  'content.cheers': (language) =>
+    language === 'en'
+      ? ['Yahoooo!', 'Wow!', 'Hooray!', 'Yay!', 'Woohoo!', 'Oops!', 'Uh-oh!', 'Hmm!']
+      : [],
+}
+
+const under = (key: string, list: readonly string[]) =>
+  list.some((prefix) => key === prefix || key.startsWith(`${prefix}.`))
+
 /** Every sentence the app can say to a child, per language (split into sentences). */
 export function childPhrases(): Record<Language, string[]> {
   return collect().phrases
@@ -140,8 +206,8 @@ export function childPhrases(): Record<Language, string[]> {
 
 /**
  * The spoken lines filled in at run time (a placeholder such as {{city}} or
- * {{a}} stays): their recordings cannot be checked sentence by sentence, so
- * they are listed as they are, for the recorder to cover with real values.
+ * {{a}} stays) whose values are not listed in phraseFills: their recordings
+ * cannot be checked sentence by sentence, so they are listed as they are.
  */
 export function childTemplates(): Record<Language, string[]> {
   return collect().templates
@@ -153,43 +219,42 @@ function collect(): {
 } {
   const out = {} as Record<Language, string[]>
   const templates = {} as Record<Language, string[]>
-  for (const [language, { tree, alphabet }] of Object.entries(sources)) {
-    const phrases = new Set<string>()
+  for (const language of Object.keys(sources) as Language[]) {
     unfilled = new Set<string>()
-    const add = (text: string) => splitSentences(text).forEach((sentence) => phrases.add(sentence))
-    const spokenNames = alphabet.letters.map((letter) => letter.spoken)
-    for (const letter of alphabet.letters) {
-      add(letter.spoken)
-      add(letter.word)
-    }
-    for (const entry of NUMBERS) add(entry.words[language as 'uz' | 'ru' | 'en'])
-    for (const [key, value] of leaves(tree)) {
-      if (!SPOKEN_PARTS.some((prefix) => key === prefix || key.startsWith(`${prefix}.`))) continue
-      expand(
-        value,
-        spokenNames,
-        alphabet.letters.map((letter) => letter.word),
-      ).forEach(add)
-    }
-    // The dinosaur world's own texts (its content file).
-    for (const [, value] of leaves(DINO_TEXT[language as Language] as unknown as Tree)) {
-      expand(value, spokenNames, []).forEach(add)
-    }
-    // The new learning sections (their own content files).
-    LEARN_SPOKEN[language as 'uz' | 'ru' | 'en'].forEach(add)
-    // Phase 49: the three-language cards' words, each said in its own language
-    // (kept apart from LEARN_SPOKEN, whose lines must all be recorded already:
-    // new words wait in pendingRecordings.json until the next recording)
-    THREE_WORDS[language as Language].forEach(add)
-    // Cheers are said in English whatever the language (see useMascot).
-    if (language === 'en') {
-      ;['Yahoooo!', 'Wow!', 'Hooray!', 'Yay!', 'Woohoo!', 'Oops!', 'Uh-oh!', 'Hmm!'].forEach(add)
-    }
-    out[language as Language] = [...phrases]
-    templates[language as Language] = [...unfilled].sort()
+    const parts = [...SPOKEN_PARTS, ...Object.keys(CONTENT_PARTS)]
+    out[language] = [...partPhrases(language, parts, [])]
+    templates[language] = [...unfilled].sort()
     unfilled = null
   }
   return { phrases: out, templates }
+}
+
+/** The sentences of the i18n and content parts under `prefixes`, keys under `except` left out. */
+function partPhrases(
+  language: Language,
+  prefixes: readonly string[],
+  except: readonly string[],
+): Set<string> {
+  const { tree, alphabet } = sources[language]
+  const fills = fillsFor(language)
+  const phrases = new Set<string>()
+  // a sentence with numbers or signs is said from pieces (pieces.ts): its pieces are listed
+  const add = (text: string) =>
+    splitSentences(text).forEach((sentence) =>
+      hasNumbers(sentence)
+        ? templatePieces(sentence, [], language).forEach((piece) => phrases.add(piece))
+        : phrases.add(sentence),
+    )
+  const spokenNames = alphabet.letters.map((letter) => letter.spoken)
+  const words = alphabet.letters.map((letter) => letter.word)
+  for (const [key, value] of leaves(tree)) {
+    if (!under(key, prefixes) || under(key, except)) continue
+    expand(value, spokenNames, words, fills.get(key), language).forEach(add)
+  }
+  for (const [name, texts] of Object.entries(CONTENT_PARTS)) {
+    if (under(name, prefixes) && !under(name, except)) texts(language).forEach(add)
+  }
+  return phrases
 }
 
 /**
@@ -202,21 +267,9 @@ export function phrasesOfParts(
   prefixes: readonly string[],
   except: readonly string[] = [],
 ): Record<Language, string[]> {
-  const under = (key: string, list: readonly string[]) =>
-    list.some((prefix) => key === prefix || key.startsWith(`${prefix}.`))
   const out = {} as Record<Language, string[]>
-  for (const [language, { tree, alphabet }] of Object.entries(sources)) {
-    const phrases = new Set<string>()
-    const spokenNames = alphabet.letters.map((letter) => letter.spoken)
-    for (const [key, value] of leaves(tree)) {
-      if (!under(key, prefixes) || under(key, except)) continue
-      expand(
-        value,
-        spokenNames,
-        alphabet.letters.map((letter) => letter.word),
-      ).forEach((text) => splitSentences(text).forEach((sentence) => phrases.add(sentence)))
-    }
-    out[language as Language] = [...phrases]
+  for (const language of Object.keys(sources) as Language[]) {
+    out[language] = [...partPhrases(language, prefixes, except)]
   }
   return out
 }

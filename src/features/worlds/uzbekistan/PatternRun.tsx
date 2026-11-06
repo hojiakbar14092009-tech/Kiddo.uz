@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { StepDots } from '@/components/ui/Progress'
 import { SpeakButton } from '@/features/learn/SpeakButton'
 import { useSpeakable } from '@/features/learn/speakable'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useLanguage } from '@/store/settingsStore'
 import { ClothBorder, MotifArt } from './art'
@@ -69,18 +70,22 @@ function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void 
     if (feedback) feedbackRef.current?.scrollIntoView?.({ block: 'nearest' })
   }, [feedback])
 
+  const { goOn, cancel } = useAfterVoice()
   const choose = (motif: MotifId) => {
     if (!round || solved || tried.includes(motif)) return
     if (motif === round.answer) {
       if (firstTries.current.length === index) firstTries.current.push(tried.length === 0)
       setSolved(true)
       react('correct', undefined, { speak: false })
+      // once the praise is said, on to the next round by itself ("Next" stays)
+      goOn(next, AUTO_NEXT_MIN_MS)
     } else {
       setTried((list) => [...list, motif])
     }
   }
 
-  const next = () => {
+  function next() {
+    cancel()
     if (index + 1 < rounds.length) {
       setIndex(index + 1)
       setTried([])

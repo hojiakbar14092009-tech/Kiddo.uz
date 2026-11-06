@@ -12,6 +12,7 @@ import { wordDisplay, wordText, type Word } from './content'
 import { COPY } from './copy'
 import type { BuildQuestion } from './generate'
 import { useStable } from './useStable'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 
 const small = (letter: string, language: Language) => letter.toLocaleLowerCase(language)
 
@@ -28,6 +29,7 @@ export function BuildWord({
   const copy = COPY[language]
   const reduceMotion = useReducedMotion() ?? false
   const { say } = useLearnMascot()
+  const { goOn } = useAfterVoice()
   const [placed, setPlaced] = useState<string[]>([])
   const [scope, animate] = useAnimate<HTMLDivElement>()
   const [mistakes, setMistakes] = useState(0)
@@ -51,6 +53,8 @@ export function BuildWord({
         // right when no wrong tile was tapped before (the first answer stays)
         session.answer(q, wordText(q.word), true)
         say('correct', { text: copy.built(display), emoji: '🌟' })
+        // once the praise is said, on to the next question by itself ("Next" stays)
+        goOn(onNext, AUTO_NEXT_MIN_MS)
       }
       return
     }

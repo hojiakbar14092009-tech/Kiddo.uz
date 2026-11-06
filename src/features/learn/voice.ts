@@ -12,8 +12,8 @@ import { canUse, useCanUse } from '@/domain/entitlements'
  *   appears (Phase 41, speakable.ts; a parent can turn that off), and the
  *   speaker button reads it again; once the voice has spoken, the mascot also
  *   says its short reactions to the child's answers (until the page is reloaded),
- * - only recorded sentences in the chosen language (no device voice standing
- *   in for a language it may not speak), the text always stays on screen,
+ * - recorded sentences first, the device voice only for one never recorded and
+ *   only in its own language; the text always stays on screen,
  * - one voice at a time (audioManager), and it stops when the question, the
  *   page, the profile or the language changes.
  */
@@ -31,7 +31,10 @@ export function isLearnVoiceOn(): boolean {
   return voiceOn
 }
 
-/** Reads the lines from recordings, in this language. */
+/**
+ * Reads the lines in this language: the child's voice or the standard recording,
+ * and a sentence recorded in neither by the device voice (when it has this language).
+ */
 export function speakLines(
   lines: readonly string[],
   language: Language,
@@ -41,7 +44,7 @@ export function speakLines(
   return audioManager.say(
     lines.filter(Boolean).map((text) => ({ text })),
     { language },
-    { requirePro: true, clipsOnly: true, quiet },
+    { requirePro: true, quiet },
   )
 }
 

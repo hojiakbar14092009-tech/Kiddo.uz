@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { Img3D } from '@/components/ui/Img3D'
 import { tDynamic } from '@/lib/tDynamic'
-import { useLater, useLine, type Finish } from './hooks'
+import { useAfterSaid, useLater, useLine, type Finish } from './hooks'
 import { Line } from './kit'
 import {
   MAX_PROGRAM,
@@ -32,6 +32,8 @@ export function RobotProgrammer({ onDone }: { onDone: Finish }) {
   const reduceMotion = useReducedMotion() ?? false
   const { line, say } = useLine()
   const later = useLater()
+  // the next level waits for the praise to be heard
+  const afterSaid = useAfterSaid()
   const [levelIndex, setLevelIndex] = useState(0)
   const [program, setProgram] = useState<Move[]>([])
   const [position, setPosition] = useState<Cell>(ROBOT_LEVELS[0]!.start)
@@ -55,7 +57,7 @@ export function RobotProgrammer({ onDone }: { onDone: Finish }) {
       const score = firstTry + (tries === 0 ? 1 : 0)
       setFirstTry(score)
       say(t('sciGames.robot.say.win'))
-      later(() => {
+      afterSaid(() => {
         if (levelIndex + 1 < ROBOT_LEVELS.length) {
           const next = ROBOT_LEVELS[levelIndex + 1]!
           setLevelIndex(levelIndex + 1)
@@ -65,7 +67,7 @@ export function RobotProgrammer({ onDone }: { onDone: Finish }) {
           setWon(false)
         } else {
           say(t('sciGames.robot.say.done'))
-          later(() => onDone(ROBOT_LEVELS.length, score), 1400)
+          afterSaid(() => onDone(ROBOT_LEVELS.length, score), 1400)
         }
       }, 1800)
       return

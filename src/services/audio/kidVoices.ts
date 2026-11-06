@@ -40,3 +40,13 @@ export function kidClipUrl(voice: KidVoice, language: Language, key: string): st
 export function kidVoiceFor(gender: string | undefined | null): KidVoice | null {
   return gender === 'girl' || gender === 'boy' ? gender : null
 }
+
+/**
+ * The voice a child hears: by the child's gender; without one (a guest, an old profile)
+ * by the robot on screen, which is the girl robot for a guest (useMascotModel).
+ */
+export function kidVoiceOf(
+  child: { gender?: string | null; mascot?: string | null } | null | undefined,
+): KidVoice {
+  return kidVoiceFor(child?.gender) ?? kidVoiceFor(child?.mascot) ?? 'girl'
+}

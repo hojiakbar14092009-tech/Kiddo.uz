@@ -143,7 +143,8 @@ test('the word train: letters in order fill the wagons, five words', async ({ pa
   await page.locator('[data-testid=tile-m]:enabled').first().click()
   await expect(page.getByText('Bu harf emas. Boshqasini bos.')).toBeVisible()
   for (const word of ['ari', 'non', 'olma', 'qor', 'baliq']) {
-    await expect(page.getByTestId('train')).toHaveAttribute('data-word', '')
+    // the next word comes once the praise is said and the full train has left
+    await expect(page.getByTestId('train')).toHaveAttribute('data-word', '', { timeout: 10_000 })
     for (const letter of word)
       await page.locator(`[data-testid=tile-${letter}]:enabled`).first().click()
     await expect(page.getByTestId('train')).toHaveAttribute('data-word', word)
@@ -191,7 +192,10 @@ test('the shape builder: each glowing outline takes its shape', async ({ page })
     ['rectangle', 'triangle', 'circle', 'triangle', 'triangle'],
   ]
   for (const shapes of pictures) {
-    await expect(page.getByTestId('shape-picture')).toHaveAttribute('data-filled', '0')
+    // the next picture comes once the praise for the last one is said
+    await expect(page.getByTestId('shape-picture')).toHaveAttribute('data-filled', '0', {
+      timeout: 10_000,
+    })
     for (const [index, shape] of shapes.entries()) {
       await page.getByTestId(`shape-${shape}`).click()
       await expect(page.getByTestId('shape-picture')).toHaveAttribute('data-filled', `${index + 1}`)

@@ -59,7 +59,9 @@ CLIP_CHAIN = (
 
 def _pictograph(ch: str) -> bool:
     cp = ord(ch)
-    return 0x2190 <= cp <= 0x2BFF or 0x1F000 <= cp <= 0x1FFFF or cp in (0xFE0F, 0x200D, 0x20E3)
+    # arrows and symbols, but not the maths operators (U+2200–22FF): "3 − 1 = 2" keeps its minus
+    return (0x2190 <= cp <= 0x21FF or 0x2300 <= cp <= 0x2BFF or 0x1F000 <= cp <= 0x1FFFF
+            or cp in (0xFE0F, 0x200D, 0x20E3))
 
 
 def normalize_phrase(text: str) -> str:

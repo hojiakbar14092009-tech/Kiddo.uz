@@ -118,7 +118,7 @@ describe('the three-language card', () => {
         expect(say).toHaveBeenLastCalledWith(
           [{ text: second.words[language] }],
           { language },
-          { requirePro: true, clipsOnly: true, quiet: false },
+          { requirePro: true, quiet: false },
         ),
       )
     }

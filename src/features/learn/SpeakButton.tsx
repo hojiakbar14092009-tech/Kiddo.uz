@@ -47,7 +47,8 @@ export function SpeakButton({ fallback = [] }: { fallback?: readonly string[] })
     const outcome = await reading
     if (outcome === 'muted') note(t('learn.voiceMuted'), '🔇')
     else if (outcome === 'locked') note(t('learn.voiceLocked'), '👑', 'locked')
-    else if (outcome === 'missing' || outcome === 'error') note(t('learn.voiceError'), '📖')
+    // a sentence no voice could say ('missing') stays on screen, without a note
+    else if (outcome === 'error') note(t('learn.voiceError'), '📖')
   }
 
   const label = !voice.isPro

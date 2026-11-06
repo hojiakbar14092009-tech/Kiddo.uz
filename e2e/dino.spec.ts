@@ -35,7 +35,8 @@ async function playQuiz(page: Page) {
 
 test('a guest explores a dinosaur, digs up bones and finishes the quiz', async ({ page }) => {
   // three activities in a row (each answer waits for its praise)
-  test.setTimeout(90_000)
+  // every answer's line is said before the next question (afterVoice)
+  test.setTimeout(180_000)
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
 
@@ -117,7 +118,7 @@ test('a guest explores a dinosaur, digs up bones and finishes the quiz', async (
   await playQuiz(page)
   await expect(page.getByTestId('dino-result')).toBeVisible()
   await expect(page.getByTestId('dino-score')).toHaveText('5 / 5 birinchi urinishda')
-  await expect(page.getByTestId('activity-reward')).toContainText('yulduz')
+  await expect(page.getByTestId('activity-reward')).toContainText('yulduz', { timeout: 10_000 })
   expect(errors).toEqual([])
 })
 

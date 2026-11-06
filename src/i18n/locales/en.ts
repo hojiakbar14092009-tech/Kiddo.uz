@@ -713,6 +713,16 @@ export const en: Translation = {
       },
     },
     profiles: {
+      nameVoice: {
+        title: 'The name in your voice',
+        hint: 'Say your child’s name clearly once (2–3 seconds). The robot plays this recording when it calls your child. It is kept only on this device, never sent over the internet, and deleted with the profile.',
+        record: 'Record the name',
+        recording: 'Speak… {{seconds}}',
+        listen: 'Listen',
+        again: 'Record again',
+        saved: 'The name is recorded.',
+        noMic: 'The microphone did not open. Allow the microphone in the browser.',
+      },
       title: 'Profiles ({{count}})',
       name: 'Name',
       nameRequired: 'Please enter a name.',
@@ -871,7 +881,7 @@ export const en: Translation = {
       },
       testSound: 'Play a test sound',
       voiceNote:
-        'The Uzbek voice is a temporary synthetic voice, not a native Uzbek voice: an open Kazakh speech model reads the Uzbek text, so the accent is not always Uzbek. It will be replaced when a real Uzbek voice is ready. The text is always shown on screen.',
+        'Uzbek sentences are read by AI-generated children’s voices: a girl hears a girl’s voice, a boy a boy’s (a guest hears the voice of the robot on screen). Sentences not yet recorded in these voices are read by the earlier synthetic voice for now, and fewer remain every month. The text is always shown on screen.',
       pace: 'Pause between a letter and its word',
       paceNormal: 'Normal',
       paceSlow: 'Longer',
@@ -928,7 +938,7 @@ export const en: Translation = {
     celebrateTitle: 'PRO is on!',
     celebrateText: 'Now the robot talks: letters, words and tasks are read aloud.',
     uzVoiceNote:
-      'Russian and English are read by natural voices. The Uzbek voice is for now a temporary synthetic voice, not a native Uzbek voice, until a real Uzbek voice is ready.',
+      'Russian and English are read by natural voices. Uzbek is read by AI-generated children’s voices; sentences not recorded yet are read by the earlier synthetic voice for now.',
     celebrateOk: 'Yay, let’s go!',
     celebrateSay: 'Hooray, thank you! Now I can talk! Let’s learn together!',
     status: 'Subscription',

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { tDynamic } from '@/lib/tDynamic'
 import { useLine, type Finish } from './hooks'
+import { whenVoiceDone } from '@/services/audio/afterVoice'
 import { Line, TapHint } from './kit'
 import { CLOUD_TAPS, nextWaterStep, type WaterStep } from '../rules'
 
@@ -29,13 +30,12 @@ export function WaterTrip({ onDone }: { onDone: Finish }) {
   useEffect(() => {
     if (step === 'done') {
       say(t('sciGames.water.say.done'))
-      const timer = setTimeout(() => done.current(1, 1), AUTO_MS)
-      return () => clearTimeout(timer)
+      return whenVoiceDone(() => done.current(1, 1), AUTO_MS)
     }
     say(tDynamic(t, `sciGames.water.say.${step}`))
     if (step === 'steam' || step === 'flower' || step === 'river') {
-      const timer = setTimeout(() => setStep(nextWaterStep), reduceMotion ? 1200 : AUTO_MS)
-      return () => clearTimeout(timer)
+      // the step's line is heard to the end before the water moves on
+      return whenVoiceDone(() => setStep(nextWaterStep), reduceMotion ? 1200 : AUTO_MS)
     }
     return undefined
   }, [reduceMotion, say, step, t])

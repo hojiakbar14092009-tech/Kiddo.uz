@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { StepDots } from '@/components/ui/Progress'
 import { SpeakButton } from '@/features/learn/SpeakButton'
 import { useSpeakable } from '@/features/learn/speakable'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useLanguage } from '@/store/settingsStore'
 import { ClothBorder, FoodArt, TableItemArt } from './art'
@@ -81,6 +82,8 @@ function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void 
     return reset
   }, [reset])
 
+  const { goOn, cancel } = useAfterVoice()
+
   const put = (id: TableItemId) => {
     if (!round || solved || placed.includes(id)) return
     if (round.targets.includes(id)) {
@@ -90,6 +93,8 @@ function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void 
       if (round.targets.every((target) => next.includes(target))) {
         if (firstTries.current.length === index) firstTries.current.push(!mistake.current)
         react('correct', undefined, { speak: false })
+        // once the praise is said, on to the next round by itself ("Next" stays)
+        goOn(nextRound, AUTO_NEXT_MIN_MS)
       }
     } else {
       mistake.current = true
@@ -97,7 +102,8 @@ function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void 
     }
   }
 
-  const next = () => {
+  function nextRound() {
+    cancel()
     if (index + 1 < rounds.length) {
       setIndex(index + 1)
       setPlaced([])
@@ -275,7 +281,7 @@ function Run({ onAgain, onReview }: { onAgain: () => void; onReview: () => void 
             )}
           </div>
           {solved && (
-            <Button size="md" onClick={next} className="short:min-h-12">
+            <Button size="md" onClick={nextRound} className="short:min-h-12">
               {index + 1 < rounds.length ? t('uzbekistan.next') : t('uzbekistan.finish')}
             </Button>
           )}

@@ -50,7 +50,7 @@ function childOfAge(age: number) {
 }
 
 beforeEach(() => {
-  useSettingsStore.setState({ language: 'en' })
+  useSettingsStore.setState({ language: 'en', autoVoice: true })
   useFamilyStore.setState({ children: [], activeChildId: null })
   useProgressStore.setState({ byChild: {} })
   useUniverseStore.setState({ byChild: {} })
@@ -123,6 +123,8 @@ describe('the story library', () => {
   it('with PRO a child opens a PRO story', async () => {
     childOfAge(5)
     useSubscriptionStore.getState().activatePlan('lifetime', 'payment')
+    // only the opening is checked here: the page is not read (and so not turned) on its own
+    useSettingsStore.setState({ autoVoice: false })
     const { user, router } = await renderRoute('/stories')
     expect(screen.getByTestId('story-card-star-night')).toHaveAttribute('data-locked', 'false')
     await user.click(screen.getByTestId('story-card-star-night'))
@@ -216,38 +218,45 @@ describe('Read to me', () => {
     expect(say).not.toHaveBeenCalled()
   })
 
-  it('on PRO reads the page from recordings and shows "not recorded" honestly', async () => {
+  it('on PRO reads the page on its own; a page no voice can say stays, without a note', async () => {
     childOfAge(5)
     useSubscriptionStore.getState().activatePlan('lifetime', 'payment')
     const say = vi.spyOn(audioManager, 'say').mockResolvedValue('missing')
-    const { user } = await renderRoute('/stories/lost-lamb')
-    await user.click(screen.getByTestId('story-narrate'))
+    await renderRoute('/stories/lost-lamb')
     await waitFor(() =>
-      expect(screen.getByTestId('story-narrate')).toHaveAttribute('data-state', 'problem'),
+      expect(say).toHaveBeenCalledWith(
+        LAMB.pages.p1!.map((text) => ({ text })),
+        { language: 'en' },
+        { requirePro: true, quiet: false },
+      ),
     )
-    expect(screen.getByTestId('story-note')).toHaveTextContent(UI.noRecording)
-    expect(say).toHaveBeenCalledWith(
-      LAMB.pages.p1!.map((text) => ({ text })),
-      { language: 'en' },
-      { requirePro: true, clipsOnly: true, quiet: false },
-    )
+    expect(screen.getByTestId('story-narrate')).toHaveAttribute('data-state', 'done')
+    expect(screen.queryByTestId('story-note')).toBeNull()
     // no automatic page turn without narration that played
+    await new Promise((resolve) => setTimeout(resolve, 1500))
     expect(page()).toBe('p1')
   })
 
-  it('turns the page by itself only after the narration played, and stops on leaving', async () => {
+  it('reads only when tapped if a parent chose so', async () => {
+    childOfAge(5)
+    useSubscriptionStore.getState().activatePlan('lifetime', 'payment')
+    useSettingsStore.setState({ autoVoice: false })
+    const say = vi.spyOn(audioManager, 'say').mockResolvedValue('done')
+    const { user } = await renderRoute('/stories/lost-lamb')
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    expect(say).not.toHaveBeenCalled()
+    await user.click(screen.getByTestId('story-narrate'))
+    await waitFor(() => expect(say).toHaveBeenCalledTimes(1))
+  })
+
+  it('turns the page by itself once the narration played, and stops on leaving', async () => {
     childOfAge(5)
     useSubscriptionStore.getState().activatePlan('lifetime', 'payment')
     vi.spyOn(audioManager, 'say').mockResolvedValue('done')
     const stop = vi.spyOn(audioManager, 'stopSpeech')
-    const { user, unmount } = await renderRoute('/stories/lost-lamb')
-    await user.click(screen.getByTestId('story-narrate'))
-    await user.click(screen.getByTestId('story-auto-turn'))
-    // page 1 was read before the auto turn was on: it waits for the child
-    expect(page()).toBe('p1')
-    await next(user)
-    // page 2 is read to the end, then turns by itself
-    await waitFor(() => expect(page()).toBe('p3'), { timeout: 4000 })
+    const { unmount } = await renderRoute('/stories/lost-lamb')
+    // nobody presses anything: page 1 is read, then the next page comes on its own
+    await waitFor(() => expect(page()).toBe('p2'), { timeout: 4000 })
     const stopsBefore = stop.mock.calls.length
     act(() => unmount())
     expect(stop.mock.calls.length).toBeGreaterThan(stopsBefore)

@@ -86,9 +86,12 @@ const AUTO_DELAY_MS = 450
 let autoTimer: ReturnType<typeof setTimeout> | undefined
 /** The last text read on its own: the same screen part with the same text is not read twice. */
 let lastAuto: { order: number; key: string } | null = null
+/** What is waiting to be read: a part's new lines (only those added under its question). */
+let scheduled: { entry: Entry; lines: readonly string[] } | null = null
 
-function scheduleAutoRead() {
+function scheduleAutoRead(entry: Entry, lines: readonly string[]) {
   clearTimeout(autoTimer)
+  scheduled = { entry, lines }
   autoTimer = setTimeout(autoRead, AUTO_DELAY_MS)
 }
 
@@ -96,6 +99,7 @@ function scheduleAutoRead() {
 export function resetAutoRead() {
   clearTimeout(autoTimer)
   lastAuto = null
+  scheduled = null
 }
 
 function autoRead() {
@@ -104,14 +108,17 @@ function autoRead() {
   if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return
   const entry = top()
   if (!entry) return
+  // only the new lines of the part that changed; any other part is read whole
+  const lines = scheduled?.entry === entry ? scheduled.lines : entry.lines
+  scheduled = null
   // the same part with the same text again (a screen drawn twice) is not read twice
-  const key = JSON.stringify(entry.lines)
+  const key = JSON.stringify(lines)
   if (lastAuto && lastAuto.order === entry.order && lastAuto.key === key) return
   lastAuto = { order: entry.order, key }
   setLearnVoiceOn(true)
   const before = audioManager.currentSpeech()
   // a reading nobody asked for never flashes an error (an unrecorded line stays quiet)
-  void speakLines(entry.lines, settings.language ?? 'uz', { quiet: true })
+  void speakLines(lines, settings.language ?? 'uz', { quiet: true })
   const now = audioManager.currentSpeech()
   // only a speech that really started is this text's reading
   reading = now !== before ? { entry, speech: now } : reading
@@ -152,10 +159,14 @@ export function useSpeakable(
     const next = JSON.parse(key) as string[]
     if (JSON.stringify(mine.lines) === key) return
     stopIfReading(mine)
-    // a new question (or a new screen's instruction) is read on its own; feedback
-    // added under the same question is not (the question is not read again)
+    // a new question (or a new screen's instruction) is read on its own, whole; words
+    // added under the same question (the answer's praise or a kind hint) are read on
+    // their own too, without the question again – a child of four cannot read them
     const fresh = next.length > 0 && next[0] !== mine.lines[0]
+    let same = 0
+    while (!fresh && same < next.length && next[same] === mine.lines[same]) same += 1
+    const added = fresh ? next : next.slice(same)
     mine.lines = next
-    if (fresh) scheduleAutoRead()
+    if (added.length > 0) scheduleAutoRead(mine, added)
   }, [key, priority])
 }

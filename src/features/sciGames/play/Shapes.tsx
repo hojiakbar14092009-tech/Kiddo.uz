@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { tDynamic } from '@/lib/tDynamic'
-import { useLater, useLine, type Finish } from './hooks'
+import { useAfterSaid, useLine, type Finish } from './hooks'
 import { Line } from './kit'
 import { ShapeScene } from './ShapeScene'
 import { SHAPE_KINDS, SHAPE_PICTURES, shapePath, type ShapeKind, type Slot } from './shapeRules'
@@ -29,7 +29,8 @@ export function ShapeBuilder({ onDone }: { onDone: Finish }) {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion() ?? false
   const { line, say } = useLine()
-  const later = useLater()
+  // the next round waits for the line just said to be heard
+  const later = useAfterSaid()
   const [index, setIndex] = useState(0)
   const [filled, setFilled] = useState(0)
   const [missed, setMissed] = useState(false)

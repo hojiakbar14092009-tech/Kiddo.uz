@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSpeaker } from '@/services/audio/useSpeaker'
+import { whenVoiceDone } from '@/services/audio/afterVoice'
 
 /** A finished game reports how many of how many it had, and how many on the first try. */
 export type Finish = (total: number, firstTry: number) => void
@@ -27,5 +28,20 @@ export function useLater() {
   }, [])
   return useCallback((run: () => void, ms: number) => {
     timers.current.push(setTimeout(run, ms))
+  }, [])
+}
+
+/**
+ * The next round (or the end): after at least `ms`, and only once the line just said
+ * (praise, a kind hint) has been heard to the end – then a short quiet moment.
+ */
+export function useAfterSaid() {
+  const cancels = useRef<(() => void)[]>([])
+  useEffect(() => {
+    const list = cancels.current
+    return () => list.forEach((cancel) => cancel())
+  }, [])
+  return useCallback((run: () => void, ms: number) => {
+    cancels.current.push(whenVoiceDone(run, ms))
   }, [])
 }

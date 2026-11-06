@@ -717,6 +717,16 @@ export const uz = {
     },
     profiles: {
       title: 'Profillar ({{count}})',
+      nameVoice: {
+        title: 'Ismi sizning ovozingizda',
+        hint: 'Bolaning ismini bir marta aniq ayting (2–3 soniya). Robot bolani chaqirganda shu yozuvni eshittiradi. Yozuv faqat shu qurilmada saqlanadi, internetga yuborilmaydi va profil o‘chirilsa o‘chadi.',
+        record: 'Ismni yozish',
+        recording: 'Ayting… {{seconds}}',
+        listen: 'Tinglash',
+        again: 'Qayta yozish',
+        saved: 'Ism yozildi.',
+        noMic: 'Mikrofon ochilmadi. Brauzerda mikrofonga ruxsat bering.',
+      },
       name: 'Ismi',
       nameRequired: 'Ismni yozing.',
       age: 'Yoshi',
@@ -876,7 +886,7 @@ export const uz = {
       },
       testSound: 'Tekshirib eshitish',
       voiceNote:
-        'O‘zbekcha ovoz vaqtinchalik sun’iy (sintez qilingan) ovoz, o‘zbek tilida so‘zlashuvchi odamning ovozi emas: o‘zbekcha matnni ochiq qozoqcha nutq modeli o‘qiydi, shuning uchun talaffuz ba’zan o‘zbekcha bo‘lmaydi. Haqiqiy o‘zbekcha ovoz tayyor bo‘lganda u almashtiriladi. Matn har doim ekranda ko‘rinadi.',
+        'O‘zbekcha gaplarni sun’iy intellekt yaratgan bolalar ovozi o‘qiydi: qizga qizcha, o‘g‘ilga o‘g‘ilcha ovoz (mehmon ekrandagi robotning ovozini eshitadi). Bu ovozda hali yozilmagan gaplarni vaqtincha avvalgi sintez ovoz o‘qiydi, ular har oy kamayib boradi. Matn har doim ekranda ko‘rinadi.',
       pace: 'Harf va so‘z orasidagi pauza',
       paceNormal: 'Odatiy',
       paceSlow: 'Uzunroq',
@@ -933,7 +943,7 @@ export const uz = {
     celebrateTitle: 'PRO ochildi!',
     celebrateText: 'Endi robot gapiradi: harflar, so‘zlar va vazifalar ovoz chiqarib o‘qiladi.',
     uzVoiceNote:
-      'Ruscha va inglizchani tabiiy ovozlar o‘qiydi. O‘zbekcha ovoz esa hozircha vaqtinchalik sun’iy ovoz, o‘zbek tilida so‘zlashuvchi odamning ovozi emas – haqiqiy o‘zbekcha ovoz tayyor bo‘lguncha.',
+      'Ruscha va inglizchani tabiiy ovozlar o‘qiydi. O‘zbekchani sun’iy intellekt yaratgan bolalar ovozi o‘qiydi; hali yozilmagan gaplarni vaqtincha avvalgi sintez ovoz o‘qiydi.',
     celebrateOk: 'Zo‘r, boshladik!',
     celebrateSay: 'Voy, rahmat! Endi men gapira olaman! Keling, birga o‘rganamiz!',
     status: 'Obuna holati',

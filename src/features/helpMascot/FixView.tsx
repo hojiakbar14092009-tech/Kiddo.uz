@@ -13,6 +13,7 @@ import { advance, startFlow, type FlowEvent } from './flow'
 import { claimOf, showValue, type FixQuestion, type SpotQuestion } from './generate'
 import type { QuestionProps } from './shared'
 import { useStable } from './useStable'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 import { ClaimView, Counters } from './views'
 
 /**
@@ -32,6 +33,7 @@ export function FixView({
   const { t } = useTranslation()
   const copy = COPY[language]
   const { say } = useLearnMascot()
+  const { goOn } = useAfterVoice()
   const [flow, setFlow] = useState(() => startFlow(q))
   const [stuck, setStuck] = useState(false)
   const [hint, setHint] = useState(false)
@@ -78,9 +80,12 @@ export function FixView({
         break
       case 'fixed':
         say('correct', { text: `${copy.correct} ${explanation}`, emoji: '🌟' }, explanation)
+        // once the robot has said it, on to the next question by itself ("Next" stays)
+        goOn(onNext, AUTO_NEXT_MIN_MS)
         break
       case 'revealed':
         say('instruct', { text: explanation, emoji: '👉' }, explanation)
+        goOn(onNext, AUTO_NEXT_MIN_MS)
         break
       default:
         break

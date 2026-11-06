@@ -11,6 +11,7 @@ import type { Lesson, PlanetId } from './content'
 import { orderSequence } from './questions'
 import { useSpaceText } from './useSpaceText'
 import { SpacePicture } from './views'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 
 type Session = ReturnType<typeof useLearnSession>
 
@@ -32,6 +33,7 @@ export function OrderGame({
   const { t } = useTranslation()
   const text = useSpaceText()
   const { say } = useLearnMascot()
+  const { goOn } = useAfterVoice()
   const sequence = useMemo(() => orderSequence(lesson), [lesson])
   const [cards] = useState(() => {
     let mixed = shuffle(sequence)
@@ -70,6 +72,8 @@ export function OrderGame({
       session.answer(question, 'all-in-order', true)
       session.close(question)
       say('correct', { text: text.say.orderDone, emoji: '🌟' })
+      // once the praise is said, on by itself (the button stays)
+      goOn(onDone, AUTO_NEXT_MIN_MS)
     }
   }
 

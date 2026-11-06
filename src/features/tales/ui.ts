@@ -14,7 +14,6 @@ export interface TalesUi {
   resume: string
   replay: string
   proOnly: string
-  noRecording: string
   sceneLabel: (title: string) => string
   orderHint: string
   orderSlot: (n: number) => string
@@ -39,7 +38,6 @@ export const TALES_UI: Record<Language, TalesUi> = {
     resume: 'Davom ettirish',
     replay: 'Sahnani qaytadan',
     proOnly: 'Ovozli o‘qish PRO versiyada. Matnni birga o‘qiymiz!',
-    noRecording: 'Bu sahnaning ovozi hali yozilmagan. Matnni o‘qib chiqamiz.',
     sceneLabel: (title) => `«${title}» ertagidan sahna`,
     orderHint: 'Avval nima bo‘lganini bos, keyin – keyingisini.',
     orderSlot: (n) => `${n}-o‘rin`,
@@ -62,7 +60,6 @@ export const TALES_UI: Record<Language, TalesUi> = {
     resume: 'Продолжить',
     replay: 'Сцена сначала',
     proOnly: 'Чтение вслух — в PRO. А текст прочитаем вместе!',
-    noRecording: 'Голос для этой сцены ещё не записан. Прочитаем текст.',
     sceneLabel: (title) => `Сцена из сказки «${title}»`,
     orderHint: 'Нажми, что было сначала, потом — что было дальше.',
     orderSlot: (n) => `Место ${n}`,
@@ -85,7 +82,6 @@ export const TALES_UI: Record<Language, TalesUi> = {
     resume: 'Continue',
     replay: 'Replay scene',
     proOnly: 'Reading aloud is in PRO. Let’s read the words together!',
-    noRecording: 'The voice for this scene is not recorded yet. Let’s read the words.',
     sceneLabel: (title) => `A scene from “${title}”`,
     orderHint: 'Tap what happened first, then what came next.',
     orderSlot: (n) => `Place ${n}`,

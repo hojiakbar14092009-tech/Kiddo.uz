@@ -9,6 +9,7 @@ import { COPY } from './copy'
 import type { FindQuestion } from './generate'
 import type { QuestionProps } from './shared'
 import { useStable } from './useStable'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 
 /** Age 4: “Find me the apple!” – the request is shown as a picture, so it works without sound. */
 export function FindView({
@@ -23,6 +24,7 @@ export function FindView({
   const { t } = useTranslation()
   const copy = COPY[language]
   const { say } = useLearnMascot()
+  const { goOn } = useAfterVoice()
   const [statuses, setStatuses] = useState<Record<string, ChoiceStatus>>({})
   const [solved, setSolved] = useState(false)
   const [stuck, setStuck] = useState(false)
@@ -43,6 +45,8 @@ export function FindView({
       }))
       setSolved(true)
       say(correct ? 'correct' : 'instruct', { text: thanks, emoji: correct ? '🌟' : '👉' })
+      // once the robot has said it, on to the next question by itself ("Next" stays)
+      goOn(onNext, AUTO_NEXT_MIN_MS)
     } else {
       setStatuses((old) => ({ ...old, [id]: 'wrong' }))
       setStuck(true)

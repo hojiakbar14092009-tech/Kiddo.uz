@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
 import type { LearnMode } from '@/features/learn/session'
 import type { useLearnSession } from '@/features/learn/useLearnSession'
@@ -8,6 +8,7 @@ import type { AgeLevel } from './content'
 import type { SpaceQuestion } from './questions'
 import { useSpaceText } from './useSpaceText'
 import { SpacePicture } from './views'
+import { useAfterVoice } from '@/services/audio/afterVoice'
 
 type Session = ReturnType<typeof useLearnSession>
 
@@ -40,17 +41,11 @@ export function QuestionBoard({
   const [statuses, setStatuses] = useState<Partial<Record<string, ChoiceStatus>>>({})
   const [solved, setSolved] = useState(false)
   const misses = useRef(0)
-  const timer = useRef<number | null>(null)
+  // the next question waits for the praise to be said (and a short quiet moment)
+  const { goOn } = useAfterVoice()
 
   // the question is written big on screen; the speaker button reads exactly this one
   useSpeakable([question.prompt])
-
-  useEffect(
-    () => () => {
-      if (timer.current !== null) window.clearTimeout(timer.current)
-    },
-    [],
-  )
 
   const choose = (id: string) => {
     if (solved) return
@@ -60,7 +55,7 @@ export function QuestionBoard({
       setSolved(true)
       const praise = text.say.correct[Math.floor(Math.random() * text.say.correct.length)]!
       say('correct', { text: praise, emoji: '🌟' })
-      timer.current = window.setTimeout(() => {
+      goOn(() => {
         session.close(question)
         onSolved()
       }, NEXT_DELAY)

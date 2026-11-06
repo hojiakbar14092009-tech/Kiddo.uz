@@ -32,7 +32,8 @@ describe('find-letter game', () => {
     for (let round = 0; round < 5; round += 1) {
       await meetNewLetter(user)
       await user.click(screen.getByRole('button', { name: `${currentTargetLetter()} harfi` }))
-      await act(async () => vi.advanceTimersByTime(1800))
+      // the praise, then a quiet moment, then the next round
+      await act(async () => vi.advanceTimersByTimeAsync(2500))
     }
 
     expect(router.state.location.pathname).toBe('/reward')
@@ -58,11 +59,13 @@ describe('find-letter game', () => {
     expect(screen.getByText('Oops! Yana urinib ko‘ramiz!')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: `${target} harfi` }))
-    await act(async () => vi.advanceTimersByTime(1800))
+    // the praise, then a quiet moment, then the next round
+    await act(async () => vi.advanceTimersByTimeAsync(2500))
     for (let round = 1; round < 5; round += 1) {
       await meetNewLetter(user)
       await user.click(screen.getByRole('button', { name: `${currentTargetLetter()} harfi` }))
-      await act(async () => vi.advanceTimersByTime(1800))
+      // the praise, then a quiet moment, then the next round
+      await act(async () => vi.advanceTimersByTimeAsync(2500))
     }
     expect(screen.getByText('Yong‘oqlar: +3')).toBeInTheDocument()
     // not 3 stars: no nuts beyond the task's own

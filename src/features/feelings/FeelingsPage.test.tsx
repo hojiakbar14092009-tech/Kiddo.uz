@@ -131,6 +131,20 @@ describe('feelings section', () => {
     expect(emitActivity).toHaveBeenCalledTimes(1)
   })
 
+  it('goes on to the next question by itself once the praise is said', async () => {
+    const { user } = await renderRoute('/feelings/faces')
+    await passLesson(user)
+    const first = askedFeeling()
+    const answers = within(screen.getByRole('group', { name: 'Answers' }))
+    await user.click(answers.getByRole('button', { name: FEELING_TEXT[first].label.en }))
+    expect(screen.getByTestId('feelings-feedback')).toHaveTextContent('Well done! You found it!')
+    // nobody presses "Next": the second question comes on its own
+    await waitFor(() => expect(screen.queryByTestId('feelings-feedback')).toBeNull(), {
+      timeout: 8_000,
+    })
+    expect(screen.getByRole('group', { name: 'Answers' })).toBeInTheDocument()
+  }, 15_000)
+
   it('explains every choice of a situation and praises the kindest one', async () => {
     const { user } = await renderRoute('/feelings/kindness')
     await passLesson(user)

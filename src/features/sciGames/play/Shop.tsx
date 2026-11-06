@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Img3D } from '@/components/ui/Img3D'
-import { useLater, useLine, type Finish } from './hooks'
+import { useAfterSaid, useLine, type Finish } from './hooks'
 import { Line } from './kit'
 import { changeOf, COINS, paid, SHOP_ROUNDS, type Coin } from './shopRules'
 
@@ -36,7 +36,8 @@ export function LittleShop({ onDone }: { onDone: Finish }) {
   const { t } = useTranslation()
   const reduceMotion = useReducedMotion() ?? false
   const { line, say } = useLine()
-  const later = useLater()
+  // the next round waits for the line just said to be heard
+  const later = useAfterSaid()
   const [index, setIndex] = useState(0)
   const [coins, setCoins] = useState<{ key: number; value: Coin }[]>([])
   const [missed, setMissed] = useState(false)

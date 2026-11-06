@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
 import { tDynamic } from '@/lib/tDynamic'
-import { useLater, useLine, type Finish } from './hooks'
+import { useAfterSaid, useLine, type Finish } from './hooks'
 import { Line } from './kit'
 import { FLOAT_THINGS } from '../rules'
 
@@ -21,7 +21,8 @@ export function FloatOrSink({ onDone }: { onDone: Finish }) {
   const thing = FLOAT_THINGS[index]!
   const total = FLOAT_THINGS.length
 
-  const later = useLater()
+  // the next round waits for the line just said to be heard
+  const later = useAfterSaid()
   /** The round already answered (two taps in one frame answer it once). */
   const answered = useRef(-1)
 

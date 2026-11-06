@@ -123,13 +123,14 @@ test.describe('the attention helper', () => {
     await ready(page, '/sci/magnet')
     await startSci(page)
     const nudge = page.getByTestId('attention-nudge')
-    await page.clock.runFor(26_000)
+    // no touch for 15 s at every age (IDLE_MS): each step is just past it
+    await page.clock.runFor(16_000)
     // the child's own name comes first (Phase 71)
     await expect(nudge).toContainText('Bek! Hoy, men shu yerdaman!')
-    await page.clock.runFor(26_000)
+    await page.clock.runFor(16_000)
     // the second time the robot is warmer ("you can do it")
     await expect(nudge).toContainText(/Ozgina qoldi|Sen zo‘rsan|birga davom/)
-    await page.clock.runFor(26_000)
+    await page.clock.runFor(16_000)
     const offer = page.getByTestId('attention-offer')
     await expect(offer).toBeVisible()
     await expect(offer.getByRole('button')).toHaveCount(7) // the top five, “all games” and “later”
@@ -196,15 +197,17 @@ test.describe('the science games', () => {
   })
 
   test('float or sink: guess, watch, and finish', async ({ page }) => {
+    // each round goes on once the robot's line has been said (afterVoice)
+    test.setTimeout(90_000)
     await child(page, 'denied')
     await ready(page, '/sci/float')
     await startSci(page)
     for (const floats of [true, false, true, false, true, false]) {
       const button = page.getByTestId(floats ? 'float-guess-float' : 'float-guess-sink')
-      await expect(button).toBeEnabled()
+      await expect(button).toBeEnabled({ timeout: 10_000 })
       await button.click()
     }
-    await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 30_000 })
   })
 
   test('a droplet’s trip goes round the water cycle', async ({ page }) => {

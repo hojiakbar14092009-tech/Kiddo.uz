@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BulbIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
@@ -21,6 +21,7 @@ import { hintOf, promptOf } from './quizText'
 import { DinoResult } from './run'
 import { NEXT_DELAY_MS, useDinoRecorder, useStepLabel, type DinoFinished } from './session'
 import { useDinoText } from './text'
+import { useAfterVoice } from '@/services/audio/afterVoice'
 
 const BACK = DINO_ROOT
 
@@ -110,8 +111,8 @@ export function QuizRun({
   const [solved, setSolved] = useState(false)
   const [firstTry, setFirstTry] = useState(0)
   const [finished, setFinished] = useState<DinoFinished | null>(null)
-  const timer = useRef<number | undefined>(undefined)
-  useEffect(() => () => window.clearTimeout(timer.current), [])
+  // the next step waits for the praise to be said (and a short quiet moment)
+  const { goOn } = useAfterVoice()
 
   useEffect(() => {
     reset()
@@ -151,9 +152,9 @@ export function QuizRun({
       say('correct')
       if (index + 1 >= questions.length) {
         const done = record({ total: questions.length, firstTry: right })
-        timer.current = window.setTimeout(() => done && setFinished(done), NEXT_DELAY_MS)
+        goOn(() => done && setFinished(done), NEXT_DELAY_MS)
       } else {
-        timer.current = window.setTimeout(() => {
+        goOn(() => {
           setIndex(index + 1)
           setStatuses({})
           setMisses(0)

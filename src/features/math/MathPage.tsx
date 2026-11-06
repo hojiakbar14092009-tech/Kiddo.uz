@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CoinIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
@@ -27,6 +27,7 @@ import {
 } from './generators'
 import { CountScene, Equation, HelpVisual, ObjectGroup } from './parts'
 import { learnOrderKey, orderOf, planLearn, planTest, TEST_ORDER_KEY } from './plan'
+import { useAfterVoice } from '@/services/audio/afterVoice'
 
 type View =
   { kind: 'menu' } | { kind: 'learn'; stage: StageId; run: number } | { kind: 'test'; run: number }
@@ -212,8 +213,8 @@ function Run({
   const [wrong, setWrong] = useState(0)
   const [solved, setSolved] = useState(false)
   const [result, setResult] = useState<FinishedSession | null>(null)
-  const timer = useRef<number | undefined>(undefined)
-  useEffect(() => () => window.clearTimeout(timer.current), [])
+  // the next step waits for the praise to be said (and a short quiet moment)
+  const { goOn } = useAfterVoice()
 
   const q = index >= 0 ? questions[index] : undefined
   const guided = mode === 'learn' && index < GUIDED_COUNT
@@ -254,7 +255,7 @@ function Run({
       setStatuses((s) => ({ ...s, [id]: 'correct' }))
       setSolved(true)
       say('correct', { text: copy.correct, emoji: '🌟' })
-      timer.current = window.setTimeout(advance, 1100)
+      goOn(advance, 1100)
       return
     }
     const misses = wrong + 1

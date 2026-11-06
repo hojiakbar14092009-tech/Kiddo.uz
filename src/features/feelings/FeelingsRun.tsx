@@ -16,6 +16,7 @@ import { useChallengeLevel } from '@/domain/learner'
 import { emitActivity } from '@/domain/universe'
 import { SpeakButton } from '@/features/learn/SpeakButton'
 import { useSpeakable } from '@/features/learn/speakable'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { newId } from '@/lib/id'
@@ -116,13 +117,18 @@ function Run({ kind, onAgain }: { kind: ScoredKind; onAgain: () => void }) {
     if (picked) feedbackRef.current?.scrollIntoView?.({ block: 'nearest' })
   }, [picked])
 
+  const { goOn, cancel } = useAfterVoice()
+
   const choose = (option: Option) => {
     if (!question || solved || tried.includes(option.id)) return
+    // the panel's words (praise and why, or a kind other look) are read on their own
     setPicked(option)
     if (option.accepted) {
       if (firstTries.current.length === index) firstTries.current.push(tried.length === 0)
       // a cheer from the robot; the panel below says why
       react('correct', undefined, { speak: false })
+      // once the praise is said, on to the next question by itself ("Next" stays)
+      goOn(next, AUTO_NEXT_MIN_MS)
     } else {
       setTried((list) => [...list, option.id])
     }
@@ -149,7 +155,8 @@ function Run({ kind, onAgain }: { kind: ScoredKind; onAgain: () => void }) {
     }
   }
 
-  const next = () => {
+  function next() {
+    cancel()
     if (index + 1 < questions.length) {
       setIndex(index + 1)
       setTried([])

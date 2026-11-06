@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Img3D } from '@/components/ui/Img3D'
 import { useLanguage } from '@/store/settingsStore'
-import { useLater, useLine, type Finish } from './hooks'
+import { useAfterSaid, useLine, type Finish } from './hooks'
 import { Line } from './kit'
 import { fits, tilesFor, TRAIN_WORDS } from './trainRules'
 
@@ -19,7 +19,8 @@ export function WordTrain({ onDone }: { onDone: Finish }) {
   const language = useLanguage()
   const reduceMotion = useReducedMotion() ?? false
   const { line, say } = useLine()
-  const later = useLater()
+  // the next round waits for the line just said to be heard
+  const later = useAfterSaid()
   const words = TRAIN_WORDS[language]
   const [index, setIndex] = useState(0)
   const [filled, setFilled] = useState<number[]>([])

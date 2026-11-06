@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import manifest from './kidVoiceManifest.json'
-import { KID_VOICES, kidClipUrl, kidVoiceFor } from './kidVoices'
+import { KID_VOICES, kidClipUrl, kidVoiceFor, kidVoiceOf } from './kidVoices'
 import { phraseKey } from './phrases'
 
 /*
@@ -22,6 +22,15 @@ describe('children voices', () => {
     expect(kidVoiceFor('girl')).toBe('girl')
     expect(kidVoiceFor('boy')).toBe('boy')
     expect(kidVoiceFor(undefined)).toBeNull()
+  })
+
+  it('a guest, or a profile without a gender, hears the robot on screen', () => {
+    // a guest sees the girl robot (useMascotModel)
+    expect(kidVoiceOf(null)).toBe('girl')
+    expect(kidVoiceOf({ mascot: 'boy' })).toBe('boy')
+    expect(kidVoiceOf({ gender: null, mascot: 'girl' })).toBe('girl')
+    // a known gender wins over the robot a parent picked
+    expect(kidVoiceOf({ gender: 'girl', mascot: 'boy' })).toBe('girl')
   })
 
   it('plays the child voice where recorded and the standard clip elsewhere', async () => {

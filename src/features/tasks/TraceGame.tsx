@@ -4,6 +4,7 @@ import { CheckIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
+import { whenVoiceDone } from '@/services/audio/afterVoice'
 import type { MistakeDetail } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { pickTargets } from './generateRounds'
@@ -19,7 +20,7 @@ import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 
 const LETTERS_PER_TASK = 3
-const ADVANCE_DELAY_MS = 1700
+const ADVANCE_DELAY_MS = 1000
 
 /** “Write the letter”: trace three letters with a finger. */
 export function TraceGame() {
@@ -55,7 +56,8 @@ export function TraceGame() {
 
   useEffect(() => {
     if (!solved) return undefined
-    const timer = setTimeout(() => {
+    // the praise is said first; the next round comes once the voice is quiet
+    return whenVoiceDone(() => {
       if (index + 1 < letters.length) {
         setIndex(index + 1)
         setSolved(false)
@@ -66,7 +68,6 @@ export function TraceGame() {
         )
       }
     }, ADVANCE_DELAY_MS)
-    return () => clearTimeout(timer)
   }, [finish, index, letters, mistakes, solved])
 
   if (!letter) return null

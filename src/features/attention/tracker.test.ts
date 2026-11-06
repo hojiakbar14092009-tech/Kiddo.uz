@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   COOLDOWN_MS,
-  idleMsFor,
+  AWAY_MIN_MS,
+  IDLE_MS,
   initialTracker,
   lineFor,
   LOOK_AWAY_MS,
@@ -44,9 +45,9 @@ describe('attention tracker', () => {
     expect(later.state.episodes).toEqual([WINDOW_MS + 1])
   })
 
-  it('waits a little longer for the youngest', () => {
-    expect(idleMsFor(4)).toBeGreaterThan(idleMsFor(6))
-    expect(idleMsFor(null)).toBe(idleMsFor(6))
+  it('calls after 15 s without a touch, at every age, and 2 s away from the app', () => {
+    expect(IDLE_MS).toBe(15_000)
+    expect(AWAY_MIN_MS).toBe(2_000)
   })
 
   it('takes turns through the lines', () => {
@@ -74,8 +75,7 @@ describe('the reminder with the child’s name (Phase 71)', () => {
     expect(withName(' ', 'Look here!')).toBe('Look here!')
   })
 
-  it('notices looking away within about a second and a half', () => {
-    expect(LOOK_AWAY_MS).toBeLessThanOrEqual(1500)
-    expect(LOOK_AWAY_MS).toBeGreaterThanOrEqual(1000)
+  it('notices a face turned away within two seconds', () => {
+    expect(LOOK_AWAY_MS).toBe(2_000)
   })
 })

@@ -1,7 +1,7 @@
 import { Howl } from 'howler'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSettingsStore } from '@/store/settingsStore'
-import { useFamilyStore } from '@/store/familyStore'
+import { useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
 import { audioManager } from './audioManager'
 import { speech } from './speech'
@@ -124,5 +124,40 @@ describe('audioManager', () => {
     const say = vi.spyOn(speech, 'say').mockResolvedValue(true)
     expect(await audioManager.speak([{ text: 'Salom' }], { language: 'uz' })).toBe(false)
     expect(say).not.toHaveBeenCalled()
+  })
+})
+
+describe('the children’s voices', () => {
+  beforeEach(() => {
+    useSettingsStore.setState({ volume: 0.8 })
+    useSubscriptionStore.getState().setDemoPro(true)
+    vi.spyOn(speech, 'say').mockResolvedValue(true)
+  })
+
+  afterEach(() => {
+    useFamilyStore.setState({ children: [], activeChildId: null })
+    vi.restoreAllMocks()
+  })
+
+  const lastSrc = () => instances().at(-1)?.options.src[0]
+
+  it('a profile without a gender hears its own robot', async () => {
+    const child = { id: 'old', name: 'Ali', mascot: 'boy' } as unknown as ChildProfile
+    useFamilyStore.setState({ children: [child], activeChildId: 'old' })
+    await audioManager.speak([{ text: 'Barakalla!' }], { language: 'uz' })
+    expect(lastSrc()).toMatch(/^\/audio\/voice\/kid\/boy\/uz\//)
+  })
+
+  it('plays a recording from this device as it is, then the sentence', async () => {
+    useFamilyStore.setState({ activeChildId: 'ali' })
+    const before = instances().length
+    const outcome = await audioManager.say(
+      [{ text: '', recording: { url: 'blob:name', format: 'webm' } }, { text: 'Barakalla!' }],
+      { language: 'uz' },
+    )
+    expect(outcome).toBe('done')
+    const played = instances().slice(before)
+    expect(played[0]?.options).toMatchObject({ src: ['blob:name'], format: ['webm'] })
+    expect(played[1]?.options.src[0]).toMatch(/^\/audio\/voice\/kid\/girl\/uz\//)
   })
 })

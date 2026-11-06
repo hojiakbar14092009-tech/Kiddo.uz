@@ -171,7 +171,7 @@ function StoryBuilder({ onDone }: { onDone: (choices: StoryChoices) => void }) {
 function problemKey(problem: NarrationProblem | undefined) {
   if (problem === 'locked') return 'learn.voiceLocked' as const
   if (problem === 'muted') return 'learn.voiceMuted' as const
-  if (problem === 'missing' || problem === 'error') return 'learn.voiceError' as const
+  if (problem === 'error') return 'learn.voiceError' as const
   return null
 }
 

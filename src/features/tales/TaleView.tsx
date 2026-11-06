@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { useReducedMotion } from 'framer-motion'
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { ChevronLeftIcon, ChevronRightIcon, SpeakerIcon } from '@/components/icons'
@@ -15,6 +15,8 @@ import type { SpeakOutcome } from '@/services/audio/audioManager'
 import { useMascot } from '@/features/mascot/useMascot'
 import { canRender3D } from '@/features/mascot/webgl'
 import { useChildKey } from '@/store/progressStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { canUse } from '@/domain/entitlements'
 import { sceneSpeech, taleText, type SceneSpec, type TaleSpec } from './content'
 import { SceneTask } from './SceneTask'
 import { StaticScene } from './StaticScene'
@@ -152,15 +154,16 @@ export function TaleView({ tale, language }: { tale: TaleSpec; language: Languag
   const sceneText = text.scenes[sceneIndex]!
   const lines = sceneSpeech(sceneText)
   const sceneKey = `${tale.id}-${sceneIndex}-${round}`
-  const noRecording = ui.noRecording
   const mutedNote = t('learn.voiceMuted')
   const errorNote = t('learn.voiceError')
   const onProblem = useCallback(
     (outcome: SpeakOutcome | 'off') => {
-      const note = outcome === 'muted' ? mutedNote : outcome === 'missing' ? noRecording : errorNote
+      // a line no voice could say stays on the card, without a note
+      if (outcome === 'missing') return
+      const note = outcome === 'muted' ? mutedNote : errorNote
       react('instruct', { text: note, emoji: outcome === 'muted' ? '🔇' : '🎙️' }, { speak: false })
     },
-    [errorNote, mutedNote, noRecording, react],
+    [errorNote, mutedNote, react],
   )
   const reader = useReader(lines, sceneKey, onProblem)
   const last = sceneIndex === tale.scenes.length - 1
@@ -173,6 +176,19 @@ export function TaleView({ tale, language }: { tale: TaleSpec; language: Languag
     if (phase !== 'story') return
     reset()
   }, [phase, reset, sceneKey])
+
+  // every scene is read on its own a moment after it shows (unless a parent chose
+  // "when the button is tapped"); the reader's buttons still pause and replay it
+  const startReading = useRef(reader.start)
+  useEffect(() => {
+    startReading.current = reader.start
+  })
+  useEffect(() => {
+    if (phase !== 'story') return undefined
+    if (!useSettingsStore.getState().autoVoice || !canUse('audio')) return undefined
+    const timer = setTimeout(() => startReading.current(), 450)
+    return () => clearTimeout(timer)
+  }, [phase, sceneKey])
 
   const go = (next: number) => setSceneIndex(Math.max(0, Math.min(tale.scenes.length - 1, next)))
   const toCheck = () => {

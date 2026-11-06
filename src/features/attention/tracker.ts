@@ -11,8 +11,6 @@
  * - Never two reminders in a row closer than the pause below.
  */
 
-import { idleMsForAge } from '@/domain/adaptive/ageProfile'
-
 export type Distraction = 'away' | 'idle' | 'lookAway'
 
 /** What the robot does about a distraction. */
@@ -35,17 +33,15 @@ export const OFFER_AT = 3
 /** The least time between two reminders. */
 export const COOLDOWN_MS = 15_000
 /** Leaving the app this long counts (a quick glance at a notification does not). */
-export const AWAY_MIN_MS = 4_000
+export const AWAY_MIN_MS = 2_000
 /**
- * Looking away this long counts (Phase 71: at once, about a second and a half – long
- * enough that a blink or a glance at the parent does not, short enough to catch a drift).
+ * Looking away this long counts: two seconds, long enough that a blink or a glance at
+ * the parent does not, short enough to catch a drift.
  */
-export const LOOK_AWAY_MS = 1_500
+export const LOOK_AWAY_MS = 2_000
 
-/** No touch on a learning screen for this long counts; a little longer for the youngest. */
-export function idleMsFor(age: number | null): number {
-  return idleMsForAge(age)
-}
+/** No touch on a learning screen for this long counts, at every age (four included). */
+export const IDLE_MS = 15_000
 
 export function initialTracker(): TrackerState {
   return { episodes: [], lastActionAt: Number.NEGATIVE_INFINITY }

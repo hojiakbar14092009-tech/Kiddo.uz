@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { LetterEntry } from '@/content/alphabet'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
+import { whenVoiceDone } from '@/services/audio/afterVoice'
 import type { MistakeDetail } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { useContentTier } from '@/domain/adaptive'
@@ -33,7 +34,7 @@ import { playableLetters } from './playableLetters'
 import { useLearner } from './useHomework'
 
 /** Pause after a right answer, so the celebration can play before moving on. */
-const ADVANCE_DELAY_MS = 1700
+const ADVANCE_DELAY_MS = 1000
 /** After this many wrong taps in a round, the right answer gently glows. */
 const HINT_AFTER_MISTAKES = GLOW_AFTER_MISTAKES
 
@@ -153,7 +154,8 @@ export function ChoiceRounds({ type, rounds, title, onFinish, introduce }: Choic
   // After a right answer: next round, or finish the task.
   useEffect(() => {
     if (!session.solved) return undefined
-    const timer = setTimeout(() => {
+    // the praise is said first; the next round comes once the voice is quiet
+    return whenVoiceDone(() => {
       if (isLastRound(session)) {
         onFinish(
           session.rounds.map((item) => item.target.id),
@@ -164,7 +166,6 @@ export function ChoiceRounds({ type, rounds, title, onFinish, introduce }: Choic
         dispatch({ type: 'next' })
       }
     }, ADVANCE_DELAY_MS)
-    return () => clearTimeout(timer)
   }, [met, onFinish, session])
 
   if (!round) return null

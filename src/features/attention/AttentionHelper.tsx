@@ -14,14 +14,15 @@ import { tDynamic } from '@/lib/tDynamic'
 import { audioManager } from '@/services/audio/audioManager'
 import { playCue } from '@/services/audio/soundLanguage'
 import { useAttentionStore } from '@/store/attentionStore'
-import { childAge, useActiveChild, useMascotModel } from '@/store/familyStore'
+import { useActiveChild, useMascotModel } from '@/store/familyStore'
 import { useChildKey, useWearing } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { watchCamera, type CameraWatch } from './cameraWatcher'
+import { loadNameVoice, recordingFormat } from './nameVoice'
 import { inChildArea, isLearningScreen } from './routes'
 import {
   AWAY_MIN_MS,
-  idleMsFor,
+  IDLE_MS,
   initialTracker,
   lineFor,
   LOOK_AWAY_MS,
@@ -34,6 +35,13 @@ import {
 const SHOWN_MS = 6500
 /** The call sound first, then the robot's words (so the two never overlap). */
 const SPEAK_AFTER_MS = 700
+/** A look-away met while the robot talked is tried again this often. */
+const RETRY_MS = 500
+
+const isTalking = () => {
+  const status = audioManager.getStatus()
+  return status === 'loading' || status === 'speaking'
+}
 
 /** Touches, keys and scrolling all mean the child is there. */
 const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const
@@ -59,7 +67,7 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
   const child = useActiveChild()
   const childKey = useChildKey()
   const note = useAttentionStore((state) => state.note)
-  const age = child ? childAge(child) : null
+
   const learning = isLearningScreen(pathname)
 
   const tracker = useRef(initialTracker())
@@ -69,6 +77,25 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
   const [cameraOn, setCameraOn] = useState(false)
   const [visible, setVisible] = useState(() => document.visibilityState === 'visible')
 
+  // the child's name in the parent's own voice, if a parent recorded it (only on this device)
+  const childId = child?.id
+  const nameVoice = useRef<{ url: string; format: string } | null>(null)
+  useEffect(() => {
+    if (!childId) return undefined
+    let url: string | null = null
+    let cancelled = false
+    void loadNameVoice(childId).then((blob) => {
+      if (!blob || cancelled || typeof URL.createObjectURL !== 'function') return
+      url = URL.createObjectURL(blob)
+      nameVoice.current = { url, format: recordingFormat(blob) }
+    })
+    return () => {
+      cancelled = true
+      nameVoice.current = null
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [childId])
+
   // the latest words and language, so the reminders' effects never restart over them
   const say = useRef({ t, language, name: child?.name, childKey, note })
   useEffect(() => {
@@ -77,14 +104,15 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
   const speakTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => () => clearTimeout(speakTimer.current), [])
 
-  const fire = useCallback((cause: Distraction) => {
+  /** False when it could not be counted now (hidden, or the robot is talking): try again later. */
+  const fire = useCallback((cause: Distraction): boolean => {
     // nothing counts while the app is hidden, and a reminder never talks over the robot
     // already speaking (a lesson's instruction); coming back is greeted either way
-    if (document.visibilityState !== 'visible') return
-    if (cause !== 'away' && audioManager.getStatus() !== 'idle') return
+    if (document.visibilityState !== 'visible') return false
+    if (cause !== 'away' && isTalking()) return false
     const { state, action } = noteDistraction(tracker.current, cause, Date.now())
     tracker.current = state
-    if (!action) return
+    if (!action) return true
     const { t: translate, language: spoken, name, childKey: key, note: log } = say.current
     const line = tDynamic(translate, `attention.say.${lineFor(action, turn.current++)}`)
     // the child's own name comes first: nothing turns a head faster (Phase 71)
@@ -107,10 +135,19 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
       () => {
         // a lesson's own words may have started meanwhile: the reminder never cuts them off
         if (action.kind !== 'welcomeBack' && audioManager.getStatus() !== 'idle') return
-        void audioManager.speak([{ text }], { language: spoken })
+        // the name in the parent's voice, then the robot's line in its own voice; with no
+        // recording the line is said without the name (the bubble still shows it)
+        const called = action.kind !== 'welcomeBack' && nameVoice.current
+        void audioManager.speak(
+          called
+            ? [{ text: '', recording: called, pauseAfterMs: 150 }, { text: line }]
+            : [{ text: line }],
+          { language: spoken },
+        )
       },
       action.kind === 'welcomeBack' ? 0 : SPEAK_AFTER_MS,
     )
+    return true
   }, [])
 
   // the reminder hides on its own
@@ -140,14 +177,13 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
   // no touch for a while on a learning screen (the robot reading aloud counts as busy)
   useEffect(() => {
     if (!learning) return undefined
-    const idleMs = idleMsFor(age)
     let timer: ReturnType<typeof setTimeout> | undefined
     const restart = () => {
       clearTimeout(timer)
       timer = setTimeout(() => {
         fire('idle')
         restart()
-      }, idleMs)
+      }, IDLE_MS)
     }
     restart()
     ACTIVITY_EVENTS.forEach((name) => window.addEventListener(name, restart, { passive: true }))
@@ -155,7 +191,7 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
       clearTimeout(timer)
       ACTIVITY_EVENTS.forEach((name) => window.removeEventListener(name, restart))
     }
-  }, [age, fire, learning])
+  }, [fire, learning])
 
   // the camera: only with the grown-up's yes, only on a learning screen, only while visible
   useEffect(() => {
@@ -166,7 +202,11 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
     watchCamera(
       (gaze) => {
         clearTimeout(awayTimer)
-        if (gaze === 'away') awayTimer = setTimeout(() => fire('lookAway'), LOOK_AWAY_MS)
+        // still turned away while the robot was reading: it calls as soon as it is quiet
+        const lookAway = () => {
+          if (!fire('lookAway')) awayTimer = setTimeout(lookAway, RETRY_MS)
+        }
+        if (gaze === 'away') awayTimer = setTimeout(lookAway, LOOK_AWAY_MS)
       },
       // the sign shows as soon as the camera is open, before the detector has loaded
       () => {

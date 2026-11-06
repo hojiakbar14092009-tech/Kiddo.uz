@@ -5,6 +5,9 @@
  * With --parts a,b,c only those interface parts (the children's voices record
  * praise and instructions first: kid_voices.py), and with --except a,b the keys
  * under those parts that are never said aloud (labels, buttons).
+ * Content files are parts too: content.alphabet, content.numbers, content.learn,
+ * content.threeWords, content.dino, content.feelings, content.uzbekistan,
+ * content.cheers (or "content" for all of them; see CONTENT_PARTS).
  */
 import { childPhrases, phrasesOfParts } from '../../src/services/audio/childPhrases'
 

@@ -233,8 +233,11 @@ export function askText(round: TableRound, language: Language): string {
   const { ask } = round
   if (ask.kind === 'allFood') return TABLE_TEXT.allFood[language]
   if (ask.kind === 'group') return TABLE_TEXT[ask.group][language]
+  // always in the same order (the order of FOOD_IDS), whatever order they were picked in:
+  // the same foods are always said the same way
+  const ordered = [...ask.foods].sort((a, b) => FOOD_IDS.indexOf(a) - FOOD_IDS.indexOf(b))
   const list = joinList(
-    ask.foods.map((food) => FOODS[food].inList[language]),
+    ordered.map((food) => FOODS[food].inList[language]),
     language,
   )
   return TABLE_TEXT.named[language].replace('{{list}}', list)

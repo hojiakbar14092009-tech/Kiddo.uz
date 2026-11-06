@@ -5,6 +5,7 @@ import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { childAge, useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
 import { ChildForm, type ChildFormValues } from './ChildForm'
+import { NameRecorder } from './NameRecorder'
 import { Panel } from './Panel'
 
 type Editing = { kind: 'new' } | { kind: 'edit'; child: ChildProfile } | null
@@ -48,6 +49,7 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
           onSave={save}
           onCancel={() => setEditing(null)}
         />
+        {editing.kind === 'edit' && <NameRecorder childId={editing.child.id} />}
       </Panel>
     )
   }

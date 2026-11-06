@@ -13,7 +13,16 @@ const LAMB_DOWN = 'Oppoq ehtiyotlab bir qadam bosdi, tuyoqlari ostidan mayda tos
 const STAR_TITLE = 'Yulduzli tun'
 const STAR_FIRST = 'Keng dashtda oppoq o‘tov turardi.'
 
-async function chooseUzbek(page: Page) {
+async function chooseUzbek(page: Page, { read = false }: { read?: boolean } = {}) {
+  // pages are read (and turned) on their own; a test that turns them by hand asks for
+  // "only when tapped", as a parent can in Settings
+  await page.addInitScript((read) => {
+    if (localStorage.getItem('kiddo.settings')) return
+    localStorage.setItem(
+      'kiddo.settings',
+      JSON.stringify({ state: { autoVoice: read }, version: 1 }),
+    )
+  }, read)
   await page.goto('/')
   await page.getByRole('button', { name: 'O‘zbekcha' }).click()
   await expect(page).toHaveURL(/\/home$/)
@@ -25,9 +34,9 @@ async function turnTo(page: Page, id: string) {
 }
 
 /** A five-year-old child profile in Uzbek (optionally with PRO, as a promo code gives it). */
-async function seedChild(page: Page, { pro }: { pro: boolean }) {
+async function seedChild(page: Page, { pro, read = false }: { pro: boolean; read?: boolean }) {
   await page.addInitScript(
-    ({ pro }) => {
+    ({ pro, read }) => {
       if (localStorage.getItem('e2e-seeded')) return
       localStorage.setItem('e2e-seeded', '1')
       const born = new Date()
@@ -35,7 +44,7 @@ async function seedChild(page: Page, { pro }: { pro: boolean }) {
       born.setDate(born.getDate() - 30)
       localStorage.setItem(
         'kiddo.settings',
-        JSON.stringify({ state: { language: 'uz', volume: 0.8 }, version: 1 }),
+        JSON.stringify({ state: { language: 'uz', volume: 0.8, autoVoice: read }, version: 1 }),
       )
       localStorage.setItem(
         'kiddo.family',
@@ -68,7 +77,7 @@ async function seedChild(page: Page, { pro }: { pro: boolean }) {
         )
       }
     },
-    { pro },
+    { pro, read },
   )
 }
 
@@ -178,11 +187,12 @@ test('a PRO story stays locked on Free, also by its direct link', async ({ page 
   await expect(page.getByText(STAR_FIRST)).toHaveCount(0)
 })
 
-test('the demo: “Read to me” works without PRO (the voice is free)', async ({ page }) => {
-  await chooseUzbek(page)
+test('the demo: the page is read on its own without PRO (the voice is free)', async ({ page }) => {
+  await chooseUzbek(page, { read: true })
   await page.goto('/stories/grandma-garden')
-  const narrate = page.getByRole('button', { name: 'O‘qib ber' })
-  await expect(narrate).toBeVisible()
+  const narrate = page.getByTestId('story-narrate')
+  // nobody pressed it: the reading is on by itself, and the button stops it
+  await expect(narrate).toHaveAttribute('aria-pressed', 'true')
   await expect(narrate).not.toHaveAttribute('data-state', 'locked')
   await expect(page.getByRole('button', { name: 'O‘qib ber (PRO)' })).toHaveCount(0)
 })
@@ -234,23 +244,26 @@ test('with PRO a child opens a PRO story and hears its page from the recordings'
     const path = new URL(response.url()).pathname
     if (path.startsWith('/audio/voice/') && response.ok()) clips.push(path)
   })
-  await seedChild(page, { pro: true })
+  await seedChild(page, { pro: true, read: true })
   await page.goto('/stories')
   const card = page.getByTestId('story-card-star-night')
   await expect(card).toHaveAttribute('data-locked', 'false')
   await card.click()
   await expect(page).toHaveURL(/\/stories\/star-night$/)
   await expect(page.getByTestId('story-text')).toContainText(STAR_FIRST)
-  // the Uzbek voice is said openly to be synthetic
-  await expect(page.getByTestId('story-voice-note')).toContainText('vaqtinchalik sun’iy ovoz')
+  // the voice is said openly to be AI-made (and the older one for lines not recorded yet)
+  await expect(page.getByTestId('story-voice-note')).toContainText('sun’iy intellekt')
 
+  // nobody presses anything: the page is read from the real clips, then turns by itself
   const narrate = page.getByTestId('story-narrate')
-  await narrate.click()
   await expect(narrate).toHaveAttribute('aria-pressed', 'true')
-  // the page is read to its end from the real clips (no "not recorded" note)
-  await expect(narrate).toHaveAttribute('data-state', 'done', { timeout: 30_000 })
+  await expect(page.getByTestId('story-reader')).not.toHaveAttribute('data-page', 'p1', {
+    timeout: 30_000,
+  })
   await expect(page.getByTestId('story-note')).toHaveCount(0)
   for (const line of STORY_TEXT_UZ['star-night']!.pages.p1!) {
-    expect(clips).toContain(`/audio/voice/uz/${phraseKey('uz', line)}.mp3`)
+    // the girl's voice where recorded, else the standard clip
+    const key = phraseKey('uz', line)
+    expect(clips.some((clip) => clip.endsWith(`/uz/${key}.mp3`))).toBe(true)
   }
 })

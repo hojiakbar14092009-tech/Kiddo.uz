@@ -19,6 +19,7 @@ import { letterIn, type QuestionProps } from './shared'
 
 type ChoiceKind = Exclude<WordQuestion, BuildQuestion>
 import { useStable } from './useStable'
+import { AUTO_NEXT_MIN_MS, useAfterVoice } from '@/services/audio/afterVoice'
 
 /** Questions answered by choosing one card: ages 4 and 6. */
 export function ChoiceQuestion({
@@ -68,6 +69,8 @@ export function ChoiceQuestion({
   const instruct = useStable(() => say('instruct', { text: prompt, emoji: '👀' }))
   useEffect(() => instruct(), [instruct])
 
+  const { goOn } = useAfterVoice()
+
   const choose = (id: string) => {
     if (solved) return
     const correct = id === right
@@ -87,6 +90,8 @@ export function ChoiceQuestion({
         },
         explanation,
       )
+      // once the robot has said it, on to the next question by itself ("Next" stays)
+      goOn(onNext, AUTO_NEXT_MIN_MS)
     } else {
       setStatuses((old) => ({ ...old, [id]: 'wrong' }))
       setStuck(true)

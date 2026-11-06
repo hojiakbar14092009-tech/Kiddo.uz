@@ -144,7 +144,7 @@ describe('speaker button on a learning screen', () => {
     )
   })
 
-  it('feedback under the same question does not read the question again', async () => {
+  it('feedback under the same question is read on its own, without the question again', async () => {
     useSettingsStore.setState({ autoVoice: true })
     render(
       <MemoryRouter>
@@ -158,7 +158,12 @@ describe('speaker button on a learning screen', () => {
     const before = voiceHowls().length
     await act(() => fireEvent.click(screen.getByText('answer')))
     await new Promise((resolve) => setTimeout(resolve, 700))
-    expect(voiceHowls().slice(before)).toEqual([])
+    // only the new line: a child who cannot read hears the praise, not the question twice
+    expect(
+      voiceHowls()
+        .slice(before)
+        .map((howl) => howl.options.src[0]),
+    ).toEqual([url('en', rings('en'))])
   })
 
   it('a page left before the moment passes reads nothing of it', async () => {

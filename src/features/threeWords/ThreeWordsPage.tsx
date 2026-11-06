@@ -43,7 +43,7 @@ export function ThreeWordsPage() {
     setPlaying((current) => (current === language ? null : current))
     if (outcome === 'muted')
       react('instruct', { text: t('learn.voiceMuted'), emoji: '🔇' }, { speak: false })
-    else if (outcome === 'missing' || outcome === 'error') {
+    else if (outcome === 'error') {
       react('instruct', { text: t('learn.voiceError'), emoji: '📖' }, { speak: false })
     }
   }

@@ -5,7 +5,7 @@ import { canUse } from '@/store/subscriptionStore'
 import { speech, type SpeakOptions } from './speech'
 import { useFamilyStore } from '@/store/familyStore'
 import { planSpeech, type SpeechPart, type VoiceClip } from './voiceLibrary'
-import { kidVoiceFor } from './kidVoices'
+import { kidVoiceOf } from './kidVoices'
 import { resolveClips, voiceMode } from './voiceSource'
 import { requestTts } from './remoteTts'
 import { noteSuccessSound, setNarrating } from './soundLanguage'
@@ -30,7 +30,15 @@ export interface Utterance {
    * letter, a pause, then its word, so a young child hears them apart).
    */
   pauseAfterMs?: number
+  /**
+   * A recording made on this device (the child's name, said by a parent), played as it
+   * is instead of `text`; `format` is its file type for the player ('webm', 'mp4').
+   */
+  recording?: { url: string; format: string }
 }
+
+/** A planned piece of speech, or a recording from this device. */
+type Part = SpeechPart | { kind: 'local'; url: string; format: string }
 
 export type VoiceOptions = Omit<SpeakOptions, 'volume'> & { language: Language }
 
@@ -141,20 +149,30 @@ class AudioManager {
     this.setStatus('loading')
     // In private voice mode clips come as signed URLs, checked for PRO on the server.
     const isPrivate = voiceMode() === 'private'
-    // a girl hears the girl's voice, a boy the boy's (where recorded; not in private mode)
-    const kidVoice = isPrivate ? null : kidVoiceFor(child?.gender)
+    // a girl hears the girl's voice, a boy the boy's (where recorded; not in private mode);
+    // a guest, or a profile without a gender, hears the robot on screen (the girl for a guest)
+    const kidVoice = isPrivate ? null : kidVoiceOf(child)
     // An English cheer (“Yahoooo!”) in any language uses the English recordings.
     const clipLanguage = options.locale?.startsWith('en') ? 'en' : options.language
     let played = 0
     let missing = 0
     let failed = 0
     try {
-      const parts: SpeechPart[] = []
+      const parts: Part[] = []
       // after which part a pause comes (the last part of an item with pauseAfterMs)
       const pauses = new Map<number, number>()
-      const spoken = items.filter((item) => item.text.trim())
+      const spoken = items.filter((item) => item.recording || item.text.trim())
       for (const [index, item] of spoken.entries()) {
-        parts.push(...(await planSpeech(clipLanguage, item.text, name, kidVoice)))
+        if (item.recording) parts.push({ kind: 'local', ...item.recording })
+        else {
+          for (const part of await planSpeech(clipLanguage, item.text, name, kidVoice)) {
+            parts.push(part)
+            // the short quiet between the pieces of one sentence (numbers, lists)
+            if (part.kind === 'clip' && part.pauseAfterMs) {
+              pauses.set(parts.length - 1, part.pauseAfterMs)
+            }
+          }
+        }
         const pause = Math.max(0, Math.min(MAX_PAUSE_MS, item.pauseAfterMs ?? 0))
         if (pause > 0 && index < spoken.length - 1 && parts.length > 0) {
           pauses.set(parts.length - 1, pause)
@@ -182,7 +200,12 @@ class AudioManager {
           await this.pause(pause)
           if (generation !== this.generation) return 'cancelled'
         }
-        if (part.kind === 'clip') {
+        if (part.kind === 'local') {
+          const result = await this.playClip(part.url, volume, generation, part.format)
+          if (result === 'error') failed += 1
+          else if (result === 'stopped') return 'cancelled'
+          else played += 1
+        } else if (part.kind === 'clip') {
           let url: string | null = part.url
           if (isPrivate) {
             if (clipsFailed) {
@@ -203,7 +226,7 @@ class AudioManager {
             missing += 1
             continue
           }
-          const result = await this.playClip(url, volume, generation, isPrivate)
+          const result = await this.playClip(url, volume, generation, isPrivate ? 'mp3' : undefined)
           if (result === 'error') failed += 1
           else if (result === 'stopped') return 'cancelled'
           else played += 1
@@ -221,7 +244,7 @@ class AudioManager {
               continue
             }
             if (remote.status === 'ok') {
-              const result = await this.playClip(remote.url, volume, generation, true)
+              const result = await this.playClip(remote.url, volume, generation, 'mp3')
               if (result === 'error') failed += 1
               else if (result === 'stopped') return 'cancelled'
               else played += 1
@@ -325,7 +348,8 @@ class AudioManager {
     src: string,
     volume: number,
     generation: number,
-    remote = false,
+    /** The file type when the URL does not show it (a signed URL, a recording on this device). */
+    format?: string,
   ): Promise<'ended' | 'stopped' | 'error'> {
     return new Promise((resolve) => {
       let settled = false
@@ -347,8 +371,8 @@ class AudioManager {
       }
       const howl: Howl = new Howl({
         src: [src],
-        // a signed URL's query string hides the file type from Howler
-        ...(remote ? { format: ['mp3'] } : {}),
+        // a signed URL's query string (or a blob: URL) hides the file type from Howler
+        ...(format ? { format: [format] } : {}),
         volume,
         onplay: () => {
           clearTimeout(timeout)

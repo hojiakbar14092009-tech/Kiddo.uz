@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Language } from '@/content/languages'
 import { ChoiceGrid, type ChoiceStatus } from '@/features/learn/ChoiceGrid'
 import { Img3D } from '@/features/learn/Img3D'
@@ -13,6 +13,7 @@ import { useChildKey } from '@/store/progressStore'
 import type { TaleSpec } from './content'
 import { checkOrderKey, pickChecks } from './logic'
 import type { TalesUi } from './ui'
+import { useAfterVoice } from '@/services/audio/afterVoice'
 
 /** The short check after a tale (test mode): first answers count, a later try only finishes the question. */
 export function TaleCheck({
@@ -38,7 +39,8 @@ export function TaleCheck({
   const [index, setIndex] = useState(0)
   const [statuses, setStatuses] = useState<Record<string, ChoiceStatus>>({})
   const [result, setResult] = useState<FinishedSession | null>(null)
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  // the next step waits for the praise to be said (and a short quiet moment)
+  const { goOn } = useAfterVoice()
   const question = questions[index]
   // the shared speaker button reads exactly the question on screen
   useSpeakable(result ? null : [question?.prompt])
@@ -50,8 +52,6 @@ export function TaleCheck({
       orderOf(questions, (q) => q.id),
     )
   }, [childKey, language, questions, setLastOrder, tale])
-
-  useEffect(() => () => clearTimeout(timer.current), [])
 
   useEffect(() => {
     if (!question || result) return
@@ -75,7 +75,7 @@ export function TaleCheck({
     setStatuses((current) => ({ ...current, [asset]: 'correct' }))
     say('correct')
     session.close(question)
-    timer.current = setTimeout(() => {
+    goOn(() => {
       setStatuses({})
       if (index + 1 < questions.length) setIndex(index + 1)
       else setResult(session.finish(questions.length))

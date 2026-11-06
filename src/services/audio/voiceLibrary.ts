@@ -2,6 +2,7 @@ import type { Language } from '@/content/languages'
 import { phraseKey, remoteSafeText, splitSentences, withoutName } from './phrases'
 import { kidClipUrl, loadKidManifest, type KidVoice } from './kidVoices'
 import { publicClipUrl } from './voicePaths'
+import { PIECE_PAUSE_MS, piecesOf } from './pieces'
 
 export type VoiceKind = 'letters' | 'words' | 'numbers' | 'phrases'
 
@@ -37,7 +38,14 @@ function loadManifest() {
  * the device at all (`remoteSafeText`). `text` is for the device voice only.
  */
 export type SpeechPart =
-  | { kind: 'clip'; url: string; language: Language; key: string }
+  | {
+      kind: 'clip'
+      url: string
+      language: Language
+      key: string
+      /** A short quiet after it: the pieces of one sentence (pieces.ts). */
+      pauseAfterMs?: number
+    }
   | { kind: 'tts'; text: string; remoteText: string | null }
 
 /**
@@ -54,17 +62,39 @@ export async function planSpeech(
 ): Promise<SpeechPart[]> {
   const recorded = (await loadManifest())[language]
   const kid = kidVoice ? (await loadKidManifest())[kidVoice][language] : null
-  return splitSentences(text).map((sentence): SpeechPart => {
-    for (const candidate of [sentence, withoutName(sentence, childName)]) {
-      if (!candidate) continue
-      const key = phraseKey(language, candidate)
-      if (kidVoice && kid?.has(key)) {
-        return { kind: 'clip', url: kidClipUrl(kidVoice, language, key), language, key }
+  return splitSentences(text).flatMap((sentence): SpeechPart[] => {
+    const candidates = [sentence, withoutName(sentence, childName)].filter(
+      (candidate): candidate is string => Boolean(candidate),
+    )
+    // the child's voice first: the whole sentence, or its pieces (numbers, lists)
+    if (kidVoice && kid) {
+      for (const candidate of candidates) {
+        const key = phraseKey(language, candidate)
+        if (kid.has(key)) {
+          return [{ kind: 'clip', url: kidClipUrl(kidVoice, language, key), language, key }]
+        }
       }
-      if (recorded.has(key)) {
-        return { kind: 'clip', url: publicClipUrl(language, key), language, key }
+      for (const candidate of candidates) {
+        const pieces = piecesOf(candidate, language, (piece) => kid.has(phraseKey(language, piece)))
+        if (!pieces) continue
+        return pieces.map((piece, index) => {
+          const key = phraseKey(language, piece)
+          return {
+            kind: 'clip',
+            url: kidClipUrl(kidVoice, language, key),
+            language,
+            key,
+            ...(index < pieces.length - 1 ? { pauseAfterMs: PIECE_PAUSE_MS } : {}),
+          }
+        })
       }
     }
-    return { kind: 'tts', text: sentence, remoteText: remoteSafeText(sentence, childName) }
+    for (const candidate of candidates) {
+      const key = phraseKey(language, candidate)
+      if (recorded.has(key)) {
+        return [{ kind: 'clip', url: publicClipUrl(language, key), language, key }]
+      }
+    }
+    return [{ kind: 'tts', text: sentence, remoteText: remoteSafeText(sentence, childName) }]
   })
 }

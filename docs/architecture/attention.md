@@ -31,6 +31,17 @@
 - **AI rule.** The kids app has no AI features; the face detector is the one
   exception, decided by the owner: on-device, opt-in by a grown-up, yes/no only.
 
+## Faster, by name in the parent's voice (children's voices update)
+
+- Turned away 2 s, out of the app 2 s, no touch 15 s at every age (`tracker.ts`). A
+  look-away met while the robot reads is not lost: it is tried again every half second
+  and the robot calls as soon as it is quiet.
+- The name: a parent records it once in the profile (`NameRecorder`, MediaRecorder, up to
+  3 s, listen and record again). It is kept only on this device (IndexedDB,
+  `nameVoice.ts`), never uploaded or synced, and deleted with the profile. The robot
+  plays it, then its own recorded line; without a recording the line is said without
+  the name (the bubble still shows it). The device voice no longer says the name.
+
 ## Science games (Phase 59)
 
 `/sci/water` (a droplet's trip: the water cycle in taps), `/sci/magnet` (only iron

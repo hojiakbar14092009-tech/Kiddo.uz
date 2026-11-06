@@ -23,7 +23,6 @@ export interface StoriesUi {
   stopReading: string
   autoTurn: string
   proNarration: string
-  noRecording: string
   narrationError: string
   narrationMuted: string
   theEnd: string
@@ -55,11 +54,10 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
     choose: 'Tanla:',
     readToMe: 'O‘qib ber',
     syntheticVoice:
-      'O‘zbekcha ovoz hozircha vaqtinchalik sun’iy ovoz (ona tilida so‘zlashuvchi odam ovozi emas) – haqiqiy o‘zbekcha ovoz tayyor bo‘lguncha.',
+      'O‘zbekchani sun’iy intellekt yaratgan bolalar ovozi o‘qiydi; hali yozilmagan gaplarni vaqtincha avvalgi sintez ovoz o‘qiydi.',
     stopReading: 'O‘qishni to‘xtat',
     autoTurn: 'Sahifani o‘zi varaqlasin',
     proNarration: 'Ovozli o‘qish PRO versiyada. Matnni birga o‘qiymiz!',
-    noRecording: 'Bu sahifaning ovozi hali yozilmagan. Matnni birga o‘qiymiz!',
     narrationError: 'Hozir ovozni yoqib bo‘lmadi. Matnni birga o‘qiymiz!',
     narrationMuted: 'Ovoz o‘chirilgan. Ota-onang ovozni balandroq qilishi mumkin.',
     theEnd: 'Tamom!',
@@ -89,11 +87,10 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
     choose: 'Выбери:',
     readToMe: 'Почитай мне',
     syntheticVoice:
-      'Узбекский голос пока временный синтезированный (не голос носителя языка) — до появления настоящего узбекского голоса.',
+      'Узбекский читают детские голоса, созданные искусственным интеллектом; ещё не записанные фразы пока читает прежний синтезированный голос.',
     stopReading: 'Остановить чтение',
     autoTurn: 'Листать страницы автоматически',
     proNarration: 'Чтение вслух — в PRO. А текст прочитаем вместе!',
-    noRecording: 'Голос для этой страницы ещё не записан. Прочитаем текст вместе!',
     narrationError: 'Сейчас не получилось включить голос. Прочитаем текст вместе!',
     narrationMuted: 'Звук выключен. Родители могут сделать его громче.',
     theEnd: 'Конец!',
@@ -123,11 +120,10 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
     choose: 'Choose:',
     readToMe: 'Read to me',
     syntheticVoice:
-      'For now the Uzbek voice is a temporary synthetic voice (not a native Uzbek speaker) until a real Uzbek voice is ready.',
+      'Uzbek is read by AI-generated children’s voices; lines not recorded yet are read by the earlier synthetic voice for now.',
     stopReading: 'Stop reading',
     autoTurn: 'Turn the pages for me',
     proNarration: 'Reading aloud is in PRO. Let’s read the words together!',
-    noRecording: 'This page is not recorded yet. Let’s read the words together!',
     narrationError: 'The voice could not start just now. Let’s read the words together!',
     narrationMuted: 'The sound is off. A parent can turn it up.',
     theEnd: 'The end!',

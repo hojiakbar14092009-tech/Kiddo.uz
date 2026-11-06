@@ -28,7 +28,6 @@ import { useStoriesUi, useStoryLanguage, type StoriesUi } from './ui'
 import { useNarration, type NarrationProblem } from './useNarration'
 
 function problemNote(ui: StoriesUi, problem: NarrationProblem): string {
-  if (problem === 'missing') return ui.noRecording
   if (problem === 'muted') return ui.narrationMuted
   if (problem === 'locked') return ui.proNarration
   return ui.narrationError

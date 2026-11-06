@@ -7,7 +7,9 @@
 function isPictograph(char: string): boolean {
   const code = char.codePointAt(0) ?? 0
   return (
-    (code >= 0x2190 && code <= 0x2bff) ||
+    // arrows and symbols, but not the maths operators (U+2200–22FF): "3 − 1 = 2" keeps its minus
+    (code >= 0x2190 && code <= 0x21ff) ||
+    (code >= 0x2300 && code <= 0x2bff) ||
     (code >= 0x1f000 && code <= 0x1ffff) ||
     code === 0xfe0f ||
     code === 0x200d ||

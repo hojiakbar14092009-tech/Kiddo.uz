@@ -25,6 +25,7 @@ import { BoneShape, ChoiceName, DinoFrame, DinoPicture, StartCard } from './part
 import { DinoResult } from './run'
 import { NEXT_DELAY_MS, useDinoRecorder, useStepLabel, type DinoFinished } from './session'
 import { fill, useDinoText } from './text'
+import { useAfterVoice } from '@/services/audio/afterVoice'
 
 const BACK = DINO_ROOT
 
@@ -198,9 +199,9 @@ function DigRun({ level, onAgain }: { level: ChallengeLevel; onAgain: () => void
   const [solved, setSolved] = useState(false)
   const [firstTry, setFirstTry] = useState(0)
   const [finished, setFinished] = useState<DinoFinished | null>(null)
-  const timer = useRef<number | undefined>(undefined)
+  // the next step waits for the praise to be said (and a short quiet moment)
+  const { goOn } = useAfterVoice()
   const question = useRef<HTMLDivElement>(null)
-  useEffect(() => () => window.clearTimeout(timer.current), [])
 
   useEffect(() => {
     reset()
@@ -242,9 +243,9 @@ function DigRun({ level, onAgain }: { level: ChallengeLevel; onAgain: () => void
       say('correct')
       if (index + 1 >= bones.length) {
         const done = record({ total: bones.length, firstTry: right })
-        timer.current = window.setTimeout(() => done && setFinished(done), NEXT_DELAY_MS)
+        goOn(() => done && setFinished(done), NEXT_DELAY_MS)
       } else {
-        timer.current = window.setTimeout(() => {
+        goOn(() => {
           setIndex(index + 1)
           setUncovered(false)
           setStatuses({})
