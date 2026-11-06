@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { useInView } from '@/components/three/useInView'
 import { prepareRenderer } from '@/components/three/prepareRenderer'
+import { mascotQuality } from '@/features/mascot/webgl'
 
 export interface PictureModel3DProps {
   /** File name in /pictures, without “.svg”. */
@@ -202,6 +203,8 @@ export default function PictureModel3D({
   const inView = useInView(frame)
   const [compiled, setCompiled] = useState<string | null>(null)
   const markCompiled = useCallback(() => setCompiled(file), [file])
+  // the soft studio light costs ≈ 0.5 s of blocked main thread to filter: weak devices go without
+  const [studioLight] = useState(() => mascotQuality() === 'high')
 
   useEffect(() => {
     let alive = true
@@ -231,14 +234,16 @@ export default function PictureModel3D({
           gl.domElement.addEventListener('webglcontextlost', onFail, { once: true })
         }}
       >
-        <ambientLight intensity={0.7} />
+        <ambientLight intensity={studioLight ? 0.7 : 1.2} />
         <directionalLight position={[3, 5, 6]} intensity={1.6} castShadow />
         <directionalLight position={[-4, -2, -5]} intensity={0.6} />
-        <Environment resolution={64} frames={1}>
-          <Lightformer intensity={2} position={[0, 3, 4]} scale={[6, 2, 1]} />
-          <Lightformer intensity={1} position={[-4, 1, 2]} scale={[2, 4, 1]} color="#FFF0C2" />
-          <Lightformer intensity={1} position={[4, 1, 2]} scale={[2, 4, 1]} color="#DDEEFC" />
-        </Environment>
+        {studioLight && (
+          <Environment resolution={64} frames={1}>
+            <Lightformer intensity={2} position={[0, 3, 4]} scale={[6, 2, 1]} />
+            <Lightformer intensity={1} position={[-4, 1, 2]} scale={[2, 4, 1]} color="#FFF0C2" />
+            <Lightformer intensity={1} position={[4, 1, 2]} scale={[2, 4, 1]} color="#DDEEFC" />
+          </Environment>
+        )}
         {model?.file === file && <Model built={model.built} />}
         {model?.file === file && <CompileFirst key={file} onDone={markCompiled} />}
         <ContactShadows position={[0, -1.9, 0]} opacity={0.3} scale={6} blur={2.4} far={3} />

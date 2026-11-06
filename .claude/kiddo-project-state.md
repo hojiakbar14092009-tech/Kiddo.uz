@@ -837,3 +837,5 @@ Skriptlar sessiya scratchpad'ida edi (repo'da emas).
   30 fps render'i main thread'ni yeydi ("(program)" 5,7 s/8 s). Chrome haqiqiy foydalanuvchilarda
   SwiftShader'ga avtomatik o'tishni bekor qilgan, shuning uchun mahsulot o'zgartirilmadi.
   Yangi build: 15/18 yiqildi (oldin 16/18) — regressiya yo'q.
+
+- 2026-11-07 qo'shimcha: PictureModel3D (alifbo 3D rasmi) past sifatda (`mascotQuality()==="low"`) drei `<Environment>` chizmaydi (PMREM ~0,5 s sinxron), o'rniga ambientLight 1.2. Mascot (Character3D) buni oldindan qilardi.
