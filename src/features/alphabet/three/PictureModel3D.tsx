@@ -1,6 +1,6 @@
 import { ContactShadows, Environment, Lightformer, OrbitControls } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
-import { useEffect, useRef, useState } from 'react'
+import { Canvas, useThree } from '@react-three/fiber'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { useInView } from '@/components/three/useInView'
@@ -170,6 +170,22 @@ function Model({ built }: { built: Built }) {
   )
 }
 
+/** Links the scene's shaders in the background, then says so: the first frame never waits for the driver. */
+function CompileFirst({ onDone }: { onDone: () => void }) {
+  const { gl, scene, camera } = useThree()
+  useEffect(() => {
+    let alive = true
+    void gl
+      .compileAsync(scene, camera)
+      .catch(() => undefined)
+      .then(() => alive && onDone())
+    return () => {
+      alive = false
+    }
+  }, [gl, scene, camera, onDone])
+  return null
+}
+
 /**
  * The letter’s picture as a real 3D toy: built from the same drawing, given
  * thickness and rounded edges, and turned with a finger (or the mouse).
@@ -184,6 +200,8 @@ export default function PictureModel3D({
   // the picture turns by itself while on screen, and draws nothing once scrolled away
   const frame = useRef<HTMLDivElement>(null)
   const inView = useInView(frame)
+  const [compiled, setCompiled] = useState<string | null>(null)
+  const markCompiled = useCallback(() => setCompiled(file), [file])
 
   useEffect(() => {
     let alive = true
@@ -204,7 +222,7 @@ export default function PictureModel3D({
   return (
     <div ref={frame} role="img" aria-label={label} className="size-full touch-none">
       <Canvas
-        frameloop={inView ? 'always' : 'never'}
+        frameloop={inView && compiled === file ? 'always' : 'never'}
         camera={{ position: [0, 0.4, 6.2], fov: 38 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
@@ -222,6 +240,7 @@ export default function PictureModel3D({
           <Lightformer intensity={1} position={[4, 1, 2]} scale={[2, 4, 1]} color="#DDEEFC" />
         </Environment>
         {model?.file === file && <Model built={model.built} />}
+        {model?.file === file && <CompileFirst key={file} onDone={markCompiled} />}
         <ContactShadows position={[0, -1.9, 0]} opacity={0.3} scale={6} blur={2.4} far={3} />
         <OrbitControls
           enablePan={false}

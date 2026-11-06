@@ -25,8 +25,11 @@ describe('security headers', () => {
   })
 
   it('scripts only from Kiddo itself: no inline or eval code', () => {
-    expect(directive('script-src')).toBe("script-src 'self'")
-    expect(header('Content-Security-Policy')).not.toContain('unsafe-eval')
+    // WebAssembly only (the mascots' meshopt decoder): without it no 3D mascot loads
+    expect(directive('script-src')).toBe("script-src 'self' 'wasm-unsafe-eval'")
+    expect(
+      header('Content-Security-Policy').replaceAll("'wasm-unsafe-eval'", ''),
+    ).not.toContain('unsafe-eval')
   })
 
   it('no plugins, no other site may frame Kiddo, no base or form hijack', () => {

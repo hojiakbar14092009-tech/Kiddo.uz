@@ -69,7 +69,8 @@ private voice bucket, every Phase 13 fix) on a local PostgreSQL:
 ## Browser
 
 - Security headers for every response in `vercel.json` (CSP with
-  `script-src 'self'`, no framing, `nosniff`, a short referrer, no camera /
+  `script-src 'self' 'wasm-unsafe-eval'` (WebAssembly only, for the mascots'
+  meshopt decoder; no JS eval), no framing, `nosniff`, a short referrer, no camera /
   microphone / location); checked against the running app (27 routes, no
   violation) and kept by `src/app/securityHeaders.test.ts`. The stored
   language's chunk is preloaded by `/lang-preload.js`, a file, so no inline

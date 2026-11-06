@@ -810,3 +810,30 @@ Realtime private-only; Vercel `VITE_SUPABASE_*`; schedule `ai_housekeeping()`; B
 - `e2e/dino.spec.ts:39`, `e2e/feelings.spec.ts:36/63` — planshetda (HEAD'da yiqilgan; bu yugurishda o‘tdi).
 - vitest to‘liq yugurishda 5 ta yuklama beqarorligi (admin, adminPin, analytics, analyticsCloud, myStory):
   alohida yugurilsa o‘tadi.
+
+## Qotish va sekin yuklanish (2026-11-07)
+
+O'lchov: Playwright (Chromium, GPU bilan va GPU'siz) — long tasks, network, console, CDP profil.
+Skriptlar sessiya scratchpad'ida edi (repo'da emas).
+
+- **Sabab 1 — CSP WebAssembly'ni bloklagan** (`vercel.json`, `script-src 'self'`): mascot va ertak
+  hayvonlarining GLB'lari meshopt WASM dekoderi bilan ochiladi → prod'da har sahifada
+  `WebAssembly.instantiate(): Refused…`, 3D mascot hech qachon chiqmagan, muvaffaqiyatsiz yuklash
+  keshlanmagani uchun GLB har sahifada qayta yuklangan. Tuzatish: `'wasm-unsafe-eval'` (faqat WASM,
+  JS eval emas); `securityHeaders.test.ts` shunga moslashtirildi. Lokal tekshiruv (CSP bilan):
+  eski — canvas 0, 2 xato; yangi — canvas 1, 0 xato.
+- **Sabab 2 — shader'lar birinchi kadrda sinxron link qilinadi** (three `WebGLUniforms` →
+  `getProgramParameter`, CDP profil: `Us … getUniforms`): har sahifada yangi WebGL kontekst → ~1 s
+  (GPU'li desktop) main thread bloki. Tuzatish: `Character3D.tsx` modelni ko'rsatishdan oldin
+  `gl.compileAsync`, `PictureModel3D.tsx` `CompileFirst` (kompilyatsiya tugaguncha `frameloop='never'`).
+- Oldin → keyin (lokal prod build, GPU, eng uzun long task, 2 yugurish): math-lab 2362/1193 → 123/91 ms;
+  alphabet/a 381/260 → 84/73; worlds/dino 486/401 → 177/140; qolganlari ≤ 263 ms.
+  Math Lab javob→keyingi savol 1,35 s (NEXT_DELAY_MS 1100, dizayn bo'yicha).
+- Qolgan: drei `<Environment>` PMREM GGX shader'i har Canvas'da ~0,5 s sinxron (async qilib bo'lmaydi;
+  kerak bo'lsa past sifatda Environment'ni o'chirish).
+- Ovoz yo'li sabab EMAS: mp3 404/kutib qolgan so'rov yo'q, kidVoiceManifest 25 KB (24 MB emas),
+  planSpeech/pieces arzon, afterVoice/audioManager navbati bloklamaydi.
+- E2E Math Lab yiqilishlari (HEAD'da ham 16/18) — GPU'siz headless (SwiftShader) muhitda mascot'ning
+  30 fps render'i main thread'ni yeydi ("(program)" 5,7 s/8 s). Chrome haqiqiy foydalanuvchilarda
+  SwiftShader'ga avtomatik o'tishni bekor qilgan, shuning uchun mahsulot o'zgartirilmadi.
+  Yangi build: 15/18 yiqildi (oldin 16/18) — regressiya yo'q.

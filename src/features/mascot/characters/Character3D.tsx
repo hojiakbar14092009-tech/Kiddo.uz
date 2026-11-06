@@ -198,6 +198,7 @@ function Scene({
   const camera = useThree((state) => state.camera as THREE.PerspectiveCamera)
   const size = useThree((state) => state.size)
   const gl = useThree((state) => state.gl)
+  const scene = useThree((state) => state.scene)
   const invalidate = useThree((state) => state.invalidate)
   const accent = palette?.accent
   const glow = palette?.glow
@@ -217,10 +218,18 @@ function Scene({
           palette: accent && glow ? { accent, glow } : undefined,
           seed: def.id.length * 7919 + 13,
         })
-        ctrl.current = made
         const owner = made
-        director.setDurations((perf) => owner.durationMs(perf.gesture))
-        setController(made)
+        // shaders are linked in the background first: the first frame otherwise waits for the
+        // driver on the main thread (≈ 1 s on a desktop GPU, far more on a weak phone)
+        void gl
+          .compileAsync(owner.root, camera, scene)
+          .catch(() => undefined)
+          .then(() => {
+            if (!alive) return
+            ctrl.current = owner
+            director.setDurations((perf) => owner.durationMs(perf.gesture))
+            setController(owner)
+          })
       },
       (error: unknown) => {
         if (!alive) return
@@ -234,7 +243,7 @@ function Scene({
       ctrl.current = null
       release(def.model)
     }
-  }, [def, accent, glow, director])
+  }, [def, accent, glow, director, gl, camera, scene])
 
   // fit the camera to this mascot (tall Scribble, wide Leafy, small Story)
   useEffect(() => {
