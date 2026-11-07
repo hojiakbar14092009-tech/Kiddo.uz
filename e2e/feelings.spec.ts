@@ -26,7 +26,8 @@ async function playRun(page: Page) {
       // never "wrong": another look or another idea
       await expect(page.getByTestId('feelings-feedback')).not.toContainText(/noto‘g‘ri/i)
     }
-    await next.click()
+    // the game may already have moved on by itself (afterVoice) after a short clip: no button then
+    await next.click({ timeout: 3_000 }).catch(() => {})
   }
 }
 

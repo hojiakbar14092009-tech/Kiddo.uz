@@ -839,3 +839,20 @@ Skriptlar sessiya scratchpad'ida edi (repo'da emas).
   Yangi build: 15/18 yiqildi (oldin 16/18) — regressiya yo'q.
 
 - 2026-11-07 qo'shimcha: PictureModel3D (alifbo 3D rasmi) past sifatda (`mascotQuality()==="low"`) drei `<Environment>` chizmaydi (PMREM ~0,5 s sinxron), o'rniga ambientLight 1.2. Mascot (Character3D) buni oldindan qilardi.
+
+## Uzbek kid voices, hybrid method (Mini / Piku)
+
+- Mini (girl, nUX4UWK0Tf1qh5zvFZWR) and Piku (boy, EeQEodFZVtBkjtgK3HBc) are English voices and read Uzbek letter by letter.
+  New method: edge-tts `uz-UZ-MadinaNeural` / `SardorNeural` (rate/pitch by kind of sentence) → ElevenLabs
+  Speech-to-Speech (`eleven_multilingual_sts_v2`, stability 0.5, similarity 0.8) → trim + -16 LUFS (2 passes).
+  Script: `scripts/voices/kid_voices_sts.py` (`--plan` spends nothing; `--budget`, `--reserve`; needs `pip install edge-tts`
+  and a key with TTS, speech_to_speech, user_read). It overwrites an old clip only when the new one is whole.
+- Ledger of new clips: `~/kid-voices-sts/log.jsonl` (outside the repo); a rerun skips what it lists. Spot checks: `~/kid-check`, `~/kid-check2`.
+- Done (uz): 1111 girl / 1109 boy clips (tiers 1–3 all: mascot, attention, reward, welcome, findHome, mathLab, alphabet, numbers,
+  sciGames, shop, task; tier 4 "known" 260 of 262 phrases). ~21 200 credits. Not recorded: tiers 5–6 (feelings, learnFirst, tutor,
+  myStory, rest, exam, birthday, the rest ≈ 1 600 phrases, ≈ 50 000 more credits) and ru/en (still Candy/Teddy / standard clips).
+  Tiers 5–6 need a new plan and credits next month: `python scripts/voices/kid_voices_sts.py --budget N`.
+- Skipped (edge-tts has no audio for a lone symbol): the phrases `?` and `/`. The run ended on a read timeout at the credit reserve; rerun resumes.
+- New clips are shorter (mean 1.65 s vs 2.38 s), so the app auto-advances (afterVoice) sooner. e2e `feelings.spec.ts` playRun raced
+  that (clicked "Keyingisi" after the game had moved on); its click is now tolerant (`{ timeout: 3_000 }.catch`).
+- Not committed or pushed (waiting for "push qil").
