@@ -2875,7 +2875,44 @@ export const en: Translation = {
     toPro: 'About PRO',
     enough: 'That’s enough cartoons for now! Let’s play.',
     loadError: 'The cartoon didn’t open. Try again.',
+    tryAgain: 'Try again!',
+    captionSize: 'Text size',
     items: {
+      crossing: {
+        title: 'How do we cross the street?',
+        text: 'Practise crossing together with a grown-up: every time, “stop, look, listen”.',
+        quiz: { q: 'What do we do at a red light?', a0: 'we stop', a1: 'we run' },
+      },
+      bread: {
+        title: 'Where does bread come from?',
+        text: 'Break bread together and say “it started as wheat”: respect for work begins there.',
+        quiz: { q: 'What does bread start from?', a0: 'wheat', a1: 'apple', a2: 'milk' },
+      },
+      tree: {
+        title: 'From a seed to a tree',
+        text: 'Plant a seed together and water it daily: your child will watch it grow.',
+        quiz: { q: 'What does a seed need to grow?', a0: 'water, sun and soil', a1: 'sweets', a2: 'a toy' },
+      },
+      rainbow: {
+        title: 'How does a rainbow appear?',
+        text: 'After rain, look at the sky together. At home, a glass of water in the sun can make a small rainbow.',
+        quiz: { q: 'How many colours does a rainbow have?', a0: 'five', a1: 'seven' },
+      },
+      dayCycle: {
+        title: 'Why do day and night change?',
+        text: 'Try a lamp and a ball: turn the ball slowly, the lit side is daytime.',
+        quiz: { q: 'What changes day into night?', a0: 'the Earth turns', a1: 'a cloud', a2: 'the Moon' },
+      },
+      calm: {
+        title: 'What do I do when I am angry?',
+        text: 'Practise “balloon breathing” in calm moments too: your child will remember it when needed.',
+        quiz: { q: 'What do we do when we are angry?', a0: 'balloon breathing', a1: 'we shout' },
+      },
+      teeth: {
+        title: 'Why do I brush my teeth?',
+        text: 'Two minutes morning and evening, with a pea-sized dab of toothpaste; a grown-up helps little ones.',
+        quiz: { q: 'How many minutes do we brush?', a0: 'one minute', a1: 'two minutes', a2: 'five minutes' },
+      },
       scale: { title: 'The scale’s secret', text: 'When is a scale level?' },
       robot: { title: 'Show the robot the way', text: 'A first program made of arrows.' },
       train: { title: 'The word train', text: 'Building words from letters.' },

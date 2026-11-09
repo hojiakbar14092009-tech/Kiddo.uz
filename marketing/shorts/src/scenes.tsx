@@ -31,7 +31,7 @@ type Scene = React.FC<SceneProps>
 // shared scenes
 // ---------------------------------------------------------------------------
 
-const HERO: Record<ShortId, string> = {
+export const HERO: Record<ShortId, string> = {
   water: 'rain-cloud',
   magnet: 'key',
   float: 'boat',

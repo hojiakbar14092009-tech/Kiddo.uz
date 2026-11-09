@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {
   AbsoluteFill,
   Easing,
@@ -9,10 +9,11 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion'
-import { C, H, THEME, W, type ShortId } from './data'
+import { C, H, THEME, W } from './data'
+import { CamCtx } from './camera'
 import { BODY, DISPLAY } from './fonts'
 
-const DARK_SKIES = new Set<ShortId>(['planets', 'dayNight'])
+const DARK_SKIES = new Set<string>(['planets', 'dayNight', 'dayCycle'])
 
 export const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const
 export const outEase = Easing.bezier(0.16, 1, 0.3, 1)
@@ -25,9 +26,23 @@ export function usePop(delay = 0, damping = 12, stiffness = 140): number {
 }
 
 /** The cartoon's sky: a soft gradient with two slow light clouds of colour. */
-export const Sky: React.FC<{ short: ShortId; night?: number }> = ({ short, night = 0 }) => {
+/** The sky is far away: it moves less than the camera does, so the scene has depth. */
+export const Sky: React.FC<{ short: string; night?: number }> = ({ short, night = 0 }) => {
+  const cam = useContext(CamCtx)
+  return (
+    <AbsoluteFill
+      style={{
+        transform: `translate(${-cam.x * 0.6}px, ${-cam.y * 0.6}px) scale(${cam.s / (1 + 0.6 * (cam.s - 1))})`,
+      }}
+    >
+      <SkyBase short={short} night={night} />
+    </AbsoluteFill>
+  )
+}
+
+const SkyBase: React.FC<{ short: string; night?: number }> = ({ short, night = 0 }) => {
   const frame = useCurrentFrame()
-  const theme = THEME[short]
+  const theme = THEME[short]!
   const drift = Math.sin(frame / 60) * 30
   return (
     <AbsoluteFill
@@ -187,7 +202,11 @@ export const Sea: React.FC<{ top: number; left?: number; width?: number; dark?: 
 }
 
 /** Green ground with a soft hill. */
-export const Ground: React.FC<{ top: number; color?: string }> = ({ top, color = '#8bc47a' }) => (
+export const Ground: React.FC<{ top: number; color?: string; bottom?: string }> = ({
+  top,
+  color = '#8bc47a',
+  bottom = '#5f9e4f',
+}) => (
   <div
     style={{
       position: 'absolute',
@@ -196,7 +215,7 @@ export const Ground: React.FC<{ top: number; color?: string }> = ({ top, color =
       top,
       bottom: -200,
       borderRadius: '50% 50% 0 0 / 120px 120px 0 0',
-      background: `linear-gradient(180deg, ${color} 0%, #5f9e4f 100%)`,
+      background: `linear-gradient(180deg, ${color} 0%, ${bottom} 100%)`,
     }}
   />
 )

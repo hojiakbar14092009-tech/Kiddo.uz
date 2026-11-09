@@ -250,6 +250,8 @@ test.describe('the cartoons', () => {
         .evaluate((v) => (v as HTMLVideoElement).currentTime > 0)
     // the first cartoon starts by itself
     await expect.poll(() => playing('water')).toBe(true)
+    // only the cartoon in view and the next one are videos; the other eleven are posters
+    await expect(page.getByTestId('shorts-feed').locator('video')).toHaveCount(2)
     await expect(page.getByTestId('shorts-free-left')).toContainText('1')
     // a child who does not swipe is shown how; the hand also moves on when tapped
     await expect(page.getByTestId('shorts-swipe-hint')).toBeVisible({ timeout: 15_000 })
@@ -267,5 +269,58 @@ test.describe('the cartoons', () => {
       })
     await expect(page.getByTestId('short-float')).toHaveAttribute('data-locked', 'true')
     await expect(page.getByTestId('short-float').getByTestId('shorts-pro')).toBeVisible()
+  })
+
+  test('a lesson ends with a question: a wrong picture tries again, the right one earns', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000)
+    await child(page, 'denied')
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'kiddo.subscription',
+        JSON.stringify({
+          state: { plan: 'lifetime', expiresAt: null, source: 'promo', usedPromoCodes: [] },
+          version: 2,
+        }),
+      )
+    })
+    const clip = readFileSync(new URL('./fixtures/short.webm', import.meta.url))
+    await page.route('**/video/shorts/**/*.mp4', (route) =>
+      route.fulfill({ body: clip, contentType: 'video/webm' }),
+    )
+    await ready(page, '/shorts')
+    await page
+      .getByTestId('shorts-feed')
+      .locator('div')
+      .first()
+      .evaluate((feed) => {
+        feed.scrollTo(0, feed.clientHeight * 13)
+      })
+    const lesson = page.getByTestId('short-crossing')
+    await expect(lesson.getByTestId('short-ended')).toBeVisible({ timeout: 30_000 })
+    await lesson.getByTestId('short-quiz-1').click()
+    await expect(lesson.getByTestId('short-quiz-won')).toHaveCount(0)
+    await lesson.getByTestId('short-quiz-0').click()
+    await expect(lesson.getByTestId('short-quiz-won')).toBeVisible()
+  })
+
+  test('calm motion: no cartoon starts by itself, a tap does', async ({ page }) => {
+    test.setTimeout(60_000)
+    await child(page, 'denied')
+    const clip = readFileSync(new URL('./fixtures/short.webm', import.meta.url))
+    await page.route('**/video/shorts/**/*.mp4', (route) =>
+      route.fulfill({ body: clip, contentType: 'video/webm' }),
+    )
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await ready(page, '/shorts')
+    const water = page.getByTestId('short-water')
+    await expect(water.getByTestId('short-toggle')).toBeVisible()
+    await page.waitForTimeout(1500)
+    expect(await water.locator('video').evaluate((v) => (v as HTMLVideoElement).paused)).toBe(true)
+    await water.getByTestId('short-toggle').click()
+    await expect
+      .poll(() => water.locator('video').evaluate((v) => (v as HTMLVideoElement).currentTime > 0))
+      .toBe(true)
   })
 })

@@ -52,7 +52,7 @@ and in the attention helper's offer.
 
 ## Cartoons (Phases 60–61)
 
-- `/shorts`: six vertical cartoons (`shorts/catalog.ts`), one opened at a time,
+- `/shorts`: thirteen vertical cartoons (`shorts/catalog.ts`), one opened at a time,
   nothing plays on by itself, four per sitting and then the robot suggests a game.
   Watching counts towards the daily screen time like any child screen.
 - **Free** opens two different cartoons (and may rewatch those); the rest show a
@@ -205,3 +205,21 @@ and in the attention helper's offer.
   not a card at the bottom of Home.
 - A test checks that O‘rgan and Kashf et still lead to every learning building.
 - Reference pictures for the coming 3D work are kept in `docs/reference/`.
+
+## Cartoons, filmed again (Phase 75)
+
+- **No words in the picture.** The app writes the title (first 2.5 s) and the subtitles (`features/shorts/captions.ts`: karaoke,
+  word by word from `marketing/shorts/src/timings.json`, at the bottom, at most 20 % of the screen, size button "Aa").
+  A cartoon with `bare: true` in the catalog is rendered that way; the app adds nothing over a cartoon without it.
+- **Virtualization.** Only the cartoon in view and the next one are `<video>` (`isLive`); the others are posters. Progress and subtitles
+  follow the picture with `requestAnimationFrame` and refs, not `timeupdate` state. `prefers-reduced-motion`: nothing starts by itself.
+- **The film engine** (`marketing/shorts/src`): `rig.tsx` (Mini = Lumi, Piku = KidoBot cut into head, body, ears, antenna: breathing,
+  squash and stretch, nods, follow-through, blinks, mouth by the loudness of the voice), `camera.tsx` (eased push/pull/pan, the sky
+  lags behind it), `story.tsx` (dialogue stories from plain scene data, soft dissolves, no flashes), `Cartoon.tsx` (the first twelve,
+  same engine, Piku narrates their old recordings, mixed back in by `render-one.sh`).
+- **Dialogue lessons.** `water` (16 lines, voiced) and seven new lessons (`crossing bread tree rainbow dayCycle calm teeth`) live in
+  `marketing/shorts/dialogue.json` (uz/ru/en per line, who speaks); `docs/shorts/scripts.md` is generated from it. One video serves every
+  language (`single`): the voice is Uzbek, the words are the app's. Each lesson ends with a question of two or three pictures
+  (`ShortQuiz`, a wrong picture only shakes, the right one counts as activity `short:<id>` once a day).
+- **Voices.** `voice_sts.py` (edge-tts + ElevenLabs STS, capped by budget and reserve); the rest and the numbers are in
+  `docs/shorts/VOICE-NEXT.md`. Sources and licences of every sound and picture: `docs/shorts/LICENSES.md`.

@@ -4,162 +4,154 @@ import {
   AbsoluteFill,
   continueRender,
   delayRender,
-  Easing,
   interpolate,
   Sequence,
-  Series,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion'
+import { Camera, MOVES } from './camera'
 import {
   ENDING,
-  FPS,
   OPENING,
   sceneFrames,
   timing,
-  VOICE_IN,
   voiceFile,
+  VOICE_IN,
   type Lang,
   type ShortId,
 } from './data'
 import { fontsReady } from './fonts'
-import { Caption, Robot } from './parts'
-import { DARK_SCENES, PlayScene, SCENES, TitleCard } from './scenes'
+import { Art, Ground, Sky, clamp } from './parts'
+import { Actor } from './rig'
+import { HERO, PlayScene, SCENES } from './scenes'
+import { Dissolve, TR } from './story'
+import legacyAmp from './amp-legacy.json'
 
-export type CartoonProps = { short: ShortId; lang: Lang }
+/*
+ * The first thirteen cartoons, filmed the new way: no words in the picture (the app writes
+ * the title and the subtitles), a dissolve between scenes, a camera that drifts while the sky
+ * lags behind it, and Piku (KidoBot) who breathes, blinks and speaks the narration with his
+ * mouth following the voice. The voice and music come from the old recordings, mixed in
+ * afterwards (`silent`), until the cartoons are voiced again as Mini and Piku talking.
+ */
+
+export type CartoonProps = { short: ShortId; lang: Lang; silent?: boolean }
 
 const waitForFonts = delayRender('fonts')
 fontsReady.then(() => continueRender(waitForFonts))
 
-/** Talks while its line plays: the robot bounces. */
-const TalkingRobot: React.FC<{ seconds: number }> = ({ seconds }) => {
-  const frame = useCurrentFrame()
-  const talking = frame >= VOICE_IN && frame < VOICE_IN + seconds * FPS
-  return <Robot talking={talking} />
-}
+const FEET = 1010
+const SIZE = 210
+const X = 530
 
-/**
- * A new scene breathes in (Phase 72): it opens from a soft light instead of a flash
- * and a quiet whoosh of air carries it in.
- */
-const Swoosh: React.FC = () => {
-  const frame = useCurrentFrame()
-  return (
-    <>
-      <AbsoluteFill
-        style={{
-          background:
-            'radial-gradient(circle at 50% 40%, rgba(255,250,235,0.55), rgba(255,250,235,0))',
-          opacity: interpolate(frame, [0, 10], [1, 0], {
-            extrapolateRight: 'clamp',
-            easing: Easing.out(Easing.quad),
-          }),
-          pointerEvents: 'none',
-        }}
-      />
-      <Audio src={staticFile('sfx/whoosh.wav')} volume={0.22} />
-    </>
-  )
-}
+const Opening: React.FC<{ short: ShortId }> = ({ short }) => (
+  <AbsoluteFill>
+    <Sky short={short} />
+    <Ground top={900} />
+    <Art name={HERO[short]} x={360} y={430} size={380} delay={3} float={14} />
+    <Art name="sparkles" x={150} y={330} size={120} delay={9} />
+    <Art name="glowing-star" x={590} y={350} size={100} delay={13} />
+    <Actor who="piku" x={X} y={FEET} size={SIZE} side={-1} voice={[0]} delay={5} />
+  </AbsoluteFill>
+)
 
-/**
- * A slow camera (Phase 72): every scene is filmed, not pinned – a gentle push in,
- * drifting a little to one side, so even a still moment feels alive.
- */
-const Camera: React.FC<{ frames: number; side: 1 | -1; children: React.ReactNode }> = ({
-  frames,
-  side,
-  children,
-}) => {
+const Ending: React.FC<{ short: ShortId }> = ({ short }) => {
   const frame = useCurrentFrame()
-  const p = interpolate(frame, [0, frames], [0, 1], {
-    extrapolateRight: 'clamp',
-    easing: Easing.inOut(Easing.sin),
-  })
+  const cheer = Array.from({ length: ENDING }, (_, f) => 0.45 + 0.4 * Math.abs(Math.sin(f / 4)))
   return (
-    <AbsoluteFill
-      style={{
-        transform: `translate(${side * p * 14}px, ${-p * 10}px) scale(${1.02 + p * 0.05})`,
-        transformOrigin: '50% 45%',
-      }}
-    >
-      {children}
+    <AbsoluteFill>
+      <Sky short={short} />
+      <Ground top={900} />
+      <Art name={HERO[short]} x={360} y={430} size={340} float={14} />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <Art
+          key={i}
+          name={i % 2 ? 'glowing-star' : 'sparkles'}
+          x={110 + i * 125}
+          y={((frame * 6 + i * 150) % 900) + 80}
+          size={70}
+          style={{ opacity: 0.85 }}
+        />
+      ))}
+      <Actor who="piku" x={X} y={FEET} size={SIZE} side={-1} voice={cheer} />
     </AbsoluteFill>
   )
 }
 
-/** Soft dark corners and a warm light from above: the look of a filmed picture. */
-const Lens: React.FC = () => (
-  <AbsoluteFill
-    style={{
-      background:
-        'radial-gradient(ellipse at 50% 18%, rgba(255,236,190,0.16), rgba(255,236,190,0) 55%),' +
-        'radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 62%, rgba(40,20,60,0.22) 100%)',
-      pointerEvents: 'none',
-    }}
-  />
-)
-
-export const Cartoon: React.FC<CartoonProps> = ({ short, lang }) => {
+export const Cartoon: React.FC<CartoonProps> = ({ short, lang, silent = false }) => {
   const { durationInFrames } = useVideoConfig()
-  const { lines, scenes, durations } = timing(short, lang)
+  const { scenes } = timing(short, lang)
+  const amp = (legacyAmp as Record<string, number[]>)[`${short}-${lang}`] ?? []
+  const starts: number[] = []
+  let at = OPENING
+  scenes.forEach((_, i) => {
+    starts.push(at)
+    at += sceneFrames(short, lang, i)
+  })
   return (
     <AbsoluteFill style={{ backgroundColor: '#fff8ec' }}>
-      <Series>
-        <Series.Sequence durationInFrames={OPENING} name="title">
-          <TitleCard short={short} lang={lang} frames={OPENING} />
-        </Series.Sequence>
-        {scenes.map((scene, index) => {
-          const frames = sceneFrames(short, lang, index)
-          const Scene = SCENES[short][scene] ?? PlayScene
-          const dark = DARK_SCENES.has(`${short}:${scene}`)
-          return (
-            <Series.Sequence key={index} durationInFrames={frames} name={scene}>
-              <Camera frames={frames} side={index % 2 === 0 ? 1 : -1}>
+      <Sequence durationInFrames={OPENING + TR} layout="none">
+        <Camera frames={OPENING + TR} move="push">
+          <Opening short={short} />
+        </Camera>
+      </Sequence>
+      {scenes.map((scene, index) => {
+        const frames = sceneFrames(short, lang, index)
+        const Scene = SCENES[short][scene] ?? PlayScene
+        return (
+          <Sequence key={index} from={starts[index]} durationInFrames={frames + TR} layout="none">
+            <Dissolve>
+              <Camera frames={frames + TR} move={MOVES[index % MOVES.length]!}>
                 <Scene short={short} lang={lang} frames={frames} />
+                <Actor
+                  who="piku"
+                  x={X}
+                  y={FEET}
+                  size={SIZE}
+                  side={-1}
+                  voice={amp.slice(starts[index])}
+                  phase={starts[index]}
+                />
               </Camera>
-              <Lens />
-              <Swoosh />
-              <TalkingRobot seconds={durations[index]!} />
-              <Sequence from={VOICE_IN - 4} layout="none">
-                <Caption text={lines[index]!} seconds={durations[index]!} dark={dark} />
-              </Sequence>
+            </Dissolve>
+            {!silent && (
               <Sequence from={VOICE_IN} layout="none">
                 <Audio src={staticFile(voiceFile(short, lang, index))} volume={1} />
               </Sequence>
-            </Series.Sequence>
-          )
-        })}
-        <Series.Sequence durationInFrames={ENDING} name="end">
-          <PlayScene short={short} lang={lang} frames={ENDING} />
-          <Lens />
-          <Sequence from={6} layout="none">
-            <Audio src={staticFile('sfx/sparkle.wav')} volume={0.3} />
+            )}
           </Sequence>
-        </Series.Sequence>
-      </Series>
-      {/* the music under the voice, a little louder on the title and the end */}
-      <Audio
-        src={staticFile('music.wav')}
-        volume={(f) =>
-          interpolate(
-            f,
-            [
-              0,
-              8,
-              OPENING - 6,
-              OPENING + 4,
-              durationInFrames - ENDING,
-              durationInFrames - ENDING + 10,
-              durationInFrames - 10,
-              durationInFrames,
-            ],
-            [0, 0.42, 0.42, 0.16, 0.16, 0.4, 0.4, 0],
-            { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
-          )
-        }
-      />
+        )
+      })}
+      <Sequence from={at} durationInFrames={ENDING} layout="none">
+        <Dissolve>
+          <Camera frames={ENDING} move="pull">
+            <Ending short={short} />
+          </Camera>
+        </Dissolve>
+      </Sequence>
+      {!silent && (
+        <Audio
+          src={staticFile('music.wav')}
+          volume={(f) =>
+            interpolate(
+              f,
+              [
+                0,
+                8,
+                OPENING - 6,
+                OPENING + 4,
+                durationInFrames - ENDING,
+                durationInFrames - ENDING + 10,
+                durationInFrames - 10,
+                durationInFrames,
+              ],
+              [0, 0.42, 0.42, 0.16, 0.16, 0.4, 0.4, 0],
+              clamp,
+            )
+          }
+        />
+      )}
     </AbsoluteFill>
   )
 }

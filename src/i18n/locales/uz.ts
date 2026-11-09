@@ -2892,7 +2892,44 @@ export const uz = {
     toPro: 'PRO haqida',
     enough: 'Hozircha multfilm yetarli! Endi o‘ynaymiz.',
     loadError: 'Multfilm ochilmadi. Yana bir bor urinib ko‘r.',
+    tryAgain: 'Yana urinib ko‘r!',
+    captionSize: 'Yozuv o‘lchami',
     items: {
+      crossing: {
+        title: 'Ko‘chani qanday kesib o‘tamiz?',
+        text: 'Yo‘ldan o‘tishni kattalar bilan birga mashq qiling: har safar «to‘xta, qara, tingla».',
+        quiz: { q: 'Qizil chiroq yonsa nima qilamiz?', a0: 'to‘xtaymiz', a1: 'yuguramiz' },
+      },
+      bread: {
+        title: 'Non qayerdan keladi?',
+        text: 'Nonni birga sindiring va «bu bug‘doydan boshlangan» deb ayting: mehnatni qadrlash shundan boshlanadi.',
+        quiz: { q: 'Non nimadan boshlanadi?', a0: 'bug‘doy', a1: 'olma', a2: 'sut' },
+      },
+      tree: {
+        title: 'Urug‘dan daraxtgacha',
+        text: 'Birga urug‘ ekib, har kuni suv quying: bola o‘sishni o‘z ko‘zi bilan ko‘radi.',
+        quiz: { q: 'Urug‘ o‘sishi uchun nima kerak?', a0: 'suv, quyosh va tuproq', a1: 'shirinlik', a2: 'o‘yinchoq' },
+      },
+      rainbow: {
+        title: 'Kamalak qanday paydo bo‘ladi?',
+        text: 'Yomg‘irdan keyin birga osmonga qarang. Uyda esa suv to‘ldirilgan stakan va quyosh nuri bilan mayda kamalak qilish mumkin.',
+        quiz: { q: 'Kamalakning ranglari nechta?', a0: 'beshta', a1: 'yettita' },
+      },
+      dayCycle: {
+        title: 'Nega kun va tun almashadi?',
+        text: 'Chiroq va koptok bilan tajriba qiling: koptokni sekin aylantiring, chiroq yoqqan tomoni yorug‘ bo‘ladi.',
+        quiz: { q: 'Kun va tunni nima almashtiradi?', a0: 'Yer aylanadi', a1: 'bulut', a2: 'oy' },
+      },
+      calm: {
+        title: 'Jahlim chiqsa nima qilaman?',
+        text: 'Shar nafasini jahl chiqmagan paytda ham birga mashq qiling: bola kerak paytda o‘zi eslaydi.',
+        quiz: { q: 'Jahl chiqsa nima qilamiz?', a0: 'shar nafasi', a1: 'baqiramiz' },
+      },
+      teeth: {
+        title: 'Tishimni nega yuvaman?',
+        text: 'Ertalab va kechqurun ikki daqiqa, mayda no‘xat kattaligida pasta bilan; kichik bolaga kattalar yordam bersin.',
+        quiz: { q: 'Tishni necha daqiqa yuvamiz?', a0: 'bir daqiqa', a1: 'ikki daqiqa', a2: 'besh daqiqa' },
+      },
       scale: { title: 'Tarozi siri', text: 'Tarozi qachon tekis turadi?' },
       robot: { title: 'Robotga yo‘l ko‘rsat', text: 'Strelkalar bilan birinchi dastur.' },
       train: { title: 'So‘z poyezdi', text: 'Harflardan so‘z yig‘amiz.' },

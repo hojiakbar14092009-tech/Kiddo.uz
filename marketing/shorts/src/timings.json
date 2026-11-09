@@ -2,42 +2,225 @@
   "water": {
     "uz": {
       "lines": [
-        "Yomg‘ir qayerdan keladi? Keling, bilib olamiz!",
-        "Quyosh dengizni isitadi. Suv iliq bo‘ladi.",
-        "Kichkina tomchilar bug‘ bo‘lib, osmonga uchadi.",
-        "Osmonda tomchilar yig‘ilib, bulut bo‘ladi.",
-        "Bulut og‘irlashadi va yomg‘ir yog‘adi!",
-        "Daryo suvni yana dengizga olib boradi. Bu suvning aylanishi!",
-        "Endi o‘yinda tomchiga o‘zing yordam ber!"
+        "Piku, yomg‘ir qayerdan keladi?",
+        "Keling, birga bilib olamiz!",
+        "Avval quyosh dengizni isitadi.",
+        "Suv iliq bo‘lib, bug‘ga aylanadi.",
+        "Bug‘ ko‘rinmaydi, lekin yuqoriga uchadi.",
+        "Kichkina tomchilar osmonga ko‘tariladi.",
+        "U yerda sovuq. Tomchilar yig‘iladi.",
+        "Ular birlashib, bulut bo‘ladi!",
+        "Bulut og‘irlashadi. Tomchilar tushadi.",
+        "Mana yomg‘ir! Gullar suv ichadi.",
+        "Demak, yomg‘ir — bulutdagi suv!",
+        "Suv oqib, daryoga tushadi.",
+        "Daryo suvni yana dengizga olib boradi.",
+        "Dengiz, bulut, yomg‘ir — suv aylanadi!",
+        "Suv hech qachon yo‘qolmaydi.",
+        "Endi o‘yinda tomchiga yordam ber!"
       ],
-      "scenes": ["hook", "sunSea", "steam", "cloud", "rain", "cycle", "play"],
-      "durations": [3.501, 3.942, 3.303, 2.92, 3.559, 5.335, 3.385]
+      "scenes": [
+        "hook",
+        "ask",
+        "sun",
+        "steam",
+        "invisible",
+        "rise",
+        "gather",
+        "cloud",
+        "heavy",
+        "rain",
+        "mean",
+        "river",
+        "sea",
+        "cycle",
+        "never",
+        "play"
+      ],
+      "durations": [
+        1.686,
+        1.661,
+        2.008,
+        1.895,
+        2.706,
+        2.269,
+        3.396,
+        1.678,
+        3.567,
+        2.966,
+        2.053,
+        1.612,
+        2.468,
+        2.559,
+        1.751,
+        1.945
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ]
     },
     "ru": {
       "lines": [
-        "Откуда берётся дождь? Давай узнаем!",
-        "Солнце греет море. Вода становится тёплой.",
-        "Крошечные капельки становятся паром и летят в небо.",
-        "В небе капельки собираются в облако.",
-        "Облако тяжелеет, и идёт дождь!",
-        "Река несёт воду обратно в море. Это круговорот воды!",
-        "А теперь помоги капельке в игре!"
+        "Пику, откуда берётся дождь?",
+        "Давай узнаем вместе!",
+        "Сначала солнце греет море.",
+        "Вода теплеет и становится паром.",
+        "Пар не виден, но летит вверх.",
+        "Крошечные капельки поднимаются в небо.",
+        "Там холодно. Капельки собираются вместе.",
+        "Они соединяются и становятся облаком!",
+        "Облако тяжелеет. Капельки падают.",
+        "Вот и дождь! Цветы пьют воду.",
+        "Значит, дождь — это вода из облака!",
+        "Вода стекает в реку.",
+        "Река несёт воду обратно в море.",
+        "Море, облако, дождь — вода кружит!",
+        "Вода никогда не исчезает.",
+        "Теперь помоги капельке в игре!"
       ],
-      "scenes": ["hook", "sunSea", "steam", "cloud", "rain", "cycle", "play"],
-      "durations": [3.733, 4.302, 4.244, 2.769, 3.454, 4.499, 2.711]
+      "scenes": [
+        "hook",
+        "ask",
+        "sun",
+        "steam",
+        "invisible",
+        "rise",
+        "gather",
+        "cloud",
+        "heavy",
+        "rain",
+        "mean",
+        "river",
+        "sea",
+        "cycle",
+        "never",
+        "play"
+      ],
+      "durations": [
+        1.686,
+        1.661,
+        2.008,
+        1.895,
+        2.706,
+        2.269,
+        3.396,
+        1.678,
+        3.567,
+        2.966,
+        2.053,
+        1.612,
+        2.468,
+        2.559,
+        1.751,
+        1.945
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ]
     },
     "en": {
       "lines": [
-        "Where does rain come from? Let’s find out!",
-        "The sun warms the sea. The water gets warm.",
-        "Tiny droplets turn into steam and fly up to the sky.",
-        "Up in the sky, the droplets gather into a cloud.",
-        "The cloud gets heavy, and it rains!",
-        "The river carries the water back to the sea. That is the water cycle!",
-        "Now help the droplet yourself in the game!"
+        "Piku, where does rain come from?",
+        "Let’s find out together!",
+        "First, the sun warms the sea.",
+        "The water gets warm and turns into steam.",
+        "Steam is invisible, but it flies up.",
+        "Tiny droplets rise up to the sky.",
+        "It is cold up there. The droplets gather.",
+        "Together they make a cloud!",
+        "The cloud gets heavy. Drops fall down.",
+        "Here is the rain! The flowers drink.",
+        "So rain is water from the cloud!",
+        "The water runs into the river.",
+        "The river carries it back to the sea.",
+        "Sea, cloud, rain — the water goes round!",
+        "Water never disappears.",
+        "Now help the droplet in the game!"
       ],
-      "scenes": ["hook", "sunSea", "steam", "cloud", "rain", "cycle", "play"],
-      "durations": [3.234, 3.187, 3.907, 3.849, 3.187, 4.372, 2.642]
+      "scenes": [
+        "hook",
+        "ask",
+        "sun",
+        "steam",
+        "invisible",
+        "rise",
+        "gather",
+        "cloud",
+        "heavy",
+        "rain",
+        "mean",
+        "river",
+        "sea",
+        "cycle",
+        "never",
+        "play"
+      ],
+      "durations": [
+        1.686,
+        1.661,
+        2.008,
+        1.895,
+        2.706,
+        2.269,
+        3.396,
+        1.678,
+        3.567,
+        2.966,
+        2.053,
+        1.612,
+        2.468,
+        2.559,
+        1.751,
+        1.945
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ]
     }
   },
   "magnet": {
@@ -51,8 +234,24 @@
         "Esingda bo‘lsin: magnit temirni tortadi.",
         "O‘yinda temir narsalarni o‘zing top!"
       ],
-      "scenes": ["hook", "key", "apple", "sort", "fridge", "rule", "play"],
-      "durations": [3.048, 4.395, 3.721, 4.964, 3.42, 3.454, 2.676]
+      "scenes": [
+        "hook",
+        "key",
+        "apple",
+        "sort",
+        "fridge",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.048,
+        4.395,
+        3.721,
+        4.964,
+        3.42,
+        3.454,
+        2.676
+      ]
     },
     "ru": {
       "lines": [
@@ -64,8 +263,24 @@
         "Запомни: магнит притягивает железо.",
         "Найди железные предметы сам в игре!"
       ],
-      "scenes": ["hook", "key", "apple", "sort", "fridge", "rule", "play"],
-      "durations": [3.303, 5.207, 4.012, 7.878, 3.582, 4.058, 3.094]
+      "scenes": [
+        "hook",
+        "key",
+        "apple",
+        "sort",
+        "fridge",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.303,
+        5.207,
+        4.012,
+        7.878,
+        3.582,
+        4.058,
+        3.094
+      ]
     },
     "en": {
       "lines": [
@@ -77,8 +292,24 @@
         "Remember: a magnet pulls iron.",
         "Find the iron things yourself in the game!"
       ],
-      "scenes": ["hook", "key", "apple", "sort", "fridge", "rule", "play"],
-      "durations": [3.106, 3.849, 4.197, 5.718, 3.036, 2.398, 2.781]
+      "scenes": [
+        "hook",
+        "key",
+        "apple",
+        "sort",
+        "fridge",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.106,
+        3.849,
+        4.197,
+        5.718,
+        3.036,
+        2.398,
+        2.781
+      ]
     }
   },
   "float": {
@@ -92,8 +323,24 @@
         "Yengillar suzadi, og‘irlar cho‘kadi.",
         "O‘yinda avval o‘yla, keyin suvga tashla!"
       ],
-      "scenes": ["hook", "duck", "stone", "pairs", "ship", "rule", "play"],
-      "durations": [3.385, 3.872, 3.315, 4.302, 4.882, 3.083, 3.025]
+      "scenes": [
+        "hook",
+        "duck",
+        "stone",
+        "pairs",
+        "ship",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.385,
+        3.872,
+        3.315,
+        4.302,
+        4.882,
+        3.083,
+        3.025
+      ]
     },
     "ru": {
       "lines": [
@@ -105,8 +352,24 @@
         "Лёгкое плавает, тяжёлое тонет.",
         "В игре сначала подумай, потом бросай в воду!"
       ],
-      "scenes": ["hook", "duck", "stone", "pairs", "ship", "rule", "play"],
-      "durations": [3.35, 3.721, 4.65, 6.334, 4.662, 3.292, 4.0]
+      "scenes": [
+        "hook",
+        "duck",
+        "stone",
+        "pairs",
+        "ship",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.35,
+        3.721,
+        4.65,
+        6.334,
+        4.662,
+        3.292,
+        4.0
+      ]
     },
     "en": {
       "lines": [
@@ -118,8 +381,24 @@
         "Light things float, heavy things sink.",
         "In the game, think first, then drop it in!"
       ],
-      "scenes": ["hook", "duck", "stone", "pairs", "ship", "rule", "play"],
-      "durations": [2.897, 3.222, 4.557, 5.498, 4.186, 2.897, 2.584]
+      "scenes": [
+        "hook",
+        "duck",
+        "stone",
+        "pairs",
+        "ship",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        2.897,
+        3.222,
+        4.557,
+        5.498,
+        4.186,
+        2.897,
+        2.584
+      ]
     }
   },
   "dayNight": {
@@ -133,8 +412,24 @@
         "Kechasi Oy va yulduzlar ko‘rinadi. Ular juda chiroyli!",
         "Bugun kechasi osmonga qara!"
       ],
-      "scenes": ["hook", "earth", "day", "night", "turn", "stars", "play"],
-      "durations": [3.489, 3.106, 2.851, 4.104, 2.003, 4.232, 2.746]
+      "scenes": [
+        "hook",
+        "earth",
+        "day",
+        "night",
+        "turn",
+        "stars",
+        "play"
+      ],
+      "durations": [
+        3.489,
+        3.106,
+        2.851,
+        4.104,
+        2.003,
+        4.232,
+        2.746
+      ]
     },
     "ru": {
       "lines": [
@@ -146,8 +441,24 @@
         "Ночью видно Луну и звёзды. Как красиво!",
         "Посмотри сегодня вечером на небо!"
       ],
-      "scenes": ["hook", "earth", "day", "night", "turn", "stars", "play"],
-      "durations": [3.315, 4.94, 3.234, 6.183, 4.302, 4.372, 2.433]
+      "scenes": [
+        "hook",
+        "earth",
+        "day",
+        "night",
+        "turn",
+        "stars",
+        "play"
+      ],
+      "durations": [
+        3.315,
+        4.94,
+        3.234,
+        6.183,
+        4.302,
+        4.372,
+        2.433
+      ]
     },
     "en": {
       "lines": [
@@ -159,8 +470,24 @@
         "At night we see the Moon and the stars. So pretty!",
         "Look up at the sky tonight!"
       ],
-      "scenes": ["hook", "earth", "day", "night", "turn", "stars", "play"],
-      "durations": [2.874, 2.967, 2.967, 4.197, 2.096, 3.536, 2.131]
+      "scenes": [
+        "hook",
+        "earth",
+        "day",
+        "night",
+        "turn",
+        "stars",
+        "play"
+      ],
+      "durations": [
+        2.874,
+        2.967,
+        2.967,
+        4.197,
+        2.096,
+        3.536,
+        2.131
+      ]
     }
   },
   "planets": {
@@ -174,8 +501,24 @@
         "Bir kun sen ham raketada uchasan!",
         "Kosmos o‘yinida sayyoralarni kashf et!"
       ],
-      "scenes": ["hook", "orbits", "earth", "jupiter", "count", "rocket", "play"],
-      "durations": [3.57, 3.71, 2.224, 4.534, 6.415, 2.502, 2.885]
+      "scenes": [
+        "hook",
+        "orbits",
+        "earth",
+        "jupiter",
+        "count",
+        "rocket",
+        "play"
+      ],
+      "durations": [
+        3.57,
+        3.71,
+        2.224,
+        4.534,
+        6.415,
+        2.502,
+        2.885
+      ]
     },
     "ru": {
       "lines": [
@@ -187,8 +530,24 @@
         "Однажды и ты полетишь на ракете!",
         "Открой планеты в космической игре!"
       ],
-      "scenes": ["hook", "orbits", "earth", "jupiter", "count", "rocket", "play"],
-      "durations": [3.338, 3.303, 2.839, 5.753, 12.139, 3.152, 3.025]
+      "scenes": [
+        "hook",
+        "orbits",
+        "earth",
+        "jupiter",
+        "count",
+        "rocket",
+        "play"
+      ],
+      "durations": [
+        3.338,
+        3.303,
+        2.839,
+        5.753,
+        12.139,
+        3.152,
+        3.025
+      ]
     },
     "en": {
       "lines": [
@@ -200,8 +559,24 @@
         "One day you might fly in a rocket too!",
         "Explore the planets in the space game!"
       ],
-      "scenes": ["hook", "orbits", "earth", "jupiter", "count", "rocket", "play"],
-      "durations": [2.769, 2.502, 3.071, 3.721, 5.869, 2.467, 2.491]
+      "scenes": [
+        "hook",
+        "orbits",
+        "earth",
+        "jupiter",
+        "count",
+        "rocket",
+        "play"
+      ],
+      "durations": [
+        2.769,
+        2.502,
+        3.071,
+        3.721,
+        5.869,
+        2.467,
+        2.491
+      ]
     }
   },
   "seed": {
@@ -215,8 +590,24 @@
         "O‘simlikka suv, quyosh va tuproq kerak.",
         "Fan laboratoriyasida tajriba qil!"
       ],
-      "scenes": ["hook", "soil", "sprout", "sun", "bloom", "rule", "play"],
-      "durations": [3.06, 3.849, 2.758, 3.315, 4.325, 3.361, 2.7]
+      "scenes": [
+        "hook",
+        "soil",
+        "sprout",
+        "sun",
+        "bloom",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.06,
+        3.849,
+        2.758,
+        3.315,
+        4.325,
+        3.361,
+        2.7
+      ]
     },
     "ru": {
       "lines": [
@@ -228,8 +619,24 @@
         "Растению нужны вода, солнце и земля.",
         "Проведи опыт в научной лаборатории!"
       ],
-      "scenes": ["hook", "soil", "sprout", "sun", "bloom", "rule", "play"],
-      "durations": [3.756, 2.909, 4.499, 3.211, 4.221, 4.406, 3.129]
+      "scenes": [
+        "hook",
+        "soil",
+        "sprout",
+        "sun",
+        "bloom",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.756,
+        2.909,
+        4.499,
+        3.211,
+        4.221,
+        4.406,
+        3.129
+      ]
     },
     "en": {
       "lines": [
@@ -241,8 +648,24 @@
         "A plant needs water, sun and soil.",
         "Do an experiment in the Science Lab!"
       ],
-      "scenes": ["hook", "soil", "sprout", "sun", "bloom", "rule", "play"],
-      "durations": [3.025, 2.781, 3.025, 2.642, 3.617, 3.582, 2.526]
+      "scenes": [
+        "hook",
+        "soil",
+        "sprout",
+        "sun",
+        "bloom",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.025,
+        2.781,
+        3.025,
+        2.642,
+        3.617,
+        3.582,
+        2.526
+      ]
     }
   },
   "scale": {
@@ -255,8 +678,22 @@
         "Teng bo‘lsa, tarozi tekis bo‘ladi.",
         "Sehrli tarozida o‘zing sinab ko‘r!"
       ],
-      "scenes": ["hook", "heavy", "add", "even", "rule", "play"],
-      "durations": [3.152, 1.968, 3.013, 3.524, 2.398, 2.862]
+      "scenes": [
+        "hook",
+        "heavy",
+        "add",
+        "even",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.152,
+        1.968,
+        3.013,
+        3.524,
+        2.398,
+        2.862
+      ]
     },
     "ru": {
       "lines": [
@@ -267,8 +704,22 @@
         "Когда поровну, весы ровные.",
         "Попробуй сам на волшебных весах!"
       ],
-      "scenes": ["hook", "heavy", "add", "even", "rule", "play"],
-      "durations": [3.327, 2.584, 3.884, 3.141, 2.839, 2.99]
+      "scenes": [
+        "hook",
+        "heavy",
+        "add",
+        "even",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        3.327,
+        2.584,
+        3.884,
+        3.141,
+        2.839,
+        2.99
+      ]
     },
     "en": {
       "lines": [
@@ -279,8 +730,22 @@
         "When it’s equal, the scale is level.",
         "Try it yourself on the magic scale!"
       ],
-      "scenes": ["hook", "heavy", "add", "even", "rule", "play"],
-      "durations": [2.769, 1.817, 3.385, 2.92, 2.955, 2.572]
+      "scenes": [
+        "hook",
+        "heavy",
+        "add",
+        "even",
+        "rule",
+        "play"
+      ],
+      "durations": [
+        2.769,
+        1.817,
+        3.385,
+        2.92,
+        2.955,
+        2.572
+      ]
     }
   },
   "robot": {
@@ -293,8 +758,22 @@
         "Robot batareyani topdi! Bu dasturlash.",
         "Robot-dasturchi o‘yinini o‘yna!"
       ],
-      "scenes": ["hook", "arrows", "plan", "rock", "win", "play"],
-      "durations": [2.584, 2.874, 3.512, 2.526, 3.315, 2.409]
+      "scenes": [
+        "hook",
+        "arrows",
+        "plan",
+        "rock",
+        "win",
+        "play"
+      ],
+      "durations": [
+        2.584,
+        2.874,
+        3.512,
+        2.526,
+        3.315,
+        2.409
+      ]
     },
     "ru": {
       "lines": [
@@ -305,8 +784,22 @@
         "Робот нашёл батарейку! Это программирование.",
         "Сыграй в игру Робот-программист!"
       ],
-      "scenes": ["hook", "arrows", "plan", "rock", "win", "play"],
-      "durations": [2.224, 2.409, 3.129, 2.7, 3.628, 2.56]
+      "scenes": [
+        "hook",
+        "arrows",
+        "plan",
+        "rock",
+        "win",
+        "play"
+      ],
+      "durations": [
+        2.224,
+        2.409,
+        3.129,
+        2.7,
+        3.628,
+        2.56
+      ]
     },
     "en": {
       "lines": [
@@ -317,8 +810,22 @@
         "The robot found its battery! That’s programming.",
         "Play the robot programmer game!"
       ],
-      "scenes": ["hook", "arrows", "plan", "rock", "win", "play"],
-      "durations": [2.595, 2.131, 2.735, 2.317, 3.768, 2.084]
+      "scenes": [
+        "hook",
+        "arrows",
+        "plan",
+        "rock",
+        "win",
+        "play"
+      ],
+      "durations": [
+        2.595,
+        2.131,
+        2.735,
+        2.317,
+        3.768,
+        2.084
+      ]
     }
   },
   "train": {
@@ -331,8 +838,22 @@
         "Hamma vagon to‘ldi. Poyezd yurdi!",
         "So‘z poyezdida o‘zing so‘z yig‘!"
       ],
-      "scenes": ["hook", "picture", "letters", "order", "go", "play"],
-      "durations": [2.433, 2.688, 2.409, 1.945, 2.746, 2.653]
+      "scenes": [
+        "hook",
+        "picture",
+        "letters",
+        "order",
+        "go",
+        "play"
+      ],
+      "durations": [
+        2.433,
+        2.688,
+        2.409,
+        1.945,
+        2.746,
+        2.653
+      ]
     },
     "ru": {
       "lines": [
@@ -343,8 +864,22 @@
         "Все вагоны полны. Поезд поехал!",
         "Собери слово сам в поезде слов!"
       ],
-      "scenes": ["hook", "picture", "letters", "order", "go", "play"],
-      "durations": [2.572, 2.92, 2.363, 2.166, 3.478, 2.467]
+      "scenes": [
+        "hook",
+        "picture",
+        "letters",
+        "order",
+        "go",
+        "play"
+      ],
+      "durations": [
+        2.572,
+        2.92,
+        2.363,
+        2.166,
+        3.478,
+        2.467
+      ]
     },
     "en": {
       "lines": [
@@ -355,8 +890,22 @@
         "Every wagon is full. Off it goes!",
         "Build a word yourself on the word train!"
       ],
-      "scenes": ["hook", "picture", "letters", "order", "go", "play"],
-      "durations": [2.572, 2.514, 1.875, 1.481, 3.048, 2.827]
+      "scenes": [
+        "hook",
+        "picture",
+        "letters",
+        "order",
+        "go",
+        "play"
+      ],
+      "durations": [
+        2.572,
+        2.514,
+        1.875,
+        1.481,
+        3.048,
+        2.827
+      ]
     }
   },
   "shop": {
@@ -369,8 +918,22 @@
         "Besh bersak, ikki tanga qaytim olamiz.",
         "Kichik do‘konda xarid qil!"
       ],
-      "scenes": ["hook", "coins", "price", "pay", "change", "play"],
-      "durations": [2.909, 2.398, 2.003, 3.071, 2.816, 2.108]
+      "scenes": [
+        "hook",
+        "coins",
+        "price",
+        "pay",
+        "change",
+        "play"
+      ],
+      "durations": [
+        2.909,
+        2.398,
+        2.003,
+        3.071,
+        2.816,
+        2.108
+      ]
     },
     "ru": {
       "lines": [
@@ -381,8 +944,22 @@
         "Дали пять — сдача две монетки.",
         "Сделай покупку в маленьком магазине!"
       ],
-      "scenes": ["hook", "coins", "price", "pay", "change", "play"],
-      "durations": [3.176, 3.42, 2.642, 5.033, 3.28, 2.769]
+      "scenes": [
+        "hook",
+        "coins",
+        "price",
+        "pay",
+        "change",
+        "play"
+      ],
+      "durations": [
+        3.176,
+        3.42,
+        2.642,
+        5.033,
+        3.28,
+        2.769
+      ]
     },
     "en": {
       "lines": [
@@ -393,8 +970,22 @@
         "Give five, and get two coins back.",
         "Go shopping in the little shop!"
       ],
-      "scenes": ["hook", "coins", "price", "pay", "change", "play"],
-      "durations": [2.653, 2.491, 2.572, 2.688, 2.874, 1.875]
+      "scenes": [
+        "hook",
+        "coins",
+        "price",
+        "pay",
+        "change",
+        "play"
+      ],
+      "durations": [
+        2.653,
+        2.491,
+        2.572,
+        2.688,
+        2.874,
+        1.875
+      ]
     }
   },
   "shapes": {
@@ -407,8 +998,22 @@
         "Uchburchaklar raketani uchiradi!",
         "Shakl quruvchida rasm yasa!"
       ],
-      "scenes": ["hook", "kinds", "house", "car", "rocket", "play"],
-      "durations": [1.887, 3.338, 2.92, 2.642, 2.793, 2.607]
+      "scenes": [
+        "hook",
+        "kinds",
+        "house",
+        "car",
+        "rocket",
+        "play"
+      ],
+      "durations": [
+        1.887,
+        3.338,
+        2.92,
+        2.642,
+        2.793,
+        2.607
+      ]
     },
     "ru": {
       "lines": [
@@ -419,8 +1024,22 @@
         "Треугольники помогают ракете лететь!",
         "Собери картинку в строителе фигур!"
       ],
-      "scenes": ["hook", "kinds", "house", "car", "rocket", "play"],
-      "durations": [1.98, 5.08, 3.234, 2.224, 2.804, 2.375]
+      "scenes": [
+        "hook",
+        "kinds",
+        "house",
+        "car",
+        "rocket",
+        "play"
+      ],
+      "durations": [
+        1.98,
+        5.08,
+        3.234,
+        2.224,
+        2.804,
+        2.375
+      ]
     },
     "en": {
       "lines": [
@@ -431,8 +1050,22 @@
         "Triangles help the rocket fly!",
         "Build pictures in the shape builder!"
       ],
-      "scenes": ["hook", "kinds", "house", "car", "rocket", "play"],
-      "durations": [1.91, 3.547, 2.618, 2.224, 2.595, 2.177]
+      "scenes": [
+        "hook",
+        "kinds",
+        "house",
+        "car",
+        "rocket",
+        "play"
+      ],
+      "durations": [
+        1.91,
+        3.547,
+        2.618,
+        2.224,
+        2.595,
+        2.177
+      ]
     }
   },
   "habitats": {
@@ -445,8 +1078,22 @@
         "Pingvin sovuq muzlikda yashaydi.",
         "Hayvonlarni uyiga olib bor!"
       ],
-      "scenes": ["hook", "forest", "sea", "desert", "ice", "play"],
-      "durations": [2.653, 3.187, 2.375, 2.038, 2.758, 2.444]
+      "scenes": [
+        "hook",
+        "forest",
+        "sea",
+        "desert",
+        "ice",
+        "play"
+      ],
+      "durations": [
+        2.653,
+        3.187,
+        2.375,
+        2.038,
+        2.758,
+        2.444
+      ]
     },
     "ru": {
       "lines": [
@@ -457,8 +1104,22 @@
         "Пингвин живёт среди льдов.",
         "Отведи животных домой!"
       ],
-      "scenes": ["hook", "forest", "sea", "desert", "ice", "play"],
-      "durations": [2.351, 3.071, 2.827, 2.932, 2.096, 1.829]
+      "scenes": [
+        "hook",
+        "forest",
+        "sea",
+        "desert",
+        "ice",
+        "play"
+      ],
+      "durations": [
+        2.351,
+        3.071,
+        2.827,
+        2.932,
+        2.096,
+        1.829
+      ]
     },
     "en": {
       "lines": [
@@ -469,8 +1130,22 @@
         "A penguin lives on the cold ice.",
         "Take the animals home!"
       ],
-      "scenes": ["hook", "forest", "sea", "desert", "ice", "play"],
-      "durations": [2.398, 2.7, 2.735, 2.073, 2.746, 1.678]
+      "scenes": [
+        "hook",
+        "forest",
+        "sea",
+        "desert",
+        "ice",
+        "play"
+      ],
+      "durations": [
+        2.398,
+        2.7,
+        2.735,
+        2.073,
+        2.746,
+        1.678
+      ]
     }
   },
   "plate": {
@@ -483,8 +1158,22 @@
         "Sog‘lom likopcha rang-barang bo‘ladi!",
         "Sog‘lom likopcha o‘yinini o‘yna!"
       ],
-      "scenes": ["hook", "fruit", "milk", "treats", "plate", "play"],
-      "durations": [2.409, 2.688, 2.92, 3.176, 2.955, 2.305]
+      "scenes": [
+        "hook",
+        "fruit",
+        "milk",
+        "treats",
+        "plate",
+        "play"
+      ],
+      "durations": [
+        2.409,
+        2.688,
+        2.92,
+        3.176,
+        2.955,
+        2.305
+      ]
     },
     "ru": {
       "lines": [
@@ -495,8 +1184,22 @@
         "Полезная тарелка — разноцветная!",
         "Сыграй в игру Полезная тарелка!"
       ],
-      "scenes": ["hook", "fruit", "milk", "treats", "plate", "play"],
-      "durations": [2.282, 3.129, 2.409, 3.466, 3.478, 2.746]
+      "scenes": [
+        "hook",
+        "fruit",
+        "milk",
+        "treats",
+        "plate",
+        "play"
+      ],
+      "durations": [
+        2.282,
+        3.129,
+        2.409,
+        3.466,
+        3.478,
+        2.746
+      ]
     },
     "en": {
       "lines": [
@@ -507,8 +1210,1710 @@
         "A healthy plate is full of colours!",
         "Play the healthy plate game!"
       ],
-      "scenes": ["hook", "fruit", "milk", "treats", "plate", "play"],
-      "durations": [1.991, 2.932, 1.899, 3.373, 2.351, 1.736]
+      "scenes": [
+        "hook",
+        "fruit",
+        "milk",
+        "treats",
+        "plate",
+        "play"
+      ],
+      "durations": [
+        1.991,
+        2.932,
+        1.899,
+        3.373,
+        2.351,
+        1.736
+      ]
+    }
+  },
+  "crossing": {
+    "uz": {
+      "lines": [
+        "Piku, ko‘chadan xavfsiz qanday o‘tamiz?",
+        "Uch qoidani eslab qol: to‘xta, qara, tingla!",
+        "Birinchi qoida: yo‘l chetida to‘xta.",
+        "Yugurma. Kattaning qo‘lidan ushla.",
+        "Ikkinchi qoida: chapga, o‘ngga, yana chapga qara.",
+        "Mashina kelyaptimi? Yaxshilab qara.",
+        "Uchinchi qoida: diqqat bilan tingla.",
+        "Mashina ovozi eshitilyaptimi?",
+        "Mana svetofor. Qizil odamcha — to‘xta!",
+        "Yashil odamcha — o‘tish mumkin.",
+        "Lekin avval yana chapga, o‘ngga, chapga qara.",
+        "Zebra chiziqdan o‘tamiz. Shoshilmaymiz.",
+        "To‘xta, qara, tingla — keyin yur!",
+        "Endi savol: qizil chiroqda nima qilamiz?"
+      ],
+      "scenes": [
+        "hook",
+        "rules",
+        "stop",
+        "hold",
+        "look",
+        "car",
+        "listen",
+        "sound",
+        "red",
+        "green",
+        "again",
+        "zebra",
+        "repeat",
+        "quiz"
+      ],
+      "durations": [
+        4.045,
+        4.5,
+        3.773,
+        3.591,
+        4.955,
+        3.682,
+        3.773,
+        3.136,
+        3.955,
+        3.318,
+        4.591,
+        4.045,
+        3.5,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ru": {
+      "lines": [
+        "Пику, как безопасно перейти улицу?",
+        "Запомни три правила: стой, смотри, слушай!",
+        "Первое правило: остановись у края дороги.",
+        "Не бегай. Держись за руку взрослого.",
+        "Второе правило: посмотри налево, направо и снова налево.",
+        "Едет ли машина? Хорошенько посмотри.",
+        "Третье правило: внимательно слушай.",
+        "Слышен ли звук машины?",
+        "Вот светофор. Красный человечек — стой!",
+        "Зелёный человечек — можно идти.",
+        "Но сначала снова посмотри налево, направо и налево.",
+        "Идём по зебре. Не спешим.",
+        "Стой, смотри, слушай — потом иди!",
+        "Теперь вопрос: что делаем на красный?"
+      ],
+      "scenes": [
+        "hook",
+        "rules",
+        "stop",
+        "hold",
+        "look",
+        "car",
+        "listen",
+        "sound",
+        "red",
+        "green",
+        "again",
+        "zebra",
+        "repeat",
+        "quiz"
+      ],
+      "durations": [
+        4.045,
+        4.5,
+        3.773,
+        3.591,
+        4.955,
+        3.682,
+        3.773,
+        3.136,
+        3.955,
+        3.318,
+        4.591,
+        4.045,
+        3.5,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "en": {
+      "lines": [
+        "Piku, how do we cross the street safely?",
+        "Remember three rules: stop, look, listen!",
+        "Rule one: stop at the edge of the road.",
+        "Do not run. Hold a grown-up’s hand.",
+        "Rule two: look left, right, then left again.",
+        "Is a car coming? Look carefully.",
+        "Rule three: listen carefully.",
+        "Can you hear a car?",
+        "Here is the traffic light. Red figure — stop!",
+        "Green figure — you may cross.",
+        "But first look left, right and left again.",
+        "We cross on the zebra. No rushing.",
+        "Stop, look, listen — then walk!",
+        "Now a question: what do we do at red?"
+      ],
+      "scenes": [
+        "hook",
+        "rules",
+        "stop",
+        "hold",
+        "look",
+        "car",
+        "listen",
+        "sound",
+        "red",
+        "green",
+        "again",
+        "zebra",
+        "repeat",
+        "quiz"
+      ],
+      "durations": [
+        4.045,
+        4.5,
+        3.773,
+        3.591,
+        4.955,
+        3.682,
+        3.773,
+        3.136,
+        3.955,
+        3.318,
+        4.591,
+        4.045,
+        3.5,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "bread": {
+    "uz": {
+      "lines": [
+        "Piku, non qayerdan keladi?",
+        "Keling, bug‘doy donidan boshlaymiz!",
+        "Dalada bug‘doy o‘sadi. Quyosh va yomg‘ir kerak.",
+        "Bug‘doy pishadi. Dehqon uni yig‘ib oladi.",
+        "Donlar tegirmonga boradi.",
+        "Tegirmon donni mayda un qiladi.",
+        "Un — bug‘doydan tayyorlanadi!",
+        "Nonvoy un va suvdan xamir qoradi.",
+        "Xamir yumshoq bo‘ladi. Uni shaklga solamiz.",
+        "Nonvoy xamirni issiq tandirga yopadi.",
+        "Issiq tandirda non pishadi!",
+        "Bug‘doy, un, xamir, non!",
+        "Non juda ko‘p mehnatdan keladi.",
+        "Endi savol: non nimadan boshlanadi?"
+      ],
+      "scenes": [
+        "hook",
+        "wheat",
+        "field",
+        "harvest",
+        "mill",
+        "flour",
+        "flour2",
+        "dough",
+        "shape",
+        "tandoor",
+        "bake",
+        "chain",
+        "work",
+        "quiz"
+      ],
+      "durations": [
+        2.864,
+        3.682,
+        4.773,
+        4.227,
+        2.773,
+        3.318,
+        3.136,
+        3.5,
+        4.409,
+        3.864,
+        2.955,
+        2.682,
+        3.318,
+        3.682
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ru": {
+      "lines": [
+        "Пику, откуда берётся хлеб?",
+        "Давай начнём с пшеничного зерна!",
+        "В поле растёт пшеница. Ей нужны солнце и дождь.",
+        "Пшеница созревает. Фермер её убирает.",
+        "Зёрна едут на мельницу.",
+        "Мельница делает из зерна мелкую муку.",
+        "Мука делается из пшеницы!",
+        "Пекарь замешивает тесто из муки и воды.",
+        "Тесто мягкое. Мы придаём ему форму.",
+        "Пекарь лепит тесто на стенку горячего тандыра.",
+        "В горячем тандыре хлеб печётся!",
+        "Пшеница, мука, тесто, хлеб!",
+        "Хлеб — это много труда.",
+        "Теперь вопрос: с чего начинается хлеб?"
+      ],
+      "scenes": [
+        "hook",
+        "wheat",
+        "field",
+        "harvest",
+        "mill",
+        "flour",
+        "flour2",
+        "dough",
+        "shape",
+        "tandoor",
+        "bake",
+        "chain",
+        "work",
+        "quiz"
+      ],
+      "durations": [
+        2.864,
+        3.682,
+        4.773,
+        4.227,
+        2.773,
+        3.318,
+        3.136,
+        3.5,
+        4.409,
+        3.864,
+        2.955,
+        2.682,
+        3.318,
+        3.682
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "en": {
+      "lines": [
+        "Piku, where does bread come from?",
+        "Let’s start with a grain of wheat!",
+        "Wheat grows in the field. It needs sun and rain.",
+        "The wheat ripens. The farmer harvests it.",
+        "The grains go to the mill.",
+        "The mill turns grain into fine flour.",
+        "Flour is made from wheat!",
+        "The baker mixes dough from flour and water.",
+        "The dough is soft. We shape it.",
+        "The baker sticks the dough on the hot tandoor wall.",
+        "The bread bakes in the hot tandoor!",
+        "Wheat, flour, dough, bread!",
+        "Bread comes from a lot of work.",
+        "Now a question: what does bread start from?"
+      ],
+      "scenes": [
+        "hook",
+        "wheat",
+        "field",
+        "harvest",
+        "mill",
+        "flour",
+        "flour2",
+        "dough",
+        "shape",
+        "tandoor",
+        "bake",
+        "chain",
+        "work",
+        "quiz"
+      ],
+      "durations": [
+        2.864,
+        3.682,
+        4.773,
+        4.227,
+        2.773,
+        3.318,
+        3.136,
+        3.5,
+        4.409,
+        3.864,
+        2.955,
+        2.682,
+        3.318,
+        3.682
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "tree": {
+    "uz": {
+      "lines": [
+        "Piku, katta daraxt qanday paydo bo‘ladi?",
+        "U juda kichkina urug‘dan boshlanadi!",
+        "Urug‘ni yerga ekamiz.",
+        "Unga suv, quyosh va tuproq kerak.",
+        "Avval ildiz pastga o‘sadi.",
+        "Ildiz yerdan suv ichadi.",
+        "Keyin kichik nihol chiqadi.",
+        "Nihol quyoshga qarab o‘sadi.",
+        "Yillar o‘tadi. Nihol kattalashadi.",
+        "Endi u baland daraxt!",
+        "Daraxt soya beradi, qushlarga uy bo‘ladi.",
+        "Ko‘p daraxtlarda meva va urug‘ pishadi.",
+        "Urug‘, ildiz, nihol, daraxt!",
+        "Endi savol: urug‘ o‘sishi uchun nima kerak?"
+      ],
+      "scenes": [
+        "hook",
+        "seed",
+        "plant",
+        "needs",
+        "root",
+        "drink",
+        "sprout",
+        "sun",
+        "years",
+        "tree",
+        "home",
+        "fruit",
+        "chain",
+        "quiz"
+      ],
+      "durations": [
+        4.136,
+        3.773,
+        2.409,
+        3.5,
+        2.864,
+        2.682,
+        2.955,
+        3.045,
+        3.591,
+        2.409,
+        4.227,
+        4.045,
+        3.045,
+        4.409
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ru": {
+      "lines": [
+        "Пику, как появляется большое дерево?",
+        "Оно начинается с крошечного семечка!",
+        "Мы сажаем семечко в землю.",
+        "Ему нужны вода, солнце и почва.",
+        "Сначала корень растёт вниз.",
+        "Корень пьёт воду из земли.",
+        "Потом появляется маленький росток.",
+        "Росток тянется к солнцу.",
+        "Идут годы. Росток вырастает.",
+        "Теперь это высокое дерево!",
+        "Дерево даёт тень, в нём живут птицы.",
+        "На многих деревьях зреют плоды и семена.",
+        "Семечко, корень, росток, дерево!",
+        "Теперь вопрос: что нужно семечку, чтобы расти?"
+      ],
+      "scenes": [
+        "hook",
+        "seed",
+        "plant",
+        "needs",
+        "root",
+        "drink",
+        "sprout",
+        "sun",
+        "years",
+        "tree",
+        "home",
+        "fruit",
+        "chain",
+        "quiz"
+      ],
+      "durations": [
+        4.136,
+        3.773,
+        2.409,
+        3.5,
+        2.864,
+        2.682,
+        2.955,
+        3.045,
+        3.591,
+        2.409,
+        4.227,
+        4.045,
+        3.045,
+        4.409
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "en": {
+      "lines": [
+        "Piku, how does a big tree appear?",
+        "It starts from a tiny seed!",
+        "We plant the seed in the ground.",
+        "It needs water, sun and soil.",
+        "First the root grows down.",
+        "The root drinks water from the soil.",
+        "Then a small sprout comes up.",
+        "The sprout reaches for the sun.",
+        "Years pass. The sprout gets bigger.",
+        "Now it is a tall tree!",
+        "The tree gives shade and a home for birds.",
+        "On many trees, fruit and seeds ripen.",
+        "Seed, root, sprout, tree!",
+        "Now a question: what does a seed need to grow?"
+      ],
+      "scenes": [
+        "hook",
+        "seed",
+        "plant",
+        "needs",
+        "root",
+        "drink",
+        "sprout",
+        "sun",
+        "years",
+        "tree",
+        "home",
+        "fruit",
+        "chain",
+        "quiz"
+      ],
+      "durations": [
+        4.136,
+        3.773,
+        2.409,
+        3.5,
+        2.864,
+        2.682,
+        2.955,
+        3.045,
+        3.591,
+        2.409,
+        4.227,
+        4.045,
+        3.045,
+        4.409
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "rainbow": {
+    "uz": {
+      "lines": [
+        "Piku, kamalak qanday paydo bo‘ladi?",
+        "U yomg‘irdan keyin osmonda paydo bo‘ladi.",
+        "Quyosh nuri oq ko‘rinadi.",
+        "Lekin unda ko‘p ranglar yashiringan!",
+        "Tomchi nurning yo‘lini o‘zgartiradi.",
+        "Nur tomchida ranglarga ajraladi.",
+        "Qizil, to‘q sariq, sariq, yashil...",
+        "...havorang, ko‘k va binafsha!",
+        "Kamalak uchun quyosh va yomg‘ir kerak.",
+        "Quyosh orqangda turadi. Unga qarama!",
+        "Tomchilar esa oldingda bo‘ladi.",
+        "Quyosh nuri, tomchilar — kamalak!",
+        "Rang-barang kamalak juda chiroyli!",
+        "Endi savol: kamalakning ranglari nechta?"
+      ],
+      "scenes": [
+        "hook",
+        "after",
+        "white",
+        "hidden",
+        "drops",
+        "split",
+        "colors1",
+        "colors2",
+        "need",
+        "back",
+        "front",
+        "chain",
+        "pretty",
+        "quiz"
+      ],
+      "durations": [
+        3.682,
+        4.227,
+        2.773,
+        3.773,
+        3.773,
+        3.409,
+        3.682,
+        3.227,
+        3.955,
+        3.773,
+        3.318,
+        3.5,
+        3.591,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ru": {
+      "lines": [
+        "Пику, как появляется радуга?",
+        "Она появляется на небе после дождя.",
+        "Солнечный свет кажется белым.",
+        "Но в нём спрятано много цветов!",
+        "Капля меняет путь света.",
+        "Свет в капле разделяется на цвета.",
+        "Красный, оранжевый, жёлтый, зелёный...",
+        "...голубой, синий и фиолетовый!",
+        "Для радуги нужны солнце и дождь.",
+        "Солнце за твоей спиной. На него не смотри!",
+        "А капли — перед тобой.",
+        "Солнечный свет, капли — радуга!",
+        "Разноцветная радуга очень красивая!",
+        "Теперь вопрос: сколько цветов у радуги?"
+      ],
+      "scenes": [
+        "hook",
+        "after",
+        "white",
+        "hidden",
+        "drops",
+        "split",
+        "colors1",
+        "colors2",
+        "need",
+        "back",
+        "front",
+        "chain",
+        "pretty",
+        "quiz"
+      ],
+      "durations": [
+        3.682,
+        4.227,
+        2.773,
+        3.773,
+        3.773,
+        3.409,
+        3.682,
+        3.227,
+        3.955,
+        3.773,
+        3.318,
+        3.5,
+        3.591,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "en": {
+      "lines": [
+        "Piku, how does a rainbow appear?",
+        "It shows up in the sky after rain.",
+        "Sunlight looks white.",
+        "But many colours hide inside it!",
+        "The drop changes the light’s path.",
+        "In the drop, the light splits into colours.",
+        "Red, orange, yellow, green...",
+        "...light blue, blue and violet!",
+        "A rainbow needs sun and rain.",
+        "The sun is behind you. Do not look at it!",
+        "And the drops are in front of you.",
+        "Sunlight, drops — a rainbow!",
+        "The colourful rainbow is so pretty!",
+        "Now a question: how many colours does a rainbow have?"
+      ],
+      "scenes": [
+        "hook",
+        "after",
+        "white",
+        "hidden",
+        "drops",
+        "split",
+        "colors1",
+        "colors2",
+        "need",
+        "back",
+        "front",
+        "chain",
+        "pretty",
+        "quiz"
+      ],
+      "durations": [
+        3.682,
+        4.227,
+        2.773,
+        3.773,
+        3.773,
+        3.409,
+        3.682,
+        3.227,
+        3.955,
+        3.773,
+        3.318,
+        3.5,
+        3.591,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "dayCycle": {
+    "uz": {
+      "lines": [
+        "Piku, nega kechasi qorong‘i bo‘ladi?",
+        "Chunki Yer aylanib turadi!",
+        "Yer — bu bizning katta sayyoramiz.",
+        "U o‘z atrofida sekin aylanadi.",
+        "Quyosh doim yorug‘lik beradi.",
+        "Yerning quyosh tomoni yorug‘ bo‘ladi.",
+        "U yerda kun. Biz o‘ynaymiz!",
+        "Boshqa tomonga quyosh nuri tushmaydi.",
+        "U yerda tun. Ko‘pchilik uxlaydi.",
+        "Yer aylanadi, kun tunga almashadi.",
+        "Bir kecha-kunduz — yigirma to‘rt soat.",
+        "Quyosh aylanmaydi. Yer aylanadi!",
+        "Kun, tun, yana kun!",
+        "Endi savol: kun va tunni nima almashtiradi?"
+      ],
+      "scenes": [
+        "hook",
+        "spin",
+        "earth",
+        "slow",
+        "sun",
+        "lit",
+        "day",
+        "dark",
+        "night",
+        "change",
+        "hours",
+        "notsun",
+        "chain",
+        "quiz"
+      ],
+      "durations": [
+        3.773,
+        2.864,
+        3.591,
+        3.227,
+        3.136,
+        3.864,
+        2.955,
+        3.864,
+        3.409,
+        3.591,
+        3.955,
+        3.409,
+        2.227,
+        4.409
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "ru": {
+      "lines": [
+        "Пику, почему ночью темно?",
+        "Потому что Земля вращается!",
+        "Земля — наша большая планета.",
+        "Она медленно вращается вокруг себя.",
+        "Солнце всегда даёт свет.",
+        "Сторона Земли к Солнцу освещена.",
+        "Там день. Мы играем!",
+        "На другую сторону свет Солнца не попадает.",
+        "Там ночь. Многие спят.",
+        "Земля вращается, день сменяется ночью.",
+        "Одни сутки — двадцать четыре часа.",
+        "Солнце не кружит. Земля вращается!",
+        "День, ночь, снова день!",
+        "Теперь вопрос: что меняет день и ночь?"
+      ],
+      "scenes": [
+        "hook",
+        "spin",
+        "earth",
+        "slow",
+        "sun",
+        "lit",
+        "day",
+        "dark",
+        "night",
+        "change",
+        "hours",
+        "notsun",
+        "chain",
+        "quiz"
+      ],
+      "durations": [
+        3.773,
+        2.864,
+        3.591,
+        3.227,
+        3.136,
+        3.864,
+        2.955,
+        3.864,
+        3.409,
+        3.591,
+        3.955,
+        3.409,
+        2.227,
+        4.409
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "en": {
+      "lines": [
+        "Piku, why is it dark at night?",
+        "Because the Earth keeps turning!",
+        "The Earth is our big planet.",
+        "It turns slowly around itself.",
+        "The Sun always gives light.",
+        "The side of Earth facing the Sun is bright.",
+        "It is day there. We play!",
+        "No sunlight reaches the other side.",
+        "It is night there. Many people sleep.",
+        "The Earth turns, day becomes night.",
+        "One day and night is twenty-four hours.",
+        "The Sun does not circle. The Earth turns!",
+        "Day, night, day again!",
+        "Now a question: what changes day into night?"
+      ],
+      "scenes": [
+        "hook",
+        "spin",
+        "earth",
+        "slow",
+        "sun",
+        "lit",
+        "day",
+        "dark",
+        "night",
+        "change",
+        "hours",
+        "notsun",
+        "chain",
+        "quiz"
+      ],
+      "durations": [
+        3.773,
+        2.864,
+        3.591,
+        3.227,
+        3.136,
+        3.864,
+        2.955,
+        3.864,
+        3.409,
+        3.591,
+        3.955,
+        3.409,
+        2.227,
+        4.409
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "calm": {
+    "uz": {
+      "lines": [
+        "Piku, jahlim chiqsa nima qilaman?",
+        "Jahl — oddiy his. Hammada bo‘ladi.",
+        "Yuzim qizaradi, yuragim tez uradi.",
+        "Keling, shar nafasini o‘rganamiz!",
+        "Qo‘lingni qorningga qo‘y.",
+        "Burun bilan sekin nafas ol.",
+        "Qorning katta shardek shishadi.",
+        "Endi og‘iz bilan sekin chiqar.",
+        "Shar asta-sekin kichrayadi.",
+        "Yana bir marta: nafas ol...",
+        "...va sekin chiqar. Uch marta!",
+        "Tinchlandingmi? Juda yaxshi!",
+        "Keyin kattaga ayt: jahlim chiqdi.",
+        "Endi savol: jahl chiqsa nima qilamiz?"
+      ],
+      "scenes": [
+        "hook",
+        "normal",
+        "body",
+        "balloon",
+        "hand",
+        "in",
+        "big",
+        "out",
+        "small",
+        "again",
+        "three",
+        "calm",
+        "tell",
+        "quiz"
+      ],
+      "durations": [
+        3.5,
+        3.591,
+        3.591,
+        3.5,
+        2.773,
+        2.955,
+        3.318,
+        3.227,
+        2.955,
+        2.955,
+        3.227,
+        3.045,
+        3.5,
+        3.864
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        3.5,
+        0,
+        3.5,
+        0,
+        3.5,
+        3.5,
+        0,
+        0,
+        0
+      ]
+    },
+    "ru": {
+      "lines": [
+        "Пику, что делать, если я злюсь?",
+        "Злость — обычное чувство. Оно бывает у всех.",
+        "Лицо краснеет, сердце бьётся быстро.",
+        "Давай научимся дыханию шарика!",
+        "Положи руку на живот.",
+        "Медленно вдохни носом.",
+        "Живот надувается, как большой шар.",
+        "Теперь медленно выдохни ртом.",
+        "Шарик понемногу уменьшается.",
+        "Ещё раз: вдохни...",
+        "...и медленно выдохни. Три раза!",
+        "Успокоился? Очень хорошо!",
+        "Потом скажи взрослому: я разозлился.",
+        "Теперь вопрос: что делаем, когда злимся?"
+      ],
+      "scenes": [
+        "hook",
+        "normal",
+        "body",
+        "balloon",
+        "hand",
+        "in",
+        "big",
+        "out",
+        "small",
+        "again",
+        "three",
+        "calm",
+        "tell",
+        "quiz"
+      ],
+      "durations": [
+        3.5,
+        3.591,
+        3.591,
+        3.5,
+        2.773,
+        2.955,
+        3.318,
+        3.227,
+        2.955,
+        2.955,
+        3.227,
+        3.045,
+        3.5,
+        3.864
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        3.5,
+        0,
+        3.5,
+        0,
+        3.5,
+        3.5,
+        0,
+        0,
+        0
+      ]
+    },
+    "en": {
+      "lines": [
+        "Piku, what do I do when I am angry?",
+        "Anger is a normal feeling. Everyone has it.",
+        "My face gets red, my heart beats fast.",
+        "Let’s learn balloon breathing!",
+        "Put your hand on your tummy.",
+        "Breathe in slowly through your nose.",
+        "Your tummy puffs up like a big balloon.",
+        "Now breathe out slowly through your mouth.",
+        "The balloon slowly gets smaller.",
+        "Once more: breathe in...",
+        "...and breathe out slowly. Three times!",
+        "Feeling calmer? Very good!",
+        "Then tell a grown-up: I felt angry.",
+        "Now a question: what do we do when angry?"
+      ],
+      "scenes": [
+        "hook",
+        "normal",
+        "body",
+        "balloon",
+        "hand",
+        "in",
+        "big",
+        "out",
+        "small",
+        "again",
+        "three",
+        "calm",
+        "tell",
+        "quiz"
+      ],
+      "durations": [
+        3.5,
+        3.591,
+        3.591,
+        3.5,
+        2.773,
+        2.955,
+        3.318,
+        3.227,
+        2.955,
+        2.955,
+        3.227,
+        3.045,
+        3.5,
+        3.864
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ],
+      "pauses": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        3.5,
+        0,
+        3.5,
+        0,
+        3.5,
+        3.5,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "teeth": {
+    "uz": {
+      "lines": [
+        "Piku, tishni nega yuvaman?",
+        "Tishlar ovqatni chaynaydi. Ular kuchli bo‘lsin.",
+        "Ovqatdan keyin tishda qoldiqlar qoladi.",
+        "Mikroblar shirinlikni yaxshi ko‘radi!",
+        "Ular tishni sekin-asta buzadi.",
+        "Tish cho‘tkasi mikroblarni ketkazadi.",
+        "Cho‘tkaga mayda no‘xatdek pasta ol.",
+        "Hamma tishni aylantirib tozala.",
+        "Ikki daqiqa yuvamiz: sanaymiz!",
+        "Ertalab va kechqurun yuvamiz.",
+        "Pastani yutma, tupurib tashla.",
+        "Toza tish — kuchli tish!",
+        "Vrach tishingni muntazam tekshiradi.",
+        "Endi savol: tishni necha daqiqa yuvamiz?"
+      ],
+      "scenes": [
+        "hook",
+        "chew",
+        "left",
+        "germs",
+        "hurt",
+        "brush",
+        "paste",
+        "round",
+        "two",
+        "twice",
+        "spit",
+        "clean",
+        "dentist",
+        "quiz"
+      ],
+      "durations": [
+        2.864,
+        4.773,
+        4.045,
+        3.864,
+        3.227,
+        3.864,
+        3.682,
+        3.318,
+        3.227,
+        3.136,
+        3.227,
+        2.682,
+        3.773,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ]
+    },
+    "ru": {
+      "lines": [
+        "Пику, зачем чистить зубы?",
+        "Зубы жуют еду. Пусть они будут крепкими.",
+        "После еды на зубах остаются крошки.",
+        "Микробы любят сладкое!",
+        "Они понемногу портят зуб.",
+        "Зубная щётка прогоняет микробов.",
+        "Возьми на щётку пасту размером с горошину.",
+        "Почисти все зубы круговыми движениями.",
+        "Чистим две минуты: считаем!",
+        "Чистим утром и вечером.",
+        "Пасту не глотай, сплюнь.",
+        "Чистые зубы — крепкие зубы!",
+        "Врач регулярно проверяет зубы.",
+        "Теперь вопрос: сколько минут чистим зубы?"
+      ],
+      "scenes": [
+        "hook",
+        "chew",
+        "left",
+        "germs",
+        "hurt",
+        "brush",
+        "paste",
+        "round",
+        "two",
+        "twice",
+        "spit",
+        "clean",
+        "dentist",
+        "quiz"
+      ],
+      "durations": [
+        2.864,
+        4.773,
+        4.045,
+        3.864,
+        3.227,
+        3.864,
+        3.682,
+        3.318,
+        3.227,
+        3.136,
+        3.227,
+        2.682,
+        3.773,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ]
+    },
+    "en": {
+      "lines": [
+        "Piku, why do I brush my teeth?",
+        "Teeth chew food. They should stay strong.",
+        "After eating, bits of food stay on teeth.",
+        "Germs love sweet things!",
+        "They slowly spoil the tooth.",
+        "A toothbrush chases the germs away.",
+        "Take a pea-sized dab of paste on the brush.",
+        "Clean every tooth in small circles.",
+        "We brush for two minutes: let us count!",
+        "We brush in the morning and at night.",
+        "Do not swallow the paste, spit it out.",
+        "Clean teeth — strong teeth!",
+        "A dentist checks your teeth regularly.",
+        "Now a question: how many minutes do we brush?"
+      ],
+      "scenes": [
+        "hook",
+        "chew",
+        "left",
+        "germs",
+        "hurt",
+        "brush",
+        "paste",
+        "round",
+        "two",
+        "twice",
+        "spit",
+        "clean",
+        "dentist",
+        "quiz"
+      ],
+      "durations": [
+        2.864,
+        4.773,
+        4.045,
+        3.864,
+        3.227,
+        3.864,
+        3.682,
+        3.318,
+        3.227,
+        3.136,
+        3.227,
+        2.682,
+        3.773,
+        4.136
+      ],
+      "speakers": [
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku",
+        "mini",
+        "piku"
+      ]
     }
   }
 }

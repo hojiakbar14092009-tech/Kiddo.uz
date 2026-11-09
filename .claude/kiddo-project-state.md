@@ -856,3 +856,15 @@ Skriptlar sessiya scratchpad'ida edi (repo'da emas).
 - New clips are shorter (mean 1.65 s vs 2.38 s), so the app auto-advances (afterVoice) sooner. e2e `feelings.spec.ts` playRun raced
   that (clicked "Keyingisi" after the game had moved on); its click is now tolerant (`{ timeout: 3_000 }.catch`).
 - Not committed or pushed (waiting for "push qil").
+
+## Phase 75: cartoons filmed again (Shorts), 2026-11-08 — NOT committed or pushed
+- Detail and resume notes: `.claude/shorts-progress.md`; docs: `docs/shorts/{scripts,LICENSES,VOICE-NEXT}.md`, `docs/architecture/attention.md`.
+- App: karaoke subtitles in the app (not in the picture), size button, virtualized feed (2 videos instead of 13), rAF progress,
+  reduced motion, per-lesson question with reward (`ShortQuiz`), 7 new lessons in `catalog.ts`, i18n uz/ru/en.
+- Film: new Remotion engine (rig, camera, dissolves), water = full Mini/Piku dialogue with real ElevenLabs voices (367 credits,
+  1 119 left), the other 12 re-filmed (Piku narrates the old recording), 7 new lessons with music + subtitles only (voices next month).
+- Remotion needed assets that were not in git (`public/art`, `public/music.wav`, `public/vo`); rebuilt (see LICENSES.md). The old
+  Piper narration of the 12 cartoons exists only inside the shipped mp4 (copied out to `marketing/shorts/out/old-audio`, ignored by git).
+- Open: voices for the 7 lessons (~2 260 credits, `VOICE-NEXT.md`); the 12 older cartoons are not Mini/Piku dialogues yet (single old
+  narrator); emoji in a few legacy scenes now use the renderer's own emoji font (looks a little different from before);
+  `dayCycle` overlaps the older `dayNight` cartoon; unit tests fail on a clean HEAD too (admin x3, MathPage: slow lazy routes).

@@ -1,0 +1,1165 @@
+{
+  "water": {
+    "voice": true,
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, yomg‘ir qayerdan keladi?",
+        "ru": "Пику, откуда берётся дождь?",
+        "en": "Piku, where does rain come from?"
+      },
+      {
+        "who": "piku",
+        "scene": "ask",
+        "uz": "Keling, birga bilib olamiz!",
+        "ru": "Давай узнаем вместе!",
+        "en": "Let’s find out together!"
+      },
+      {
+        "who": "mini",
+        "scene": "sun",
+        "uz": "Avval quyosh dengizni isitadi.",
+        "ru": "Сначала солнце греет море.",
+        "en": "First, the sun warms the sea."
+      },
+      {
+        "who": "piku",
+        "scene": "steam",
+        "uz": "Suv iliq bo‘lib, bug‘ga aylanadi.",
+        "ru": "Вода теплеет и становится паром.",
+        "en": "The water gets warm and turns into steam."
+      },
+      {
+        "who": "mini",
+        "scene": "invisible",
+        "uz": "Bug‘ ko‘rinmaydi, lekin yuqoriga uchadi.",
+        "ru": "Пар не виден, но летит вверх.",
+        "en": "Steam is invisible, but it flies up."
+      },
+      {
+        "who": "piku",
+        "scene": "rise",
+        "uz": "Kichkina tomchilar osmonga ko‘tariladi.",
+        "ru": "Крошечные капельки поднимаются в небо.",
+        "en": "Tiny droplets rise up to the sky."
+      },
+      {
+        "who": "mini",
+        "scene": "gather",
+        "uz": "U yerda sovuq. Tomchilar yig‘iladi.",
+        "ru": "Там холодно. Капельки собираются вместе.",
+        "en": "It is cold up there. The droplets gather."
+      },
+      {
+        "who": "piku",
+        "scene": "cloud",
+        "uz": "Ular birlashib, bulut bo‘ladi!",
+        "ru": "Они соединяются и становятся облаком!",
+        "en": "Together they make a cloud!"
+      },
+      {
+        "who": "mini",
+        "scene": "heavy",
+        "uz": "Bulut og‘irlashadi. Tomchilar tushadi.",
+        "ru": "Облако тяжелеет. Капельки падают.",
+        "en": "The cloud gets heavy. Drops fall down."
+      },
+      {
+        "who": "piku",
+        "scene": "rain",
+        "uz": "Mana yomg‘ir! Gullar suv ichadi.",
+        "ru": "Вот и дождь! Цветы пьют воду.",
+        "en": "Here is the rain! The flowers drink."
+      },
+      {
+        "who": "mini",
+        "scene": "mean",
+        "uz": "Demak, yomg‘ir — bulutdagi suv!",
+        "ru": "Значит, дождь — это вода из облака!",
+        "en": "So rain is water from the cloud!"
+      },
+      {
+        "who": "piku",
+        "scene": "river",
+        "uz": "Suv oqib, daryoga tushadi.",
+        "ru": "Вода стекает в реку.",
+        "en": "The water runs into the river."
+      },
+      {
+        "who": "mini",
+        "scene": "sea",
+        "uz": "Daryo suvni yana dengizga olib boradi.",
+        "ru": "Река несёт воду обратно в море.",
+        "en": "The river carries it back to the sea."
+      },
+      {
+        "who": "piku",
+        "scene": "cycle",
+        "uz": "Dengiz, bulut, yomg‘ir — suv aylanadi!",
+        "ru": "Море, облако, дождь — вода кружит!",
+        "en": "Sea, cloud, rain — the water goes round!"
+      },
+      {
+        "who": "mini",
+        "scene": "never",
+        "uz": "Suv hech qachon yo‘qolmaydi.",
+        "ru": "Вода никогда не исчезает.",
+        "en": "Water never disappears."
+      },
+      {
+        "who": "piku",
+        "scene": "play",
+        "uz": "Endi o‘yinda tomchiga yordam ber!",
+        "ru": "Теперь помоги капельке в игре!",
+        "en": "Now help the droplet in the game!"
+      }
+    ]
+  },
+  "crossing": {
+    "voice": false,
+    "title": {
+      "uz": "Ko‘chani qanday kesib o‘tamiz?",
+      "ru": "Как переходить улицу?",
+      "en": "How do we cross the street?"
+    },
+    "parent": {
+      "uz": "Yo‘ldan o‘tishni kattalar bilan birga mashq qiling: har safar «to‘xta, qara, tingla».",
+      "ru": "Тренируйтесь переходить дорогу вместе со взрослым: каждый раз «стой, смотри, слушай».",
+      "en": "Practise crossing together with a grown-up: every time, “stop, look, listen”."
+    },
+    "quiz": {
+      "q": {
+        "uz": "Qizil chiroq yonsa nima qilamiz?",
+        "ru": "Что делаем, когда горит красный?",
+        "en": "What do we do at a red light?"
+      },
+      "options": [
+        {
+          "pic": "✋",
+          "uz": "to‘xtaymiz",
+          "ok": true
+        },
+        {
+          "pic": "🏃",
+          "uz": "yuguramiz",
+          "ok": false
+        }
+      ]
+    },
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, ko‘chadan xavfsiz qanday o‘tamiz?",
+        "ru": "Пику, как безопасно перейти улицу?",
+        "en": "Piku, how do we cross the street safely?",
+        "visual": "street, a car drives past"
+      },
+      {
+        "who": "piku",
+        "scene": "rules",
+        "uz": "Uch qoidani eslab qol: to‘xta, qara, tingla!",
+        "ru": "Запомни три правила: стой, смотри, слушай!",
+        "en": "Remember three rules: stop, look, listen!",
+        "visual": "three icons pop: hand, eyes, ear"
+      },
+      {
+        "who": "mini",
+        "scene": "stop",
+        "uz": "Birinchi qoida: yo‘l chetida to‘xta.",
+        "ru": "Первое правило: остановись у края дороги.",
+        "en": "Rule one: stop at the edge of the road.",
+        "visual": "kerb, big stop hand"
+      },
+      {
+        "who": "piku",
+        "scene": "hold",
+        "uz": "Yugurma. Kattaning qo‘lidan ushla.",
+        "ru": "Не бегай. Держись за руку взрослого.",
+        "en": "Do not run. Hold a grown-up’s hand.",
+        "visual": "a hand to hold, a ball stays still"
+      },
+      {
+        "who": "mini",
+        "scene": "look",
+        "uz": "Ikkinchi qoida: chapga, o‘ngga, yana chapga qara.",
+        "ru": "Второе правило: посмотри налево, направо и снова налево.",
+        "en": "Rule two: look left, right, then left again.",
+        "visual": "eyes look left, then right"
+      },
+      {
+        "who": "piku",
+        "scene": "car",
+        "uz": "Mashina kelyaptimi? Yaxshilab qara.",
+        "ru": "Едет ли машина? Хорошенько посмотри.",
+        "en": "Is a car coming? Look carefully.",
+        "visual": "a car passes, then the road is clear"
+      },
+      {
+        "who": "mini",
+        "scene": "listen",
+        "uz": "Uchinchi qoida: diqqat bilan tingla.",
+        "ru": "Третье правило: внимательно слушай.",
+        "en": "Rule three: listen carefully.",
+        "visual": "big ear, sound waves"
+      },
+      {
+        "who": "piku",
+        "scene": "sound",
+        "uz": "Mashina ovozi eshitilyaptimi?",
+        "ru": "Слышен ли звук машины?",
+        "en": "Can you hear a car?",
+        "visual": "ear, a distant car"
+      },
+      {
+        "who": "mini",
+        "scene": "red",
+        "uz": "Mana svetofor. Qizil odamcha — to‘xta!",
+        "ru": "Вот светофор. Красный человечек — стой!",
+        "en": "Here is the traffic light. Red figure — stop!",
+        "visual": "traffic light turns red"
+      },
+      {
+        "who": "piku",
+        "scene": "green",
+        "uz": "Yashil odamcha — o‘tish mumkin.",
+        "ru": "Зелёный человечек — можно идти.",
+        "en": "Green figure — you may cross.",
+        "visual": "traffic light turns green"
+      },
+      {
+        "who": "mini",
+        "scene": "again",
+        "uz": "Lekin avval yana chapga, o‘ngga, chapga qara.",
+        "ru": "Но сначала снова посмотри налево, направо и налево.",
+        "en": "But first look left, right and left again.",
+        "visual": "eyes look both ways"
+      },
+      {
+        "who": "piku",
+        "scene": "zebra",
+        "uz": "Zebra chiziqdan o‘tamiz. Shoshilmaymiz.",
+        "ru": "Идём по зебре. Не спешим.",
+        "en": "We cross on the zebra. No rushing.",
+        "visual": "zebra crossing, calm walking"
+      },
+      {
+        "who": "mini",
+        "scene": "repeat",
+        "uz": "To‘xta, qara, tingla — keyin yur!",
+        "ru": "Стой, смотри, слушай — потом иди!",
+        "en": "Stop, look, listen — then walk!",
+        "visual": "the three icons again, then go"
+      },
+      {
+        "who": "piku",
+        "scene": "quiz",
+        "uz": "Endi savol: qizil chiroqda nima qilamiz?",
+        "ru": "Теперь вопрос: что делаем на красный?",
+        "en": "Now a question: what do we do at red?",
+        "visual": "red light, a question mark"
+      }
+    ]
+  },
+  "bread": {
+    "voice": false,
+    "title": {
+      "uz": "Non qayerdan keladi?",
+      "ru": "Откуда берётся хлеб?",
+      "en": "Where does bread come from?"
+    },
+    "parent": {
+      "uz": "Nonni birga sindiring va «bu bug‘doydan boshlangan» deb ayting: mehnatni qadrlash shundan boshlanadi.",
+      "ru": "Ломая хлеб вместе, скажите: «он начался с пшеницы». Так начинается уважение к труду.",
+      "en": "Break bread together and say “it started as wheat”: respect for work begins there."
+    },
+    "quiz": {
+      "q": {
+        "uz": "Non nimadan boshlanadi?",
+        "ru": "С чего начинается хлеб?",
+        "en": "What does bread start from?"
+      },
+      "options": [
+        {
+          "pic": "🌾",
+          "uz": "bug‘doy",
+          "ok": true
+        },
+        {
+          "pic": "🍎",
+          "uz": "olma",
+          "ok": false
+        },
+        {
+          "pic": "🥛",
+          "uz": "sut",
+          "ok": false
+        }
+      ]
+    },
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, non qayerdan keladi?",
+        "ru": "Пику, откуда берётся хлеб?",
+        "en": "Piku, where does bread come from?",
+        "visual": "a round Uzbek tandoor bread, a question mark"
+      },
+      {
+        "who": "piku",
+        "scene": "wheat",
+        "uz": "Keling, bug‘doy donidan boshlaymiz!",
+        "ru": "Давай начнём с пшеничного зерна!",
+        "en": "Let’s start with a grain of wheat!",
+        "visual": "a wheat ear grows"
+      },
+      {
+        "who": "mini",
+        "scene": "field",
+        "uz": "Dalada bug‘doy o‘sadi. Quyosh va yomg‘ir kerak.",
+        "ru": "В поле растёт пшеница. Ей нужны солнце и дождь.",
+        "en": "Wheat grows in the field. It needs sun and rain.",
+        "visual": "field, sun, rain"
+      },
+      {
+        "who": "piku",
+        "scene": "harvest",
+        "uz": "Bug‘doy pishadi. Dehqon uni yig‘ib oladi.",
+        "ru": "Пшеница созревает. Фермер её убирает.",
+        "en": "The wheat ripens. The farmer harvests it.",
+        "visual": "a combine harvester in the field"
+      },
+      {
+        "who": "mini",
+        "scene": "mill",
+        "uz": "Donlar tegirmonga boradi.",
+        "ru": "Зёрна едут на мельницу.",
+        "en": "The grains go to the mill.",
+        "visual": "grain goes to a mill"
+      },
+      {
+        "who": "piku",
+        "scene": "flour",
+        "uz": "Tegirmon donni mayda un qiladi.",
+        "ru": "Мельница делает из зерна мелкую муку.",
+        "en": "The mill turns grain into fine flour.",
+        "visual": "grain becomes flour"
+      },
+      {
+        "who": "mini",
+        "scene": "flour2",
+        "uz": "Un — bug‘doydan tayyorlanadi!",
+        "ru": "Мука делается из пшеницы!",
+        "en": "Flour is made from wheat!",
+        "visual": "wheat and flour side by side"
+      },
+      {
+        "who": "piku",
+        "scene": "dough",
+        "uz": "Nonvoy un va suvdan xamir qoradi.",
+        "ru": "Пекарь замешивает тесто из муки и воды.",
+        "en": "The baker mixes dough from flour and water.",
+        "visual": "flour and water make dough"
+      },
+      {
+        "who": "mini",
+        "scene": "shape",
+        "uz": "Xamir yumshoq bo‘ladi. Uni shaklga solamiz.",
+        "ru": "Тесто мягкое. Мы придаём ему форму.",
+        "en": "The dough is soft. We shape it.",
+        "visual": "round dough is shaped"
+      },
+      {
+        "who": "piku",
+        "scene": "tandoor",
+        "uz": "Nonvoy xamirni issiq tandirga yopadi.",
+        "ru": "Пекарь лепит тесто на стенку горячего тандыра.",
+        "en": "The baker sticks the dough on the hot tandoor wall.",
+        "visual": "tandoor with fire"
+      },
+      {
+        "who": "mini",
+        "scene": "bake",
+        "uz": "Issiq tandirda non pishadi!",
+        "ru": "В горячем тандыре хлеб печётся!",
+        "en": "The bread bakes in the hot tandoor!",
+        "visual": "bread turns golden"
+      },
+      {
+        "who": "piku",
+        "scene": "chain",
+        "uz": "Bug‘doy, un, xamir, non!",
+        "ru": "Пшеница, мука, тесто, хлеб!",
+        "en": "Wheat, flour, dough, bread!",
+        "visual": "the four steps in a row"
+      },
+      {
+        "who": "mini",
+        "scene": "work",
+        "uz": "Non juda ko‘p mehnatdan keladi.",
+        "ru": "Хлеб — это много труда.",
+        "en": "Bread comes from a lot of work.",
+        "visual": "bread, sparkles"
+      },
+      {
+        "who": "piku",
+        "scene": "quiz",
+        "uz": "Endi savol: non nimadan boshlanadi?",
+        "ru": "Теперь вопрос: с чего начинается хлеб?",
+        "en": "Now a question: what does bread start from?",
+        "visual": "bread, a question mark"
+      }
+    ]
+  },
+  "tree": {
+    "voice": false,
+    "title": {
+      "uz": "Urug‘dan daraxtgacha",
+      "ru": "От семечка до дерева",
+      "en": "From a seed to a tree"
+    },
+    "parent": {
+      "uz": "Birga urug‘ ekib, har kuni suv quying: bola o‘sishni o‘z ko‘zi bilan ko‘radi.",
+      "ru": "Посадите семечко вместе и поливайте каждый день: ребёнок увидит рост своими глазами.",
+      "en": "Plant a seed together and water it daily: your child will watch it grow."
+    },
+    "quiz": {
+      "q": {
+        "uz": "Urug‘ o‘sishi uchun nima kerak?",
+        "ru": "Что нужно семечку, чтобы расти?",
+        "en": "What does a seed need to grow?"
+      },
+      "options": [
+        {
+          "pic": "💧",
+          "uz": "suv, quyosh va tuproq",
+          "ok": true
+        },
+        {
+          "pic": "🍭",
+          "uz": "shirinlik",
+          "ok": false
+        },
+        {
+          "pic": "🧸",
+          "uz": "o‘yinchoq",
+          "ok": false
+        }
+      ]
+    },
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, katta daraxt qanday paydo bo‘ladi?",
+        "ru": "Пику, как появляется большое дерево?",
+        "en": "Piku, how does a big tree appear?",
+        "visual": "a big tree, a question mark"
+      },
+      {
+        "who": "piku",
+        "scene": "seed",
+        "uz": "U juda kichkina urug‘dan boshlanadi!",
+        "ru": "Оно начинается с крошечного семечка!",
+        "en": "It starts from a tiny seed!",
+        "visual": "a tiny seed"
+      },
+      {
+        "who": "mini",
+        "scene": "plant",
+        "uz": "Urug‘ni yerga ekamiz.",
+        "ru": "Мы сажаем семечко в землю.",
+        "en": "We plant the seed in the ground.",
+        "visual": "seed goes into soil"
+      },
+      {
+        "who": "piku",
+        "scene": "needs",
+        "uz": "Unga suv, quyosh va tuproq kerak.",
+        "ru": "Ему нужны вода, солнце и почва.",
+        "en": "It needs water, sun and soil.",
+        "visual": "sun and rain over the soil"
+      },
+      {
+        "who": "mini",
+        "scene": "root",
+        "uz": "Avval ildiz pastga o‘sadi.",
+        "ru": "Сначала корень растёт вниз.",
+        "en": "First the root grows down.",
+        "visual": "a root grows under the ground"
+      },
+      {
+        "who": "piku",
+        "scene": "drink",
+        "uz": "Ildiz yerdan suv ichadi.",
+        "ru": "Корень пьёт воду из земли.",
+        "en": "The root drinks water from the soil.",
+        "visual": "water goes up the root"
+      },
+      {
+        "who": "mini",
+        "scene": "sprout",
+        "uz": "Keyin kichik nihol chiqadi.",
+        "ru": "Потом появляется маленький росток.",
+        "en": "Then a small sprout comes up.",
+        "visual": "a sprout appears"
+      },
+      {
+        "who": "piku",
+        "scene": "sun",
+        "uz": "Nihol quyoshga qarab o‘sadi.",
+        "ru": "Росток тянется к солнцу.",
+        "en": "The sprout reaches for the sun.",
+        "visual": "sprout grows toward the sun"
+      },
+      {
+        "who": "mini",
+        "scene": "years",
+        "uz": "Yillar o‘tadi. Nihol kattalashadi.",
+        "ru": "Идут годы. Росток вырастает.",
+        "en": "Years pass. The sprout gets bigger.",
+        "visual": "seasons pass, it grows"
+      },
+      {
+        "who": "piku",
+        "scene": "tree",
+        "uz": "Endi u baland daraxt!",
+        "ru": "Теперь это высокое дерево!",
+        "en": "Now it is a tall tree!",
+        "visual": "a tall tree"
+      },
+      {
+        "who": "mini",
+        "scene": "home",
+        "uz": "Daraxt soya beradi, qushlarga uy bo‘ladi.",
+        "ru": "Дерево даёт тень, в нём живут птицы.",
+        "en": "The tree gives shade and a home for birds.",
+        "visual": "bird, nest, shade"
+      },
+      {
+        "who": "piku",
+        "scene": "fruit",
+        "uz": "Ko‘p daraxtlarda meva va urug‘ pishadi.",
+        "ru": "На многих деревьях зреют плоды и семена.",
+        "en": "On many trees, fruit and seeds ripen.",
+        "visual": "fruit, seeds fall"
+      },
+      {
+        "who": "mini",
+        "scene": "chain",
+        "uz": "Urug‘, ildiz, nihol, daraxt!",
+        "ru": "Семечко, корень, росток, дерево!",
+        "en": "Seed, root, sprout, tree!",
+        "visual": "the four steps in a row"
+      },
+      {
+        "who": "piku",
+        "scene": "quiz",
+        "uz": "Endi savol: urug‘ o‘sishi uchun nima kerak?",
+        "ru": "Теперь вопрос: что нужно семечку, чтобы расти?",
+        "en": "Now a question: what does a seed need to grow?",
+        "visual": "seed, a question mark"
+      }
+    ]
+  },
+  "rainbow": {
+    "voice": false,
+    "title": {
+      "uz": "Kamalak qanday paydo bo‘ladi?",
+      "ru": "Как появляется радуга?",
+      "en": "How does a rainbow appear?"
+    },
+    "parent": {
+      "uz": "Yomg‘irdan keyin birga osmonga qarang. Uyda esa suv to‘ldirilgan stakan va quyosh nuri bilan mayda kamalak qilish mumkin.",
+      "ru": "После дождя посмотрите на небо вместе. Дома можно получить маленькую радугу стаканом воды на солнце.",
+      "en": "After rain, look at the sky together. At home, a glass of water in the sun can make a small rainbow."
+    },
+    "quiz": {
+      "q": {
+        "uz": "Kamalakning ranglari nechta?",
+        "ru": "Сколько цветов у радуги?",
+        "en": "How many colours does a rainbow have?"
+      },
+      "options": [
+        {
+          "pic": "5️⃣",
+          "uz": "beshta",
+          "ok": false
+        },
+        {
+          "pic": "7️⃣",
+          "uz": "yettita",
+          "ok": true
+        }
+      ]
+    },
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, kamalak qanday paydo bo‘ladi?",
+        "ru": "Пику, как появляется радуга?",
+        "en": "Piku, how does a rainbow appear?",
+        "visual": "a rainbow, a question mark"
+      },
+      {
+        "who": "piku",
+        "scene": "after",
+        "uz": "U yomg‘irdan keyin osmonda paydo bo‘ladi.",
+        "ru": "Она появляется на небе после дождя.",
+        "en": "It shows up in the sky after rain.",
+        "visual": "rain ends, the sun comes out"
+      },
+      {
+        "who": "mini",
+        "scene": "white",
+        "uz": "Quyosh nuri oq ko‘rinadi.",
+        "ru": "Солнечный свет кажется белым.",
+        "en": "Sunlight looks white.",
+        "visual": "a white ray from the sun"
+      },
+      {
+        "who": "piku",
+        "scene": "hidden",
+        "uz": "Lekin unda ko‘p ranglar yashiringan!",
+        "ru": "Но в нём спрятано много цветов!",
+        "en": "But many colours hide inside it!",
+        "visual": "sparkles, colours peek out"
+      },
+      {
+        "who": "mini",
+        "scene": "drops",
+        "uz": "Tomchi nurning yo‘lini o‘zgartiradi.",
+        "ru": "Капля меняет путь света.",
+        "en": "The drop changes the light’s path.",
+        "visual": "ray hits a drop"
+      },
+      {
+        "who": "piku",
+        "scene": "split",
+        "uz": "Nur tomchida ranglarga ajraladi.",
+        "ru": "Свет в капле разделяется на цвета.",
+        "en": "In the drop, the light splits into colours.",
+        "visual": "ray splits into colours"
+      },
+      {
+        "who": "mini",
+        "scene": "colors1",
+        "uz": "Qizil, to‘q sariq, sariq, yashil...",
+        "ru": "Красный, оранжевый, жёлтый, зелёный...",
+        "en": "Red, orange, yellow, green...",
+        "visual": "four stripes appear"
+      },
+      {
+        "who": "piku",
+        "scene": "colors2",
+        "uz": "...havorang, ko‘k va binafsha!",
+        "ru": "...голубой, синий и фиолетовый!",
+        "en": "...light blue, blue and violet!",
+        "visual": "three more stripes, a full rainbow"
+      },
+      {
+        "who": "mini",
+        "scene": "need",
+        "uz": "Kamalak uchun quyosh va yomg‘ir kerak.",
+        "ru": "Для радуги нужны солнце и дождь.",
+        "en": "A rainbow needs sun and rain.",
+        "visual": "sun and rain together"
+      },
+      {
+        "who": "piku",
+        "scene": "back",
+        "uz": "Quyosh orqangda turadi. Unga qarama!",
+        "ru": "Солнце за твоей спиной. На него не смотри!",
+        "en": "The sun is behind you. Do not look at it!",
+        "visual": "sun behind, rain ahead"
+      },
+      {
+        "who": "mini",
+        "scene": "front",
+        "uz": "Tomchilar esa oldingda bo‘ladi.",
+        "ru": "А капли — перед тобой.",
+        "en": "And the drops are in front of you.",
+        "visual": "drops in front"
+      },
+      {
+        "who": "piku",
+        "scene": "chain",
+        "uz": "Quyosh nuri, tomchilar — kamalak!",
+        "ru": "Солнечный свет, капли — радуга!",
+        "en": "Sunlight, drops — a rainbow!",
+        "visual": "sun plus drops make a rainbow"
+      },
+      {
+        "who": "mini",
+        "scene": "pretty",
+        "uz": "Rang-barang kamalak juda chiroyli!",
+        "ru": "Разноцветная радуга очень красивая!",
+        "en": "The colourful rainbow is so pretty!",
+        "visual": "rainbow, sparkles"
+      },
+      {
+        "who": "piku",
+        "scene": "quiz",
+        "uz": "Endi savol: kamalakning ranglari nechta?",
+        "ru": "Теперь вопрос: сколько цветов у радуги?",
+        "en": "Now a question: how many colours does a rainbow have?",
+        "visual": "rainbow, a question mark"
+      }
+    ]
+  },
+  "dayCycle": {
+    "voice": false,
+    "title": {
+      "uz": "Nega kun va tun almashadi?",
+      "ru": "Почему день сменяется ночью?",
+      "en": "Why do day and night change?"
+    },
+    "parent": {
+      "uz": "Chiroq va koptok bilan tajriba qiling: koptokni sekin aylantiring, chiroq yoqqan tomoni yorug‘ bo‘ladi.",
+      "ru": "Сделайте опыт с лампой и мячом: медленно вращайте мяч, освещённая сторона — это день.",
+      "en": "Try a lamp and a ball: turn the ball slowly, the lit side is daytime."
+    },
+    "quiz": {
+      "q": {
+        "uz": "Kun va tunni nima almashtiradi?",
+        "ru": "Что меняет день и ночь?",
+        "en": "What changes day into night?"
+      },
+      "options": [
+        {
+          "pic": "🌍",
+          "uz": "Yer aylanadi",
+          "ok": true
+        },
+        {
+          "pic": "☁️",
+          "uz": "bulut",
+          "ok": false
+        },
+        {
+          "pic": "🌙",
+          "uz": "oy",
+          "ok": false
+        }
+      ]
+    },
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, nega kechasi qorong‘i bo‘ladi?",
+        "ru": "Пику, почему ночью темно?",
+        "en": "Piku, why is it dark at night?",
+        "visual": "a night sky, a question mark"
+      },
+      {
+        "who": "piku",
+        "scene": "spin",
+        "uz": "Chunki Yer aylanib turadi!",
+        "ru": "Потому что Земля вращается!",
+        "en": "Because the Earth keeps turning!",
+        "visual": "Earth turns"
+      },
+      {
+        "who": "mini",
+        "scene": "earth",
+        "uz": "Yer — bu bizning katta sayyoramiz.",
+        "ru": "Земля — наша большая планета.",
+        "en": "The Earth is our big planet.",
+        "visual": "Earth with a tiny house"
+      },
+      {
+        "who": "piku",
+        "scene": "slow",
+        "uz": "U o‘z atrofida sekin aylanadi.",
+        "ru": "Она медленно вращается вокруг себя.",
+        "en": "It turns slowly around itself.",
+        "visual": "Earth turns with an arrow"
+      },
+      {
+        "who": "mini",
+        "scene": "sun",
+        "uz": "Quyosh doim yorug‘lik beradi.",
+        "ru": "Солнце всегда даёт свет.",
+        "en": "The Sun always gives light.",
+        "visual": "sun shines"
+      },
+      {
+        "who": "piku",
+        "scene": "lit",
+        "uz": "Yerning quyosh tomoni yorug‘ bo‘ladi.",
+        "ru": "Сторона Земли к Солнцу освещена.",
+        "en": "The side of Earth facing the Sun is bright.",
+        "visual": "half the Earth lit"
+      },
+      {
+        "who": "mini",
+        "scene": "day",
+        "uz": "U yerda kun. Biz o‘ynaymiz!",
+        "ru": "Там день. Мы играем!",
+        "en": "It is day there. We play!",
+        "visual": "children play in daylight"
+      },
+      {
+        "who": "piku",
+        "scene": "dark",
+        "uz": "Boshqa tomonga quyosh nuri tushmaydi.",
+        "ru": "На другую сторону свет Солнца не попадает.",
+        "en": "No sunlight reaches the other side.",
+        "visual": "the dark half"
+      },
+      {
+        "who": "mini",
+        "scene": "night",
+        "uz": "U yerda tun. Ko‘pchilik uxlaydi.",
+        "ru": "Там ночь. Многие спят.",
+        "en": "It is night there. Many people sleep.",
+        "visual": "moon, stars, sleeping house"
+      },
+      {
+        "who": "piku",
+        "scene": "change",
+        "uz": "Yer aylanadi, kun tunga almashadi.",
+        "ru": "Земля вращается, день сменяется ночью.",
+        "en": "The Earth turns, day becomes night.",
+        "visual": "day and night swap"
+      },
+      {
+        "who": "mini",
+        "scene": "hours",
+        "uz": "Bir kecha-kunduz — yigirma to‘rt soat.",
+        "ru": "Одни сутки — двадцать четыре часа.",
+        "en": "One day and night is twenty-four hours.",
+        "visual": "a clock goes round"
+      },
+      {
+        "who": "piku",
+        "scene": "notsun",
+        "uz": "Quyosh aylanmaydi. Yer aylanadi!",
+        "ru": "Солнце не кружит. Земля вращается!",
+        "en": "The Sun does not circle. The Earth turns!",
+        "visual": "Earth turns, sun stays"
+      },
+      {
+        "who": "mini",
+        "scene": "chain",
+        "uz": "Kun, tun, yana kun!",
+        "ru": "День, ночь, снова день!",
+        "en": "Day, night, day again!",
+        "visual": "sun, moon, sun"
+      },
+      {
+        "who": "piku",
+        "scene": "quiz",
+        "uz": "Endi savol: kun va tunni nima almashtiradi?",
+        "ru": "Теперь вопрос: что меняет день и ночь?",
+        "en": "Now a question: what changes day into night?",
+        "visual": "Earth, a question mark"
+      }
+    ]
+  },
+  "calm": {
+    "voice": false,
+    "title": {
+      "uz": "Jahlim chiqsa nima qilaman?",
+      "ru": "Что делать, если я злюсь?",
+      "en": "What do I do when I am angry?"
+    },
+    "parent": {
+      "uz": "Shar nafasini jahl chiqmagan paytda ham birga mashq qiling: bola kerak paytda o‘zi eslaydi.",
+      "ru": "Тренируйте «дыхание шарика» и в спокойные минуты: тогда ребёнок вспомнит его в нужный момент.",
+      "en": "Practise “balloon breathing” in calm moments too: your child will remember it when needed."
+    },
+    "quiz": {
+      "q": {
+        "uz": "Jahl chiqsa nima qilamiz?",
+        "ru": "Что делаем, когда злимся?",
+        "en": "What do we do when we are angry?"
+      },
+      "options": [
+        {
+          "pic": "🎈",
+          "uz": "shar nafasi",
+          "ok": true
+        },
+        {
+          "pic": "📢",
+          "uz": "baqiramiz",
+          "ok": false
+        }
+      ]
+    },
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, jahlim chiqsa nima qilaman?",
+        "ru": "Пику, что делать, если я злюсь?",
+        "en": "Piku, what do I do when I am angry?",
+        "visual": "a cross face, a question mark"
+      },
+      {
+        "who": "piku",
+        "scene": "normal",
+        "uz": "Jahl — oddiy his. Hammada bo‘ladi.",
+        "ru": "Злость — обычное чувство. Оно бывает у всех.",
+        "en": "Anger is a normal feeling. Everyone has it.",
+        "visual": "friendly faces, a heart"
+      },
+      {
+        "who": "mini",
+        "scene": "body",
+        "uz": "Yuzim qizaradi, yuragim tez uradi.",
+        "ru": "Лицо краснеет, сердце бьётся быстро.",
+        "en": "My face gets red, my heart beats fast.",
+        "visual": "red face, fast heart"
+      },
+      {
+        "who": "piku",
+        "scene": "balloon",
+        "uz": "Keling, shar nafasini o‘rganamiz!",
+        "ru": "Давай научимся дыханию шарика!",
+        "en": "Let’s learn balloon breathing!",
+        "visual": "a balloon appears"
+      },
+      {
+        "who": "mini",
+        "scene": "hand",
+        "uz": "Qo‘lingni qorningga qo‘y.",
+        "ru": "Положи руку на живот.",
+        "en": "Put your hand on your tummy.",
+        "visual": "a hand on the tummy"
+      },
+      {
+        "who": "piku",
+        "scene": "in",
+        "uz": "Burun bilan sekin nafas ol.",
+        "ru": "Медленно вдохни носом.",
+        "en": "Breathe in slowly through your nose.",
+        "visual": "balloon grows",
+        "pause": 3.5
+      },
+      {
+        "who": "mini",
+        "scene": "big",
+        "uz": "Qorning katta shardek shishadi.",
+        "ru": "Живот надувается, как большой шар.",
+        "en": "Your tummy puffs up like a big balloon.",
+        "visual": "balloon is big"
+      },
+      {
+        "who": "piku",
+        "scene": "out",
+        "uz": "Endi og‘iz bilan sekin chiqar.",
+        "ru": "Теперь медленно выдохни ртом.",
+        "en": "Now breathe out slowly through your mouth.",
+        "visual": "balloon shrinks",
+        "pause": 3.5
+      },
+      {
+        "who": "mini",
+        "scene": "small",
+        "uz": "Shar asta-sekin kichrayadi.",
+        "ru": "Шарик понемногу уменьшается.",
+        "en": "The balloon slowly gets smaller.",
+        "visual": "balloon is small"
+      },
+      {
+        "who": "piku",
+        "scene": "again",
+        "uz": "Yana bir marta: nafas ol...",
+        "ru": "Ещё раз: вдохни...",
+        "en": "Once more: breathe in...",
+        "visual": "balloon grows again",
+        "pause": 3.5
+      },
+      {
+        "who": "mini",
+        "scene": "three",
+        "uz": "...va sekin chiqar. Uch marta!",
+        "ru": "...и медленно выдохни. Три раза!",
+        "en": "...and breathe out slowly. Three times!",
+        "visual": "three balloons",
+        "pause": 3.5
+      },
+      {
+        "who": "piku",
+        "scene": "calm",
+        "uz": "Tinchlandingmi? Juda yaxshi!",
+        "ru": "Успокоился? Очень хорошо!",
+        "en": "Feeling calmer? Very good!",
+        "visual": "smiling faces, sparkles"
+      },
+      {
+        "who": "mini",
+        "scene": "tell",
+        "uz": "Keyin kattaga ayt: jahlim chiqdi.",
+        "ru": "Потом скажи взрослому: я разозлился.",
+        "en": "Then tell a grown-up: I felt angry.",
+        "visual": "a child talks to a grown-up"
+      },
+      {
+        "who": "piku",
+        "scene": "quiz",
+        "uz": "Endi savol: jahl chiqsa nima qilamiz?",
+        "ru": "Теперь вопрос: что делаем, когда злимся?",
+        "en": "Now a question: what do we do when angry?",
+        "visual": "balloon, a question mark"
+      }
+    ]
+  },
+  "teeth": {
+    "voice": false,
+    "title": {
+      "uz": "Tishimni nega yuvaman?",
+      "ru": "Зачем чистить зубы?",
+      "en": "Why do I brush my teeth?"
+    },
+    "parent": {
+      "uz": "Ertalab va kechqurun ikki daqiqa, mayda no‘xat kattaligida pasta bilan; kichik bolaga kattalar yordam bersin.",
+      "ru": "Утром и вечером по две минуты, пастой размером с горошину; маленькому ребёнку помогает взрослый.",
+      "en": "Two minutes morning and evening, with a pea-sized dab of toothpaste; a grown-up helps little ones."
+    },
+    "quiz": {
+      "q": {
+        "uz": "Tishni necha daqiqa yuvamiz?",
+        "ru": "Сколько минут чистим зубы?",
+        "en": "How many minutes do we brush?"
+      },
+      "options": [
+        {
+          "pic": "1️⃣",
+          "uz": "bir daqiqa",
+          "ok": false
+        },
+        {
+          "pic": "2️⃣",
+          "uz": "ikki daqiqa",
+          "ok": true
+        },
+        {
+          "pic": "5️⃣",
+          "uz": "besh daqiqa",
+          "ok": false
+        }
+      ]
+    },
+    "lines": [
+      {
+        "who": "mini",
+        "scene": "hook",
+        "uz": "Piku, tishni nega yuvaman?",
+        "ru": "Пику, зачем чистить зубы?",
+        "en": "Piku, why do I brush my teeth?",
+        "visual": "a big smile with teeth"
+      },
+      {
+        "who": "piku",
+        "scene": "chew",
+        "uz": "Tishlar ovqatni chaynaydi. Ular kuchli bo‘lsin.",
+        "ru": "Зубы жуют еду. Пусть они будут крепкими.",
+        "en": "Teeth chew food. They should stay strong.",
+        "visual": "teeth chew an apple"
+      },
+      {
+        "who": "mini",
+        "scene": "left",
+        "uz": "Ovqatdan keyin tishda qoldiqlar qoladi.",
+        "ru": "После еды на зубах остаются крошки.",
+        "en": "After eating, bits of food stay on teeth.",
+        "visual": "crumbs on a tooth"
+      },
+      {
+        "who": "piku",
+        "scene": "germs",
+        "uz": "Mikroblar shirinlikni yaxshi ko‘radi!",
+        "ru": "Микробы любят сладкое!",
+        "en": "Germs love sweet things!",
+        "visual": "tiny germs near a candy"
+      },
+      {
+        "who": "mini",
+        "scene": "hurt",
+        "uz": "Ular tishni sekin-asta buzadi.",
+        "ru": "Они понемногу портят зуб.",
+        "en": "They slowly spoil the tooth.",
+        "visual": "a tooth gets a spot"
+      },
+      {
+        "who": "piku",
+        "scene": "brush",
+        "uz": "Tish cho‘tkasi mikroblarni ketkazadi.",
+        "ru": "Зубная щётка прогоняет микробов.",
+        "en": "A toothbrush chases the germs away.",
+        "visual": "brush and germs flee"
+      },
+      {
+        "who": "mini",
+        "scene": "paste",
+        "uz": "Cho‘tkaga mayda no‘xatdek pasta ol.",
+        "ru": "Возьми на щётку пасту размером с горошину.",
+        "en": "Take a pea-sized dab of paste on the brush.",
+        "visual": "a small dab of paste"
+      },
+      {
+        "who": "piku",
+        "scene": "round",
+        "uz": "Hamma tishni aylantirib tozala.",
+        "ru": "Почисти все зубы круговыми движениями.",
+        "en": "Clean every tooth in small circles.",
+        "visual": "brush moves in circles"
+      },
+      {
+        "who": "mini",
+        "scene": "two",
+        "uz": "Ikki daqiqa yuvamiz: sanaymiz!",
+        "ru": "Чистим две минуты: считаем!",
+        "en": "We brush for two minutes: let us count!",
+        "visual": "a clock counts to two"
+      },
+      {
+        "who": "piku",
+        "scene": "twice",
+        "uz": "Ertalab va kechqurun yuvamiz.",
+        "ru": "Чистим утром и вечером.",
+        "en": "We brush in the morning and at night.",
+        "visual": "sun and moon"
+      },
+      {
+        "who": "mini",
+        "scene": "spit",
+        "uz": "Pastani yutma, tupurib tashla.",
+        "ru": "Пасту не глотай, сплюнь.",
+        "en": "Do not swallow the paste, spit it out.",
+        "visual": "spit into the sink"
+      },
+      {
+        "who": "piku",
+        "scene": "clean",
+        "uz": "Toza tish — kuchli tish!",
+        "ru": "Чистые зубы — крепкие зубы!",
+        "en": "Clean teeth — strong teeth!",
+        "visual": "a shiny smile"
+      },
+      {
+        "who": "mini",
+        "scene": "dentist",
+        "uz": "Vrach tishingni muntazam tekshiradi.",
+        "ru": "Врач регулярно проверяет зубы.",
+        "en": "A dentist checks your teeth regularly.",
+        "visual": "a friendly dentist"
+      },
+      {
+        "who": "piku",
+        "scene": "quiz",
+        "uz": "Endi savol: tishni necha daqiqa yuvamiz?",
+        "ru": "Теперь вопрос: сколько минут чистим зубы?",
+        "en": "Now a question: how many minutes do we brush?",
+        "visual": "a clock, a question mark"
+      }
+    ]
+  }
+}

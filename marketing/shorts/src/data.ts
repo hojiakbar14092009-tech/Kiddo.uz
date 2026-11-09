@@ -39,31 +39,56 @@ export const LANGS: Lang[] = ['uz', 'ru', 'en']
 /** The voice starts this long into its scene, and the scene holds this long after it. */
 export const VOICE_IN = 10
 export const HOLD = 22
+/** Dialogue stories (two storytellers) breathe faster: a short pause, not a long hold. */
+export const STORY_IDS: ReadonlySet<string> = new Set([
+  'water',
+  'crossing',
+  'bread',
+  'tree',
+  'rainbow',
+  'dayCycle',
+  'calm',
+  'teeth',
+])
+export const voiceIn = (short: string) => (STORY_IDS.has(short) ? 8 : VOICE_IN)
+export const hold = (short: string) => (STORY_IDS.has(short) ? 12 : HOLD)
 /** The title card before the first scene and the end card after the last. */
 export const OPENING = 36
 export const ENDING = 45
 
-interface Timing {
+export interface Timing {
   lines: string[]
   scenes: string[]
   durations: number[]
+  /** Dialogue stories: who says each line. */
+  speakers?: ('mini' | 'piku')[]
+  /** Seconds of silence after each line (the child breathes along); 0 when absent. */
+  pauses?: number[]
 }
 
-export function timing(short: ShortId, lang: Lang): Timing {
+export function timing(short: string, lang: Lang): Timing {
   return (timings as Record<string, Record<string, Timing>>)[short]![lang]!
 }
 
 /** Frames of one scene: its line plus the breath before and after. */
-export function sceneFrames(short: ShortId, lang: Lang, index: number): number {
-  return VOICE_IN + Math.ceil(timing(short, lang).durations[index]! * FPS) + HOLD
+export const pauseFrames = (short: string, lang: Lang, index: number): number =>
+  Math.round((timing(short, lang).pauses?.[index] ?? 0) * FPS)
+
+export function sceneFrames(short: string, lang: Lang, index: number): number {
+  return (
+    voiceIn(short) +
+    Math.ceil(timing(short, lang).durations[index]! * FPS) +
+    hold(short) +
+    pauseFrames(short, lang, index)
+  )
 }
 
-export function totalFrames(short: ShortId, lang: Lang): number {
+export function totalFrames(short: string, lang: Lang): number {
   const { durations } = timing(short, lang)
   return OPENING + durations.reduce((sum, _, i) => sum + sceneFrames(short, lang, i), 0) + ENDING
 }
 
-export const voiceFile = (short: ShortId, lang: Lang, index: number) =>
+export const voiceFile = (short: string, lang: Lang, index: number) =>
   `vo/${short}/${lang}-${index}.wav`
 
 /** The app's colours. */
@@ -84,7 +109,7 @@ export const C = {
 }
 
 /** Each cartoon's own sky and accent. */
-export const THEME: Record<ShortId, { top: string; bottom: string; accent: string }> = {
+export const THEME: Record<string, { top: string; bottom: string; accent: string }> = {
   water: { top: '#8fd3ff', bottom: '#e6f6ff', accent: '#2f7fc4' },
   magnet: { top: '#ffd9c7', bottom: '#fff6ef', accent: '#e2552d' },
   float: { top: '#b8ecdf', bottom: '#f0fbf7', accent: '#13917e' },
@@ -98,6 +123,13 @@ export const THEME: Record<ShortId, { top: string; bottom: string; accent: strin
   shapes: { top: '#cfe6ff', bottom: '#f6faff', accent: '#2f7fc4' },
   habitats: { top: '#bfe9c9', bottom: '#f3fff5', accent: '#3f9a3a' },
   plate: { top: '#ffe3cf', bottom: '#fff9f3', accent: '#ff8a4c' },
+  crossing: { top: '#cfe8ff', bottom: '#f3fbff', accent: '#e2552d' },
+  bread: { top: '#ffe9b8', bottom: '#fff8e8', accent: '#c97a1e' },
+  tree: { top: '#c9f0b5', bottom: '#fbfff2', accent: '#3f9a3a' },
+  rainbow: { top: '#bfe6ff', bottom: '#f6fbff', accent: '#9b5de5' },
+  dayCycle: { top: '#3a3f8f', bottom: '#8fb6ff', accent: '#ffc93c' },
+  calm: { top: '#d9f0ff', bottom: '#f5fbff', accent: '#2f7fc4' },
+  teeth: { top: '#d4f5ee', bottom: '#f6fffc', accent: '#13917e' },
 }
 
 /** The title of each cartoon, per language (the app's own wording). */
