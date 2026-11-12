@@ -257,17 +257,19 @@ webhook secret_token.
   (to'langan Pro faqat `/api/me`dan; promo/demo saqlanadi) + test. `/privacy` yangilandi (2026-11-13).
 - 12 ovozsiz so'z: `docs/shorts/VOICE-NEXT.md` "Ilova" bo'limi.
 
-## YAKUN oldidan qolgan bandlar (egasining ro'yxati, 2026-11-13 holati)
+## YAKUN oldidan qolgan bandlar — holat (2026-11-13, kun oxiri)
 | band | holat |
 |---|---|
-| Masshtab portali matnlari va avtomatik o'tish | bajarilmadi |
-| Chizamiz: 20–30 shakl bitta ro'yxatda | bajarilmadi (5 shakl + 0–10 alohida) |
-| Birinchi so'zim sodda so'zlar | qisman (12 so'z ovoz kutadi) |
-| Dinozavrlar: avtomatik o'tish, qazish/viktorina to'g'ridan-to'g'ri | qisman (to'g'ridan-to'g'ri yo'llar bor) |
-| Uyda top 10 tagacha | bajarilmadi |
-| Yong'oq animatsiyasi | bajarilmadi |
-| Har bo'limda bitta orqaga tugma | tekshirilmagan |
-| Tugmalar scroll qilmasdan | qisman |
+| Masshtab portali: avtomatik o'tish | bajarildi (qo'nishdan keyin ovoz + kamida 4 s, tugma orqali) |
+| Masshtab portali: matnlar | aniqlanmadi — talab matni progress faylda yo'q; egadan aniq talab kerak |
+| Chizamiz: bitta ro'yxat | bajarildi: /trace = 0–10 + 14 shakl = 25 (9 yangi shakl, uz/ru/en) |
+| Birinchi so'zim sodda so'zlar | qisman: 12 so'z ovoz kutadi (`docs/shorts/VOICE-NEXT.md` Ilova) |
+| Dinozavrlar | bajarildi: qazish/viktorina darhol ochiladi (dars "takrorlash"da), ikkalasida avtomatik o'tish bor edi |
+| Uyda top 10 tagacha | bajarildi: 10 topshiriqli raund + yakun + "Yana o'ynash" |
+| Yong'oq animatsiyasi | bajarildi: CoinBadge'da yong'oq sakraydi va +N ko'tariladi (motion-safe) |
+| Har bo'limda bitta orqaga | bajarildi: TitleTopBar orqaga bo'lsa uy tugmasi yo'q (audit: hamma ekranda 1 ta) |
+| Scroll'siz tugmalar | bajarildi o'yin ekranlari uchun (375×667 o'lchandi: Uyda top, Masshtab, Uch tilli so'z); ro'yxat sahifalari scroll qiladi |
+- Orqa fon jarayonlari: o'zim ochgan vite preview'lar (4182–4185) PID bilan to'xtatildi. `.data/load.db` (lokal yuklama bazasi, git-ignored) qoldi.
 
 ## Bosqichlar rejasi (qarorlardan)
 3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
