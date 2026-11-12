@@ -117,10 +117,14 @@ export class CloudSync {
       }
       if (server.rev === known) continue
       // a first sign-in (no revision yet) or unsent changes: merge; otherwise the account's copy is newer
-      const merged = known === undefined || this.ledger.dirty.includes(key) ? mergeSaved(local, server.data) : server.data
+      const merged =
+        known === undefined || this.ledger.dirty.includes(key)
+          ? mergeSaved(local, server.data)
+          : server.data
       this.ledger.revs[key] = server.rev
       if (merged) this.apply(key, merged)
-      if (known === undefined && local && !this.ledger.dirty.includes(key)) this.ledger.dirty.push(key)
+      if (known === undefined && local && !this.ledger.dirty.includes(key))
+        this.ledger.dirty.push(key)
     }
     this.save()
   }
@@ -166,22 +170,33 @@ export class CloudSync {
     const keys = [...this.ledger.dirty]
     if (keys.length === 0) return
     const changes: Record<string, { baseRev: number; data: Saved | null }> = {}
-    for (const key of keys) changes[key] = { baseRev: this.ledger.revs[key] ?? 0, data: this.stores[key].read() }
+    for (const key of keys)
+      changes[key] = { baseRev: this.ledger.revs[key] ?? 0, data: this.stores[key].read() }
     const done = (revs: Record<string, number>) => {
       for (const [key, rev] of Object.entries(revs)) {
         this.ledger.revs[key as SyncKey] = rev
         // a key changed again while this request was on its way stays dirty
-        if (JSON.stringify(this.stores[key as SyncKey].read()) === JSON.stringify(changes[key]?.data)) {
+        if (
+          JSON.stringify(this.stores[key as SyncKey].read()) === JSON.stringify(changes[key]?.data)
+        ) {
           this.ledger.dirty = this.ledger.dirty.filter((item) => item !== key)
         }
       }
     }
     try {
-      const { revs } = await api<{ revs: Record<string, number> }>('sync', { method: 'PUT', body: { changes }, retries: 2, keepalive })
+      const { revs } = await api<{ revs: Record<string, number> }>('sync', {
+        method: 'PUT',
+        body: { changes },
+        retries: 2,
+        keepalive,
+      })
       done(revs)
     } catch (error) {
       if (error instanceof ApiError && error.status === 409 && round < 2) {
-        const body = error.body as { revs: Record<string, number>; conflicts: Record<string, { rev: number; data: Saved }> }
+        const body = error.body as {
+          revs: Record<string, number>
+          conflicts: Record<string, { rev: number; data: Saved }>
+        }
         done(body.revs ?? {})
         for (const [key, server] of Object.entries(body.conflicts ?? {})) {
           const merged = mergeSaved(this.stores[key as SyncKey].read(), server.data)

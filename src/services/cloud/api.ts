@@ -34,7 +34,10 @@ export interface ApiOptions {
   keepalive?: boolean
 }
 
-export async function api<T = Record<string, unknown>>(path: string, options: ApiOptions = {}): Promise<T> {
+export async function api<T = Record<string, unknown>>(
+  path: string,
+  options: ApiOptions = {},
+): Promise<T> {
   const method = options.method ?? 'GET'
   const retries = options.retries ?? (method === 'GET' ? 3 : 0)
   for (let attempt = 0; ; attempt += 1) {
@@ -43,7 +46,10 @@ export async function api<T = Record<string, unknown>>(path: string, options: Ap
         method,
         credentials: 'same-origin',
         keepalive: options.keepalive,
-        headers: { ...(options.body === undefined ? {} : { 'content-type': 'application/json' }), ...options.headers },
+        headers: {
+          ...(options.body === undefined ? {} : { 'content-type': 'application/json' }),
+          ...options.headers,
+        },
         body: options.body === undefined ? undefined : JSON.stringify(options.body),
       })
       if (response.status === 304) return { notModified: true } as T
@@ -52,7 +58,9 @@ export async function api<T = Record<string, unknown>>(path: string, options: Ap
       const error = new ApiError(response.status, body)
       if ((response.status >= 500 || response.status === 429) && attempt < retries) {
         const retryAfter = Number(response.headers.get('retry-after'))
-        await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : backoffMs(attempt))
+        await sleep(
+          Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : backoffMs(attempt),
+        )
         continue
       }
       throw error

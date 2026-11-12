@@ -37,13 +37,19 @@ function mockServer(replies: Record<string, Reply[]>) {
       calls.push({ method, body: init.body ? JSON.parse(String(init.body)) : undefined })
       const reply = replies[method]?.shift() ?? { status: 200, body: { revs: {} } }
       if (reply === 'offline') throw new TypeError('Failed to fetch')
-      return new Response(JSON.stringify(reply.body), { status: reply.status, headers: { 'content-type': 'application/json' } })
+      return new Response(JSON.stringify(reply.body), {
+        status: reply.status,
+        headers: { 'content-type': 'application/json' },
+      })
     }),
   )
   return calls
 }
 
-const family = (ids: string[]): Saved => ({ state: { children: ids.map((id) => ({ id })) }, version: 3 })
+const family = (ids: string[]): Saved => ({
+  state: { children: ids.map((id) => ({ id })) },
+  version: 3,
+})
 
 describe('cloud sync (batched, offline queue, conflicts)', () => {
   beforeEach(() => {
@@ -58,8 +64,14 @@ describe('cloud sync (batched, offline queue, conflicts)', () => {
   })
 
   it('first sign-in: the device’s progress goes to an empty account, nothing is lost', async () => {
-    const { stores } = fakeStores({ family: family(['a']), progress: { state: { byChild: { a: { coins: 5 } } } } })
-    const calls = mockServer({ GET: [{ status: 200, body: { keys: {} } }], PUT: [{ status: 200, body: { revs: { family: 1, progress: 1 } } }] })
+    const { stores } = fakeStores({
+      family: family(['a']),
+      progress: { state: { byChild: { a: { coins: 5 } } } },
+    })
+    const calls = mockServer({
+      GET: [{ status: 200, body: { keys: {} } }],
+      PUT: [{ status: 200, body: { revs: { family: 1, progress: 1 } } }],
+    })
     const sync = new CloudSync('u1', stores)
     await sync.start()
     await vi.advanceTimersByTimeAsync(16_000)
@@ -84,13 +96,18 @@ describe('cloud sync (batched, offline queue, conflicts)', () => {
     await sync.start()
     expect(data.family?.state.children).toEqual([{ id: 'a' }, { id: 'b' }])
     await vi.advanceTimersByTimeAsync(16_000)
-    expect(calls[1]!.body).toEqual({ changes: { family: { baseRev: 4, data: family(['a', 'b']) } } })
+    expect(calls[1]!.body).toEqual({
+      changes: { family: { baseRev: 4, data: family(['a', 'b']) } },
+    })
     sync.stop()
   })
 
   it('many quick changes are one request', async () => {
     const { stores, change } = fakeStores({})
-    const calls = mockServer({ GET: [{ status: 200, body: { keys: {} } }], PUT: [{ status: 200, body: { revs: { progress: 1, rewards: 1 } } }] })
+    const calls = mockServer({
+      GET: [{ status: 200, body: { keys: {} } }],
+      PUT: [{ status: 200, body: { revs: { progress: 1, rewards: 1 } } }],
+    })
     const sync = new CloudSync('u1', stores)
     await sync.start()
     for (let coins = 1; coins <= 10; coins += 1) {
@@ -101,13 +118,18 @@ describe('cloud sync (batched, offline queue, conflicts)', () => {
     await vi.advanceTimersByTimeAsync(16_000)
     const puts = calls.filter((c) => c.method === 'PUT')
     expect(puts).toHaveLength(1)
-    expect(puts[0]!.body).toMatchObject({ changes: { progress: { data: { state: { byChild: { a: { coins: 10 } } } } } } })
+    expect(puts[0]!.body).toMatchObject({
+      changes: { progress: { data: { state: { byChild: { a: { coins: 10 } } } } } },
+    })
     sync.stop()
   })
 
   it('offline: keeps the changes on the device and sends them when the network is back', async () => {
     const { stores, change } = fakeStores({})
-    const calls = mockServer({ GET: [{ status: 200, body: { keys: {} } }], PUT: ['offline', 'offline', 'offline', { status: 200, body: { revs: { progress: 1 } } }] })
+    const calls = mockServer({
+      GET: [{ status: 200, body: { keys: {} } }],
+      PUT: ['offline', 'offline', 'offline', { status: 200, body: { revs: { progress: 1 } } }],
+    })
     const sync = new CloudSync('u1', stores)
     await sync.start()
     change('progress', { state: { byChild: { a: { coins: 1 } } } })
@@ -125,7 +147,10 @@ describe('cloud sync (batched, offline queue, conflicts)', () => {
     const calls = mockServer({
       GET: [{ status: 200, body: { keys: {} } }],
       PUT: [
-        { status: 409, body: { revs: {}, conflicts: { family: { rev: 2, data: family(['other']) } } } },
+        {
+          status: 409,
+          body: { revs: {}, conflicts: { family: { rev: 2, data: family(['other']) } } },
+        },
         { status: 200, body: { revs: { family: 3 } } },
       ],
     })
@@ -134,7 +159,9 @@ describe('cloud sync (batched, offline queue, conflicts)', () => {
     change('family', family(['mine']))
     await vi.advanceTimersByTimeAsync(16_000)
     expect(data.family?.state.children).toEqual([{ id: 'other' }, { id: 'mine' }])
-    expect(calls.filter((c) => c.method === 'PUT')[1]!.body).toEqual({ changes: { family: { baseRev: 2, data: family(['other', 'mine']) } } })
+    expect(calls.filter((c) => c.method === 'PUT')[1]!.body).toEqual({
+      changes: { family: { baseRev: 2, data: family(['other', 'mine']) } },
+    })
     expect(JSON.parse(localStorage.getItem('kiddo.cloud')!).revs.family).toBe(3)
     sync.stop()
   })

@@ -9,7 +9,8 @@
  */
 type Json = Record<string, unknown>
 
-const isObject = (value: unknown): value is Json => !!value && typeof value === 'object' && !Array.isArray(value)
+const isObject = (value: unknown): value is Json =>
+  !!value && typeof value === 'object' && !Array.isArray(value)
 const hasIds = (value: unknown): value is Json[] =>
   Array.isArray(value) && value.every((item) => isObject(item) && typeof item.id === 'string')
 
@@ -19,7 +20,8 @@ function joinById(local: Json[], server: Json[]): Json[] {
   for (const item of local) byId.set(String(item.id), item)
   const joined = [...byId.values()]
   // events keep their order in time
-  if (joined.every((item) => typeof item.at === 'string')) joined.sort((a, b) => String(a.at).localeCompare(String(b.at)))
+  if (joined.every((item) => typeof item.at === 'string'))
+    joined.sort((a, b) => String(a.at).localeCompare(String(b.at)))
   return joined
 }
 
@@ -27,7 +29,8 @@ export function mergeState(local: Json, server: Json): Json {
   const out: Json = { ...server, ...local }
   for (const [field, mine] of Object.entries(local)) {
     const theirs = server[field]
-    if (field === 'byChild' && isObject(mine) && isObject(theirs)) out[field] = { ...theirs, ...mine }
+    if (field === 'byChild' && isObject(mine) && isObject(theirs))
+      out[field] = { ...theirs, ...mine }
     else if (hasIds(mine) && hasIds(theirs)) out[field] = joinById(mine, theirs)
   }
   return out
