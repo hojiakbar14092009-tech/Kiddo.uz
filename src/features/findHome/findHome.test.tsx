@@ -232,4 +232,13 @@ describe('the find-at-home page', () => {
       '/explore/find-home',
     )
   })
+
+  it('one round is ten things, then a finish with "play again" (never an endless list)', async () => {
+    const { user } = await renderRoute('/explore/find-home')
+    expect(screen.getByTestId('find-step')).toHaveTextContent('1 / 10')
+    for (let i = 0; i < 10; i += 1) await user.click(screen.getByTestId('find-next'))
+    expect(screen.getByTestId('find-done')).toHaveTextContent('10 ta narsani')
+    await user.click(screen.getByTestId('find-again'))
+    expect(screen.getByTestId('find-step')).toHaveTextContent('1 / 10')
+  })
 })

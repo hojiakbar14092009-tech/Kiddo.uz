@@ -2263,6 +2263,8 @@ export const en: Translation = {
     found: 'Found it!',
     foundGirl: 'Found it!',
     next: 'Next one',
+    step: '{{n}} / {{total}}',
+    roundDone: 'Well done! You looked for {{count}} things.',
     nutsWon: '+{{nuts}} nuts',
     already: 'You found this one today. Look for the next!',
     capped: 'Today’s nuts are collected. Let’s just play!',

@@ -2266,6 +2266,8 @@ export const ru: Translation = {
     found: 'Нашёл!',
     foundGirl: 'Нашла!',
     next: 'Следующее задание',
+    step: '{{n}} / {{total}}',
+    roundDone: 'Молодец! Ты искал(а) {{count}} вещей.',
     nutsWon: 'Орешки: +{{nuts}}',
     already: 'Это сегодня уже найдено. Ищи следующее!',
     capped: 'Орешки на сегодня собраны. Играем просто так!',

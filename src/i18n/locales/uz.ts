@@ -2277,6 +2277,8 @@ export const uz = {
     found: 'Topdim!',
     foundGirl: 'Topdim!',
     next: 'Keyingi topshiriq',
+    step: '{{n}} / {{total}}',
+    roundDone: 'Barakalla! {{count}} ta narsani izlading.',
     nutsWon: '+{{nuts}} yong‘oq',
     already: 'Bugun buni topding. Endi keyingisini izla!',
     capped: 'Bugungi yong‘oqlar yig‘ildi. Endi shunchaki o‘ynaymiz!',

@@ -124,6 +124,9 @@ export const BANNED_WORDS: readonly string[] = [
   'hovli',
 ]
 
+/** One round: ten things to find, then a finish (MVP: a game with an end, not an endless list). */
+export const FIND_ROUND = 10
+
 /**
  * The order of today's prompts: all of them, starting at a place that
  * changes from day to day (the same for the whole day, on every device).

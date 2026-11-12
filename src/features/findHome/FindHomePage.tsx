@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CoinIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { LinkButton } from '@/components/ui/LinkButton'
 import { useRewardStore } from '@/domain/rewards/rewardStore'
 import { LearnShell } from '@/features/learn/LearnShell'
 import { useLearnMascot } from '@/features/learn/useLearnMascot'
@@ -11,7 +12,7 @@ import { tDynamic } from '@/lib/tDynamic'
 import { useActiveChild } from '@/store/familyStore'
 import { useChildKey } from '@/store/progressStore'
 import { FindPicture } from './FindPicture'
-import { praiseKeyFor, promptsForDay } from './prompts'
+import { FIND_ROUND, praiseKeyFor, promptsForDay } from './prompts'
 import { FIND_HOME_PAID_PER_DAY, paidFindsOn, rewardFound, type FindOutcome } from './reward'
 
 /**
@@ -66,12 +67,45 @@ export function FindHomePage() {
         ? t('findHome.capped')
         : t('findHome.already')
 
+  if (index >= FIND_ROUND)
+    return (
+      <LearnShell title={t('findHome.title')} speak={[t('findHome.say.praise1')]}>
+        <section
+          data-testid="find-done"
+          className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-[36px] bg-surface p-6 text-center shadow-[0_8px_0_var(--color-line)]"
+        >
+          <p className="text-5xl" aria-hidden="true">
+            🎉
+          </p>
+          <h2 className="font-display text-2xl font-extrabold">
+            {t('findHome.roundDone', { count: FIND_ROUND })}
+          </h2>
+          <div className="flex w-full flex-col gap-3 sm:flex-row">
+            <Button
+              variant="coin"
+              className="w-full"
+              onClick={() => setIndex(0)}
+              data-testid="find-again"
+            >
+              {t('reward.again')}
+            </Button>
+            <LinkButton to="/home" variant="soft" className="w-full">
+              {t('reward.home')}
+            </LinkButton>
+          </div>
+        </section>
+      </LearnShell>
+    )
+
   return (
     <LearnShell title={t('findHome.title')} speak={lines}>
       <section
         data-testid="find-home"
         className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-[36px] bg-surface p-4 text-center shadow-[0_8px_0_var(--color-line)] sm:gap-5 sm:p-6"
       >
+        <p className="font-display text-lg font-bold" data-testid="find-step">
+          {t('findHome.step', { n: index + 1, total: FIND_ROUND })}
+        </p>
         <p className="text-sm font-semibold text-ink-soft sm:text-base" data-testid="find-progress">
           {t('findHome.progress', {
             found: Math.min(paid, FIND_HOME_PAID_PER_DAY),
