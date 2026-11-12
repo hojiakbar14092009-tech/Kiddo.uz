@@ -25,6 +25,7 @@ beforeEach(async () => {
     SMTP_FROM: 'Kiddo <a@b.c>',
     TELEGRAM_BOT_TOKEN: 'bot-token',
     TELEGRAM_BOT_USERNAME: '@kiddo_test_bot ',
+    TELEGRAM_WEBHOOK_SECRET: 'webhook-secret-for-tests_123',
     GOOGLE_CLIENT_ID: 'google-id',
     GOOGLE_CLIENT_SECRET: 'google-secret',
   })
@@ -176,6 +177,16 @@ describe('a code by Telegram', () => {
 
   it('the webhook needs Telegram’s secret header; a bad phone and a missing bot are clear errors', async () => {
     expect((await hook({ text: '/start x' }, 'wrong')).status).toBe(401)
+    // a prefix of the secret, or one character longer, is still wrong (no length or prefix shortcut)
+    expect((await hook({ text: '/start x' }, webhookSecret().slice(0, -1))).status).toBe(401)
+    expect((await hook({ text: '/start x' }, `${webhookSecret()}x`)).status).toBe(401)
+    // no header at all
+    const bare = await call('POST', 'telegram/webhook', {
+      body: { message: { chat: { id: 77 }, from: { id: 42 }, text: '/start x' } },
+      origin: null,
+    })
+    expect(bare.status).toBe(401)
+    expect(bot).toHaveLength(0) // nothing was answered for a refused update
     expect((await call('POST', 'auth/telegram/start', { body: { phone: '12345' } })).status).toBe(
       400,
     )

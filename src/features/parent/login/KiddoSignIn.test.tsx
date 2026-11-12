@@ -126,4 +126,13 @@ describe('KiddoSignIn', () => {
     await user.click(screen.getByRole('button', { name: /Telegram yo‘qmi/ }))
     expect(screen.getByTestId('email-sign-in')).toBeInTheDocument()
   })
+
+  it('no Telegram and no e-mail set up: the hint leads to the Google button', async () => {
+    const user = userEvent.setup()
+    routes['GET auth/methods'] = { body: { google: true, email: false, telegram: true } }
+    render(<KiddoSignIn onSignedIn={() => undefined} />)
+    await screen.findByTestId('telegram-sign-in')
+    await user.click(screen.getByRole('button', { name: /Telegram yo‘qmi/ }))
+    expect(screen.getByTestId('login-google')).toHaveFocus()
+  })
 })

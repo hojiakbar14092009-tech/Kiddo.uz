@@ -106,7 +106,12 @@ export function KiddoSignIn({ onSignedIn }: { onSignedIn: () => void }) {
           text={text}
           language={language}
           onDone={done}
-          onOtherWay={() => methods.email && setTab('email')}
+          onOtherWay={() =>
+            methods.email
+              ? setTab('email')
+              : // no e-mail set up: the other way is the Google button above
+                document.querySelector<HTMLElement>('[data-testid="login-google"]')?.focus()
+          }
         />
       ) : (
         methods.email && <EmailFlow text={text} language={language} onDone={done} />

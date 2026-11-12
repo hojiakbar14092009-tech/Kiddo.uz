@@ -1,5 +1,5 @@
 import { issueCode, langOf, signedIn, useCode, userFor, type Lang } from './auth.js'
-import { hmac, randomToken, sameText, sha256 } from './crypto.js'
+import { randomToken, sameText, sha256 } from './crypto.js'
 import { db } from './db.js'
 import { botUsername, requireEnv } from './env.js'
 import { clientIp, HttpError, json, readJson } from './http.js'
@@ -13,7 +13,7 @@ import { memoryLimit, rateLimit } from './rateLimit.js'
  *    the bot accepts only their OWN contact (contact.user_id == from.id) and only the phone
  *    typed on the site, then sends a 6-digit code;
  * 3. the code typed on the site signs in. Resending: 30 s apart, at most 5 per sign-in.
- * Telegram calls the webhook with a secret header (derived from AUTH_SECRET).
+ * Telegram calls the webhook with a secret header (TELEGRAM_WEBHOOK_SECRET).
  */
 export const LOGIN_MS = 10 * 60_000
 export const RESEND_MS = 30_000
@@ -27,7 +27,8 @@ export function normalizePhone(raw: unknown): string | null {
   return null
 }
 
-export const webhookSecret = () => hmac('telegram-webhook').slice(0, 64)
+/** Telegram sends it in X-Telegram-Bot-Api-Secret-Token on every update (set by scripts/telegram-webhook.mjs). */
+export const webhookSecret = () => requireEnv('TELEGRAM_WEBHOOK_SECRET')
 
 export const BOT_TEXT: Record<
   Lang,
@@ -206,7 +207,9 @@ const langOfTelegram = (code: string | undefined): Lang =>
 /** Telegram → us. Always 200 for a real call (Telegram retries otherwise); the secret header first. */
 export async function telegramWebhook(request: Request, now = Date.now()): Promise<Response> {
   const secret = request.headers.get('x-telegram-bot-api-secret-token') ?? ''
-  if (!sameText(secret, webhookSecret())) throw new HttpError(401, 'bad_secret')
+  // constant time: both sides hashed to the same length first (no length or prefix leak)
+  if (!secret || !sameText(sha256(secret), sha256(webhookSecret())))
+    throw new HttpError(401, 'bad_secret')
   const update = await readJson<Update>(request, 64 * 1024)
   const message = update.message
   const chatId = message?.chat?.id

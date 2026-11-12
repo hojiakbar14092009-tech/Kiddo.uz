@@ -295,6 +295,10 @@ export function methods(): Response {
     email: ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM'].every((name) =>
       env(name),
     ),
-    telegram: !!(env('TELEGRAM_BOT_TOKEN') && env('TELEGRAM_BOT_USERNAME')),
+    telegram: !!(
+      env('TELEGRAM_BOT_TOKEN') &&
+      env('TELEGRAM_BOT_USERNAME') &&
+      env('TELEGRAM_WEBHOOK_SECRET')
+    ),
   })
 }
