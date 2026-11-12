@@ -61,6 +61,7 @@ const CHECK_FILES = [
   // (lib.test.ts fails if vite.config.ts gains a local import not listed here)
   /^src\/services\/audio\/voiceBuild\.ts$/,
   /^src\/app\/pwaShell\.ts$/,
+  /^scripts\/dev-api\.ts$/,
   // perf budget (MVP stage 1) runs in `npm run check`
   /^scripts\/perf-budget\.mjs$/,
 ]

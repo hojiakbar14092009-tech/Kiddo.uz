@@ -13,6 +13,7 @@ import {
   voiceRuntimeCaching,
 } from './src/services/audio/voiceBuild.ts'
 import { shellOnly } from './src/app/pwaShell.ts'
+import { devApi } from './scripts/dev-api.ts'
 
 /**
  * VITE_VOICE_PRIVATE=true: the recorded clips stay out of dist (they are
@@ -86,6 +87,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       rememberOutDir,
+      devApi(),
       preloadStoredLanguage(),
       ...(voicePrivate ? [dropPublicVoice()] : []),
       VitePWA({
@@ -181,6 +183,8 @@ export default defineConfig(({ mode }) => {
           // The 3D robot chunk (three.js) is about 1 MB.
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           navigateFallback: '/index.html',
+          // sign-in redirects and webhooks are the server's, never the app's index.html
+          navigateFallbackDenylist: [/^\/api(\/|$)/],
           cleanupOutdatedCaches: true,
           // take the open page at once, so what a child opens on the first visit is cached for offline
           clientsClaim: true,
@@ -198,16 +202,22 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1400,
     },
     test: {
-      environment: 'jsdom',
-      include: [
-        'src/**/*.test.{ts,tsx}',
-        'supabase/functions/**/*.test.ts',
-        'scripts/**/*.test.ts',
-      ],
-      setupFiles: ['./src/test/setup.ts'],
       css: false,
       // the first lazy route import can be slow on a busy machine
       testTimeout: 15_000,
+      projects: [
+        {
+          extends: true,
+          test: {
+            name: 'app',
+            environment: 'jsdom',
+            include: ['src/**/*.test.{ts,tsx}', 'supabase/functions/**/*.test.ts', 'scripts/**/*.test.ts'],
+            setupFiles: ['./src/test/setup.ts'],
+          },
+        },
+        // the API (server/): plain Node, an in-memory libSQL database, no browser setup
+        { extends: true, test: { name: 'server', environment: 'node', include: ['server/**/*.test.ts'] } },
+      ],
     },
   }
 })

@@ -36,3 +36,6 @@ playwright-report
 tools/mascots/out
 __pycache__
 dist-production
+
+# local Turso (libSQL) file for development and load tests
+.data

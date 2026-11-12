@@ -92,4 +92,13 @@ describe('error screens', () => {
     )
     expect(screen.getByTestId('error-screen')).toBeTruthy()
   })
+
+  it('a failing section keeps the app shell: the child and parent areas have their own error screen', async () => {
+    const { routes } = await import('@/app/routes')
+    const areas = routes[0]?.children ?? []
+    const childArea = areas.find((route) => route.children?.some((r) => r.children?.some((c) => c.path === '/home')))
+    const parentArea = areas.find((route) => route.path === '/parent')
+    expect(childArea?.errorElement).toBeTruthy()
+    expect(parentArea?.errorElement).toBeTruthy()
+  })
 })

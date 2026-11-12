@@ -5,6 +5,7 @@ import { InterfaceSounds } from './InterfaceSounds'
 import { LanguageSync } from './LanguageSync'
 import { ParentGateAutoLock } from './ParentGateAutoLock'
 import { SyncManager } from '@/services/sync/SyncManager'
+import { CloudSyncBridge } from '@/services/cloud/CloudSyncBridge'
 import { SpeechUnlock } from './SpeechUnlock'
 import { SplashScreen } from './SplashScreen'
 import { Toaster } from '@/components/ui/Toaster'
@@ -65,6 +66,7 @@ export function AppShell() {
       <SpeechUnlock />
       <InterfaceSounds />
       <SyncManager />
+      <CloudSyncBridge />
       <NutConversion />
       <ParentGateAutoLock />
       <ExitWatcher />

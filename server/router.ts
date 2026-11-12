@@ -1,0 +1,62 @@
+import { ready } from './db.js'
+import { assertSameOrigin, clientIp, HttpError, json } from './http.js'
+import { memoryLimit } from './rateLimit.js'
+import { endSession, requireSession } from './session.js'
+import { getState, putState } from './sync.js'
+import { deleteUser, getUser, proStatus } from './users.js'
+
+type Handler = (request: Request, url: URL) => Promise<Response>
+
+/** Every API route, in ONE Vercel function (Hobby allows 12 per deployment). */
+const routes: Record<string, Handler> = {
+  'GET health': async () => json(200, { ok: true }),
+  'GET me': async (request) => {
+    const { userId } = await requireSession(request)
+    const [user, pro] = await Promise.all([getUser(userId), proStatus(userId)])
+    return json(200, { user, pro })
+  },
+  'POST auth/logout': async (request) => json(200, { ok: true }, { 'set-cookie': await endSession(request) }),
+  'POST account/delete': async (request) => {
+    const { userId } = await requireSession(request)
+    await deleteUser(userId)
+    return json(200, { ok: true }, { 'set-cookie': await endSession(request) })
+  },
+  'GET sync': getState,
+  'PUT sync': putState,
+}
+
+/** Webhooks prove themselves with a secret, not with a browser Origin. */
+const WEBHOOKS = new Set<string>([])
+
+/**
+ * The route: /api/<path> in the dev server, or /api?path=<path> after the vercel.json rewrite.
+ */
+export function routeOf(url: URL): string {
+  const fromQuery = url.searchParams.get('path')
+  const path = fromQuery ?? url.pathname.replace(/^\/api\/?/, '')
+  return path.replace(/^\/+|\/+$/g, '')
+}
+
+export async function handle(request: Request): Promise<Response> {
+  const url = new URL(request.url)
+  const route = `${request.method} ${routeOf(url)}`
+  const handler = routes[route]
+  try {
+    if (!handler) throw new HttpError(404, 'not_found')
+    if (!WEBHOOKS.has(route)) assertSameOrigin(request)
+    // a coarse limit per IP over every route, in memory (no database write per request);
+    // the sensitive routes (codes, sign-in, writes, payments) add their own in Turso
+    memoryLimit(`ip:${clientIp(request)}`, 300, 60)
+    await ready()
+    return await handler(request, url)
+  } catch (error) {
+    if (error instanceof HttpError) {
+      const headers: Record<string, string> = {}
+      if (error.status === 429 && typeof error.extra?.retryAfter === 'number') headers['retry-after'] = String(error.extra.retryAfter)
+      return json(error.status, { error: error.code, ...error.extra }, headers)
+    }
+    // the route and the error's name only: never the request body, cookies or secrets
+    console.error('[api] failed', route, error instanceof Error ? error.name : 'unknown')
+    return json(500, { error: 'server_error' })
+  }
+}

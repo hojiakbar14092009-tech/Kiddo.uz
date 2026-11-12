@@ -43,6 +43,8 @@ export const routes: RouteObject[] = [
       },
       {
         element: <RequireLanguage />,
+        // a section that fails shows the error screen inside the shell; the app around it lives on
+        errorElement: <RouteErrorScreen />,
         children: [
           {
             element: <ScreenTimeGuard />,
@@ -273,6 +275,7 @@ export const routes: RouteObject[] = [
       {
         path: '/parent',
         element: <RequireParentGate />,
+        errorElement: <RouteErrorScreen />,
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
           {
