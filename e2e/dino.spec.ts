@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { passLesson, passLessonIfShown } from './lesson.ts'
+import { passLessonIfShown } from './lesson.ts'
 
 /** The Dinosaur world, entered through Kiddo City's Dino Park, as a guest (Free). */
 
@@ -74,8 +74,7 @@ test('a guest explores a dinosaur, digs up bones and finishes the quiz', async (
 
   // the dig: taps brush the sand away (no dragging needed), then the bone is matched
   await page.goto('/worlds/dino/dig')
-  // Learn Before Play: the animals and their bones first
-  await passLesson(page)
+  // MVP: the dig opens straight away
   await page.getByTestId('dig-start').click()
   for (let bone = 0; bone < 4; bone += 1) {
     const run = page.getByTestId('dig-run')

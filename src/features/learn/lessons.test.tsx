@@ -101,6 +101,8 @@ describe('the games teach first', () => {
   it('a lesson counts only after its short check: find the first card again', async () => {
     act(() => useFamilyStore.setState({ activeChildId: null }))
     const { user } = await renderRoute('/worlds/dino/dig')
+    // MVP: the dig opens straight away; the lesson is one tap away
+    await user.click(screen.getByTestId('lesson-review'))
     while (screen.queryByTestId('lesson-next')) await user.click(screen.getByTestId('lesson-next'))
     // the way to the game appears only after the check
     expect(screen.queryByTestId('lesson-start')).toBeNull()
@@ -116,6 +118,7 @@ describe('the games teach first', () => {
   it('the fossil dig shares the dinosaur lesson (bones and who was longest)', async () => {
     act(() => useFamilyStore.setState({ activeChildId: null }))
     const { user } = await renderRoute('/worlds/dino/dig')
+    await user.click(screen.getByTestId('lesson-review'))
     expect(screen.getByTestId('lesson-deck')).toHaveAttribute('data-lesson', 'dino.animals')
     // the first animal's card says what a dig finds of it
     expect(screen.getByTestId('lesson-deck')).toHaveTextContent(

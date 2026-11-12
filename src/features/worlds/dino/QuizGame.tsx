@@ -13,8 +13,7 @@ import { DINO_ROOT } from './explore'
 import { ChoiceName, DietPicture, DinoFrame, DinoPicture, StartCard } from './parts'
 import { planQuiz, type QuizQuestion } from './quiz'
 import { quizOutcome } from './quizEvidence'
-import { ACTIVITY_LESSONS, recordLearning } from '@/domain/learning'
-import { useLessonSeen } from '@/features/learn/learnStore'
+import { recordLearning } from '@/domain/learning'
 import { newId } from '@/lib/id'
 import { useChildKey } from '@/store/progressStore'
 import { hintOf, promptOf } from './quizText'
@@ -33,13 +32,13 @@ export function QuizGame() {
   const { t } = useTranslation()
   const { say } = useLearnMascot()
   // Learn Before Play: the six animals are met before the first question
-  const seen = useLessonSeen(ACTIVITY_LESSONS.dinoAnimals)
   const [review, setReview] = useState(false)
   useEffect(() => {
     if (!run) say('greet', { text: text.modes.quiz.title, emoji: '🦕' })
   }, [run, say, text.modes.quiz.title])
 
-  if (!run && (!seen || review)) {
+  // MVP: dig and quiz open straight away; the lesson is there to review, never in the way
+  if (!run && review) {
     return <DinoLesson title={text.modes.quiz.title} back={BACK} onDone={() => setReview(false)} />
   }
 

@@ -18,8 +18,6 @@ import {
   type DigBone,
 } from './dig'
 import { DINO_ROOT } from './explore'
-import { ACTIVITY_LESSONS } from '@/domain/learning'
-import { useLessonSeen } from '@/features/learn/learnStore'
 import { DinoLesson } from './DinoLesson'
 import { BoneShape, ChoiceName, DinoFrame, DinoPicture, StartCard } from './parts'
 import { DinoResult } from './run'
@@ -37,14 +35,14 @@ export function DigGame() {
   const { t } = useTranslation()
   const { say } = useLearnMascot()
   // Learn Before Play: "whose bone is this?" needs the animals and their bones first
-  const seen = useLessonSeen(ACTIVITY_LESSONS.dinoAnimals)
   const [review, setReview] = useState(false)
 
   useEffect(() => {
     if (!run) say('greet', { text: text.modes.dig.title, emoji: '🦴' })
   }, [run, say, text.modes.dig.title])
 
-  if (!run && (!seen || review)) {
+  // MVP: dig and quiz open straight away; the lesson is there to review, never in the way
+  if (!run && review) {
     return <DinoLesson title={text.modes.dig.title} back={BACK} onDone={() => setReview(false)} />
   }
 
