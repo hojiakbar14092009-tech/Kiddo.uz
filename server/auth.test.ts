@@ -233,6 +233,7 @@ describe('Google', () => {
 
 describe('Pro on the server (test payments)', () => {
   it('needs a session, pays once per key, adds the plan’s days', async () => {
+    process.env.PAYMENT_MODE = 'test'
     expect(
       (await call('POST', 'pay/checkout', { body: { plan: 'month', idempotencyKey: 'k1-abcdef' } }))
         .status,
@@ -257,22 +258,29 @@ describe('Pro on the server (test payments)', () => {
     expect((await pay('bad key!')).status).toBe(400)
   })
 
-  it('prices: 24 990 and 238 990 so‘m, test mode; live mode is refused until a provider exists', async () => {
+  it('prices: 24 990 and 238 990 so‘m', async () => {
     expect(await (await call('GET', 'pay/prices')).json()).toMatchObject({
       currency: 'UZS',
-      mode: 'test',
       plans: { month: { amount: 24_990 }, year: { amount: 238_990 } },
     })
-    process.env.PAYMENT_MODE = 'live'
+  })
+
+  it.each([
+    ['unset', undefined, 503],
+    ['empty', '', 503],
+    ['live', 'live', 503],
+    ['unknown', 'TEST', 503],
+    ['test', 'test', 200],
+  ])('PAYMENT_MODE %s: checkout answers %s', async (_name, mode, status) => {
+    if (mode === undefined) delete process.env.PAYMENT_MODE
+    else process.env.PAYMENT_MODE = mode
     const cookie = await makeUser('u2')
-    expect(
-      (
-        await call('POST', 'pay/checkout', {
-          cookie,
-          body: { plan: 'month', idempotencyKey: 'k1-abcdef' },
-        })
-      ).status,
-    ).toBe(503)
+    const pay = await call('POST', 'pay/checkout', {
+      cookie,
+      body: { plan: 'month', idempotencyKey: 'k1-abcdef' },
+    })
+    expect(pay.status).toBe(status)
+    if (status === 503) expect(await pay.json()).toMatchObject({ error: 'payments_not_live' })
     delete process.env.PAYMENT_MODE
   })
 })

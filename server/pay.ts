@@ -20,8 +20,8 @@ export type Plan = keyof typeof PLANS
 
 export const prices = () => json(200, { currency: 'UZS', mode: payMode(), plans: PLANS })
 
-/** test until a real provider is connected; anything else is refused (no live payments by accident) */
-const payMode = () => env('PAYMENT_MODE') ?? 'test'
+/** Safe default: unset, empty or unknown means no payment. Only an explicit PAYMENT_MODE=test takes the test payment. */
+const payMode = () => env('PAYMENT_MODE') ?? 'off'
 
 export async function checkout(request: Request, now = Date.now()): Promise<Response> {
   const { userId } = await requireSession(request)

@@ -283,6 +283,8 @@ webhook secret_token.
 - Tarix: ad81645a va 63756794 ichidagi faqat-format fayllar alohida `style: prettier …` commit'larga ajratildi; yakuniy daraxt asl bilan
   bir xil (tekshirildi). Zaxira: branch `backup/before-prettier-split` (ega o'chirishi mumkin).
 
+- PAYMENT_MODE: o'rnatilmagan/bo'sh/noma'lum → 503 `payments_not_live`; faqat aniq `test` sinov to'lovini ishlatadi (server/pay.ts, 5 holat testi). `.env.example`: PAYMENT_MODE, APP_ORIGIN qiymatsiz.
+
 ## Bosqichlar rejasi (qarorlardan)
 3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
 4. Sonlar ochilishi: har son ketma-ket 2 marta to'g'ri → keyingi 5 son (sonlar + chizish).
