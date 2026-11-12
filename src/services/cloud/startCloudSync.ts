@@ -6,6 +6,7 @@ import { useFamilyStore } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
 import { CloudSync, type SyncedStore, type SyncKey } from './cloudSync'
 import type { Saved } from './merge'
+import { pullServerPro } from './serverPro'
 
 interface PersistedStore {
   subscribe(listener: () => void): () => void
@@ -45,6 +46,8 @@ const stores = (): Record<SyncKey, SyncedStore> => ({
 export function startCloudSync(userId: string): () => void {
   const sync = new CloudSync(userId, stores())
   void sync.start()
+  // Pro is the server's word (a paid plan never comes from the device's storage)
+  void pullServerPro().catch(() => undefined)
   return () => {
     void sync.flush(true)
     sync.stop()

@@ -49,6 +49,9 @@ const routes: Record<string, Handler> = {
   'POST pay/checkout': (request) => checkout(request),
 }
 
+/** Answered without the database (they work, and say what is set up, before Turso is). */
+const NO_DATABASE = new Set(['GET health', 'GET auth/methods', 'GET pay/prices'])
+
 /** Webhooks prove themselves with a secret, not with a browser Origin. */
 const WEBHOOKS = new Set<string>(['POST telegram/webhook'])
 
@@ -71,7 +74,7 @@ export async function handle(request: Request): Promise<Response> {
     // a coarse limit per IP over every route, in memory (no database write per request);
     // the sensitive routes (codes, sign-in, writes, payments) add their own in Turso
     memoryLimit(`ip:${clientIp(request)}`, 300, 60)
-    await ready()
+    if (!NO_DATABASE.has(route)) await ready()
     return await handler(request, url)
   } catch (error) {
     if (error instanceof HttpError) {

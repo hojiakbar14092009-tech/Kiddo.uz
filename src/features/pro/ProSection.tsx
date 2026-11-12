@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/Button'
 import { ChoiceChips } from '@/features/parent/dashboard/ChoiceChips'
 import { Panel } from '@/features/parent/dashboard/Panel'
 import { formatDayMonth } from '@/lib/dates'
+import { payOnServer } from '@/services/cloud/serverPro'
 import { paymentsAvailable } from '@/services/payments/availability'
+import { isSupabaseConfigured } from '@/services/supabase/config'
+import { useParentStore } from '@/store/parentStore'
 import { PAYMENT_PROVIDERS, payMock, type PaymentProvider } from '@/services/payments/mockPayment'
 import { DEMO } from '@/config/demo'
 import { PromoPanel } from '@/features/promo/PromoPanel'
@@ -50,14 +53,32 @@ export function ProSection() {
   // state a promo code (or the demo admin) can turn on.
   const publicPro = DEMO.publicProUIEnabled
 
-  const canPay = paymentsAvailable()
+  // MVP: a signed-in parent pays on Kiddo's server (test mode until a provider is connected)
+  const signedIn = useParentStore((state) => state.session?.mode === 'cloud')
+  const serverPay = !isSupabaseConfigured && signedIn
+  const canPay = serverPay || paymentsAvailable()
+  const [payError, setPayError] = useState(false)
 
   const pay = async () => {
     if (!canPay) return
     setPayState('paying')
-    const receipt = await payMock({ plan: planId, provider, amount: plan.price })
-    subscription.activatePlan(receipt.plan, 'payment')
-    setGift(recordProPurchase(receipt.plan, provider, plan.price))
+    setPayError(false)
+    if (serverPay) {
+      try {
+        await payOnServer(
+          planId === 'yearly' ? 'yearly' : 'monthly',
+          crypto.randomUUID().replace(/-/g, ''),
+        )
+      } catch {
+        setPayState('idle')
+        setPayError(true)
+        return
+      }
+    } else {
+      const receipt = await payMock({ plan: planId, provider, amount: plan.price })
+      subscription.activatePlan(receipt.plan, 'payment')
+    }
+    setGift(recordProPurchase(planId, serverPay ? 'test' : provider, plan.price))
     setPayState('paid')
     setCelebrating(true)
   }
@@ -216,6 +237,11 @@ export function ProSection() {
                   ? t('pro.paying')
                   : t('pro.pay', { amount: formatSum(plan.price) })}
               </Button>
+              {payError && (
+                <p role="alert" className="font-semibold text-oops-ink">
+                  {t('pro.payFailed')}
+                </p>
+              )}
             </>
           )}
         </Panel>

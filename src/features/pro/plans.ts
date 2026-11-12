@@ -4,7 +4,9 @@ import {
   yearlyPrice,
   type AppSettings,
 } from '@/store/appSettingsStore'
+import { isSupabaseConfigured } from '@/services/supabase/config'
 import type { PlanId } from '@/store/subscriptionStore'
+import { FUTURE_PRO_PRICES } from './futurePrices'
 
 export interface Plan {
   id: PlanId
@@ -30,10 +32,22 @@ export function plansFor(prices: AppSettings['prices']): Plan[] {
   ]
 }
 
+/** MVP (Kiddo's own server): the owner's prices, the same as server/pay.ts PLANS. */
+export const MVP_PLANS: Plan[] = [
+  { id: 'monthly', price: FUTURE_PRO_PRICES.monthly },
+  {
+    id: 'yearly',
+    price: FUTURE_PRO_PRICES.yearly,
+    savingPercent: Math.round(
+      (1 - FUTURE_PRO_PRICES.yearly / (FUTURE_PRO_PRICES.monthly * 12)) * 100,
+    ),
+  },
+]
+
 /** Plans at the current prices. */
 export function usePlans(): Plan[] {
   const prices = useAppSettingsStore((state) => state.prices)
-  return plansFor(prices)
+  return isSupabaseConfigured ? plansFor(prices) : MVP_PLANS
 }
 
 /** Only for receipts of earlier lifetime purchases. */

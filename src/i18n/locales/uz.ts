@@ -976,6 +976,7 @@ export const uz = {
       'Onlayn to‘lov (Click, Payme, Uzum) hali ulanmagan – pul yechilmaydi. Hozircha PRO ni promokod bilan yoqish mumkin.',
     pay: '{{amount}} so‘m to‘lash',
     paying: 'To‘lanmoqda…',
+    payFailed: 'To‘lov o‘tmadi. Internetni tekshirib, qaytadan urinib ko‘ring.',
     paid: 'Rahmat! PRO yoqildi 👑',
     paidText: 'Endi robot gapiradi, harflar va so‘zlar ovoz bilan aytiladi.',
     done: 'Yaxshi',

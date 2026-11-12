@@ -49,3 +49,29 @@ Without a recording a line is timed from its length and the film still plays.
 They keep their old single narrator voice (the recordings inside the shipped videos, copied bit for bit). Turning them into Mini and Piku
 conversations needs a dialogue script per cartoon in `marketing/shorts/dialogue.json` (same format as the lessons), a scene list per script in
 `src/stories2.ts` style, and the same recording sequence: about 300-350 credits each, 12 of them about 4 000 credits.
+
+## Ilova: «Birinchi so‘zim» uchun 12 ta ovozsiz so‘z (MVP, 2026-11-13)
+
+Sobiq Tomorqa bo‘limining sodda so‘zlari «Birinchi so‘zim» → `read` ro‘yxatiga (6 yosh) qo‘shilishi kerak, lekin ilova
+PRO ovozni faqat yozib olingan klipdan ijro etadi (`src/features/learn/voiceCoverage.test.ts`): klipsiz qator jim qoladi.
+Shuning uchun so‘zlar hali qo‘shilmadi. Har so‘zga bitta qator yoziladi (`copy.wordIs`), rasmlar `public/3d/` da bor.
+
+| til | so‘z (`w(id, harflar, rasm)`) | yoziladigan qator |
+|---|---|---|
+| uz | `w('pomidor', 'P O M I D O R', 'tomato')` | Bu so‘z: «Pomidor». |
+| uz | `w('qurbaqa', 'Q U R B A Q A', 'frog')` | Bu so‘z: «Qurbaqa». |
+| uz | `w('savat', 'S A V A T', 'basket')` | Bu so‘z: «Savat». |
+| uz | `w('chelak', 'Ch E L A K', 'bucket')` | Bu so‘z: «Chelak». |
+| ru | `w('ptitsa', 'П Т И Ц А', 'bird')` | Это слово «Птица». |
+| ru | `w('yozhik', 'Ё Ж И К', 'hedgehog')` | Это слово «Ёжик». |
+| ru | `w('morkov', 'М О Р К О В Ь', 'carrot')` | Это слово «Морковь». |
+| ru | `w('ulitka', 'У Л И Т К А', 'snail')` | Это слово «Улитка». |
+| en | `w('bee', 'B E E', 'bee')` | The word is “Bee”. |
+| en | `w('bird', 'B I R D', 'bird')` | The word is “Bird”. |
+| en | `w('pear', 'P E A R', 'pear')` | The word is “Pear”. |
+| en | `w('rose', 'R O S E', 'rose')` | The word is “Rose”. |
+
+Tartib: so‘zlarni `src/features/firstWords/content.ts` `read` oxiriga qo‘shing → `npx tsx --tsconfig tsconfig.app.json
+scripts/voices/collect.ts > scripts/voices/phrases.json` → uz: `python scripts/voices/kid_voices_sts.py --plan` (keyin `--budget`),
+ru/en: amaldagi ElevenLabs ovozlari → `npx vitest run src/features/learn/voiceCoverage.test.ts` yashil bo‘lishi shart.
+Taxmin: 12 qisqa qator ≈ 300 kredit.

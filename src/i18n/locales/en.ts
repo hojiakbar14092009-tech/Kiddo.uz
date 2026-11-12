@@ -971,6 +971,7 @@ export const en: Translation = {
       'Online payment (Click, Payme, Uzum) is not connected yet – nothing is charged. For now PRO can be turned on with a promo code.',
     pay: 'Pay {{amount}} UZS',
     paying: 'Paying…',
+    payFailed: 'The payment did not go through. Check the internet and try again.',
     paid: 'Thank you! PRO is on 👑',
     paidText: 'The robot now talks, and letters and words are read aloud.',
     done: 'OK',

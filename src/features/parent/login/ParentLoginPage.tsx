@@ -14,6 +14,7 @@ import { isSupabaseConfigured } from '@/services/supabase/client'
 import { rememberConsent } from '@/services/supabase/consent'
 import { useParentStore } from '@/store/parentStore'
 import { ParentShell } from '../ParentShell'
+import { KiddoSignIn } from './KiddoSignIn'
 
 const MIN_PASSWORD_LENGTH = 8
 
@@ -246,15 +247,22 @@ export function ParentLoginPage() {
             </form>
           </div>
         ) : (
-          <p className="rounded-[28px] bg-sky-soft p-5">{t('parent.login.offline')}</p>
+          // MVP: Kiddo's own sign-in (Google, e-mail code, Telegram code)
+          <KiddoSignIn onSignedIn={() => navigate('/parent/dashboard', { replace: true })} />
         )}
 
-        <div className="flex flex-col items-center gap-2 text-center">
-          <Button variant="soft" size="md" onClick={enterDemo}>
-            {t('parent.login.demo')}
-          </Button>
-          <p className="text-sm text-ink-soft">{t('parent.login.demoHint')}</p>
-        </div>
+        {/* MVP: three ways only; demo stays for development and the browser tests */}
+        {(isSupabaseConfigured ||
+          import.meta.env.DEV ||
+          import.meta.env.MODE === 'e2e' ||
+          import.meta.env.MODE === 'test') && (
+          <div className="flex flex-col items-center gap-2 text-center">
+            <Button variant="soft" size="md" onClick={enterDemo}>
+              {t('parent.login.demo')}
+            </Button>
+            <p className="text-sm text-ink-soft">{t('parent.login.demoHint')}</p>
+          </div>
+        )}
       </div>
     </ParentShell>
   )
