@@ -19,7 +19,7 @@ export function ChildSwitchLink() {
     <Link
       to="/child-select"
       aria-label={t('childSelect.switch')}
-      className="flex min-h-11 min-w-11 shrink-0 items-center gap-2 rounded-full active:scale-95 sm:py-1 sm:pr-3 sm:pl-1"
+      className="flex min-h-12 min-w-12 shrink-0 items-center gap-2 rounded-full active:scale-95 sm:py-1 sm:pr-3 sm:pl-1"
     >
       <ChildAvatar child={child} size={44} />
       <span className="hidden truncate font-display text-lg font-bold sm:inline">

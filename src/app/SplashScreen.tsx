@@ -11,25 +11,41 @@ const EXIT_S = 0.35
 const REDUCED_MS = 900
 // Unit tests start without it, so screens are testable straight away.
 let shownThisLaunch = import.meta.env.MODE === 'test'
+/** Set after the first full opening on this device. */
+const SEEN_KEY = 'kiddo.opening'
+
+function seenBefore(): boolean {
+  try {
+    return localStorage.getItem(SEEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 /**
  * The cinematic opening, once per launch (never on route changes): light
  * appears, the star forms, the blue world enters, the gold orbit joins and
  * interlocks, the centre light activates and the symbol settles, then the
  * name fades in beneath it and Home is there. Vector only: nothing else is
- * loaded for it. A tap skips it; reduced motion gets a short fade.
+ * loaded for it. A tap skips it. MVP: the full opening plays on the first launch on a device;
+ * later launches (and reduced motion) get a short fade, so a child is not kept waiting.
  */
 export function SplashScreen() {
   const reduceMotion = useReducedMotion() ?? false
   const [visible, setVisible] = useState(() => !shownThisLaunch)
   const layer = useRef<HTMLDivElement>(null)
-  // read once: a later change of the setting must not restart the timer (the 4 s cap)
-  const reducedAtStart = useRef(reduceMotion)
+  // read once: a later change must not restart the timer (the 4 s cap)
+  const [quick] = useState(() => reduceMotion || seenBefore())
 
   useEffect(() => {
     shownThisLaunch = true
     if (!visible) return undefined
-    const timer = setTimeout(() => setVisible(false), reducedAtStart.current ? REDUCED_MS : SHOW_MS)
+    try {
+      localStorage.setItem(SEEN_KEY, '1')
+    } catch {
+      // no storage: the full opening again next time, nothing worse
+    }
+    const timer = setTimeout(() => setVisible(false), quick ? REDUCED_MS : SHOW_MS)
     // a key skips it too (Escape, Enter, Space), as a tap does
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
@@ -53,7 +69,7 @@ export function SplashScreen() {
         node.inert = before[index] ?? false
       })
     }
-  }, [visible])
+  }, [quick, visible])
 
   return (
     <AnimatePresence>
@@ -63,33 +79,34 @@ export function SplashScreen() {
           ref={layer}
           role="presentation"
           data-splash=""
+          data-opening={quick ? 'short' : 'full'}
           onClick={() => setVisible(false)}
-          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.04 }}
-          transition={{ duration: reduceMotion ? 0.2 : EXIT_S }}
+          exit={quick ? { opacity: 0 } : { opacity: 0, scale: 1.04 }}
+          transition={{ duration: quick ? 0.2 : EXIT_S }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 overflow-hidden bg-[radial-gradient(circle_at_50%_44%,#FFFFFF_0%,#F1F5FF_48%,#DCE6FF_100%)]"
         >
           {/* a slow wash of light behind the symbol */}
           <motion.div
             aria-hidden="true"
             className="absolute top-[44%] left-1/2 size-[min(110vw,720px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,196,84,0.22),rgba(58,108,244,0.10)_45%,transparent_70%)]"
-            initial={reduceMotion ? false : { scale: 0.3, opacity: 0 }}
+            initial={quick ? false : { scale: 0.3, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.4, ease: 'easeOut' }}
           />
           <motion.div
             className="relative w-[min(58vw,300px)]"
-            initial={reduceMotion ? false : { scale: 1.08 }}
+            initial={quick ? false : { scale: 1.08 }}
             animate={{ scale: 1 }}
             // the symbol settles after the centre light activates
             transition={{ delay: OPENING_SECONDS - 0.4, duration: 0.4, ease: 'easeInOut' }}
           >
-            <KiddoSymbol play label="Kiddo" className="h-auto w-full" />
+            <KiddoSymbol play={!quick} label="Kiddo" className="h-auto w-full" />
           </motion.div>
           <motion.div
             className="relative w-[min(46vw,240px)]"
-            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            initial={quick ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: reduceMotion ? 0 : OPENING_SECONDS - 0.5, duration: 0.5 }}
+            transition={{ delay: quick ? 0 : OPENING_SECONDS - 0.5, duration: 0.5 }}
             aria-hidden="true"
           >
             <KiddoWordmark className="h-auto w-full" />

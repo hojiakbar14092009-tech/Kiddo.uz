@@ -5,7 +5,7 @@ import { LANGUAGE_INFO, LANGUAGES, type Language } from '@/content/languages'
 import { useSettingsStore } from '@/store/settingsStore'
 
 const OPTION =
-  'h-11 min-w-11 rounded-full px-1.5 font-display text-sm font-bold transition-colors sm:h-12 sm:min-w-14 sm:px-3 sm:text-lg'
+  'h-12 min-w-12 rounded-full px-1.5 font-display text-sm font-bold transition-colors sm:min-w-14 sm:px-3 sm:text-lg'
 
 /**
  * The three languages side by side. With `folded` (the top bar decides it from

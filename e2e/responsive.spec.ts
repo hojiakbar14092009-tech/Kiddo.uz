@@ -163,12 +163,14 @@ test.describe('a small phone', () => {
 test.describe('a phone with large system text', () => {
   test.use({ viewport: { width: 393, height: 852 } })
 
-  test('the three languages stay side by side at normal text size', async ({ page }) => {
+  test('a child’s bar shows one language button (a stray tap never switches it, MVP)', async ({
+    page,
+  }) => {
     await sixYearOld(page)
     await go(page, '/math-lab')
     const header = page.locator('header')
-    await expect(header.getByRole('group', { name: 'Сменить язык' })).toBeVisible()
-    await expect(header.getByRole('button', { name: /Язык: Русский/ })).toBeHidden()
+    await expect(header.getByRole('button', { name: /Язык: Русский/ })).toBeVisible()
+    await expect(header.getByRole('group', { name: 'Сменить язык' })).toBeHidden()
   })
 
   test('at 150 % text the switch folds into one button that still works', async ({ page }) => {
@@ -188,10 +190,11 @@ test.describe('a phone with large system text', () => {
 test.describe('a small phone at normal text size', () => {
   test.use({ viewport: { width: 320, height: 568 } })
 
-  test('keeps the three languages side by side', async ({ page }) => {
+  test('keeps the one language button on screen', async ({ page }) => {
     await sixYearOld(page)
     await go(page, '/home')
-    await expect(page.getByRole('button', { name: /Язык: Русский/ })).toBeHidden()
+    await expect(page.getByRole('button', { name: /Язык: Русский/ })).toBeVisible()
+    expect(await page.evaluate(problems)).toEqual({ overflow: 0, off: [] })
   })
 
   test('a back button and PRO never sit under each other in the top bar', async ({ page }) => {
@@ -220,15 +223,14 @@ test.describe('very large system text (200 %)', () => {
   }
 })
 
-test('turning a small phone sideways unfolds the language switch again', async ({ page }) => {
+test('turning a small phone sideways keeps the bar tidy', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 })
   await sixYearOld(page, { pro: true })
   await go(page, '/worlds/dino/explore/trex')
   const folded = page.getByRole('button', { name: /Язык: Русский/ })
   await expect(folded).toBeVisible()
   await page.setViewportSize({ width: 768, height: 700 })
-  await expect(folded).toBeHidden()
-  await expect(page.locator('header').getByRole('group', { name: 'Сменить язык' })).toBeVisible()
+  await expect(folded).toBeVisible()
   await page.setViewportSize({ width: 320, height: 700 })
   await expect(folded).toBeVisible()
   expect(await page.evaluate(barOverlaps)).toBe(0)

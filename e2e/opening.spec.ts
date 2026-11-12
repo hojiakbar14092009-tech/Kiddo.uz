@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 /*
  * Phase 32: the cinematic opening plays once per launch with the standalone
  * symbol (vector only), lasts about 2.8–4 s, never replays on route changes,
- * and becomes a short fade under reduced motion.
+ * and becomes a short fade under reduced motion and on later launches (MVP).
  */
 
 test('the opening plays once, then Home; route changes never replay it', async ({ page }) => {
@@ -27,6 +27,18 @@ test('the opening plays once, then Home; route changes never replay it', async (
   await page.goBack()
   await expect(page).toHaveURL(/\/home$/)
   await expect(splash).toHaveCount(0)
+})
+
+test('the next launch on the same device: a short fade, the child is not kept waiting (MVP)', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await expect(page.locator('[data-splash]')).toHaveAttribute('data-opening', 'full')
+  await expect(page.locator('[data-splash]')).toHaveCount(0, { timeout: 8_000 })
+  await page.reload()
+  // the short version (0.9 s); not timed here: headless software WebGL can hold the page's thread
+  await expect(page.locator('[data-splash]')).toHaveAttribute('data-opening', 'short')
+  await expect(page.locator('[data-splash]')).toHaveCount(0, { timeout: 8_000 })
 })
 
 test('reduced motion: a short fade instead of the choreography', async ({ browser }) => {

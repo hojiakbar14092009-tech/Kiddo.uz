@@ -45,7 +45,7 @@ export function ParentLockLink() {
       aria-label={t('common.parentArea')}
       title={t('common.parentArea')}
       data-testid="parent-lock"
-      className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-ink-soft shadow-press-sm active:scale-95 max-[359px]:hidden"
+      className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface text-ink-soft shadow-press-sm active:scale-95 max-[359px]:hidden"
     >
       <LockIcon size={22} />
     </Link>

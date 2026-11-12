@@ -84,7 +84,8 @@ export function TopBar({ start, showHome = true, showCoins = true }: TopBarProps
           <TierBadge />
         </span>
         {showCoins && <CoinBadge amount={coins} />}
-        <LanguageSwitcher folded={crowding > 0} />
+        {/* MVP: always one button and a menu on a child's bar, so a stray tap never changes the language */}
+        <LanguageSwitcher folded />
       </div>
     </header>
   )

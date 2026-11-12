@@ -1,6 +1,6 @@
 # Kiddo MVP — progress
 
-Holat: 0–5-bosqichlar bajarildi (pastda). Keyingi: 6-bosqich. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
+Holat: 0–6-bosqichlar bajarildi (pastda). Keyingi: 8-bosqich (kirish) → 7 (Pro serverda); egadan sirlar va Turso ruxsati kutilmoqda. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
 sessiya scratchpad'ida edi (repo'da emas).
 
 ## 0-bosqich: AUDIT (2026-11-12)
@@ -230,6 +230,16 @@ webhook secret_token.
   **Tekshirilmadi**: haqiqiy yuz bilan aniqlik (real telefon/planshetda sinash kerak), Safari/iOS.
 - Trade-off: kamera yoqqan oilaga birinchi marta ~4–5 MB (siqilgan) yuklanadi (face-api ~1,6 MB edi); keyin keshdan.
 
+## 6-bosqich: UX — bajarildi (2026-11-13)
+- Brend ochilishi: to'liq (3,5 s) faqat qurilmadagi BIRINCHI ishga tushishda; keyin qisqa fade 0,9 s (`kiddo.opening` flag,
+  `data-opening="full|short"`). O'lchov (WebGL'siz Chromium): ikkinchi ochilish 1,2 s da tugaydi. Headless software WebGL asosiy oqimni
+  ~2 s band qiladi → e2e vaqtga emas, atributga tayanadi.
+- Tegish maydonlari ≥ 48 px: `IconButton` (bosh sahifa/orqaga), bola almashtirish, ota-ona qulfi, til tugmasi.
+- Bola panelida til almashtirgich doim bitta tugma + menyu (tasodifiy bosish tilni o'zgartirmaydi); ota-ona bo'limida o'z almashtirgichi bor.
+- Bosh sahifa qisqardi (3-bosqichda takroriy qator olingan). Testlar: unit (admin x4 ma'lum), e2e responsive + words 21/21 + opening.
+- Ma'lum e2e flake'lar (mening o'zgarishimga bog'liq emas): opening "a key/tap skips" (toza HEAD'da ham), homework "planet homework"
+  (javobdan keyin savol 1,4 s da almashmaydi — ovoz vaqti), kiddo "a right answer earns… coins" (toza HEAD'da ham).
+
 ## Bosqichlar rejasi (qarorlardan)
 3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
 4. Sonlar ochilishi: har son ketma-ket 2 marta to'g'ri → keyingi 5 son (sonlar + chizish).
@@ -248,4 +258,5 @@ qotmasin, tokenning holati (ishlatildi/muddati o'tdi) haqida tushunarli xabar be
 uz/ru/en tillarida, sodda. Hammasi uchun test yoz (QR/havola yaratish, token muddati, qayta yuborish limiti).
 
 ## Keyingi aniq qadam
-6-bosqich: UX (brend animatsiya qisqartirish, kichik tugmalar ≥48 px, bosh sahifa qisqartirish).
+8-bosqich (kirish: Google, email kod, Telegram kod + Telegram UX talabi) — egadan sirlar kerak; so'ng 7-bosqich (Pro serverda, narxlar, sinov to'lovi).
+Turso: migratsiya 1 (faqat yangi jadvallar) birinchi production so'rovida `ready()` orqali qo'llanadi → env qo'yishdan oldin egaga aytish SHART.

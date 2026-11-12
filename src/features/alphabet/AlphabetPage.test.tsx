@@ -18,6 +18,7 @@ describe('Alphabet', () => {
 
   it('switches the alphabet when the language changes', async () => {
     const { user } = await renderRoute('/alphabet')
+    await user.click(screen.getByRole('button', { name: /Til: O‘zbekcha/ }))
     await user.click(screen.getByRole('button', { name: 'Русский' }))
     expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(33)
   })
