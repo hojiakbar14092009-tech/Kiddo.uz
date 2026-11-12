@@ -14,4 +14,5 @@ export function requireEnv(name: string): string {
 }
 
 /** The bot's username without a leading @ or spaces (TELEGRAM_BOT_USERNAME). */
-export const botUsername = (): string | undefined => env('TELEGRAM_BOT_USERNAME')?.replace(/^@+/, '').replace(/\s+/g, '') || undefined
+export const botUsername = (): string | undefined =>
+  env('TELEGRAM_BOT_USERNAME')?.replace(/^@+/, '').replace(/\s+/g, '') || undefined

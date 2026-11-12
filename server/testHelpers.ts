@@ -13,7 +13,10 @@ export async function freshDb(): Promise<void> {
   await migrate(client)
 }
 
-export async function makeUser(id: string, fields: { email?: string; phone?: string } = {}): Promise<string> {
+export async function makeUser(
+  id: string,
+  fields: { email?: string; phone?: string } = {},
+): Promise<string> {
   const now = Date.now()
   await db().execute({
     sql: 'INSERT INTO users (id, email, phone, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
@@ -26,11 +29,27 @@ export async function makeUser(id: string, fields: { email?: string; phone?: str
 export function call(
   method: string,
   path: string,
-  { cookie, body, origin = ORIGIN, headers = {} }: { cookie?: string; body?: unknown; origin?: string | null; headers?: Record<string, string> } = {},
+  {
+    cookie,
+    body,
+    origin = ORIGIN,
+    headers = {},
+  }: {
+    cookie?: string
+    body?: unknown
+    origin?: string | null
+    headers?: Record<string, string>
+  } = {},
 ): Promise<Response> {
   const all: Record<string, string> = { ...headers }
   if (cookie) all.cookie = cookie
   if (origin) all.origin = origin
   if (body !== undefined) all['content-type'] = 'application/json'
-  return handle(new Request(`${ORIGIN}/api/${path}`, { method, headers: all, body: body === undefined ? undefined : JSON.stringify(body) }))
+  return handle(
+    new Request(`${ORIGIN}/api/${path}`, {
+      method,
+      headers: all,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+  )
 }

@@ -20,11 +20,16 @@ interface Change {
 
 export async function getState(request: Request): Promise<Response> {
   const { userId } = await requireSession(request)
-  const result = await db().execute({ sql: 'SELECT key, rev, data FROM user_state WHERE user_id = ?', args: [userId] })
+  const result = await db().execute({
+    sql: 'SELECT key, rev, data FROM user_state WHERE user_id = ?',
+    args: [userId],
+  })
   const etag = `"${sha256(result.rows.map((row) => `${row.key}:${row.rev}`).join(','))}"`
-  if (request.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers: { etag } })
+  if (request.headers.get('if-none-match') === etag)
+    return new Response(null, { status: 304, headers: { etag } })
   const keys: Record<string, { rev: number; data: unknown }> = {}
-  for (const row of result.rows) keys[String(row.key)] = { rev: Number(row.rev), data: JSON.parse(String(row.data)) }
+  for (const row of result.rows)
+    keys[String(row.key)] = { rev: Number(row.rev), data: JSON.parse(String(row.data)) }
   return json(200, { keys }, { etag, 'cache-control': 'private, no-cache' })
 }
 
@@ -34,11 +39,14 @@ export async function putState(request: Request): Promise<Response> {
   memoryLimit(`sync:${userId}`, 30, 60)
   const body = await readJson<{ changes?: Record<string, Change> }>(request)
   const entries = Object.entries(body.changes ?? {})
-  if (entries.length === 0 || entries.length > SYNC_KEYS.length) throw new HttpError(400, 'no_changes')
+  if (entries.length === 0 || entries.length > SYNC_KEYS.length)
+    throw new HttpError(400, 'no_changes')
   const now = Date.now()
   const statements = entries.map(([key, change]) => {
-    if (!(SYNC_KEYS as readonly string[]).includes(key)) throw new HttpError(400, 'unknown_key', { key })
-    if (!Number.isInteger(change?.baseRev) || change.baseRev < 0) throw new HttpError(400, 'bad_rev', { key })
+    if (!(SYNC_KEYS as readonly string[]).includes(key))
+      throw new HttpError(400, 'unknown_key', { key })
+    if (!Number.isInteger(change?.baseRev) || change.baseRev < 0)
+      throw new HttpError(400, 'bad_rev', { key })
     const data = JSON.stringify(change.data ?? null)
     if (data.length > MAX_KEY_BYTES) throw new HttpError(413, 'too_large', { key })
     // inserts the first copy, or updates only when the device saw the latest revision
@@ -66,6 +74,7 @@ export async function putState(request: Request): Promise<Response> {
     args: [userId, ...stale],
   })
   const conflicts: Record<string, { rev: number; data: unknown }> = {}
-  for (const row of current.rows) conflicts[String(row.key)] = { rev: Number(row.rev), data: JSON.parse(String(row.data)) }
+  for (const row of current.rows)
+    conflicts[String(row.key)] = { rev: Number(row.rev), data: JSON.parse(String(row.data)) }
   return json(409, { revs, conflicts })
 }

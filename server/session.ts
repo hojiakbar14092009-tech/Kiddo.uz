@@ -9,7 +9,8 @@ const SESSION_DAYS = 30
  * Sessions: a random 256-bit token in an httpOnly cookie; the database keeps only its SHA-256,
  * so a leaked table cannot be replayed. `__Host-` (Secure, Path=/, no Domain) on https.
  */
-export const sessionCookieName = (request: Request) => (isSecure(request) ? '__Host-kiddo_session' : 'kiddo_session')
+export const sessionCookieName = (request: Request) =>
+  isSecure(request) ? '__Host-kiddo_session' : 'kiddo_session'
 
 export interface Session {
   userId: string
@@ -46,7 +47,11 @@ export async function requireSession(request: Request): Promise<Session> {
  * A new session after every sign-in (the old one of this browser, if any, is deleted), so a
  * session id planted before the sign-in is never promoted. Returns the Set-Cookie value.
  */
-export async function startSession(request: Request, userId: string, now = Date.now()): Promise<string> {
+export async function startSession(
+  request: Request,
+  userId: string,
+  now = Date.now(),
+): Promise<string> {
   const old = parseCookies(request)[sessionCookieName(request)]
   const token = randomToken()
   await db().batch(
@@ -64,6 +69,7 @@ export async function startSession(request: Request, userId: string, now = Date.
 
 export async function endSession(request: Request): Promise<string> {
   const token = parseCookies(request)[sessionCookieName(request)]
-  if (token) await db().execute({ sql: 'DELETE FROM sessions WHERE id_hash = ?', args: [sha256(token)] })
+  if (token)
+    await db().execute({ sql: 'DELETE FROM sessions WHERE id_hash = ?', args: [sha256(token)] })
   return cookie(request, sessionCookieName(request), '', 0)
 }

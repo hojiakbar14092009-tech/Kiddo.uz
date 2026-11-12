@@ -12,10 +12,18 @@ export class HttpError extends Error {
   }
 }
 
-export function json(status: number, body: unknown, headers: Record<string, string> = {}): Response {
+export function json(
+  status: number,
+  body: unknown,
+  headers: Record<string, string> = {},
+): Response {
   return new Response(body === undefined ? null : JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers },
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+      ...headers,
+    },
   })
 }
 
@@ -28,7 +36,10 @@ export function redirect(location: string, cookies: string[] = []): Response {
 const MAX_BODY = 1024 * 1024
 
 /** The JSON body of a request, at most 1 MB; anything else is a 400/413/415. */
-export async function readJson<T = Record<string, unknown>>(request: Request, max = MAX_BODY): Promise<T> {
+export async function readJson<T = Record<string, unknown>>(
+  request: Request,
+  max = MAX_BODY,
+): Promise<T> {
   if (!(request.headers.get('content-type') ?? '').includes('application/json')) {
     throw new HttpError(415, 'json_required')
   }
@@ -38,7 +49,8 @@ export async function readJson<T = Record<string, unknown>>(request: Request, ma
   if (text.length > max) throw new HttpError(413, 'too_large')
   try {
     const value: unknown = JSON.parse(text)
-    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('not an object')
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      throw new Error('not an object')
     return value as T
   } catch {
     throw new HttpError(400, 'bad_json')
@@ -70,7 +82,13 @@ export function cookie(
   maxAgeSeconds: number,
   sameSite: 'Lax' | 'Strict' = 'Lax',
 ): string {
-  const parts = [`${name}=${encodeURIComponent(value)}`, 'Path=/', 'HttpOnly', `SameSite=${sameSite}`, `Max-Age=${maxAgeSeconds}`]
+  const parts = [
+    `${name}=${encodeURIComponent(value)}`,
+    'Path=/',
+    'HttpOnly',
+    `SameSite=${sameSite}`,
+    `Max-Age=${maxAgeSeconds}`,
+  ]
   if (isSecure(request)) parts.push('Secure')
   return parts.join('; ')
 }
