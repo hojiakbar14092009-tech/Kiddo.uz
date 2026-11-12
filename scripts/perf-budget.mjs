@@ -25,13 +25,15 @@ const LIMITS = {
     '.woff2': 60 * KB,
     '.css': 150 * KB,
     '.js': 600 * KB,
+    // MediaPipe Face Landmarker (attention camera, MVP): only for families that turned the camera on,
+    // downloaded on first use and never precached
+    '.wasm': 15 * KB * KB,
+    '.task': 4 * KB * KB,
   },
   /** lazily loaded chunks allowed above the .js limit, with the reason */
   bigChunks: {
     // three.js scene code, loaded only on 3D screens
     prepareRenderer: 700 * KB,
-    // the attention helper's face detector, loaded only when a parent turned the camera on
-    'face-api': 1400 * KB,
   },
 }
 

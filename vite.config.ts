@@ -124,7 +124,7 @@ export default defineConfig(({ mode }) => {
           globPatterns: ['**/*.{js,css,html}', 'audio/ui/*.mp3'], // + includeAssets and the manifest icons
           // the attention helper's face detector is only for families that turned
           // the camera on: cached when first used, never precached for everyone
-          globIgnores: ['**/node_modules/**', '**/face-api*.js', ...VOICE_GLOB_IGNORES],
+          globIgnores: ['**/node_modules/**', '**/vision_wasm*', ...VOICE_GLOB_IGNORES],
           manifestTransforms: [
             (entries) => ({
               manifest: shellOnly(entries, readFileSync(resolve(builtDir, 'index.html'), 'utf8')),
@@ -160,8 +160,8 @@ export default defineConfig(({ mode }) => {
             },
             {
               urlPattern: ({ url }: { url: URL }) =>
-                url.pathname.startsWith('/models/face/') ||
-                /\/assets\/face-api[^/]*\.js$/.test(url.pathname),
+                url.pathname.startsWith('/models/mediapipe/') ||
+                /\/assets\/vision_wasm[^/]*\.(js|wasm)$/.test(url.pathname),
               handler: 'CacheFirst' as const,
               options: {
                 cacheName: 'kiddo-face',
@@ -211,12 +211,19 @@ export default defineConfig(({ mode }) => {
           test: {
             name: 'app',
             environment: 'jsdom',
-            include: ['src/**/*.test.{ts,tsx}', 'supabase/functions/**/*.test.ts', 'scripts/**/*.test.ts'],
+            include: [
+              'src/**/*.test.{ts,tsx}',
+              'supabase/functions/**/*.test.ts',
+              'scripts/**/*.test.ts',
+            ],
             setupFiles: ['./src/test/setup.ts'],
           },
         },
         // the API (server/): plain Node, an in-memory libSQL database, no browser setup
-        { extends: true, test: { name: 'server', environment: 'node', include: ['server/**/*.test.ts'] } },
+        {
+          extends: true,
+          test: { name: 'server', environment: 'node', include: ['server/**/*.test.ts'] },
+        },
       ],
     },
   }

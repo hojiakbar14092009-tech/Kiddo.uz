@@ -35,6 +35,13 @@ export function inChildArea(pathname: string): boolean {
   return pathname !== '/' && pathname !== '/rest' && !under(pathname, OUTSIDE)
 }
 
+/** Drawing and tracing: the child looks down at the picture, which is the task itself. */
+const DRAWING = ['/trace', '/tasks/trace', '/studio']
+
+export function allowsLookingDown(pathname: string): boolean {
+  return under(pathname, DRAWING)
+}
+
 /** A screen where the child is learning or playing (touch and gaze are watched). */
 export function isLearningScreen(pathname: string): boolean {
   return inChildArea(pathname) && !CALM.has(pathname) && !under(pathname, WATCHED)

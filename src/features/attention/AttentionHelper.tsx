@@ -19,7 +19,7 @@ import { useChildKey, useWearing } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { watchCamera, type CameraWatch } from './cameraWatcher'
 import { loadNameVoice, recordingFormat } from './nameVoice'
-import { inChildArea, isLearningScreen } from './routes'
+import { allowsLookingDown, inChildArea, isLearningScreen } from './routes'
 import {
   AWAY_MIN_MS,
   IDLE_MS,
@@ -69,6 +69,7 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
   const note = useAttentionStore((state) => state.note)
 
   const learning = isLearningScreen(pathname)
+  const allowDown = allowsLookingDown(pathname)
 
   const tracker = useRef(initialTracker())
   const turn = useRef(0)
@@ -208,11 +209,14 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
         }
         if (gaze === 'away') awayTimer = setTimeout(lookAway, LOOK_AWAY_MS)
       },
-      // the sign shows as soon as the camera is open, before the detector has loaded
-      () => {
-        if (cancelled) return
-        setCameraOn(true)
-        track('attention_camera')
+      {
+        // the sign shows as soon as the camera is open, before the detector has loaded
+        onOpen: () => {
+          if (cancelled) return
+          setCameraOn(true)
+          track('attention_camera')
+        },
+        allowDown,
       },
     )
       .then((started) => {
@@ -229,7 +233,7 @@ function AttentionRunner({ pathname, camera }: { pathname: string; camera: boole
       watch?.stop()
       setCameraOn(false)
     }
-  }, [camera, fire, learning, visible])
+  }, [allowDown, camera, fire, learning, visible])
 
   const go = (to: string) => {
     setOffer(false)

@@ -21,11 +21,18 @@
   The robot peeks in from the lower left with a bubble; PRO (and the demo build)
   also hear it, Free sees it only. Every line is in `attention.say`, recorded.
 - **The camera** (`cameraWatcher.ts`) runs only with consent, only on learning
-  screens, only while the app is visible. A tiny face detector (face-api, MIT,
-  `/models/face`, ≈ 0.3 MB of models) looks at a 160 px picture about three times
-  a second; `gazeOf` turns three points of the face into "screen" or "away". No
-  frame is drawn, kept or sent. The detector chunk (≈ 1.3 MB) is downloaded the
-  first time the camera is used and cached then, never precached for everyone.
+  screens, only while the app is visible. MVP: MediaPipe Face Landmarker
+  (Apache-2.0, `@mediapipe/tasks-vision` 1.2.0; model `/models/mediapipe/face_landmarker.task`
+  3.6 MB, WebAssembly 14.5 MB raw from `/assets/vision_wasm*`, GPU then CPU) looks at a
+  320×240 picture about three times a second. `nearestFace` takes the closest face
+  (the child, not a parent behind); `gazeOf` turns eyes + nose tip into "screen" or
+  "away"; `GazeFilter` learns the child's usual head position from the first 6
+  straight frames (a tablet on the table), waits 1.5 s before a lost face counts,
+  and needs 3 frames to say "away", 2 to say "back". Drawing screens (`/trace`,
+  `/tasks/trace`, `/studio`) allow looking down. No frame is drawn, kept or sent.
+  Everything is downloaded the first time the camera is used, cached then, never
+  precached. A grown-up turns the helper and the camera on in the parent area
+  (no question on a child's screen); `Permissions-Policy: camera=(self)`.
   While it runs a small camera sign is on screen. A browser that refuses the
   camera leaves the helper working without it.
 - **AI rule.** The kids app has no AI features; the face detector is the one

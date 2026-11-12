@@ -1,6 +1,6 @@
 # Kiddo MVP — progress
 
-Holat: 0–4-bosqichlar bajarildi (pastda). Keyingi: 5-bosqich. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
+Holat: 0–5-bosqichlar bajarildi (pastda). Keyingi: 6-bosqich. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
 sessiya scratchpad'ida edi (repo'da emas).
 
 ## 0-bosqich: AUDIT (2026-11-12)
@@ -216,6 +216,20 @@ webhook secret_token.
 - Matnlar uz/ru/en: `alphabet.numbersLocked`, `alphabet.lockedNumber` (faqat ko'rinadigan matn, ovozga berilmaydi).
 - Testlar: vitest 1758/1765 (admin x4 ma'lum; MathPage, myStory, Dino alohida o'tadi); e2e age-look + words 12/12.
 
+## 5-bosqich: KAMERA — bajarildi (2026-11-13)
+- 5a: `vercel.json` `camera=(self), microphone=(self)` (+ securityHeaders testi). Bola ekranidagi rozilik oynasi (`AttentionConsent`) olindi:
+  yordamchini va kamerani kattalar ota-ona bo'limi → Sozlamalar → `AttentionPanel`da yoqadi (e2e yangilandi). i18n `attention.consent` olindi.
+- 5b: face-api → **MediaPipe Face Landmarker** (`@mediapipe/tasks-vision` **1.2.0** exact, 2026-10-27 relizi; 1.2.3 juda yangi edi).
+  Model `public/models/mediapipe/face_landmarker.task` (3,6 MB, Google rasmiy float16/1, Apache-2.0). WASM `?url` bilan `/assets/vision_wasm*`
+  (SIMD 14,5 MB yoki nosimd 12,9 MB, xom hajm), GPU → CPU zaxira. Faqat kamera yoqilganda lazy; precache'da YO'Q (sw.js'da faqat runtime
+  CacheFirst `kiddo-face`). face-api paketi va `public/models/face/*` o'chirildi. perf-budget: `.wasm` 15 MB, `.task` 4 MB limit.
+- Mantiq (`cameraWatcher.ts`, test bilan): `nearestFace` (2 yuzdan eng yaqini — bola), `gazeOf` (yon 0.42; past/yuqori bolaning o'z
+  holatiga nisbatan), `GazeFilter`: birinchi 6 to'g'ri kadrdan kalibrlash (planshet stolda), yuz yo'qolsa 1,5 s kutish, away uchun 3 kadr,
+  qaytish 2 kadr. Chizish ekranlari (`/trace`, `/tasks/trace`, `/studio`) — pastga qarash chalg'ish emas. Old kamera `exact: user`, bo'lmasa istalgani.
+- Tekshirildi: Chromium soxta kamera bilan (preview build): bundle + SIMD wasm + model 200, kamera belgisi chiqdi, sahifa xatosi yo'q.
+  **Tekshirilmadi**: haqiqiy yuz bilan aniqlik (real telefon/planshetda sinash kerak), Safari/iOS.
+- Trade-off: kamera yoqqan oilaga birinchi marta ~4–5 MB (siqilgan) yuklanadi (face-api ~1,6 MB edi); keyin keshdan.
+
 ## Bosqichlar rejasi (qarorlardan)
 3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
 4. Sonlar ochilishi: har son ketma-ket 2 marta to'g'ri → keyingi 5 son (sonlar + chizish).
@@ -234,4 +248,4 @@ qotmasin, tokenning holati (ishlatildi/muddati o'tdi) haqida tushunarli xabar be
 uz/ru/en tillarida, sodda. Hammasi uchun test yoz (QR/havola yaratish, token muddati, qayta yuborish limiti).
 
 ## Keyingi aniq qadam
-5-bosqich: kamera (`camera=(self), microphone=(self)`, MediaPipe Face Landmarker lazy, rozilik ota-ona bo'limida, histerezis).
+6-bosqich: UX (brend animatsiya qisqartirish, kichik tugmalar ≥48 px, bosh sahifa qisqartirish).
