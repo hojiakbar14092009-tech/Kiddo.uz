@@ -1,6 +1,6 @@
 # Kiddo MVP — progress
 
-Holat: 0–6-bosqichlar bajarildi (pastda). Keyingi: 8-bosqich (kirish) → 7 (Pro serverda); egadan sirlar va Turso ruxsati kutilmoqda. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
+Holat: 0–8-bosqichlar kodda bajarildi. Turso migratsiyasi QILINMADI (.env.local'da Turso sirlari yo'q). Keyingi: YAKUN oldidan qolgan UX bandlari (pastdagi jadval).
 sessiya scratchpad'ida edi (repo'da emas).
 
 ## 0-bosqich: AUDIT (2026-11-12)
@@ -239,6 +239,35 @@ webhook secret_token.
 - Bosh sahifa qisqardi (3-bosqichda takroriy qator olingan). Testlar: unit (admin x4 ma'lum), e2e responsive + words 21/21 + opening.
 - Ma'lum e2e flake'lar (mening o'zgarishimga bog'liq emas): opening "a key/tap skips" (toza HEAD'da ham), homework "planet homework"
   (javobdan keyin savol 1,4 s da almashmaydi — ovoz vaqti), kiddo "a right answer earns… coins" (toza HEAD'da ham).
+
+## 7–8-bosqichlar: PRO SERVERDA VA KIRISH — kodda bajarildi (2026-11-13)
+- Egasi Turso migratsiyasiga rozi (shartlar: baza nomi "kiddo", faqat CREATE ... IF NOT EXISTS, AUTH_SECRET faqat .env.local).
+  **`.env.local` yo'q edi** → migratsiya qilinmadi; `.env.local` yaratildi, ichida faqat yangi `AUTH_SECRET` (64 belgi, git-ignored).
+  Yetishmaydi: TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, GOOGLE_CLIENT_ID/SECRET, TELEGRAM_BOT_TOKEN/USERNAME, SMTP_*.
+  Migratsiyadan oldin: host `kiddo-` bilan boshlanishi va "teamflow" yo'qligini tekshirish skripti (faqat nom chiqaradi) — sessiyada ishlatildi.
+- Server: `server/auth.ts` (kod: HMAC, 5 daq, 1 marta, 5 urinish; email SMTP nodemailer; Google PKCE+state cookie, jose JWKS, faqat
+  email_verified), `server/telegram.ts` (deep link token 32 belgi/10 daq, /start → request_contact, `contact.user_id == from.id`,
+  saytdagi telefon bilan mos, kod, qayta yuborish 30 s / 5 marta, status, webhook secret = HMAC(AUTH_SECRET), bot matnlari uz/ru/en),
+  `server/pay.ts` (24 990 / 238 990, PAYMENT_MODE=test, idempotency, kunlar qo'shiladi). Router: auth/*, telegram/webhook, pay/*;
+  `health`, `auth/methods`, `pay/prices` bazasiz. Testlar: `server/auth.test.ts` (28+3), migratsiya statik tekshiruvi.
+- Webhook: `node scripts/telegram-webhook.mjs https://<domen>` (deploydan keyin). `.env.example`ga nomlar qo'shildi.
+- Klient: `features/parent/login/KiddoSignIn.tsx` (+ `signInText.ts` uz/ru/en, testlar 14), `ParentLoginPage` Supabase'siz shu ekran,
+  demo faqat dev/e2e/test build'da; `AuthReturnPage` `?signin=google|failed`. QR: `qrcode-generator` 2.0.4 (lazy chunk).
+- Pro: `MVP_PLANS` = `FUTURE_PRO_PRICES` = server `PLANS`; `ProSection` kirgan ota-onada server sinov to'lovi; `serverPro.ts`
+  (to'langan Pro faqat `/api/me`dan; promo/demo saqlanadi) + test. `/privacy` yangilandi (2026-11-13).
+- 12 ovozsiz so'z: `docs/shorts/VOICE-NEXT.md` "Ilova" bo'limi.
+
+## YAKUN oldidan qolgan bandlar (egasining ro'yxati, 2026-11-13 holati)
+| band | holat |
+|---|---|
+| Masshtab portali matnlari va avtomatik o'tish | bajarilmadi |
+| Chizamiz: 20–30 shakl bitta ro'yxatda | bajarilmadi (5 shakl + 0–10 alohida) |
+| Birinchi so'zim sodda so'zlar | qisman (12 so'z ovoz kutadi) |
+| Dinozavrlar: avtomatik o'tish, qazish/viktorina to'g'ridan-to'g'ri | qisman (to'g'ridan-to'g'ri yo'llar bor) |
+| Uyda top 10 tagacha | bajarilmadi |
+| Yong'oq animatsiyasi | bajarilmadi |
+| Har bo'limda bitta orqaga tugma | tekshirilmagan |
+| Tugmalar scroll qilmasdan | qisman |
 
 ## Bosqichlar rejasi (qarorlardan)
 3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
