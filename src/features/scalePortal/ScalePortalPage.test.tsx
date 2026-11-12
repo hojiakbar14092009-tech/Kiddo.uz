@@ -78,6 +78,18 @@ describe('Scale Portal', () => {
     expect(screen.getByTestId('scale-stop')).toHaveAttribute('data-stop', 'ant')
   })
 
+  it('after a landing it goes on by itself (MVP): the next question comes without a tap', async () => {
+    seedChild(5)
+    const { user } = await renderRoute('/scale-portal')
+    await user.click(screen.getByTestId('scale-start'))
+    const first = screen.getByTestId('scale-question')
+    await user.click(within(first).getAllByRole('button')[0]!)
+    await screen.findByTestId('scale-next')
+    // at least 4 s to look and listen, then the journey goes on
+    expect(await screen.findByTestId('scale-question', {}, { timeout: 8_000 })).toBeInTheDocument()
+    expect(screen.queryByTestId('scale-next')).toBeNull()
+  }, 15_000)
+
   it('finishes once through central progression; guesses are shown, never graded', async () => {
     seedChild(8)
     const { user } = await renderRoute('/scale-portal')

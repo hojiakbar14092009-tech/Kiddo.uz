@@ -12,6 +12,7 @@ import { emitActivity, type AwardSummary } from '@/domain/universe'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { newId } from '@/lib/id'
+import { useAfterVoice } from '@/services/audio/afterVoice'
 import { tDynamic } from '@/lib/tDynamic'
 import { childAge, useActiveChild } from '@/store/familyStore'
 import { useChildKey } from '@/store/progressStore'
@@ -39,6 +40,9 @@ type Phase =
  * finished journey goes through emitActivity like every activity; free
  * exploration on the rail earns nothing (it cannot be farmed).
  */
+/** At least this long on a landed place before going on by itself (time to look and listen). */
+const AUTO_NEXT_MS = 4_000
+
 export function ScalePortalPage() {
   const { t } = useTranslation()
   const language = useSettingsStore((state) => state.language) ?? 'uz'
@@ -61,6 +65,8 @@ export function ScalePortalPage() {
   const heading = useRef<HTMLHeadingElement>(null)
   const nextButton = useRef<HTMLButtonElement>(null)
   const alive = useRef(true)
+  // MVP: after a jump lands and its words are said, the journey goes on by itself
+  const { goOn, cancel } = useAfterVoice()
 
   useEffect(() => {
     alive.current = true
@@ -98,11 +104,15 @@ export function ScalePortalPage() {
     setPhase({ kind: 'jump', step, right: ok, landed: false })
     // the portal jump: a continuous zoom out to the next place
     void camera(frameOf(question.to)).then(() => {
-      if (alive.current) setPhase({ kind: 'jump', step, right: ok, landed: true })
+      if (!alive.current) return
+      setPhase({ kind: 'jump', step, right: ok, landed: true })
+      // through the button itself: the latest state, and the same path as a tap
+      goOn(() => nextButton.current?.click(), AUTO_NEXT_MS)
     })
   }
 
   const next = (step: number) => {
+    cancel()
     if (step + 1 < JUMPS) {
       setPhase({ kind: 'guess', step: step + 1 })
       return
