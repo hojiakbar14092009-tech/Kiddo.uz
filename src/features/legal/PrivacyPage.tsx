@@ -7,7 +7,7 @@ import { Screen } from '@/components/layout/Screen'
 export const CONTACT_EMAIL = 'PLACEHOLDER_EMAIL'
 export const OPERATOR_NAME = 'PLACEHOLDER_COMPANY'
 /** Bump when the text changes. */
-export const PRIVACY_UPDATED = '2026-11-12'
+export const PRIVACY_UPDATED = '2026-11-13'
 
 const SECTIONS = [
   'modes',

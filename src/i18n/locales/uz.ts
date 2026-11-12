@@ -2532,11 +2532,11 @@ export const uz = {
     s: {
       modes: {
         title: 'Ikki xil ishlash usuli',
-        body: 'Kiddo hisobsiz ham ishlaydi: bunda bolaning profili va natijalari faqat shu qurilmada qoladi.\nOta-ona bulut hisobiga kirsa (Google, e-pochta havolasi yoki parol bilan), profil va natijalar ota-onaning hisobiga saqlanadi va qurilmalar o‘rtasida sinxronlanadi.\nIkkala holatda ham ilova anonim statistika yuboradi (pastda “Anonim statistika”).',
+        body: 'Kiddo hisobsiz ham ishlaydi: bunda bolaning profili va natijalari faqat shu qurilmada qoladi.\nOta-ona hisobga kirsa (Google, e-pochtaga kelgan kod yoki Telegram’ga kelgan kod bilan), profil va natijalar ota-onaning hisobiga saqlanadi va qurilmalar o‘rtasida sinxronlanadi.\nIkkala holatda ham ilova anonim statistika yuboradi (pastda “Anonim statistika”).',
       },
       parent: {
         title: 'Ota-ona ma’lumotlari',
-        body: 'Bulut hisobi uchun: e-pochta manzilingiz (Google profilingizdan yoki o‘zingiz kiritgan) va rozilik berganingiz haqida belgi (sana va matn versiyasi). Parol bilan kirsangiz, parol kirish xizmatida himoyalangan holda saqlanadi.\nKiddo telefon raqamingizni so‘ramaydi va saqlamaydi.\nTelegram’ni ulasangiz, serverda faqat Telegram suhbat identifikatori saqlanadi (bot xabar yuborishi uchun). Bot faqat bolaning ismi, yoshi va qisqa natijani (kunlar, daqiqalar, harflar) yuboradi — familiya, rasm, ovoz yoki javoblar yuborilmaydi.',
+        body: 'Hisob uchun kirish usuliga qarab: e-pochta manzili (Google profilidan yoki o‘zingiz kiritgan), telefon raqami va Telegram foydalanuvchi identifikatori (Telegram orqali kirsangiz), Google hisobi identifikatori va ismi (Google bilan kirsangiz).\nKirish kodlari faqat xesh ko‘rinishida 5 daqiqa saqlanadi va bir marta ishlatiladi. Sessiya brauzerda faqat server o‘qiy oladigan cookie’da turadi; serverda uning faqat xeshi saqlanadi.\nTelegram bot faqat kirish kodini yuboradi; telefon raqamini faqat siz o‘zingiz “Raqamni ulashish” tugmasini bossangiz oladi.\nPRO to‘lovi (hozircha sinov rejimida, pul yechilmaydi): tarif, summa va sana saqlanadi; karta ma’lumotlari Kiddo’ga kelmaydi.',
       },
       child: {
         title: 'Bola haqidagi ma’lumotlar (bulut hisobida)',
@@ -2560,7 +2560,7 @@ export const uz = {
       },
       share: {
         title: 'Ma’lumotni kim ko‘radi',
-        body: 'Oila ma’lumotini faqat siz (ota-ona) ko‘rasiz; boshqa oilalar hech qachon ko‘rmaydi.\nKiddo quyidagi xizmatlardan foydalanadi: ma’lumotlar bazasi, kirish va surat ombori (Supabase); Google bilan kirish (faqat tanlasangiz); Telegram (faqat ulasangiz); ovoz sintezi (PRO); sayt hostingi (Vercel). Ilovada uchinchi tomon reklama tarmoqlari va kuzatuvchilari yo‘q.\nPRO bo‘limida ota-ona Kiddo’ning o‘z qisqa videosini ko‘rib promo-kod olishi mumkin.\nIlovani yuritadigan administratorlar xizmat ishlashi uchun zarur umumiy ma’lumotni (masalan, anonim statistikani) ko‘radi.',
+        body: 'Oila ma’lumotini faqat siz (ota-ona) ko‘rasiz; boshqa oilalar hech qachon ko‘rmaydi.\nKiddo quyidagi xizmatlardan foydalanadi: ma’lumotlar bazasi (Turso), sayt va server (Vercel), Google bilan kirish (faqat tanlasangiz), Telegram (faqat Telegram orqali kirsangiz), e-pochta yuborish xizmati (kirish kodi uchun), ovoz sintezi (PRO). Ilovada uchinchi tomon reklama tarmoqlari va kuzatuvchilari yo‘q.\nIlovani yuritadigan administratorlar xizmat ishlashi uchun zarur umumiy ma’lumotni (masalan, anonim statistikani) ko‘radi.',
       },
       keep: {
         title: 'Qancha saqlanadi',

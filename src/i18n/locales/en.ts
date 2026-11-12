@@ -2521,11 +2521,11 @@ export const en: Translation = {
     s: {
       modes: {
         title: 'Two ways to use it',
-        body: 'Kiddo also works without an account: then the child’s profile and results stay on this device only.\nIf a parent signs in to a cloud account (Google, an e-mail link or a password), the profile and results are saved in the parent’s account and synced between devices.\nIn both cases the app sends anonymous statistics (see “Anonymous statistics” below).',
+        body: 'Kiddo works without an account: then the child’s profile and results stay on this device only.\nIf a parent signs in (with Google, a code by e-mail or a code in Telegram), the profile and results are kept in the parent’s account and synced between devices.\nEither way the app sends anonymous statistics (below, “Anonymous statistics”).',
       },
       parent: {
         title: 'Parent’s data',
-        body: 'For a cloud account: your e-mail address (from your Google profile or typed by you) and a note that you gave consent (date and text version). If you sign in with a password, it is stored protected in the sign-in service.\nKiddo does not ask for or store your phone number.\nIf you connect Telegram, the server keeps only your Telegram chat identifier (so the bot can write to you). The bot sends only the child’s first name, age and a short result (days, minutes, letters) — no surname, photo, voice or answers.',
+        body: 'For the account, depending on how you sign in: your e-mail address (from your Google profile or typed by you), your phone number and Telegram user ID (if you sign in with Telegram), your Google account ID and name (if you sign in with Google).\nSign-in codes are stored only as a hash for 5 minutes and work once. The session lives in a cookie only the server can read; the server keeps only its hash.\nThe Telegram bot only sends the sign-in code; it gets your phone number only if you tap “Share my number” yourself.\nPRO payment (test mode for now, no money is taken): the plan, amount and date are stored; card details never reach Kiddo.',
       },
       child: {
         title: 'Child’s data (in the cloud account)',
@@ -2549,7 +2549,7 @@ export const en: Translation = {
       },
       share: {
         title: 'Who sees the data',
-        body: 'Only you (the parent) see your family’s data; other families never do.\nKiddo uses these services: database, sign-in and photo storage (Supabase); Google sign-in (only if you choose it); Telegram (only if you connect it); speech synthesis (PRO); website hosting (Vercel). There are no third-party ad networks or trackers in the app.\nIn the PRO section a parent may watch a short video made by Kiddo to get a promo code.\nThe administrators who run the app see the general data needed to operate the service (for example, anonymous statistics).',
+        body: 'Only you (the parent) see your family’s data; other families never do.\nKiddo uses these services: database (Turso), website and server (Vercel), Google sign-in (only if you choose it), Telegram (only if you sign in with it), an e-mail delivery service (for the sign-in code), speech synthesis (PRO). There are no third-party ad networks or trackers in the app.\nThe administrators who run the app see the general data the service needs (for example, anonymous statistics).',
       },
       keep: {
         title: 'How long it is kept',
