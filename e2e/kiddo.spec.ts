@@ -258,7 +258,6 @@ test('the learning sections open from their Kiddo City buildings without errors'
   for (const [building, section] of [
     ['So‘zlar ustaxonasi', 'Birinchi so‘zim'],
     ['Rasadxona', 'Koinot'],
-    ['Tomorqa', 'Tomorqada top'],
     ['Robot ustaxonasi', 'Maskotga yordam ber'],
   ] as const) {
     await page.getByRole('link', { name: building, exact: true }).click()
@@ -268,7 +267,7 @@ test('the learning sections open from their Kiddo City buildings without errors'
     )
     await page.goto('/my-world')
   }
-  // The Story Library opens the Story Engine, which links on to the classic tales.
+  // The Story Library opens the Story Engine (the classic tales were removed in the MVP).
   await page
     .getByRole('navigation', { name: 'Bo‘limlar' })
     .getByRole('link', { name: 'O‘rgan' })
@@ -276,11 +275,6 @@ test('the learning sections open from their Kiddo City buildings without errors'
   await page.getByRole('link', { name: 'Ertaklar', exact: true }).click()
   await expect(page).toHaveURL(/\/stories$/)
   await expect(page.getByRole('heading', { name: 'Ertaklar kutubxonasi' })).toBeAttached()
-  await page.getByTestId('stories-classic-tales').click()
-  await expect(page).toHaveURL(/\/learn\/tales$/)
-  await expect(page.locator('.learn-title').filter({ visible: true }).first()).toContainText(
-    'Ertaklar',
-  )
   await page.goto('/home')
   // Math Land opens the adaptive Math Lab, which links to the step-by-step lessons.
   await page
@@ -293,15 +287,10 @@ test('the learning sections open from their Kiddo City buildings without errors'
   expect(errors).toEqual([])
 })
 
-test('the city opens the Adventure Map and the collection', async ({ page }) => {
+test('the city opens the collection; the old map link lands on Kashf et', async ({ page }) => {
   await chooseUzbek(page)
-  await page
-    .getByRole('navigation', { name: 'Bo‘limlar' })
-    .getByRole('link', { name: 'Kashf et' })
-    .click()
-  await page.getByRole('link', { name: 'Xarita', exact: true }).click()
-  await expect(page).toHaveURL(/\/adventure$/)
-  await expect(page.getByText('Sen shu yerdasan')).toBeVisible()
+  await page.goto('/adventure')
+  await expect(page).toHaveURL(/\/explore$/)
   await page.goto('/my-world')
   await page.getByTestId('resource-bar').click()
   await expect(page).toHaveURL(/\/collection$/)

@@ -78,7 +78,11 @@ describe('quest registry: the connected world can always be finished', () => {
           expect(steps[step.id]?.title, step.id).toBeTruthy()
           expect(steps[step.id]?.text, step.id).toBeTruthy()
         }
-        expect(paths, step.route).toContain(step.route)
+        // a route with a parameter (/worlds/dino/:mode) also counts
+        const matches = paths.some((path) =>
+          new RegExp(`^${path.replace(/:[a-zA-Z]+/g, '[^/]+')}$`).test(step.route),
+        )
+        expect(matches, step.route).toBe(true)
       }
     }
     for (const texts of [uz, ru, en]) {

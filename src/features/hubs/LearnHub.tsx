@@ -48,6 +48,7 @@ export function LearnHub() {
     label: t('games.title'),
     picture: <Img3D name="ball" className="size-[74%]" />,
     tint: 'bg-coin-soft',
+    testId: 'games-link',
   }
   const tiles = [alphabet, numbers, words, writing, tales, games].filter(
     (tile): tile is Tile => tile !== undefined,
@@ -104,7 +105,7 @@ export function LearnHub() {
         <BuildingPlaces ids={['math-land', 'robot-workshop', 'mistake-garden']} />
       </PlaceGroup>
       <PlaceGroup id="learn-life" title={t('hubs.learn.groups.life')} row>
-        <BuildingPlaces ids={['friendship-house', 'garden']} />
+        <BuildingPlaces ids={['friendship-house']} />
       </PlaceGroup>
     </HubScreen>
   )

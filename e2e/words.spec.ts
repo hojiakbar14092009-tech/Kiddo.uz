@@ -12,7 +12,7 @@ const ROUTES = [
   '/learn',
   '/explore',
   '/my-world',
-  '/learn/tales',
+  '/stories',
   '/learn/my-story',
   '/math-lab',
   '/alphabet/num-9',

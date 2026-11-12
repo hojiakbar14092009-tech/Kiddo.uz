@@ -8,20 +8,6 @@ import { PLOT_TINTS } from './cityModel'
 import { ResourceBar } from './ResourceBar'
 import { UpgradeSheet } from './UpgradeSheet'
 
-/**
- * Places in the city that are not (yet) buildings of the universe domain:
- * the Adventure Map. It has no levels.
- */
-const EXTRA_PLACES = [
-  {
-    id: 'adventure',
-    nameKey: 'city.adventure',
-    icon3d: 'mountain',
-    route: '/adventure',
-    after: null,
-  },
-] as const
-
 function isReady(building: BuildingView): boolean {
   return building.next !== null && Object.keys(building.next.missing).length === 0
 }
@@ -52,20 +38,6 @@ export function KiddoCity() {
   }
 
   const tiles: ReactNode[] = []
-  const pushExtras = (after: string | null) => {
-    for (const place of EXTRA_PLACES) {
-      if (place.after !== after) continue
-      tiles.push(
-        <BuildingTile
-          key={place.id}
-          name={tDynamic(t, place.nameKey)}
-          icon3d={place.icon3d}
-          route={place.route}
-          tint={PLOT_TINTS[tiles.length % PLOT_TINTS.length]!}
-        />,
-      )
-    }
-  }
   for (const building of buildings) {
     tiles.push(
       <BuildingTile
@@ -90,9 +62,7 @@ export function KiddoCity() {
         lockedText={building.locked ? tDynamic(t, `city.opensWith.${building.id}`) : undefined}
       />,
     )
-    pushExtras(building.id)
   }
-  pushExtras(null)
 
   return (
     <section aria-labelledby="city-title" className="flex w-full flex-col items-center gap-4">

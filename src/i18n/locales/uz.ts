@@ -138,7 +138,6 @@ export const uz = {
     mine: 'Mening dunyom',
   },
   home: {
-    quick: { label: 'Eng kerakli joylar', tales: 'Ertaklar' },
     greeting: 'Salom, {{name}}!',
     greetingNoName: 'Salom!',
     alphabet: 'Alifbo',
@@ -1740,7 +1739,7 @@ export const uz = {
       plant: { title: 'Urug‘ni ek', text: 'Mashq bog‘ida Mars urug‘ini ek.' },
       grow: {
         title: 'Gulni o‘stir',
-        text: 'Tomorqa va tabiat o‘yinlarini yaxshi o‘yna, shunda gul o‘sadi.',
+        text: 'Dinozavr viktorinasi va tabiat savollariga yaxshi javob ber, shunda gul o‘sadi.',
       },
       lab: {
         title: 'Laboratoriyada tajriba',
@@ -1799,9 +1798,9 @@ export const uz = {
     plant: 'Urug‘ni ekish',
     planted: 'Urug‘ ekildi!',
     stages: { seed: 'Urug‘', sprout: 'Nihol', plant: 'O‘simlik', bloom: 'Gul ochildi!' },
-    grow: 'Tomorqa yoki tabiat o‘yinini yaxshi o‘yna – gul o‘sadi.',
+    grow: 'Dinozavr viktorinasini yaxshi o‘yna – gul o‘sadi.',
     growth: 'O‘sish: {{stage}} / {{total}}',
-    toLesson: 'Tomorqa o‘yini',
+    toLesson: 'Dinozavr viktorinasi',
     bloomed: 'Gul ochildi! Fan laboratoriyasi ochildi.',
     toLab: 'Laboratoriyaga',
     learningIntro:
@@ -1969,113 +1968,6 @@ export const uz = {
     doneTitle: 'Galaktikagacha yetding!',
     doneText: 'To‘g‘ri taxminlar: {{n}} / {{total}}',
     again: 'Yana sayohat',
-    back: 'Koinotga qaytish',
-  },
-  shadowLab: {
-    title: 'Soya laboratoriyasi',
-    cardText: 'Lumi bilan: chiroq va buyumni sur, soyani kerakli shaklga keltir.',
-    intro:
-      'Men Lumi! Soya qayerga tushishi chiroqqa, buyumga va masofaga bog‘liq. Kel, sinab ko‘ramiz!',
-    learn:
-      'Soya buyum shakliga, chiroq qayerdaligiga, buyum qanday burilganiga va chiroqdan qancha uzoqligiga bog‘liq.',
-    start: 'Boshlash',
-    progress: '{{n}} / {{total}}',
-    wallLabel: 'Devor: maqsad soya (qizil chiziq) va hozirgi soya',
-    mapLabel: 'Yuqoridan ko‘rinish: chiroq, buyum va devor',
-    check: 'Tekshirish',
-    show: 'Lumi ko‘rsatsin',
-    shown: 'Mana shunday bo‘ladi!',
-    right: 'Zo‘r! Soya to‘g‘ri tushdi.',
-    tryAgain: 'Yana bir oz o‘zgartirib ko‘r.',
-    next: 'Keyingisi',
-    less: '{{name}}: kamaytirish',
-    more: '{{name}}: ko‘paytirish',
-    controls: {
-      distance: 'Buyum chiroqdan uzoqligi',
-      rotate: 'Buyumni burish',
-      tilt: 'Buyumni devorga tomon burish',
-      lightX: 'Chiroq: chap — o‘ng',
-      lightY: 'Chiroq: past — yuqori',
-      lightZ: 'Chiroqni devorga yaqinlashtirish',
-    },
-    hints: {
-      distance: {
-        up: 'Soya juda katta: buyumni chiroqdan uzoqlashtir.',
-        down: 'Soya juda kichik: buyumni chiroqqa yaqinlashtir.',
-      },
-      rotate: {
-        up: 'Buyumni soat miliga teskari bur: "Buyumni burish" ning + tugmasi.',
-        down: 'Buyumni soat mili bo‘yicha bur: "Buyumni burish" ning − tugmasi.',
-      },
-      tilt: {
-        up: '"Buyumni devorga tomon burish" ning + tugmasini bos.',
-        down: '"Buyumni devorga tomon burish" ning − tugmasini bos.',
-      },
-      lightX: {
-        up: 'Soya chapga ketishi kerak: chiroqni o‘ngga sur.',
-        down: 'Soya o‘ngga ketishi kerak: chiroqni chapga sur.',
-      },
-      lightY: {
-        up: 'Soya pastga tushishi kerak: chiroqni ko‘tar.',
-        down: 'Soya yuqoriga chiqishi kerak: chiroqni tushir.',
-      },
-      lightZ: {
-        up: 'Soya kattaroq bo‘lishi kerak: chiroqni buyumga yaqinlashtir.',
-        down: 'Soya kichikroq bo‘lishi kerak: chiroqni orqaga qaytar.',
-      },
-    },
-    modes: {
-      match: {
-        title: 'Soyani moslashtir',
-        task: 'Buyum soyasi qizil chiziqqa tushadigan qilib sozla.',
-        why: 'Buyum chiroqqa yaqin bo‘lsa, soyasi kattaroq bo‘ladi; burilsa, soyasi ham buriladi.',
-      },
-      views: {
-        title: 'Ko‘rinishdan top',
-        task: 'Bu soyalar qaysi jismniki?',
-        why: 'Bitta jism turli tomondan turlicha ko‘rinadi: konus oldidan uchburchak, yuqoridan doira.',
-        example: 'Avval misol. {{solid}} oldidan, yuqoridan va yonidan:',
-      },
-      build: {
-        title: 'Bo‘laklardan yasa',
-        task: 'Joylarga bo‘laklarni qo‘y: soyalar birgalikda maqsad shaklni hosil qilsin.',
-        why: 'Murakkab soya oddiy shakllar soyalaridan tuziladi.',
-      },
-      light: {
-        title: 'Faqat chiroq',
-        task: 'Buyum joyida qoladi. Faqat chiroqni surib, soyani maqsadga tushir.',
-        why: 'Chiroq chapga surilsa, soya o‘ngga ketadi: soya doim chiroqqa qarama-qarshi tomonga tushadi.',
-      },
-      detective: {
-        title: 'Soya detektivi',
-        task: 'Bu soyani qaysi holat hosil qilgan? Yuqoridan ko‘rinishlarni solishtir.',
-        why: 'Soyaning joyi chiroq qayerdaligini, kattaligi esa buyum chiroqqa qanchalik yaqinligini aytadi.',
-      },
-    },
-    views: { front: 'Oldidan', top: 'Yuqoridan', side: 'Yonidan' },
-    solids: {
-      cube: 'Kub',
-      cylinder: 'Silindr',
-      cone: 'Konus',
-      sphere: 'Shar',
-      pyramid: 'Piramida',
-      prism: 'Prizma',
-    },
-    pieces: { none: 'Bo‘sh', square: 'Kvadrat', triangle: 'Uchburchak', circle: 'Doira' },
-    slots: 'Bo‘laklar joylari',
-    slot: '{{where}}: {{piece}}. Almashtirish uchun bos',
-    where: {
-      top: 'Yuqorida',
-      bottom: 'Pastda',
-      topLeft: 'Yuqori chapda',
-      topRight: 'Yuqori o‘ngda',
-      bottomLeft: 'Pastki chapda',
-      bottomRight: 'Pastki o‘ngda',
-    },
-    sceneLabel: '{{n}}-holat',
-    doneTitle: 'Soya ustasi!',
-    doneText: 'Birinchi urinishda topilgani: {{n}} / {{total}}',
-    again: 'Yana o‘ynash',
     back: 'Koinotga qaytish',
   },
   scienceLab: {

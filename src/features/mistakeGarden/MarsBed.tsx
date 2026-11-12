@@ -88,7 +88,7 @@ export function MarsBed() {
             ) : (
               <>
                 <p className="text-lg text-ink-soft">{t('practiceGarden.grow')}</p>
-                <LinkButton to="/learn/garden" variant="soft" size="md">
+                <LinkButton to="/worlds/dino/quiz" variant="soft" size="md">
                   {t('practiceGarden.toLesson')}
                 </LinkButton>
               </>

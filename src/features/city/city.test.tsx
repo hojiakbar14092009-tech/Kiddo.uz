@@ -56,11 +56,11 @@ beforeEach(() => {
 const city = () => screen.getByRole('region', { name: 'Kiddo shahri' })
 
 describe('Kiddo City', () => {
-  it('shows every building as an open door, plus the writing school and the map', async () => {
+  it('shows every building as an open door, the writing school among them', async () => {
     await renderRoute('/my-world')
     expect(screen.getByRole('heading', { name: 'Kiddo shahri' })).toBeInTheDocument()
-    // the buildings (the writing school is one of them) and the map
-    expect(screen.getAllByTestId(/^building-/)).toHaveLength(BUILDINGS.length + 1)
+    // the buildings (the writing school is one of them); the Adventure Map is gone (MVP)
+    expect(screen.getAllByTestId(/^building-/)).toHaveLength(BUILDINGS.length)
     expect(screen.getByRole('link', { name: 'Matematika shahri' })).toHaveAttribute(
       'href',
       '/math-lab',
@@ -71,10 +71,6 @@ describe('Kiddo City', () => {
     )
     expect(screen.getByRole('link', { name: 'Yozuv maktabi' })).toHaveAttribute('href', '/trace')
     expect(screen.getByRole('link', { name: 'Do‘stlik uyi' })).toHaveAttribute('href', '/feelings')
-    expect(screen.getByRole('link', { name: 'Sarguzashtlar xaritasi' })).toHaveAttribute(
-      'href',
-      '/adventure',
-    )
     expect(screen.getByRole('link', { name: 'Matematika shahri' })).toHaveAccessibleDescription(
       'Kichik maktab, 1-daraja',
     )

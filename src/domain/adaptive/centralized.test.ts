@@ -65,11 +65,9 @@ describe('age policy has one home', () => {
   it('learning screens take their items from the strand resolver', () => {
     const screens = [
       'features/math/MathPage.tsx',
-      'features/garden/GardenPage.tsx',
       'features/firstWords/FirstWordsPage.tsx',
       'features/helpMascot/HelpMascotPage.tsx',
       'features/space/SpacePage.tsx',
-      'features/tales/TalesPage.tsx',
       'features/tasks/MemoryGame.tsx',
       'features/tasks/ChoiceGame.tsx',
     ]

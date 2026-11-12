@@ -81,7 +81,7 @@ export const SKILLS: readonly SkillDef[] = [
     'reading-words',
     'reading-sentences',
   ]),
-  ...defs('language', 'reading', { path: '/learn/tales' }, ['story-questions']),
+  ...defs('language', 'reading', { path: '/stories' }, ['story-questions']),
   // science: space and dinosaurs
   ...defs('science', 'space', SPACE, [
     'planet-names',

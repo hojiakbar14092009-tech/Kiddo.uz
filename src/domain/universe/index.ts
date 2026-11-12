@@ -110,23 +110,7 @@ export {
   type BuildingView,
   type UpgradeResult,
 } from './world'
-export {
-  adventureState,
-  useAdventure,
-  WORLDS,
-  type AdventureActivityDef,
-  type AdventureWorld,
-  type WorldDef,
-} from './adventure'
 export { learnActivity, taskActivity } from './wiring'
-export {
-  stageIndex,
-  starsToNextStage,
-  WORLD_STAGES,
-  worldStage,
-  worldStars,
-  type WorldStage,
-} from './worldStage'
 export {
   appendMistake,
   appendRecentRun,

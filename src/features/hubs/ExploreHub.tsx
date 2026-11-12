@@ -18,12 +18,6 @@ export function ExploreHub() {
   ])
   const tiles: Tile[] = [
     {
-      to: '/adventure',
-      label: t('hubs.tiles.adventure'),
-      picture: <Img3D name="mountain" className="size-[74%]" />,
-      tint: 'bg-sky-soft',
-    },
-    {
       to: '/shorts',
       label: t('shorts.open'),
       picture: (
@@ -40,7 +34,7 @@ export function ExploreHub() {
   return (
     <HubScreen className="gap-6 py-5 sm:gap-8 sm:py-8">
       <HubHeading title={t('hubs.explore.title')} />
-      <QuickTiles tiles={tiles} label={t('hubs.explore.title')} />
+      <QuickTiles tiles={tiles} label={t('hubs.explore.title')} wide />
       <PlaceGroup id="explore-space" title={t('hubs.explore.groups.space')} row>
         <BuildingPlaces ids={['observatory', 'spaceport']} />
         <PlaceCard
@@ -52,12 +46,6 @@ export function ExploreHub() {
       </PlaceGroup>
       <PlaceGroup id="explore-science" title={t('hubs.explore.groups.science')} row>
         <BuildingPlaces ids={['science-lab']} />
-        <PlaceCard
-          to="/shadow-lab"
-          label={t('shadowLab.title')}
-          picture={<Img3D name="lamp" className="size-[72%]" />}
-          tint="bg-coin-soft"
-        />
         {/* Phase 49: the robot asks for a real thing at home */}
         <PlaceCard
           to="/explore/find-home"

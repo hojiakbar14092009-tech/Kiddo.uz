@@ -192,7 +192,7 @@ test('a closed place says what it still needs; a double tap builds once; reload 
   await expect(page.getByTestId('journey-card')).toHaveAttribute('data-done', '0')
 })
 
-test('the Adventure Map shows the journey; Russian on 320 px fits', async ({ page }) => {
+test('the journey card fits; Russian on 320 px fits', async ({ page }) => {
   await seed(page, {
     language: 'ru',
     memory: { 'kid-a': { 'science:planet-order': seedPlant('science:planet-order') } },
@@ -202,7 +202,7 @@ test('the Adventure Map shows the journey; Russian on 320 px fits', async ({ pag
     [1024, 768],
   ] as const) {
     await page.setViewportSize({ width, height })
-    await page.goto('/adventure')
+    await page.goto('/home')
     await expect(page.getByTestId('journey-card')).toBeVisible()
     await noSidewaysScroll(page)
   }

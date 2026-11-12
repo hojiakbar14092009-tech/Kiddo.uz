@@ -5,7 +5,6 @@ import { HubScreen } from '@/features/hubs/HubScreen'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { RoamingMascot } from '@/features/mascot/RoamingMascot'
-import { QuickTiles } from '@/features/hubs/QuickTiles'
 import { ParentAreaLink } from '@/features/parent/ParentAreaLink'
 import { GAME_META } from '@/features/tasks/gameMeta'
 import { dayKey } from '@/features/tasks/rules'
@@ -141,45 +140,7 @@ export function HomePage() {
       {/* one big way on: the next step of today's plan (Phase 40) */}
       <ContinueButton plan={plan} />
 
-      {/* Phase 75: the four places a child looks for most, right under the plan */}
-      <QuickTiles
-        label={t('home.quick.label')}
-        tiles={[
-          {
-            to: '/games',
-            label: t('games.title'),
-            picture: <Img3D name="ball" className="size-[74%]" />,
-            tint: 'bg-coin-soft',
-            testId: 'games-link',
-          },
-          {
-            to: '/shorts',
-            label: t('shorts.open'),
-            picture: (
-              <span aria-hidden="true" className="text-3xl leading-none sm:text-5xl">
-                🎬
-              </span>
-            ),
-            tint: 'bg-lilac-soft',
-            testId: 'home-shorts',
-          },
-          {
-            to: '/stories',
-            label: t('home.quick.tales'),
-            picture: <Img3D name="book" className="size-[74%]" />,
-            tint: 'bg-girl-soft',
-            testId: 'home-tales',
-          },
-          {
-            to: '/learn/my-story',
-            label: t('myStory.title'),
-            picture: <Img3D name="castle" className="size-[74%]" />,
-            tint: 'bg-primary-soft',
-            testId: 'home-my-story',
-          },
-        ]}
-      />
-
+      {/* MVP: no shortcut row here; games, cartoons and tales each have one door, in their tab */}
       <JourneyPath plan={plan} />
 
       <DailyQuestCard />

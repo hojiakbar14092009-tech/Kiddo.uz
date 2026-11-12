@@ -94,14 +94,15 @@ async function answerAll(user: User) {
 }
 
 describe('the story library', () => {
-  it('shows six stories, four of them PRO, and a link to the classic tales', async () => {
+  it('shows six stories, four of them PRO', async () => {
     const { user, router } = await renderRoute('/stories')
     expect(screen.getByRole('heading', { name: UI.title })).toBeInTheDocument()
     const cards = screen.getAllByTestId(/^story-card-/)
     expect(cards).toHaveLength(6)
     expect(cards.filter((card) => card.dataset.locked === 'true')).toHaveLength(4)
     expect(screen.getByRole('button', { name: `${STAR.title} (PRO)` })).toBeInTheDocument()
-    expect(screen.getByTestId('stories-classic-tales')).toHaveAttribute('href', '/learn/tales')
+    // the classic tales were removed (MVP): no link to them
+    expect(screen.queryByTestId('stories-classic-tales')).toBeNull()
 
     // a PRO story does not open on Free: the robot says so calmly
     await user.click(screen.getByTestId('story-card-star-night'))

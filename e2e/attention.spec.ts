@@ -221,13 +221,13 @@ test.describe('the science games', () => {
     await expect(page.getByTestId('sci-finished')).toBeVisible({ timeout: 15_000 })
   })
 
-  test('the cartoons are a big button at the top of Kashf et and of Home', async ({ page }) => {
+  test('the cartoons are a big button at the top of Kashf et (their one door)', async ({
+    page,
+  }) => {
     await child(page, 'denied')
     await ready(page, '/explore')
     await expect(page.getByTestId('explore-shorts')).toBeInViewport()
-    await ready(page, '/home')
-    await expect(page.getByTestId('home-shorts')).toBeInViewport()
-    await page.getByTestId('home-shorts').click()
+    await page.getByTestId('explore-shorts').click()
     await expect(page).toHaveURL(/\/shorts$/)
   })
 })

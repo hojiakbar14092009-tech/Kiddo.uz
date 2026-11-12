@@ -15,7 +15,6 @@ import {
   ACHIEVEMENT_COINS,
   ACHIEVEMENTS,
   activityEffects,
-  adventureState,
   BUILDINGS,
   claimDailyQuest,
   convertToNuts,
@@ -37,12 +36,9 @@ import {
   universeChild,
   upgradeBuilding,
   useAchievements,
-  useAdventure,
   useDailyQuest,
-  useResources,
   useUniverseStore,
   useWorld,
-  WORLDS,
   type ActivityCompleted,
   type AwardSummary,
   type UniverseChild,
@@ -335,7 +331,6 @@ describe('world', () => {
       'observatory',
       'spaceport',
       'story-library',
-      'garden',
       'mistake-garden',
       'robot-workshop',
       'science-lab',
@@ -485,11 +480,7 @@ describe('achievements', () => {
   })
 
   it('only uses 3D pictures that exist', () => {
-    const icons = [
-      ...ACHIEVEMENTS.map((a) => a.icon3d),
-      ...BUILDINGS.map((b) => b.icon3d),
-      ...WORLDS.map((w) => w.icon3d),
-    ]
+    const icons = [...ACHIEVEMENTS.map((a) => a.icon3d), ...BUILDINGS.map((b) => b.icon3d)]
     const pictures = Object.keys(
       import.meta.glob(['/public/3d/*.webp', '/public/3d/worlds/*.webp']),
     )
@@ -555,70 +546,6 @@ describe('daily quest', () => {
     ])
     expect(result.current.reward).toEqual({ nuts: 15 })
     expect(result.current.claim()).toBeNull()
-  })
-})
-
-describe('adventure', () => {
-  it('opens worlds at 0, 6, 14, 24, 36 and 50 stars', () => {
-    expect(WORLDS.map((w) => [w.id, w.starsNeeded])).toEqual([
-      ['forest', 0],
-      ['ocean', 6],
-      ['dinosaur', 14],
-      ['space', 24],
-      ['science', 36],
-      ['uzbekistan', 50],
-    ])
-    const unlocked = (stars: number) =>
-      adventureState(stars, {})
-        .filter((w) => w.unlocked)
-        .map((w) => w.id)
-    expect(unlocked(0)).toEqual(['forest'])
-    expect(unlocked(5)).toEqual(['forest'])
-    expect(unlocked(6)).toEqual(['forest', 'ocean'])
-    expect(unlocked(49)).toHaveLength(5)
-    expect(unlocked(50)).toHaveLength(6)
-    // the Dinosaur world is open (no longer 'coming soon'): 14 stars stand there
-    expect(adventureState(14, {}).find((w) => w.current)?.id).toBe('dinosaur')
-    expect(adventureState(60, {}).find((w) => w.current)?.id).toBe('uzbekistan')
-  })
-
-  it('shows the best stars per activity and marks future worlds', () => {
-    const map = adventureState(0, {
-      'words:4': 2,
-      'words:6': 3,
-      'find-letter:uz': 1,
-      'math:4': 2,
-      'feelings:faces:basic': 2,
-    })
-    const forest = map[0]!
-    expect(forest.activities.map((a) => [a.activity, a.route, a.bestStars])).toEqual([
-      ['alphabet', '/alphabet', 1],
-      ['words', '/learn/words', 3],
-      ['garden', '/learn/garden', 0],
-      ['stories', '/stories', 0],
-      ['feelings', '/feelings', 2],
-    ])
-    expect(map.find((w) => w.id === 'dinosaur')).toMatchObject({ comingSoon: false })
-    // Learning routes are open even in a world not unlocked yet; only future routes are not.
-    expect(map.find((w) => w.id === 'science')).toMatchObject({ unlocked: false })
-    expect(map.find((w) => w.id === 'science')?.activities.every((a) => a.open)).toBe(true)
-    expect(map.find((w) => w.id === 'dinosaur')?.activities).toEqual([
-      expect.objectContaining({ activity: 'dino', route: '/worlds/dino', open: true }),
-    ])
-    expect(map.find((w) => w.id === 'uzbekistan')?.activities[0]?.route).toBe('/worlds/uzbekistan')
-  })
-
-  it('follows the active child’s stars', () => {
-    reset()
-    useFamilyStore.setState({ activeChildId: KID })
-    const { result } = renderHook(() => ({ map: useAdventure(), resources: useResources() }))
-    act(() => {
-      emitActivity(run())
-      emitActivity(run({ activity: 'math:5' }))
-    })
-    expect(result.current.resources.star).toBe(6)
-    expect(result.current.map.find((w) => w.current)?.id).toBe('ocean')
-    expect(result.current.map[1]?.activities[0]?.bestStars).toBe(3)
   })
 })
 

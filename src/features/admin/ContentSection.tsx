@@ -3,7 +3,6 @@ import { getAlphabet } from '@/content/alphabet'
 import { NUMBERS } from '@/content/numbers'
 import { PICTURE_FILES } from '@/content/pictures'
 import { STORIES } from '@/features/stories/content'
-import { TALES } from '@/features/tales/content'
 import { activeSeason, SEASON_SETTINGS, type SeasonSetting } from '@/features/seasons/seasons'
 import { Panel } from './AdminSections'
 import type { AdminData } from './adminData'
@@ -42,7 +41,6 @@ export function ContentSection({ data }: { data: AdminData }) {
       { label: 'Ingliz alifbosi', value: getAlphabet('en').letters.length, unit: 'harf' },
       { label: 'Sonlar', value: NUMBERS.length, unit: 'ta' },
       { label: 'Hikoyalar', value: STORIES.length, unit: 'ta' },
-      { label: 'Ertaklar', value: TALES.length, unit: 'ta' },
       { label: 'Rasmlar', value: Object.keys(PICTURE_FILES).length, unit: 'ta' },
     ],
     [],

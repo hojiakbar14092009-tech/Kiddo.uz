@@ -457,14 +457,14 @@ describe('medalsAndCity', () => {
   it('counts medal tiers and upgraded buildings', () => {
     const view = medalsAndCity({
       achievements: { 'first-steps': 'silver', 'star-collector': 'bronze', bogus: 'gold' },
-      buildings: { 'math-land': 2, garden: 1, 'reading-house': 0, nowhere: 3 },
+      buildings: { 'math-land': 2, 'friendship-house': 1, 'reading-house': 0, nowhere: 3 },
     })
     expect(view.medals).toEqual({ bronze: 1, silver: 1, gold: 0 })
     expect(view.medalsTotal).toBe(2)
     expect(view.medalsPossible).toBe(12) // the classic medals (Star Paths are counted apart)
     expect(view.buildings.map((item) => [item.id, item.level])).toEqual([
       ['math-land', 2],
-      ['garden', 1],
+      ['friendship-house', 1],
     ])
     expect(view.upgrades).toBe(3)
   })

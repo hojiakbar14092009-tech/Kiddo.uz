@@ -35,7 +35,7 @@ describe('homework categories', () => {
         'traceLetters',
         'traceNumbers',
         'space',
-        'garden',
+        'dinoQuiz',
       ]),
     )
     expect(countsFor('findLetter', 'find-letter:uz')).toBe(true)

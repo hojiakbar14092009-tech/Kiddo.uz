@@ -85,7 +85,7 @@ export const PLOTS: readonly PlotDef[] = [
     id: 'mars',
     seed: 'mars-seed',
     cost: { seed: 1 },
-    // biology: the Veggie Patch game, the dinosaur quiz, any science activity done well
+    // biology: the dinosaur quiz, a cartoon's science question, any science activity done well
     grows: { strand: 'science', minStars: 2 },
     stages: PLANT_STAGES,
   },
@@ -126,7 +126,8 @@ export const FIRST_FLIGHT: JourneyDef = {
     {
       id: 'grow',
       done: { kind: 'plotStage', plot: 'mars', stage: PLANT_STAGES },
-      route: '/learn/garden',
+      // science runs grow it: the dinosaur quiz (also cartoon quizzes)
+      route: '/worlds/dino/quiz',
       icon: 'blossom',
     },
     {

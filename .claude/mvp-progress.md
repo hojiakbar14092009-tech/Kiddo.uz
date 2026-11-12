@@ -1,7 +1,6 @@
 # Kiddo MVP — progress
 
-Holat: **0-bosqich (audit) tugadi, egasining "ha" javobi va savollarga javob kutilmoqda.** Kodda hech narsa
-o'zgartirilmadi (faqat shu fayl). Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
+Holat: 0, 1, 2, 3-bosqichlar bajarildi (pastda). Keyingi: 4-bosqich. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
 sessiya scratchpad'ida edi (repo'da emas).
 
 ## 0-bosqich: AUDIT (2026-11-12)
@@ -174,6 +173,46 @@ webhook secret_token.
 - Ochiq: WebKit/Safari tekshiruvi (Playwright webkit yuklanishi qotib qoldi) — yakunda qayta urinish. Vaqt o'lchovi shovqinli edi
   (mashina band) → Lighthouse oldin/keyin jadvali yakunda tinch muhitda.
 
+## 2-bosqich: BAZA (Turso) + BITTA DISPATCHER — bajarildi (2026-11-12)
+- `api/index.ts` (yagona Vercel funksiya) → `server/router.ts`; `vercel.json` `/api/:path*` → `/api?path=`; SW `/api`ni index.html bilan almashtirmaydi.
+- `server/`: db (libsql https, migratsiya cold start'da 1 marta), migrations (1: users, sessions, auth_codes, telegram_logins,
+  user_state, rate_limits, subscriptions, payments — faqat yangi jadvallar), session (httpOnly cookie, hash), http (same-origin/CSRF),
+  rateLimit, sync (rev bilan, 409+merge), users (me, delete). Routelar: health, me, auth/logout, account/delete, GET/PUT sync.
+- Klient: `src/services/cloud` (api backoff+jitter, CloudSync navbat/debounce 15 s, merge), `CloudSyncBridge` (AppShell; faqat
+  `session.mode==='cloud'` va Supabase sozlanmaganda; engine lazy → shell 360 KB o'zgarmadi), `useSingleFlight` (8-bosqich tugmalari uchun).
+- Dev: `scripts/dev-api.ts` (vite dev/preview'da /api, `.env.local`dan). Hujjat: `docs/architecture/turso.md` (jadval, xavfsizlik, yuklama).
+- Yuklama (lokal libSQL fayl): 50 VU 0 % xato p95 384 ms; 200 VU 0 % p95 1,46 s; 1000 VU — bitta lokal jarayon ~200 req/s'da to'yinadi.
+- Testlar: server 12, cloud 12, tsc, oxlint, build, budget OK.
+- **Turso'ga hali hech narsa yozilmagan** (birinchi migratsiya production env qo'yilganda; oldin egaga aytiladi).
+
+## 3-bosqich: BO'LIMLARNI OLIB TASHLASH — bajarildi (2026-11-13)
+- Route'lar redirect: `/learn/garden` → `/learn/words`, `/learn/tales/*` → `/stories`, `/shadow-lab` va `/adventure` → `/explore`.
+- O'chirildi (`git rm`, aniq fayllar): `features/garden/*`, `features/adventure/*`, `features/shadowLab/*`, `domain/universe/adventure.ts`,
+  `worldStage.ts`, tales sahifalari/matnlari/mantiq (TalesPage, TaleView, TaleCheck, SceneTask, StaticScene, logic, spoken, text.*, ui, useReader),
+  `e2e/shadow-lab.spec.ts`, i18n `shadowLab` bloki, `home.quick`.
+- QOLDI: `tales/three`, `animals.ts`, `backdrops.ts`, `content.ts` (faqat tiplar) — Stories va "O'z ertagim" ishlatadi; Mashq bog'i; Ertaklar (Stories).
+- Garden binosi shahardan olindi (saqlangan darajasi zararsiz qoladi, `findBuilding` undefined beradi). Supabase 0010 migratsiyasi tegilmadi
+  (serverPrices testi 'garden'ni chiqarib solishtiradi). Tarixiy ma'lumot uchun `SectionId`/`SECTION_STRAND`da 'garden'/'tales' tiplari qoldi.
+- Kvest "o'stir" qadami va MarsBed havolasi → `/worlds/dino/quiz` (gul science run'lardan o'sadi: dino viktorina, shorts savollari); matnlar uz/ru/en.
+- `story-questions` ko'nikmasi yo'li → `/stories`. Bookworm yutug'i Stories'dan ham "scroll" oladi (ishlaydi).
+- Takroriy tugmalar: bosh sahifadagi 4 plitkali qator (O'yinlar, Multfilmlar, Ertaklar, O'z ertagim — hammasi hub'larda bor) olindi;
+  Kashf et'dan Xarita va Soya lab kartalari olindi; KiddoCity "Xarita" joyi olindi. Kashf et QuickTiles `wide`: Multfilmlar qatorni egallaydi
+  (ruscha 320 px'da "Динозавры/Узбекистан" bo'linmasin). Stories sarlavhalari `FitWords` ("Потерявшаяся" bo'linardi).
+- **Sodda so'zlar**: uz'da Tomorqaning sodda so'zlari (olma, nok, sabzi, bodring, kapalak, ari, qush, gul) "Birinchi so'zim"da allaqachon bor.
+  Qo'shimcha so'zlar (uz: pomidor, qurbaqa, savat, chelak; ru: птица, ёжик, морковь, улитка; en: bee, bird, pear, rose) **ovoz klipi kerak**
+  (voiceCoverage testi: PRO ovoz faqat yozuvni ijro etadi) → keyingi ElevenLabs partiyasida, kredit bilan. Hozir qo'shilmadi.
+- Testlar: tsc, oxlint, prettier OK; vitest 1750/1757 (7 yiqilgan: admin x4 + MathPage + threeWords — alohida yugurilganda o'tadi yoki
+  toza HEAD'da ham yiqiladi); build OK, shell 360 → 355 KB, precache 1,46 MB; e2e phone: words 8/8, games, mascots, quests, attention o'tdi;
+  `kiddo.spec` "a right answer earns… coins" **toza HEAD'da ham yiqiladi** (worktree'da tekshirildi, oldindan bor).
+
+## Bosqichlar rejasi (qarorlardan)
+3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
+4. Sonlar ochilishi: har son ketma-ket 2 marta to'g'ri → keyingi 5 son (sonlar + chizish).
+5. Kamera: `camera=(self), microphone=(self)`, MediaPipe lazy (precache'siz), rozilik ota-ona bo'limida, chizishda pastga qarash ok, histerezis.
+6. UX: brend animatsiya, kichik tugmalar (≥48 px), bosh sahifa qisqartirish.
+7. Pro serverda: narx 24 990 / 238 990, to'lov sinov rejimi.
+8. Kirish: Google, email kod, Telegram kod (pastdagi talab) + /privacy yangilash.
+
 ## 8-bosqich: qo'shimcha talab (egasidan, aynan) — 8-bosqichdan oldin QAYTA O'QI
 Qo'shimcha talab (8-bosqich, Telegram kirishi UX): Ro'yxatdan o'tish ekranida telefon kiritilgach "Telegram'da kod olish"
 tugmasi t.me/TELEGRAM_BOT_USERNAME?start=<bir martalik token> havolasini ochsin (start parametri 64 belgidan oshmasin).
@@ -184,4 +223,4 @@ qotmasin, tokenning holati (ishlatildi/muddati o'tdi) haqida tushunarli xabar be
 uz/ru/en tillarida, sodda. Hammasi uchun test yoz (QR/havola yaratish, token muddati, qayta yuborish limiti).
 
 ## Keyingi aniq qadam
-1-bosqich (bo'sh ikonka, precache, code-splitting, budget skripti).
+4-bosqich: sonlar ochilishi (har son ketma-ket 2 marta to'g'ri → keyingi 5 son; sonlar va chizish).

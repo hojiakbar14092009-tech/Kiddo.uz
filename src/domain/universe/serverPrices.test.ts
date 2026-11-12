@@ -50,7 +50,11 @@ describe('server building prices (0010) match the city', () => {
   })
 
   it('lists the same buildings', () => {
-    expect([...serverBuildings()].sort()).toEqual(BUILDINGS.map((item) => item.id).sort())
+    // MVP removed the Veggie Patch building from the city; the (unused) Supabase migration keeps it
+    const removed = new Set(['garden'])
+    expect([...serverBuildings()].filter((id) => !removed.has(id)).sort()).toEqual(
+      BUILDINGS.map((item) => item.id).sort(),
+    )
   })
 
   it('asks the same crystals, parts and stars for every level', () => {

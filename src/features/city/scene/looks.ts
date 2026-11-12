@@ -268,7 +268,6 @@ export const NAMED_STAGES: ReadonlySet<string> = new Set([
   'observatory',
   'spaceport',
   'story-library',
-  'garden',
 ])
 
 /** The light of each level: the sky gets richer, the top level is a lit evening. */

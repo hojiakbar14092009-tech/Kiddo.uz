@@ -84,7 +84,6 @@ export const BUILDINGS: readonly BuildingDef[] = [
   building('spaceport', 'rocket', '/spaceport', true),
   // the Story Engine's library; it links on to the classic tales
   building('story-library', 'book', '/stories'),
-  building('garden', 'garden-house', '/learn/garden'),
   // practice plants from the learning memory, and the bed for the Mars seed
   building('mistake-garden', 'seedling', '/mistake-garden'),
   building('robot-workshop', 'clock', '/learn/help', true),

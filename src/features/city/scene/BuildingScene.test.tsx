@@ -20,7 +20,7 @@ describe('a City building evolves in architecture, light and ground', () => {
     expect(scene('math-land', 3).querySelectorAll('circle').length).toBeGreaterThan(10) // stars, lit windows, lamps
   })
 
-  it('every building has a style with three richer stages, and the eight named places', () => {
+  it('every building has a style with three richer stages, and the seven named places', () => {
     for (const look of Object.values(STYLES)) {
       const [a, b, c] = look.stages
       expect(a.length).toBeLessThan(c.length)
@@ -29,7 +29,7 @@ describe('a City building evolves in architecture, light and ground', () => {
     expect(styleOf('math-land')).toBe('academy')
     expect(styleOf('spaceport')).toBe('spaceport')
     expect(styleOf('unknown')).toBe('town')
-    expect(NAMED_STAGES.size).toBe(8)
+    expect(NAMED_STAGES.size).toBe(7)
     expect(scene('spaceport', 3).dataset.style).toBe('spaceport')
   })
 })

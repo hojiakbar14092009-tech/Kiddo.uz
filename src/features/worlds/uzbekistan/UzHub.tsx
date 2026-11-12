@@ -141,7 +141,7 @@ export function UzHub() {
   }
 
   return (
-    <Screen header={<TitleTopBar title={t('uzbekistan.title')} back="/adventure" />}>
+    <Screen header={<TitleTopBar title={t('uzbekistan.title')} back="/explore" />}>
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 pt-3 pb-8 sm:gap-6 sm:px-6 short:gap-2 short:py-2">
         <div ref={mascotRow} className="flex items-center gap-3 short:gap-2">
           <Mascot

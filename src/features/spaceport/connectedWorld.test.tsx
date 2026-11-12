@@ -114,12 +114,12 @@ describe('Practice (Mistake) Garden and Science Lab', () => {
     expect(screen.getByTestId('garden-empty')).toBeInTheDocument()
     fireEvent.click(screen.getByTestId('plant-seed'))
     expect(screen.getByTestId('mars-bed')).toHaveAttribute('data-stage', '0')
-    expect(screen.getByRole('link', { name: 'Tomorqa o‘yini' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Dinozavr viktorinasi' })).toHaveAttribute(
       'href',
-      '/learn/garden',
+      '/worlds/dino/quiz',
     )
     act(() => {
-      for (const activity of ['garden:1', 'garden:2', 'dino:quiz']) {
+      for (const activity of ['dino:quiz', 'short:water', 'short:bread']) {
         universe.emitActivity(run({ activity, strand: 'science' }))
       }
     })

@@ -317,11 +317,9 @@ const LETTER_PATHS = [
 ]
 const EXPLORE_PATHS = [
   '/explore',
-  '/adventure',
   '/worlds',
   '/spaceport',
   '/science-lab',
-  '/shadow-lab',
   '/scale-portal',
   '/learn/space',
 ]

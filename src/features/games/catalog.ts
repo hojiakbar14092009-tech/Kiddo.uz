@@ -69,16 +69,8 @@ export const GAMES: Readonly<Record<Subject, readonly GameEntry[]>> = {
     sci('magnet', '🧲'),
     sci('float', '🛶'),
     sci('habitats', '🦊'),
-    { kind: 'building', id: 'garden' },
     { kind: 'building', id: 'science-lab' },
     { kind: 'building', id: 'dino-park' },
-    {
-      kind: 'page',
-      id: 'shadow-lab',
-      to: '/shadow-lab',
-      labelKey: 'shadowLab.title',
-      picture: { img3d: 'lamp' },
-    },
   ],
   space: [
     { kind: 'building', id: 'observatory' },
@@ -141,12 +133,5 @@ export const TOP_GAMES: readonly {
     labelKey: 'sciGames.float.title',
     emoji: '🛶',
     tint: 'bg-primary-soft',
-  },
-  {
-    id: 'shadow',
-    to: '/shadow-lab',
-    labelKey: 'shadowLab.title',
-    emoji: '🔦',
-    tint: 'bg-coin-soft',
   },
 ]

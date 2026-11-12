@@ -152,7 +152,7 @@ test('each world has its own guide, one at a time, and home gets KidoBot back', 
     ['/worlds/uzbekistan', 'ziyo'],
     ['/mistake-garden', 'leafy'],
     ['/tasks/find-letter', 'scribble'],
-    ['/learn/tales', 'story'],
+    ['/learn/words', 'story'],
     ['/spaceport', 'pixel'],
     ['/home', 'kidobot'],
   ]

@@ -1,7 +1,8 @@
 import clsx from 'clsx'
 import { useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { CheckIcon, ChevronRightIcon, LockIcon } from '@/components/icons'
+import { useNavigate } from 'react-router-dom'
+import { CheckIcon, LockIcon } from '@/components/icons'
+import { FitWords } from '@/components/ui/FitWords'
 import { Img3D } from '@/components/ui/Img3D'
 import { ProBadge } from '@/components/ui/ProLock'
 import { useProLabel } from '@/components/ui/useProLabel'
@@ -87,9 +88,11 @@ export function StoryLibrary() {
                   )}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="font-display text-xl leading-tight font-extrabold [overflow-wrap:anywhere] hyphens-auto sm:text-2xl short:text-base">
-                    {text.title}
-                  </span>
+                  {/* a long Russian title ("Потерявшаяся") shrinks to fit, never splits */}
+                  <FitWords
+                    text={text.title}
+                    className="font-display text-xl leading-tight font-extrabold sm:text-2xl short:text-base"
+                  />
                   <span className="text-sm leading-snug text-ink-soft sm:text-base short:hidden">
                     {text.blurb}
                   </span>
@@ -110,23 +113,6 @@ export function StoryLibrary() {
           )
         })}
       </ul>
-      <Link
-        to="/learn/tales"
-        data-testid="stories-classic-tales"
-        className="mx-auto flex w-full max-w-5xl items-center gap-3 rounded-card bg-lilac-soft p-3 shadow-press transition-transform active:translate-y-1 sm:p-4 short:p-2"
-      >
-        <span
-          aria-hidden="true"
-          className="flex size-16 shrink-0 items-center justify-center rounded-tile bg-surface p-2 short:size-12"
-        >
-          <Img3D name="rabbit" className="size-full" />
-        </span>
-        <span className="flex min-w-0 flex-col">
-          <span className="font-display text-xl font-extrabold short:text-base">{ui.classic}</span>
-          <span className="text-sm text-ink-soft sm:text-base short:hidden">{ui.classicText}</span>
-        </span>
-        <ChevronRightIcon size={28} className="ml-auto shrink-0 text-ink-soft" />
-      </Link>
     </StoryFrame>
   )
 }

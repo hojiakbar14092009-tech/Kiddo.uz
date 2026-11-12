@@ -16,21 +16,36 @@ export interface Tile {
  * (Phase 75), so a child who cannot read yet finds them without scrolling: four
  * as two rows of wide buttons on a phone (the picture over the name below 380px,
  * where a name like "Узбекистан" needs the whole width), one row on a tablet; three or six
- * in rows of three.
+ * in rows of three. `wide` with three: the first spans the phone's row (Kashf et: the cartoons).
  */
-export function QuickTiles({ tiles, label }: { tiles: readonly Tile[]; label: string }) {
+export function QuickTiles({
+  tiles,
+  label,
+  wide = tiles.length === 4,
+}: {
+  tiles: readonly Tile[]
+  label: string
+  wide?: boolean
+}) {
   // four long names do not fit side by side on a phone: two wide buttons per row there
-  const wide = tiles.length === 4
+  const spanFirst = wide && tiles.length % 2 === 1
   return (
     <nav aria-label={label} className="w-full max-w-4xl">
       <ul
         className={clsx(
           'grid gap-2 min-[380px]:gap-3 sm:gap-4',
-          wide ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3',
+          wide
+            ? tiles.length === 3
+              ? 'grid-cols-2 sm:grid-cols-3'
+              : 'grid-cols-2 sm:grid-cols-4'
+            : 'grid-cols-3',
         )}
       >
-        {tiles.map((tile) => (
-          <li key={tile.to}>
+        {tiles.map((tile, index) => (
+          <li
+            key={tile.to}
+            className={clsx(spanFirst && index === 0 && 'col-span-2 sm:col-span-1')}
+          >
             <Link
               to={tile.to}
               aria-label={tile.label}

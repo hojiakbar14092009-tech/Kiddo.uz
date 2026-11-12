@@ -5,8 +5,6 @@ import { useSettingsStore } from '@/store/settingsStore'
 export interface StoriesUi {
   title: string
   intro: string
-  classic: string
-  classicText: string
   minutes: (n: number) => string
   finished: string
   locked: string
@@ -40,8 +38,6 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
   uz: {
     title: 'Ertaklar kutubxonasi',
     intro: 'Qaysi hikoyani o‘qiymiz?',
-    classic: 'Klassik ertaklar',
-    classicText: 'Qisqa 3D ertaklar va topshiriqlar',
     minutes: (n) => `${n} daqiqa`,
     finished: 'O‘qilgan',
     locked: 'Bu hikoya PRO versiyada. Uni ota-onang «Ota-ona bo‘limi»da yoqishi mumkin.',
@@ -73,8 +69,6 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
   ru: {
     title: 'Библиотека сказок',
     intro: 'Какую историю почитаем?',
-    classic: 'Классические сказки',
-    classicText: 'Короткие 3D-сказки с заданиями',
     minutes: (n) => `${n} мин`,
     finished: 'Прочитано',
     locked: 'Эта история — в PRO. Родители могут включить PRO в «Разделе для родителей».',
@@ -106,8 +100,6 @@ export const STORIES_UI: Record<Language, StoriesUi> = {
   en: {
     title: 'Story Library',
     intro: 'Which story shall we read?',
-    classic: 'Classic tales',
-    classicText: 'Short 3D tales with tasks',
     minutes: (n) => `${n} min`,
     finished: 'Read',
     locked: 'This story is in PRO. A parent can turn it on in the Parent area.',

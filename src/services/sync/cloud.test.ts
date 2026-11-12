@@ -283,7 +283,7 @@ describe('cloud change tracking', () => {
     ).toBe(coins)
     // Earned later, upgraded later: the level still follows its payment.
     emitActivity({ ...run, id: 'late', activity: 'math:5' })
-    expect(upgradeBuilding(ali.id, 'garden')).toBe('ok')
+    expect(upgradeBuilding(ali.id, 'friendship-house')).toBe('ok')
     const tail = useSyncStore
       .getState()
       .queue.slice(-2)
@@ -295,13 +295,19 @@ describe('cloud change tracking', () => {
           p_child: ali.id,
           p_coins: -10,
           p_reason: 'purchase',
-          p_ref: 'upgrade|garden|1',
+          p_ref: 'upgrade|friendship-house|1',
           p_at: expect.any(String),
         },
       },
-      { kind: 'recordBuildingLevel', row: expect.objectContaining({ p_building: 'garden' }) },
+      {
+        kind: 'recordBuildingLevel',
+        row: expect.objectContaining({ p_building: 'friendship-house' }),
+      },
     ])
-    expect(rewardHistory(ali.id)[0]).toMatchObject({ refId: 'upgrade|garden|1', coins: -10 })
+    expect(rewardHistory(ali.id)[0]).toMatchObject({
+      refId: 'upgrade|friendship-house|1',
+      coins: -10,
+    })
     stop()
   })
 

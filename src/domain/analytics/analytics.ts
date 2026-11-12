@@ -85,11 +85,9 @@ const ACTIVITY_PREFIXES = [
   '/worlds',
   '/stories',
   '/scale-portal',
-  '/shadow-lab',
   '/mistake-garden',
   '/exam',
   '/studio',
-  '/adventure',
   '/spaceport',
   '/science-lab',
 ]

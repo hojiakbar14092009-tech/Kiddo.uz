@@ -63,7 +63,7 @@ describe('mascot registry', () => {
     expect(mascotFor(contextOf('/spaceport'))).toBe('pixel')
     expect(mascotFor(contextOf('/spaceport/mars'))).toBe('astro')
     expect(mascotFor(contextOf('/tasks/trace'))).toBe('scribble')
-    expect(mascotFor(contextOf('/learn/tales/1'))).toBe('story')
+    expect(mascotFor(contextOf('/learn/words/1'))).toBe('story')
     // a prefix is a whole path segment
     expect(contextOf('/alphabetical')).toBe('home')
     for (const [prefix] of CONTEXT_ROUTES) expect(prefix.startsWith('/')).toBe(true)

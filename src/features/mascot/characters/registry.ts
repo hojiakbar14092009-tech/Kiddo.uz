@@ -323,17 +323,14 @@ export const CONTEXT_ROUTES: readonly (readonly [prefix: string, context: Mascot
   ['/spaceport', 'workshop'],
   ['/learn/space', 'space'],
   ['/scale-portal', 'space'],
-  ['/shadow-lab', 'light'],
   ['/worlds/dino', 'dinosaur'],
   ['/worlds/uzbekistan', 'uzbekistan'],
   ['/mistake-garden', 'garden'],
-  ['/learn/garden', 'garden'],
   ['/science-lab', 'garden'],
   ['/alphabet', 'writing'],
   ['/tasks/trace', 'writing'],
   ['/tasks/find-letter', 'writing'],
   ['/studio', 'writing'],
-  ['/learn/tales', 'stories'],
   ['/learn/words', 'stories'],
 ]
 

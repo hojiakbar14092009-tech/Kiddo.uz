@@ -70,10 +70,10 @@ describe('Next adventure on the home screen (extras in O‘rgan)', () => {
         at: new Date().toISOString(),
       })
     })
-    // the run paid 15 nuts, the rocket's price; 10 went to the garden, so 10 more are needed
+    // the run paid 15 nuts, the rocket's price; 10 went to the Friendship House, so 10 more are needed
     expect(useProgressStore.getState().byChild[GUEST_KEY]?.coins).toBe(15)
     act(() => {
-      expect(upgradeBuilding(GUEST_KEY, 'garden')).toBe('ok')
+      expect(upgradeBuilding(GUEST_KEY, 'friendship-house')).toBe('ok')
     })
     await renderRoute('/home')
     const needs = screen.getByTestId('quest-needs')

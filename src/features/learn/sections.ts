@@ -17,8 +17,6 @@ export const LEARN_SECTIONS: readonly LearnSection[] = [
   { id: 'words', path: '/learn/words', icon: 'apple', minLevel: 4, tint: 'bg-coin-soft' },
   { id: 'math', path: '/learn/math', icon: 'strawberry', minLevel: 4, tint: 'bg-girl-soft' },
   { id: 'space', path: '/learn/space', icon: 'ringed-planet', minLevel: 4, tint: 'bg-lilac-soft' },
-  { id: 'tales', path: '/learn/tales', icon: 'rabbit', minLevel: 4, tint: 'bg-sky-soft' },
-  { id: 'garden', path: '/learn/garden', icon: 'butterfly', minLevel: 4, tint: 'bg-primary-soft' },
   { id: 'help', path: '/learn/help', icon: 'gift', minLevel: 4, tint: 'bg-oops-soft' },
 ]
 

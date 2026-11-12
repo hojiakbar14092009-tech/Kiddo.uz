@@ -37,11 +37,8 @@ export const HOMEWORK_ACTIVITIES: readonly HomeworkActivity[] = [
   { key: 'mathLab', route: '/math-lab', emoji: '🔢', fromAge: 4 },
   { key: 'math', route: '/learn/math', emoji: '➕', fromAge: 4 },
   { key: 'words', route: '/learn/words', emoji: '🔤', fromAge: 5 },
-  { key: 'tale', route: '/learn/tales', emoji: '📖', fromAge: 4 },
   { key: 'story', route: '/stories', emoji: '📚', fromAge: 4 },
   { key: 'space', route: '/learn/space', emoji: '🪐', fromAge: 5 },
-  // science: the garden lessons (the Science Lab opens later, on the journey)
-  { key: 'garden', route: '/learn/garden', emoji: '🌻', fromAge: 4 },
   { key: 'help', route: '/learn/help', emoji: '🤖', fromAge: 4 },
   { key: 'dinoQuiz', route: '/worlds/dino/quiz', emoji: '🦕', fromAge: 4 },
   { key: 'dinoDig', route: '/worlds/dino/dig', emoji: '🦴', fromAge: 4 },

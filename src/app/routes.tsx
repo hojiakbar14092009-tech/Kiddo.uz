@@ -104,19 +104,10 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/helpMascot/HelpMascotPage')).HelpMascotPage,
                 }),
               },
-              {
-                path: '/learn/tales/*',
-                lazy: async () => ({
-                  Component: (await import('@/features/tales/TalesPage')).TalesPage,
-                }),
-              },
-              // Shadow Lab (Phase 34): Lumi's shadow puzzles
-              {
-                path: '/shadow-lab',
-                lazy: async () => ({
-                  Component: (await import('@/features/shadowLab/ShadowLabPage')).ShadowLabPage,
-                }),
-              },
+              // MVP: the 9 classic tales are gone; the Story Engine's tales stay
+              { path: '/learn/tales/*', element: <Navigate to="/stories" replace /> },
+              // MVP: Shadow Lab removed; an old link lands on Explore
+              { path: '/shadow-lab', element: <Navigate to="/explore" replace /> },
               // Scale Portal (Phase 33): Astro's journey from a cell to the galaxy
               {
                 path: '/scale-portal',
@@ -144,12 +135,8 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/math/MathPage')).MathPage,
                 }),
               },
-              {
-                path: '/learn/garden',
-                lazy: async () => ({
-                  Component: (await import('@/features/garden/GardenPage')).GardenPage,
-                }),
-              },
+              // MVP: the Veggie Patch section is gone; old links land on the first words
+              { path: '/learn/garden', element: <Navigate to="/learn/words" replace /> },
               // Adaptive maths practice (Math Land in Kiddo City; /learn/math stays the lessons).
               {
                 path: '/math-lab',
@@ -184,13 +171,8 @@ export const routes: RouteObject[] = [
                   Component: (await import('@/features/feelings/FeelingsPage')).FeelingsPage,
                 }),
               })),
-              // Kiddo City's map and museum.
-              {
-                path: '/adventure',
-                lazy: async () => ({
-                  Component: (await import('@/features/adventure/AdventurePage')).AdventurePage,
-                }),
-              },
+              // MVP: the Adventure Map removed (its places all live in Explore)
+              { path: '/adventure', element: <Navigate to="/explore" replace /> },
               // The Dinosaur world (Adventure Map, Dino Park in Kiddo City); 3D loads inside it.
               ...['/worlds/dino', '/worlds/dino/:mode', '/worlds/dino/explore/:dinoId'].map(
                 (path) => ({

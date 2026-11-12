@@ -2,7 +2,7 @@ import { act, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import i18n from '@/i18n'
-import { ACHIEVEMENTS, BUILDINGS, emitActivity, useUniverseStore, WORLDS } from '@/domain/universe'
+import { ACHIEVEMENTS, BUILDINGS, emitActivity, useUniverseStore } from '@/domain/universe'
 import { LearnResult } from '@/features/learn/LearnResult'
 import { useFamilyStore } from '@/store/familyStore'
 import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
@@ -122,10 +122,9 @@ describe('result screens', () => {
 describe('universe texts', () => {
   const keys = [
     ...BUILDINGS.map((building) => building.nameKey),
-    ...WORLDS.flatMap((world) => [world.nameKey, ...world.activities.map((a) => a.labelKey)]),
     ...ACHIEVEMENTS.flatMap((achievement) => [achievement.titleKey, achievement.descKey]),
   ]
-  it.each(['uz', 'ru', 'en'])('has every building, world, activity and medal text in %s', (lng) => {
+  it.each(['uz', 'ru', 'en'])('has every building and medal text in %s', (lng) => {
     expect(keys.filter((key) => !i18n.exists(key, { lng, fallbackLng: false }))).toEqual([])
   })
 })

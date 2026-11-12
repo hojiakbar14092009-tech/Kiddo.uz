@@ -44,9 +44,9 @@ async function ready(page: Page, path: string) {
   await expect(page.locator('[data-splash]')).toHaveCount(0, { timeout: 30_000 })
 }
 
-test('Home leads to the Games page, where every subject has its games', async ({ page }) => {
+test('O‘rgan leads to the Games page, where every subject has its games', async ({ page }) => {
   await child(page)
-  await ready(page, '/home')
+  await ready(page, '/learn')
   await page.getByTestId('games-link').click()
   await expect(page).toHaveURL(/\/games$/)
   await expect(page.getByRole('heading', { level: 1, name: 'O‘yinlar' })).toBeVisible()

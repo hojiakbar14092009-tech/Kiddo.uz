@@ -78,9 +78,10 @@ describe('the four section pages', () => {
     expect(document.documentElement.dataset.world).toBe('learn')
   })
 
-  it('Kashf et has the map and the worlds; a closed world says what opens it', async () => {
+  it('Kashf et has the worlds (no map, no Shadow Lab); a closed world says what opens it', async () => {
     await renderRoute('/explore')
-    expect(screen.getByRole('link', { name: 'Xarita' })).toHaveAttribute('href', '/adventure')
+    expect(screen.queryByRole('link', { name: 'Xarita' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Soya laboratoriyasi' })).toBeNull()
     expect(screen.getByRole('link', { name: 'Dinozavrlar' })).toHaveAttribute(
       'href',
       '/worlds/dino',
@@ -96,17 +97,20 @@ describe('the four section pages', () => {
     expect(document.documentElement.dataset.world).toBe('mine')
   })
 
-  it("Home gathers the four most used places and the parents' lock at the top (Phase 75)", async () => {
+  it("each place has one door, in its tab (MVP: no shortcut row on Home); the parents' lock stays", async () => {
     await renderRoute('/home')
-    const quick = screen.getByRole('navigation', { name: 'Eng kerakli joylar' })
-    for (const [name, href] of [
-      ['O‘yinlar', '/games'],
-      ['Multfilmlar', '/shorts'],
-      ['Ertaklar', '/stories'],
-      ['O‘z ertagim', '/learn/my-story'],
-    ])
-      expect(within(quick).getByRole('link', { name })).toHaveAttribute('href', href)
+    expect(screen.queryByRole('navigation', { name: 'Eng kerakli joylar' })).toBeNull()
     expect(screen.getByTestId('parent-lock')).toHaveAttribute('href', '/parent')
+    const hrefsOf = async (route: string) => {
+      const { unmount } = await renderRoute(route)
+      const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href'))
+      unmount()
+      return hrefs
+    }
+    const learn = await hrefsOf('/learn')
+    for (const href of ['/games', '/stories', '/learn/my-story'])
+      expect(learn, href).toContain(href)
+    expect(await hrefsOf('/explore')).toContain('/shorts')
   })
 
   it('no place is lost: O‘rgan and Kashf et still lead to every learning building', async () => {

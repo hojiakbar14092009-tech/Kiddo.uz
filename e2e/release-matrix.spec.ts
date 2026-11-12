@@ -26,10 +26,8 @@ const ROUTES = [
   '/math-lab',
   '/alphabet',
   '/learn/words',
-  '/learn/garden',
   '/learn/space',
   '/scale-portal',
-  '/shadow-lab',
   '/mistake-garden',
   '/collection',
   '/shop',
@@ -43,9 +41,7 @@ const ROUTES = [
   '/learn/three-words',
   '/explore/find-home',
   '/learn/help',
-  '/learn/tales',
   '/studio',
-  '/adventure',
   '/spaceport',
   '/science-lab',
 ]
@@ -225,7 +221,7 @@ test.describe('release matrix @matrix', () => {
         }
       })
     const cycle = async () => {
-      for (const route of ['/scale-portal', '/shadow-lab', '/home', '/collection', '/home'])
+      for (const route of ['/scale-portal', '/learn/space', '/home', '/collection', '/home'])
         await go(page, route)
     }
     await cycle()

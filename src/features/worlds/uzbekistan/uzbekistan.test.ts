@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { LANGUAGES } from '@/content/languages'
-import { WORLDS, adventureState, BUILDINGS } from '@/domain/universe'
+import { BUILDINGS } from '@/domain/universe'
 import type { ChallengeLevel } from '@/domain/learner'
 import { useFamilyStore } from '@/store/familyStore'
 import { useSubscriptionStore } from '@/store/subscriptionStore'
@@ -278,17 +278,7 @@ describe('free and PRO', () => {
 })
 
 describe('universe wiring', () => {
-  it('the world is open on the map with its games, each showing its own best', () => {
-    const world = WORLDS.find((w) => w.id === 'uzbekistan')!
-    expect(world.comingSoon).toBeFalsy()
-    const map = adventureState(60, { 'uzbekistan:map:basic': 2, 'uzbekistan:patterns:mid': 3 })
-    const uzb = map.find((w) => w.id === 'uzbekistan')!
-    expect(uzb.activities.map((a) => [a.route, a.bestStars, a.open])).toEqual([
-      ['/worlds/uzbekistan', 3, true],
-      ['/worlds/uzbekistan/map', 2, true],
-      ['/worlds/uzbekistan/table', 0, true],
-      ['/worlds/uzbekistan/patterns', 3, true],
-    ])
+  it('Kiddo City opens the world', () => {
     expect(BUILDINGS.find((b) => b.id === 'uzbekistan-gate')?.route).toBe('/worlds/uzbekistan')
   })
 })
