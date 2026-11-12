@@ -2584,26 +2584,6 @@ export const uz = {
     },
   },
   attention: {
-    consent: {
-      title: 'Kattalar uchun muhim savol',
-      lead: 'Robot farzandingizga diqqatini jamlashga yordam bersinmi?',
-      what: 'Diqqat yordamchisi bola mashg‘ulotdan chalg‘iganini sezadi: ilovadan chiqib ketsa, uzoq vaqt ekranga tegmasa yoki ekrandan boshqa tomonga qarab qolsa. Shunda robot uni muloyimlik bilan qaytaradi. Bola juda ko‘p chalg‘isa, robot unga qiziqarli ilmiy o‘yinlar taklif qiladi.',
-      whyTitle: 'Nega bu foydali?',
-      why1: 'Bola diqqatini bir ishga jamlashni asta-sekin o‘rganadi.',
-      why2: 'Chalg‘ish tergov emas, o‘yin bilan to‘xtatiladi: bola zerikmaydi.',
-      why3: 'Ekran oldida o‘tgan vaqt behuda ketmaydi, bola ilovadan chiqsa vaqt hisobi to‘xtaydi.',
-      camera:
-        'Kamera faqat dars va o‘yin sahifalarida, faqat shu qurilmaning o‘zida ishlaydi. Tasvir saqlanmaydi, hech kimga yuborilmaydi va ko‘rsatilmaydi: ilova faqat yuz ekranga qaraganini yoki qaramaganini biladi. Kamera ishlayotganda ekranda kichik belgi turadi.',
-      voice:
-        'PRO tarifda robot bolani ismi bilan chaqirib, ovoz bilan ogohlantiradi. Bepul tarifda robot gapirmaydi: qisqa chaqiruv ovozi chiqadi, robot ko‘rinib, pufakchada yozib eslatadi.',
-      later:
-        'Javobingizni istalgan vaqtda ota-onalar bo‘limidagi Sozlamalardan o‘zgartirishingiz mumkin.',
-      yes: 'Ha, ruxsat beraman',
-      no: 'Yo‘q, kerak emas',
-      cameraTitle: 'Kamera bilan ham kuzatsinmi?',
-      cameraYes: 'Ha, kamera bilan',
-      cameraNo: 'Kamerasiz',
-    },
     cameraOn: 'Diqqat yordamchisi: kamera yoqilgan',
     offerTitle: 'Keling, qiziq o‘yin o‘ynaymiz!',
     offerText: 'Bittasini tanla.',

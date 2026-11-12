@@ -20,29 +20,21 @@ import { NutConversion } from './NutConversion'
 import { SectionWorld } from './SectionWorld'
 import { isAdminPreview } from './preview/adminPreview'
 import { useAttentionStore } from '@/store/attentionStore'
-import { useSettingsStore } from '@/store/settingsStore'
-import { toursOff } from '@/features/onboarding/tour'
 
 /**
- * The attention helper (Phase 58) and its one-time question: downloaded only for a
- * family that turned it on, or while the question is still to be asked, so the
- * first screen stays light.
+ * The attention helper (Phase 58), downloaded only for a family that turned it on. MVP: a
+ * grown-up turns it on in the parent area (Settings); a child is never asked on their screen.
  */
 const AttentionHelper = lazy(async () => ({
   default: (await import('@/features/attention/AttentionHelper')).AttentionHelper,
 }))
-const AttentionConsent = lazy(async () => ({
-  default: (await import('@/features/attention/AttentionConsent')).AttentionConsent,
-}))
 
 function Attention() {
   const consent = useAttentionStore((state) => state.consent)
-  const onboarded = useSettingsStore((state) => state.onboarded)
-  // the question waits for the welcome tour (and is off in other features' browser tests)
-  if (consent === 'denied' || (consent === 'unasked' && (!onboarded || toursOff()))) return null
+  if (consent !== 'granted') return null
   return (
     <Suspense fallback={null}>
-      {consent === 'granted' ? <AttentionHelper /> : <AttentionConsent />}
+      <AttentionHelper />
     </Suspense>
   )
 }

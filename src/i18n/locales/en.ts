@@ -2573,25 +2573,6 @@ export const en: Translation = {
     },
   },
   attention: {
-    consent: {
-      title: 'An important question for grown-ups',
-      lead: 'May the robot help your child stay focused?',
-      what: 'The attention helper notices when your child drifts away: leaves the app, stops touching the screen for a long time or looks away from it. The robot then gently calls them back. If your child drifts away very often, the robot offers fun science games.',
-      whyTitle: 'Why it helps',
-      why1: 'Your child slowly learns to keep their attention on one thing.',
-      why2: 'Drifting off ends with a game, not a telling-off, so it never gets boring.',
-      why3: 'Screen time is not wasted, and the clock stops while your child is out of the app.',
-      camera:
-        'The camera works only on lesson and game pages, and only on this device. No picture is kept, sent anywhere or shown: the app only knows whether a face is turned to the screen. While the camera is on, a small sign is shown.',
-      voice:
-        'With PRO the robot calls your child by name and reminds out loud. In the free version the robot does not talk: a short call sound plays and the robot writes its reminder in a bubble.',
-      later: 'You can change your answer any time in Settings in the parents’ area.',
-      yes: 'Yes, allow it',
-      no: 'No, thanks',
-      cameraTitle: 'Use the camera too?',
-      cameraYes: 'Yes, with the camera',
-      cameraNo: 'Without the camera',
-    },
     cameraOn: 'Attention helper: camera on',
     offerTitle: 'Let’s play a fun game!',
     offerText: 'Pick one.',

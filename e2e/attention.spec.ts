@@ -76,45 +76,19 @@ const stored = (page: Page) =>
   page.evaluate(() => JSON.parse(localStorage.getItem('kiddo.attention') ?? '{}').state?.consent)
 
 test.describe('the attention helper', () => {
-  test('is asked once, cannot be skipped, and a grown-up answers', async ({ page }) => {
+  test('a child is never asked; a grown-up turns it on in the parent area', async ({ page }) => {
     await child(page, 'unasked', { firstRun: true })
     await ready(page, '/home')
-    const consent = page.getByTestId('attention-consent')
-    await expect(consent).toBeVisible()
-    // why it exists, why it helps, the camera and the free version are explained
-    await expect(consent).toContainText('Nega bu foydali?')
-    await expect(consent).toContainText('Bepul tarifda robot gapirmaydi')
-    // no way past it: Escape does nothing and there is no close button
-    await page.keyboard.press('Escape')
-    await expect(consent).toBeVisible()
-    await expect(consent.getByRole('button', { name: /yopish|close/i })).toHaveCount(0)
-    // a child's tap is not an answer: the grown-ups' question comes first
-    await consent.getByRole('button', { name: 'Yo‘q, kerak emas' }).click()
-    await solveParentGate(page)
-    await expect(consent).toHaveCount(0)
-    expect(await stored(page)).toBe('denied')
-    // asked only once
-    await page.reload()
-    await expect(page.locator('[data-splash]')).toHaveCount(0, { timeout: 30_000 })
     await expect(page.getByTestId('attention-consent')).toHaveCount(0)
-  })
-
-  test('“yes” turns it on; the camera is a separate choice', async ({ page }) => {
-    await child(page, 'unasked', { firstRun: true })
-    await ready(page, '/home')
-    await page.getByRole('button', { name: 'Ha, ruxsat beraman' }).click()
+    await ready(page, '/parent/dashboard?tab=settings')
     await solveParentGate(page)
-    const camera = page.getByTestId('attention-camera')
-    await expect(camera).toBeVisible()
-    await camera.getByRole('button', { name: 'Kamerasiz' }).click()
-    await expect(page.getByTestId('attention-consent')).toHaveCount(0)
-    await expect(camera).toHaveCount(0)
-    expect(await stored(page)).toBe('granted')
-    expect(
-      await page.evaluate(
-        () => JSON.parse(localStorage.getItem('kiddo.attention') ?? '{}').state?.camera,
-      ),
-    ).toBe(false)
+    await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
+    await page.goto('/parent/dashboard?tab=settings')
+    const gate = page.getByRole('dialog', { name: 'Faqat kattalar uchun' })
+    await expect(gate.or(page.getByTestId('attention-setting'))).toBeVisible()
+    if (await gate.isVisible()) await solveParentGate(page)
+    await page.getByTestId('attention-setting').getByRole('radio', { name: 'Yoqilgan' }).click()
+    await expect.poll(() => stored(page)).toBe('granted')
   })
 
   test('reminds a child who stops touching, then offers three science games', async ({ page }) => {

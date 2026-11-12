@@ -45,11 +45,12 @@ describe('security headers', () => {
     )
   })
 
-  it('no MIME sniffing, a short referrer, and no camera, microphone or location', () => {
+  it('no MIME sniffing, a short referrer; camera and microphone for Kiddo itself only, no location', () => {
     expect(header('X-Content-Type-Options')).toBe('nosniff')
     expect(header('Referrer-Policy')).toBe('strict-origin-when-cross-origin')
     const permissions = header('Permissions-Policy')
-    for (const feature of ['camera=()', 'microphone=()', 'geolocation=()']) {
+    // the attention helper's camera and the name recorder's microphone (MVP): never an embedded page's
+    for (const feature of ['camera=(self)', 'microphone=(self)', 'geolocation=()']) {
       expect(permissions).toContain(feature)
     }
   })
