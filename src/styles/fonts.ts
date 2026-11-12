@@ -1,26 +1,10 @@
-// Self-hosted fonts: they work offline. Only the subsets Kiddo needs are bundled:
-// Latin, Latin Extended (Oʻ, Gʻ, ʼ) and Cyrillic.
-import '@fontsource/nunito/latin-600.css'
-import '@fontsource/nunito/latin-ext-600.css'
-import '@fontsource/nunito/cyrillic-600.css'
-import '@fontsource/nunito/cyrillic-ext-600.css'
-import '@fontsource/nunito/latin-700.css'
-import '@fontsource/nunito/latin-ext-700.css'
-import '@fontsource/nunito/cyrillic-700.css'
-import '@fontsource/nunito/cyrillic-ext-700.css'
-import '@fontsource/nunito/latin-800.css'
-import '@fontsource/nunito/latin-ext-800.css'
-import '@fontsource/nunito/cyrillic-800.css'
-import '@fontsource/nunito/cyrillic-ext-800.css'
-import '@fontsource/rubik/latin-500.css'
-import '@fontsource/rubik/latin-ext-500.css'
-import '@fontsource/rubik/cyrillic-500.css'
-import '@fontsource/rubik/cyrillic-ext-500.css'
-import '@fontsource/rubik/latin-700.css'
-import '@fontsource/rubik/latin-ext-700.css'
-import '@fontsource/rubik/cyrillic-700.css'
-import '@fontsource/rubik/cyrillic-ext-700.css'
-import '@fontsource/rubik/latin-800.css'
-import '@fontsource/rubik/latin-ext-800.css'
-import '@fontsource/rubik/cyrillic-800.css'
-import '@fontsource/rubik/cyrillic-ext-800.css'
+// Self-hosted fonts: they work offline. The weight files carry each subset's unicode-range
+// (Latin, Latin Extended, Cyrillic, …), so a page downloads only the subsets its text uses.
+// The per-subset files (e.g. `latin-700.css`) have no unicode-range: with them every subset
+// was downloaded on every page (MVP stage 1: 12 font files on an Uzbek page instead of 3).
+import '@fontsource/nunito/600.css'
+import '@fontsource/nunito/700.css'
+import '@fontsource/nunito/800.css'
+import '@fontsource/rubik/500.css'
+import '@fontsource/rubik/700.css'
+import '@fontsource/rubik/800.css'

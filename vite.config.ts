@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { rmSync } from 'node:fs'
+import { readFileSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
@@ -12,6 +12,7 @@ import {
   VOICE_GLOB_IGNORES,
   voiceRuntimeCaching,
 } from './src/services/audio/voiceBuild.ts'
+import { shellOnly } from './src/app/pwaShell.ts'
 
 /**
  * VITE_VOICE_PRIVATE=true: the recorded clips stay out of dist (they are
@@ -62,12 +63,29 @@ function preloadStoredLanguage(): Plugin {
   }
 }
 
+/**
+ * MVP stage 1: the offline copy is only the app shell – index.html's own scripts and
+ * styles (its <script> and modulepreload links). Before, every chunk and picture was
+ * precached (8.3 MB) and on a first visit over a slow network that download competed
+ * with the screen the child was looking at. Section chunks, pictures and fonts are
+ * cached the first time they are used (runtimeCaching below).
+ */
+let builtDir = 'dist'
+const rememberOutDir: Plugin = {
+  name: 'kiddo:out-dir',
+  apply: 'build',
+  configResolved(config) {
+    builtDir = resolve(config.root, config.build.outDir)
+  },
+}
+
 export default defineConfig(({ mode }) => {
   const voicePrivate = isVoicePrivateBuild(loadEnv(mode, process.cwd(), 'VITE_'))
   return {
     plugins: [
       react(),
       tailwindcss(),
+      rememberOutDir,
       preloadStoredLanguage(),
       ...(voicePrivate ? [dropPublicVoice()] : []),
       VitePWA({
@@ -98,23 +116,34 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
-          // Everything the child area needs is precached, so it works fully offline.
-          // Voice clips (several MB) are cached as they are first played instead
+          // The app shell is precached (shellOnly); everything else is cached at first use.
+          // Voice clips (several MB) are cached as they are first played
           // (public mode only: private-mode signed URLs are never cached).
-          // pets: every pose, so a companion can turn sad or surprised offline (≈ 0.6 MB)
-          globPatterns: [
-            '**/*.{js,css,html,svg,png,woff2}',
-            'audio/ui/*.mp3',
-            '3d/**/*.webp',
-            'pets/**/*.webp',
-            // the mascots' still pictures (≈ 0.1 MB): a mascot is never missing offline
-            'mascots/posters/*.webp',
-          ],
-          // the attention helper's face detector (≈ 1.3 MB) is only for families that turned
+          globPatterns: ['**/*.{js,css,html}', 'audio/ui/*.mp3'], // + includeAssets and the manifest icons
+          // the attention helper's face detector is only for families that turned
           // the camera on: cached when first used, never precached for everyone
           globIgnores: ['**/node_modules/**', '**/face-api*.js', ...VOICE_GLOB_IGNORES],
+          manifestTransforms: [
+            (entries) => ({
+              manifest: shellOnly(entries, readFileSync(resolve(builtDir, 'index.html'), 'utf8')),
+              warnings: [],
+            }),
+          ],
           runtimeCaching: [
             ...voiceRuntimeCaching(voicePrivate),
+            // pictures (3D icons, pets, still mascots, worksheets): a picture seen once works offline
+            {
+              urlPattern: ({ url }: { url: URL }) =>
+                /^\/(3d|pets|pictures|icons|mascots\/posters)\/.*\.(webp|png|svg)$/.test(
+                  url.pathname,
+                ),
+              handler: 'StaleWhileRevalidate' as const,
+              options: {
+                cacheName: 'kiddo-pictures',
+                expiration: { maxEntries: 600 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
             // 3D mascots (0.2–0.4 MB each) are cached when first met, not precached; a rebuilt
             // model replaces the cached one on the next visit (the cached one plays meanwhile)
             {
@@ -138,11 +167,23 @@ export default defineConfig(({ mode }) => {
                 cacheableResponse: { statuses: [0, 200] },
               },
             },
+            // section chunks, fonts and styles: hashed names never change, so the first copy is final
+            {
+              urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/assets/'),
+              handler: 'CacheFirst' as const,
+              options: {
+                cacheName: 'kiddo-assets',
+                expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 90 },
+                cacheableResponse: { statuses: [200] },
+              },
+            },
           ],
           // The 3D robot chunk (three.js) is about 1 MB.
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           navigateFallback: '/index.html',
           cleanupOutdatedCaches: true,
+          // take the open page at once, so what a child opens on the first visit is cached for offline
+          clientsClaim: true,
         },
       }),
     ],

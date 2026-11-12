@@ -60,6 +60,9 @@ const CHECK_FILES = [
   // vite.config.ts imports it, so its code runs in the build check
   // (lib.test.ts fails if vite.config.ts gains a local import not listed here)
   /^src\/services\/audio\/voiceBuild\.ts$/,
+  /^src\/app\/pwaShell\.ts$/,
+  // perf budget (MVP stage 1) runs in `npm run check`
+  /^scripts\/perf-budget\.mjs$/,
 ]
 
 /** A file that decides how the checks run. */
