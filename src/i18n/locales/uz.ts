@@ -2626,6 +2626,68 @@ export const uz = {
     },
     label: 'Chop etish uchun varaq',
   },
+  privacy: {
+    link: 'Maxfiylik siyosati',
+    title: 'Maxfiylik siyosati',
+    updated: 'Yangilangan: {{date}}',
+    back: 'Orqaga',
+    intro:
+      'Kiddo — 4–6 yoshli bolalar uchun o‘quv ilova. Bu sahifa ilova qanday ma’lumot yig‘ishini, nima uchun kerakligini va uni qanday o‘chirish mumkinligini oddiy tilda tushuntiradi.',
+    s: {
+      modes: {
+        title: 'Ikki xil ishlash usuli',
+        body: 'Kiddo hisobsiz ham ishlaydi: bunda bolaning profili va natijalari faqat shu qurilmada qoladi.\nOta-ona bulut hisobiga kirsa (Google, e-pochta havolasi yoki parol bilan), profil va natijalar ota-onaning hisobiga saqlanadi va qurilmalar o‘rtasida sinxronlanadi.\nIkkala holatda ham ilova anonim statistika yuboradi (pastda “Anonim statistika”).',
+      },
+      parent: {
+        title: 'Ota-ona ma’lumotlari',
+        body: 'Bulut hisobi uchun: e-pochta manzilingiz (Google profilingizdan yoki o‘zingiz kiritgan) va rozilik berganingiz haqida belgi (sana va matn versiyasi). Parol bilan kirsangiz, parol kirish xizmatida himoyalangan holda saqlanadi.\nKiddo telefon raqamingizni so‘ramaydi va saqlamaydi.\nTelegram’ni ulasangiz, serverda faqat Telegram suhbat identifikatori saqlanadi (bot xabar yuborishi uchun). Bot faqat bolaning ismi, yoshi va qisqa natijani (kunlar, daqiqalar, harflar) yuboradi — familiya, rasm, ovoz yoki javoblar yuborilmaydi.',
+      },
+      child: {
+        title: 'Bola haqidagi ma’lumotlar (bulut hisobida)',
+        body: 'Ism, tug‘ilgan sana, jins, tanlangan qahramon, kunlik vaqt chegarasi, uy vazifalari; yong‘oqlar (mukofotlar), o‘yin va o‘rganish natijalari, xatolar, kuniga necha daqiqa o‘ynagani, ilovadan chiqish/qaytish hodisalari va “ilova ochiq” signali.\nBular bolaning o‘rganishini moslashtirish va ota-onaga hisobot ko‘rsatish uchun kerak.\nMaslahat: familiyani yozmang — ism yetarli.',
+      },
+      local: {
+        title: 'Faqat shu qurilmada qoladiganlar',
+        body: 'Ota-ona o‘z ovozida yozgan bola ismi yozuvi va Studiyada chizilgan rasmlar faqat shu qurilmada saqlanadi — internetga yuborilmaydi.\nBola surati (256×256 kichik nusxa) qurilmada qoladi. Ota-ona “bulutda saqlash”ni yoqsagina u shaxsiy omborga yuklanadi va uni faqat o‘sha ota-ona o‘qiy oladi.\nIlova oflayn ishlashi uchun brauzer xotirasi (localStorage, IndexedDB) va keshdan foydalanadi.',
+      },
+      camera: {
+        title: 'Kamera',
+        body: 'Kamera ixtiyoriy va o‘zingiz yoqmaguningizcha o‘chiq. U faqat ota-ona e’tibor yordamchisini va kamerani alohida yoqsa, brauzer ruxsat bersa, dars va o‘yin sahifalarida, ilova ko‘rinib turganda ishlaydi.\nTasvir faqat shu qurilmada, kichik kadr sifatida qayta ishlanadi va faqat bitta savolga javob beradi: yuz ekranga qaragan-qaramagani. Hech qanday rasm yoki video saqlanmaydi, yuborilmaydi va ko‘rsatilmaydi; kim ekani aniqlanmaydi.\nKamera yoniq paytda ekranda kichik belgi turadi. Buni Sozlamalarda istalgan vaqt o‘chirish mumkin.',
+      },
+      voice: {
+        title: 'Ovoz xizmati (PRO)',
+        body: 'PRO’da ayrim jumlalarni tabiiy ovozda o‘qish uchun jumla matni ovoz sintezi xizmatiga yuboriladi va tayyor audio olinadi. Bolaning ismi bor jumla hech qachon yuborilmaydi.\nHozir ilovada sun’iy intellekt suhbatdoshi (chatbot) ulanmagan.',
+      },
+      stats: {
+        title: 'Anonim statistika',
+        body: 'Ilovani yaxshilash uchun anonim hodisalar yuboriladi: qaysi qadamlar ochilgani, ilova qaysi sahifada yopilgani, e’tibor yordamchisi yoki kamera yoqilgan-yoqilmagani (faqat sanoq sifatida). Ular tasodifiy qurilma raqamiga bog‘lanadi — bola, ism, javob, rasm yoki hisobga emas. Taxminan 180 kundan keyin o‘chiriladi.\nOta-ona buni Ota-ona bo‘limidagi “Ma’lumotlar va maxfiylik”da o‘chirib qo‘yishi mumkin.',
+      },
+      share: {
+        title: 'Ma’lumotni kim ko‘radi',
+        body: 'Oila ma’lumotini faqat siz (ota-ona) ko‘rasiz; boshqa oilalar hech qachon ko‘rmaydi.\nKiddo quyidagi xizmatlardan foydalanadi: ma’lumotlar bazasi, kirish va surat ombori (Supabase); Google bilan kirish (faqat tanlasangiz); Telegram (faqat ulasangiz); ovoz sintezi (PRO); sayt hostingi (Vercel). Ilovada uchinchi tomon reklama tarmoqlari va kuzatuvchilari yo‘q.\nPRO bo‘limida ota-ona Kiddo’ning o‘z qisqa videosini ko‘rib promo-kod olishi mumkin.\nIlovani yuritadigan administratorlar xizmat ishlashi uchun zarur umumiy ma’lumotni (masalan, anonim statistikani) ko‘radi.',
+      },
+      keep: {
+        title: 'Qancha saqlanadi',
+        body: 'Bulutdagi oila ma’lumoti hisob o‘chirilguncha saqlanadi. Anonim statistika taxminan 180 kun. Telegram ulanishi uni uzguningizcha (botga /stop) yoki hisob o‘chirilguncha.\nQurilmadagi ma’lumot profil o‘chirilguncha yoki brauzer ma’lumotlari tozalanguncha qoladi.',
+      },
+      delete: {
+        title: 'Ma’lumotni qanday o‘chirish mumkin',
+        body: '• Butun hisob: Ota-ona bo‘limi → Sozlamalar → Hisob → DELETE deb yozing. Oilaning barcha ma’lumoti va suratlari o‘chadi.\n• Bitta bola: Profillar bo‘limida profilni o‘chiring.\n• Nusxa olish: Ota-ona bo‘limida bola ma’lumotini fayl sifatida yuklab olish mumkin.\n• Telegram: botga /stop yozing yoki Sozlamalarda uzing.\n• Hisobsiz rejim: profilni o‘chiring yoki brauzer ma’lumotlarini tozalang.\nYordam kerak bo‘lsa, quyidagi manzilga yozing.',
+      },
+      kids: {
+        title: 'Bolalar maxfiyligi',
+        body: 'Bolaning o‘z hisobi yo‘q. Bulut hisobini faqat ota-ona yoki vasiy ochadi va ro‘yxatdan o‘tishda bolaning ma’lumoti saqlanishiga rozilik beradi. Rozilik matni o‘zgarsa, ota-onadan qayta so‘raladi.\nOta-ona bo‘limi kattalar savoli bilan himoyalangan. Kamera va e’tibor yordamchisi faqat ota-ona roziligi bilan ishlaydi. Bola ma’lumoti reklama uchun ishlatilmaydi.',
+      },
+      changes: {
+        title: 'O‘zgarishlar',
+        body: 'Siyosat o‘zgarsa, shu sahifadagi sana yangilanadi. Muhim o‘zgarishda ota-onadan rozilik qayta so‘raladi.',
+      },
+      contact: {
+        title: 'Bog‘lanish',
+        body: 'Savol yoki ma’lumotni o‘chirish so‘rovi uchun {{company}} ga yozing:',
+      },
+    },
+  },
   attention: {
     consent: {
       title: 'Kattalar uchun muhim savol',
@@ -2908,7 +2970,12 @@ export const uz = {
       tree: {
         title: 'Urug‘dan daraxtgacha',
         text: 'Birga urug‘ ekib, har kuni suv quying: bola o‘sishni o‘z ko‘zi bilan ko‘radi.',
-        quiz: { q: 'Urug‘ o‘sishi uchun nima kerak?', a0: 'suv, quyosh va tuproq', a1: 'shirinlik', a2: 'o‘yinchoq' },
+        quiz: {
+          q: 'Urug‘ o‘sishi uchun nima kerak?',
+          a0: 'suv, quyosh va tuproq',
+          a1: 'shirinlik',
+          a2: 'o‘yinchoq',
+        },
       },
       rainbow: {
         title: 'Kamalak qanday paydo bo‘ladi?',
@@ -2928,7 +2995,12 @@ export const uz = {
       teeth: {
         title: 'Tishimni nega yuvaman?',
         text: 'Ertalab va kechqurun ikki daqiqa, mayda no‘xat kattaligida pasta bilan; kichik bolaga kattalar yordam bersin.',
-        quiz: { q: 'Tishni necha daqiqa yuvamiz?', a0: 'bir daqiqa', a1: 'ikki daqiqa', a2: 'besh daqiqa' },
+        quiz: {
+          q: 'Tishni necha daqiqa yuvamiz?',
+          a0: 'bir daqiqa',
+          a1: 'ikki daqiqa',
+          a2: 'besh daqiqa',
+        },
       },
       scale: { title: 'Tarozi siri', text: 'Tarozi qachon tekis turadi?' },
       robot: { title: 'Robotga yo‘l ko‘rsat', text: 'Strelkalar bilan birinchi dastur.' },

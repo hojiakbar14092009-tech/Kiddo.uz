@@ -2615,6 +2615,68 @@ export const en: Translation = {
     },
     label: 'Sheet to print',
   },
+  privacy: {
+    link: 'Privacy policy',
+    title: 'Privacy policy',
+    updated: 'Updated: {{date}}',
+    back: 'Back',
+    intro:
+      'Kiddo is a learning app for children aged 4–6. This page explains in plain words what data the app collects, why, and how to delete it.',
+    s: {
+      modes: {
+        title: 'Two ways to use it',
+        body: 'Kiddo also works without an account: then the child’s profile and results stay on this device only.\nIf a parent signs in to a cloud account (Google, an e-mail link or a password), the profile and results are saved in the parent’s account and synced between devices.\nIn both cases the app sends anonymous statistics (see “Anonymous statistics” below).',
+      },
+      parent: {
+        title: 'Parent’s data',
+        body: 'For a cloud account: your e-mail address (from your Google profile or typed by you) and a note that you gave consent (date and text version). If you sign in with a password, it is stored protected in the sign-in service.\nKiddo does not ask for or store your phone number.\nIf you connect Telegram, the server keeps only your Telegram chat identifier (so the bot can write to you). The bot sends only the child’s first name, age and a short result (days, minutes, letters) — no surname, photo, voice or answers.',
+      },
+      child: {
+        title: 'Child’s data (in the cloud account)',
+        body: 'Name, date of birth, gender, chosen character, daily time limit, homework; nuts (rewards), game and learning results, mistakes, minutes played per day, leaving/returning events and an “app is open” signal.\nThey are needed to adapt the learning and to show the parent a report.\nTip: do not enter a surname — a first name is enough.',
+      },
+      local: {
+        title: 'What stays on the device only',
+        body: 'The recording of your child’s name in your voice and the pictures drawn in the Studio are kept on this device only and are never sent over the internet.\nThe child’s photo (a small 256×256 copy) stays on the device. Only if a parent turns on “keep in the cloud” is it uploaded to a private store that only that parent can read.\nTo work offline, the app uses browser storage (localStorage, IndexedDB) and a cache.',
+      },
+      camera: {
+        title: 'Camera',
+        body: 'The camera is optional and off until you turn it on. It works only if a parent separately turns on the attention helper and the camera, the browser allows it, a lesson or game page is open and the app is visible.\nThe picture is processed on this device only, as a small frame, and answers one question: is a face turned to the screen. No photo or video is saved, sent or shown, and nobody is identified.\nWhile the camera is on, a small sign is shown on screen. You can turn it off any time in Settings.',
+      },
+      voice: {
+        title: 'Voice service (PRO)',
+        body: 'In PRO, to read some sentences in a natural voice, the sentence text is sent to a speech-synthesis service and the finished audio comes back. A sentence containing the child’s name is never sent.\nThere is currently no AI chatbot connected in the app.',
+      },
+      stats: {
+        title: 'Anonymous statistics',
+        body: 'To improve the app, anonymous events are sent: which steps were opened, on which page the app was closed, whether the attention helper or camera was turned on (only as a count). They are linked to a random device number — not to a child, name, answer, photo or account. They are deleted after about 180 days.\nA parent can switch this off under “Data and privacy” in the parent area.',
+      },
+      share: {
+        title: 'Who sees the data',
+        body: 'Only you (the parent) see your family’s data; other families never do.\nKiddo uses these services: database, sign-in and photo storage (Supabase); Google sign-in (only if you choose it); Telegram (only if you connect it); speech synthesis (PRO); website hosting (Vercel). There are no third-party ad networks or trackers in the app.\nIn the PRO section a parent may watch a short video made by Kiddo to get a promo code.\nThe administrators who run the app see the general data needed to operate the service (for example, anonymous statistics).',
+      },
+      keep: {
+        title: 'How long it is kept',
+        body: 'Family data in the cloud is kept until the account is deleted. Anonymous statistics: about 180 days. A Telegram link: until you unlink it (send /stop to the bot) or the account is deleted.\nData on the device stays until the profile is removed or the browser data is cleared.',
+      },
+      delete: {
+        title: 'How to delete data',
+        body: '• The whole account: Parent area → Settings → Account → type DELETE. All the family’s data and photos are deleted.\n• One child: remove the profile under Profiles.\n• A copy: in the parent area a child’s data can be downloaded as a file.\n• Telegram: send /stop to the bot or unlink it in Settings.\n• Without an account: remove the profile or clear the browser data.\nIf you need help, write to the address below.',
+      },
+      kids: {
+        title: 'Children’s privacy',
+        body: 'A child has no account of their own. Only a parent or guardian creates a cloud account and, when signing up, consents to the child’s data being kept. If the consent text changes, the parent is asked again.\nThe parent area is protected by a grown-ups’ question. The camera and the attention helper work only with a parent’s consent. A child’s data is not used for advertising.',
+      },
+      changes: {
+        title: 'Changes',
+        body: 'If this policy changes, the date on this page is updated. For important changes the parent’s consent is asked again.',
+      },
+      contact: {
+        title: 'Contact',
+        body: 'For questions or a data deletion request, write to {{company}}:',
+      },
+    },
+  },
   attention: {
     consent: {
       title: 'An important question for grown-ups',
@@ -2891,7 +2953,12 @@ export const en: Translation = {
       tree: {
         title: 'From a seed to a tree',
         text: 'Plant a seed together and water it daily: your child will watch it grow.',
-        quiz: { q: 'What does a seed need to grow?', a0: 'water, sun and soil', a1: 'sweets', a2: 'a toy' },
+        quiz: {
+          q: 'What does a seed need to grow?',
+          a0: 'water, sun and soil',
+          a1: 'sweets',
+          a2: 'a toy',
+        },
       },
       rainbow: {
         title: 'How does a rainbow appear?',
@@ -2901,7 +2968,12 @@ export const en: Translation = {
       dayCycle: {
         title: 'Why do day and night change?',
         text: 'Try a lamp and a ball: turn the ball slowly, the lit side is daytime.',
-        quiz: { q: 'What changes day into night?', a0: 'the Earth turns', a1: 'a cloud', a2: 'the Moon' },
+        quiz: {
+          q: 'What changes day into night?',
+          a0: 'the Earth turns',
+          a1: 'a cloud',
+          a2: 'the Moon',
+        },
       },
       calm: {
         title: 'What do I do when I am angry?',
@@ -2911,7 +2983,12 @@ export const en: Translation = {
       teeth: {
         title: 'Why do I brush my teeth?',
         text: 'Two minutes morning and evening, with a pea-sized dab of toothpaste; a grown-up helps little ones.',
-        quiz: { q: 'How many minutes do we brush?', a0: 'one minute', a1: 'two minutes', a2: 'five minutes' },
+        quiz: {
+          q: 'How many minutes do we brush?',
+          a0: 'one minute',
+          a1: 'two minutes',
+          a2: 'five minutes',
+        },
       },
       scale: { title: 'The scale’s secret', text: 'When is a scale level?' },
       robot: { title: 'Show the robot the way', text: 'A first program made of arrows.' },

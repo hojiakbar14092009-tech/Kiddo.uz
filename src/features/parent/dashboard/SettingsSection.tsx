@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { LANGUAGE_INFO, LANGUAGES } from '@/content/languages'
 import { audioManager } from '@/services/audio/audioManager'
@@ -147,6 +147,12 @@ export function SettingsSection() {
           </p>
         </Panel>
       )}
+
+      <Panel title={t('privacy.title')} className="lg:col-span-2">
+        <Link to="/privacy" className="font-bold text-primary-ink underline">
+          {t('privacy.link')}
+        </Link>
+      </Panel>
     </div>
   )
 }

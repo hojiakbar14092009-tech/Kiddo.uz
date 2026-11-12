@@ -34,6 +34,13 @@ export const routes: RouteObject[] = [
     errorElement: <RouteErrorScreen />,
     children: [
       { path: '/', element: <LanguagePage /> },
+      // Open to anyone (a store listing or a parent's browser links here), so outside RequireLanguage.
+      {
+        path: '/privacy',
+        lazy: async () => ({
+          Component: (await import('@/features/legal/PrivacyPage')).PrivacyPage,
+        }),
+      },
       {
         element: <RequireLanguage />,
         children: [

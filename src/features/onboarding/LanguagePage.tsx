@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { KiddoMark, KiddoWordmark } from '@/components/brand/KiddoLogo'
 import { Flag } from '@/components/flags/Flag'
 import { Screen } from '@/components/layout/Screen'
@@ -78,6 +78,9 @@ export function LanguagePage() {
         ))}
       </ul>
       <ParentAreaLink />
+      <Link to="/privacy" className="text-sm font-semibold text-ink-soft underline">
+        {t('privacy.link')}
+      </Link>
     </Screen>
   )
 }
