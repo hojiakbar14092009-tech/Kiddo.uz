@@ -1,8 +1,17 @@
+import { emailStart, emailVerify, googleCallback, googleStart, methods } from './auth.js'
 import { ready } from './db.js'
 import { assertSameOrigin, clientIp, HttpError, json } from './http.js'
 import { memoryLimit } from './rateLimit.js'
 import { endSession, requireSession } from './session.js'
+import { checkout, prices } from './pay.js'
 import { getState, putState } from './sync.js'
+import {
+  telegramResend,
+  telegramStart,
+  telegramStatus,
+  telegramVerify,
+  telegramWebhook,
+} from './telegram.js'
 import { deleteUser, getUser, proStatus } from './users.js'
 
 type Handler = (request: Request, url: URL) => Promise<Response>
@@ -15,7 +24,8 @@ const routes: Record<string, Handler> = {
     const [user, pro] = await Promise.all([getUser(userId), proStatus(userId)])
     return json(200, { user, pro })
   },
-  'POST auth/logout': async (request) => json(200, { ok: true }, { 'set-cookie': await endSession(request) }),
+  'POST auth/logout': async (request) =>
+    json(200, { ok: true }, { 'set-cookie': await endSession(request) }),
   'POST account/delete': async (request) => {
     const { userId } = await requireSession(request)
     await deleteUser(userId)
@@ -23,10 +33,24 @@ const routes: Record<string, Handler> = {
   },
   'GET sync': getState,
   'PUT sync': putState,
+  // signing in (MVP): Google, a code by e-mail, a code by Telegram
+  'GET auth/methods': async () => methods(),
+  'POST auth/email/start': (request) => emailStart(request),
+  'POST auth/email/verify': (request) => emailVerify(request),
+  'GET auth/google/start': (request) => googleStart(request),
+  'GET auth/google/callback': (request, url) => googleCallback(request, url),
+  'POST auth/telegram/start': (request) => telegramStart(request),
+  'GET auth/telegram/status': (request, url) => telegramStatus(request, url),
+  'POST auth/telegram/resend': (request) => telegramResend(request),
+  'POST auth/telegram/verify': (request) => telegramVerify(request),
+  'POST telegram/webhook': (request) => telegramWebhook(request),
+  // Pro (MVP: test payments)
+  'GET pay/prices': async () => prices(),
+  'POST pay/checkout': (request) => checkout(request),
 }
 
 /** Webhooks prove themselves with a secret, not with a browser Origin. */
-const WEBHOOKS = new Set<string>([])
+const WEBHOOKS = new Set<string>(['POST telegram/webhook'])
 
 /**
  * The route: /api/<path> in the dev server, or /api?path=<path> after the vercel.json rewrite.
@@ -52,7 +76,8 @@ export async function handle(request: Request): Promise<Response> {
   } catch (error) {
     if (error instanceof HttpError) {
       const headers: Record<string, string> = {}
-      if (error.status === 429 && typeof error.extra?.retryAfter === 'number') headers['retry-after'] = String(error.extra.retryAfter)
+      if (error.status === 429 && typeof error.extra?.retryAfter === 'number')
+        headers['retry-after'] = String(error.extra.retryAfter)
       return json(error.status, { error: error.code, ...error.extra }, headers)
     }
     // the route and the error's name only: never the request body, cookies or secrets
