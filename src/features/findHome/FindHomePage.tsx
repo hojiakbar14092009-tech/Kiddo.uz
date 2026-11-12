@@ -124,6 +124,20 @@ export function FindHomePage() {
         >
           {sentence}
         </h2>
+        {/* MVP: the two buttons right under the task, on the first screen of a small phone */}
+        <div className="flex w-full gap-3">
+          <Button
+            variant="coin"
+            className="min-h-16 flex-[3] text-2xl"
+            onClick={found}
+            data-testid="find-found"
+          >
+            {child?.gender === 'girl' ? t('findHome.foundGirl') : t('findHome.found')}
+          </Button>
+          <Button variant="soft" className="flex-[2]" onClick={next} data-testid="find-next">
+            {t('findHome.next')}
+          </Button>
+        </div>
         <p className="font-display text-lg font-bold text-primary-ink" data-testid="find-safe">
           {t('findHome.say.safe')}
         </p>
@@ -142,19 +156,6 @@ export function FindHomePage() {
           {shown?.outcome === 'paid' && <CoinIcon size={28} aria-hidden="true" />}
           {status}
         </p>
-        <div className="flex w-full flex-col gap-3 sm:flex-row">
-          <Button
-            variant="coin"
-            className="min-h-16 w-full text-2xl"
-            onClick={found}
-            data-testid="find-found"
-          >
-            {child?.gender === 'girl' ? t('findHome.foundGirl') : t('findHome.found')}
-          </Button>
-          <Button variant="soft" className="w-full" onClick={next} data-testid="find-next">
-            {t('findHome.next')}
-          </Button>
-        </div>
         <p className="text-sm text-ink-soft">{t('findHome.safety')}</p>
         <p className="text-xs text-ink-soft" data-testid="find-parent-note">
           {t('findHome.parentNote')}

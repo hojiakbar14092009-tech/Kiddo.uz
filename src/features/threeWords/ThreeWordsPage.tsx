@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeftIcon, ChevronRightIcon, SpeakerIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { FitWords } from '@/components/ui/FitWords'
 import { Img3D } from '@/components/ui/Img3D'
 import { LANGUAGE_INFO, type Language } from '@/content/languages'
 import { canUse } from '@/domain/entitlements'
@@ -64,16 +65,20 @@ export function ThreeWordsPage() {
         <p className="text-center font-semibold text-ink-soft">{t('threeWords.say.intro')}</p>
         <div
           key={item.id}
-          className="flex size-40 items-center justify-center rounded-[32px] bg-sky-soft motion-safe:animate-pop-in sm:size-52"
+          className="flex size-28 items-center justify-center rounded-[32px] bg-sky-soft motion-safe:animate-pop-in sm:size-52"
         >
           <Img3D name={item.picture} className="size-[80%]" eager />
         </div>
-        <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
-          {TRI_LANGUAGES.map((language) => {
+        {/* a small phone: the first word on its own row, the other two side by side (no scrolling to "next") */}
+        <ul className="grid w-full grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:grid-cols-3">
+          {TRI_LANGUAGES.map((language, index) => {
             const text = displayWord(item.words[language], language)
             const languageName = t(`threeWords.languages.${language}`)
             return (
-              <li key={language}>
+              <li
+                key={language}
+                className={index === 0 ? 'min-[360px]:col-span-2 sm:col-span-1' : undefined}
+              >
                 <button
                   type="button"
                   onClick={() => void play(language)}
@@ -86,17 +91,18 @@ export function ThreeWordsPage() {
                   )}
                 >
                   <SpeakerIcon size={28} aria-hidden="true" className="shrink-0" />
-                  <span className="flex min-w-0 flex-col">
+                  <span className="flex min-w-0 flex-1 flex-col">
                     {/* the name is the visible content: the language for screen readers, then the word in its own lang */}
                     <span className="sr-only">{languageName}:</span>{' '}
                     <span aria-hidden="true" className="text-sm font-semibold text-ink-soft">
                       {LANGUAGE_INFO[language].shortLabel}
                     </span>
-                    <span
-                      lang={language}
-                      className="font-display text-2xl leading-tight font-extrabold [overflow-wrap:anywhere] sm:text-3xl"
-                    >
-                      {text}
+                    {/* a half-width card on a phone: the word shrinks to fit, never splits */}
+                    <span lang={language} className="block w-full">
+                      <FitWords
+                        text={text}
+                        className="font-display text-2xl leading-tight font-extrabold sm:text-3xl"
+                      />
                     </span>
                   </span>
                 </button>

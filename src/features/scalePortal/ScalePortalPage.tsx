@@ -168,7 +168,8 @@ export function ScalePortalPage() {
         />
 
         {phase.kind === 'intro' && (
-          <div className="flex flex-wrap justify-center gap-3">
+          // a small phone sees the way in first, before the big picture (no scrolling to start)
+          <div className="flex flex-wrap justify-center gap-3 max-sm:-order-1">
             <Button onClick={start} data-testid="scale-start">
               {t('scalePortal.start')}
             </Button>

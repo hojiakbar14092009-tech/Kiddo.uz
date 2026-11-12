@@ -35,6 +35,8 @@ export function TitleTopBar({
   const target = back === '/home' ? hubOf(pathname) : back
   return (
     <TopBar
+      // MVP: one way back per screen; with a back button the home button is not repeated
+      showHome={!showBack}
       start={
         <>
           {showBack && (

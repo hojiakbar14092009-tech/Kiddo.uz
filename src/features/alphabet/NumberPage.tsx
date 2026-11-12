@@ -79,6 +79,7 @@ function NumberScreen({ index, open }: { index: number; open: number }) {
     <Screen
       header={
         <TopBar
+          showHome={false}
           start={
             <Link
               to="/alphabet?tab=numbers"
