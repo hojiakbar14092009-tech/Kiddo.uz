@@ -15,7 +15,7 @@ const ROUTES = [
   '/stories',
   '/learn/my-story',
   '/math-lab',
-  '/alphabet/num-9',
+  '/alphabet/num-3',
 ]
 
 async function child(page: Page, language: 'uz' | 'ru' | 'en', age: number) {

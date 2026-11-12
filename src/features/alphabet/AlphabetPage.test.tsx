@@ -1,5 +1,7 @@
-import { screen } from '@testing-library/react'
+import { act, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { useFamilyStore } from '@/store/familyStore'
+import { GUEST_KEY, useProgressStore } from '@/store/progressStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { renderRoute } from '@/test/renderRoute'
 
@@ -49,10 +51,27 @@ describe('Numbers', () => {
   it('switches to the numbers tab and opens a number', async () => {
     const { router, user } = await renderRoute('/alphabet')
     await user.click(screen.getByRole('tab', { name: /123/ }))
-    expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(10)
+    // numbers open five at a time: 1–5 open, 6–10 locked with a calm reason
+    expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(5)
+    expect(screen.getByRole('button', { name: '6, yopiq' })).toBeDisabled()
+    expect(screen.getByText(/ketma-ket ikki marta/)).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '3 — uch' }))
     expect(router.state.location.pathname).toBe('/alphabet/num-3')
+  })
+
+  it('counting each of 1–5 to the end twice in a row opens 6–10; a locked URL goes back to the list', async () => {
+    const { router } = await renderRoute('/alphabet/num-7')
+    expect(router.state.location.search).toBe('?tab=numbers')
+    const record = useProgressStore.getState().recordNumberAnswer
+    const child = useFamilyStore.getState().activeChildId ?? GUEST_KEY
+    act(() => {
+      for (const n of [1, 2, 3, 4, 5]) {
+        record(child, `count:num-${n}`, true)
+        record(child, `count:num-${n}`, true)
+      }
+    })
+    expect(screen.getAllByRole('button', { name: /—/ })).toHaveLength(10)
   })
 
   it('counts the pictures one by one and celebrates at the end', async () => {

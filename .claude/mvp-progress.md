@@ -1,6 +1,6 @@
 # Kiddo MVP — progress
 
-Holat: 0, 1, 2, 3-bosqichlar bajarildi (pastda). Keyingi: 4-bosqich. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
+Holat: 0–4-bosqichlar bajarildi (pastda). Keyingi: 5-bosqich. Dalillar: `~/kiddo-check/mvp/stage0/` (skrinshotlar), o'lchov skriptlari
 sessiya scratchpad'ida edi (repo'da emas).
 
 ## 0-bosqich: AUDIT (2026-11-12)
@@ -205,6 +205,17 @@ webhook secret_token.
   toza HEAD'da ham yiqiladi); build OK, shell 360 → 355 KB, precache 1,46 MB; e2e phone: words 8/8, games, mascots, quests, attention o'tdi;
   `kiddo.spec` "a right answer earns… coins" **toza HEAD'da ham yiqiladi** (worktree'da tekshirildi, oldindan bor).
 
+## 4-bosqich: SONLAR OCHILISHI — bajarildi (2026-11-13)
+- `src/domain/progress/numberUnlock.ts`: `openCount` (5 talik guruh; keyingi guruh oldingi guruhning HAR soni ketma-ket 2 marta to'g'ri
+  bo'lganda ochiladi), `nextStreak` (xato → 0; 2 ga yetgan son "bajarilgan" bo'lib qoladi, keyingi xato ochilgan guruhni yopmaydi). Test bor.
+- progressStore: `numberStreaks` (bola bo'yicha, `kiddo.progress` → bulutga sinxron), `recordNumberAnswer`.
+- Sonlar (`/alphabet?tab=numbers`, 1–10): sanash oxirigacha = to'g'ri (`count:num-N`); yopiq plitka disabled + qulf + sabab matni;
+  yopiq son URL'i → ro'yxat; "keyingi" strelka faqat ochiq songa.
+- Chizish (`/trace/numbers`, 0–10, guruhlar 0–4 / 5–9 / 10): xatosiz (failedChecks 0) = to'g'ri, aks holda seriya 0 (`trace:N`);
+  yopiq plitka qulf bilan, yopiq URL → ro'yxat, "keyingi" faqat ochiq. Shakllar hammasi ochiq.
+- Matnlar uz/ru/en: `alphabet.numbersLocked`, `alphabet.lockedNumber` (faqat ko'rinadigan matn, ovozga berilmaydi).
+- Testlar: vitest 1758/1765 (admin x4 ma'lum; MathPage, myStory, Dino alohida o'tadi); e2e age-look + words 12/12.
+
 ## Bosqichlar rejasi (qarorlardan)
 3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
 4. Sonlar ochilishi: har son ketma-ket 2 marta to'g'ri → keyingi 5 son (sonlar + chizish).
@@ -223,4 +234,4 @@ qotmasin, tokenning holati (ishlatildi/muddati o'tdi) haqida tushunarli xabar be
 uz/ru/en tillarida, sodda. Hammasi uchun test yoz (QR/havola yaratish, token muddati, qayta yuborish limiti).
 
 ## Keyingi aniq qadam
-4-bosqich: sonlar ochilishi (har son ketma-ket 2 marta to'g'ri → keyingi 5 son; sonlar va chizish).
+5-bosqich: kamera (`camera=(self), microphone=(self)`, MediaPipe Face Landmarker lazy, rozilik ota-ona bo'limida, histerezis).

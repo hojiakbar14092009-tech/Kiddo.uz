@@ -92,13 +92,14 @@ describe('Home', () => {
     expect(screen.queryByText(/yoshda ochiladi/)).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-    // the addresses work at four as well: a game, a number past 5, an older tale
-    for (const path of ['/tasks/trace', '/alphabet/num-9', '/learn/tales/seed-sunflower']) {
+    // the addresses work at four as well (a game, a number); numbers open by mastery, not by age
+    for (const path of ['/tasks/trace', '/alphabet/num-3']) {
       await act(() => router.navigate(path))
       expect(router.state.location.pathname).toBe(path)
     }
     await act(() => router.navigate('/alphabet?tab=numbers'))
-    expect(await screen.findByRole('button', { name: /^10 — / })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /^5 — / })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '10, yopiq' })).toBeDisabled()
     await act(() => router.navigate('/home'))
 
     // A year later the child is five: the celebration shows the new suggestions.

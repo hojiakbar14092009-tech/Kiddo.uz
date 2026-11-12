@@ -6,6 +6,7 @@ import { SegmentedTabs } from '@/components/ui/SegmentedTabs'
 import { tabPanelProps } from '@/components/ui/tabPanel'
 import { getAlphabet } from '@/content/alphabet'
 import { NUMBERS } from '@/content/numbers'
+import { openCount } from '@/domain/progress/numberUnlock'
 import { useProgress } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { LetterTile } from './LetterTile'
@@ -21,7 +22,11 @@ export function AlphabetPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const language = useLanguage()
-  const { learned } = useProgress()
+  const { learned, numberStreaks } = useProgress()
+  const openNumbers = openCount(
+    NUMBERS.map((entry) => `count:${entry.id}`),
+    numberStreaks ?? {},
+  )
   const [params, setParams] = useSearchParams()
   const tab: AlphabetTab = params.get('tab') === 'numbers' ? 'numbers' : 'letters'
   const learnedLetters = new Set(learned[language] ?? [])
@@ -40,6 +45,9 @@ export function AlphabetPage() {
           <p className="text-lg text-ink-soft">
             {tab === 'letters' ? t('alphabet.hint') : t('alphabet.numbersHint')}
           </p>
+          {tab === 'numbers' && openNumbers < NUMBERS.length && (
+            <p className="text-base text-ink-soft">{t('alphabet.numbersLocked')}</p>
+          )}
         </div>
 
         <SegmentedTabs
@@ -73,6 +81,11 @@ export function AlphabetPage() {
                   word={entry.words[language]}
                   palette={paletteFor(index)}
                   onSelect={() => navigate(`/alphabet/${entry.id}`)}
+                  locked={
+                    index < openNumbers
+                      ? undefined
+                      : t('alphabet.lockedNumber', { number: entry.value })
+                  }
                 />
               </li>
             ))}

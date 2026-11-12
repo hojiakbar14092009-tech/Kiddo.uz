@@ -171,6 +171,9 @@ export const en: Translation = {
     tabLetters: 'Letters',
     tabNumbers: 'Numbers',
     numbersHint: 'Tap a number and count!',
+    numbersLocked:
+      'Get each of the five numbers before right twice in a row, and the next ones open.',
+    lockedNumber: '{{number}}, locked',
   },
   number: {
     countAgain: 'Count again',

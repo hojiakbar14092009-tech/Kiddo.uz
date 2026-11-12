@@ -12,9 +12,15 @@ import { Button } from '@/components/ui/Button'
 import { ProgressBar } from '@/components/ui/Progress'
 import { emitActivity } from '@/domain/universe'
 import { newId } from '@/lib/id'
-import { useChildKey } from '@/store/progressStore'
+import { useChildKey, useProgressStore } from '@/store/progressStore'
 import { traceResult } from './traceResult'
-import { nextTraceItem, traceActivity, traceStrand, type TraceItem } from './traceItems'
+import {
+  nextTraceItem,
+  TRACE_ITEMS,
+  traceActivity,
+  traceStrand,
+  type TraceItem,
+} from './traceItems'
 import { traceItemName } from './traceText'
 
 type Hint = 'start' | 'offPath' | 'nextStroke' | 'retry' | null
@@ -25,7 +31,7 @@ interface Reward {
 }
 
 /** One number or shape on the board; when it is traced, the reward and what next. */
-export function TraceRun({ item }: { item: TraceItem }) {
+export function TraceRun({ item, open }: { item: TraceItem; open: number }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const childKey = useChildKey()
@@ -36,7 +42,9 @@ export function TraceRun({ item }: { item: TraceItem }) {
   const [progress, setProgress] = useState(0)
   const [reward, setReward] = useState<Reward | null>(null)
   const name = traceItemName(t, item)
-  const next = nextTraceItem(item.set, item.id)
+  const following = nextTraceItem(item.set, item.id)
+  // "next" offers only an open number (numbers open five at a time)
+  const next = following && TRACE_ITEMS[item.set].indexOf(following) < open ? following : undefined
   const multiStroke = item.strokes.length > 1
 
   const finish = (score: PathScore) => {
@@ -44,6 +52,11 @@ export function TraceRun({ item }: { item: TraceItem }) {
     emitted.current = true
     setProgress(1)
     const result = traceResult(score, item.strokes.length, failedChecks)
+    // traced without a failed check: right; with one, its streak starts again (numbers open five at a time)
+    if (item.set === 'numbers')
+      useProgressStore
+        .getState()
+        .recordNumberAnswer(childKey, `trace:${item.id}`, failedChecks === 0)
     try {
       const gained = emitActivity({
         id: newId(),

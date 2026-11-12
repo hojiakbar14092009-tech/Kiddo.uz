@@ -15,9 +15,17 @@ describe('trace page', () => {
     expect(screen.getByRole('link', { name: /Shapes/ })).toHaveAttribute('href', '/trace/shapes')
   })
 
-  it('lists the numbers 0–10', async () => {
+  it('lists the numbers 0–10, the first five open (numbers open five at a time)', async () => {
     await renderRoute('/trace/numbers')
-    expect(screen.getAllByRole('link', { name: /^Number \d+$/ })).toHaveLength(11)
+    expect(screen.getAllByRole('link', { name: /^Number \d+$/ })).toHaveLength(5)
+    expect(screen.getByRole('img', { name: '5, locked' })).toBeInTheDocument()
+  })
+
+  it('a locked number goes back to the list', async () => {
+    const { router } = await renderRoute('/trace/numbers/7')
+    await waitFor(() => expect(router.state.location.pathname).toBe('/trace/numbers'), {
+      timeout: 5000,
+    })
   })
 
   it('opens the board for a shape with a hint where to start', async () => {

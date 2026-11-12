@@ -169,6 +169,9 @@ export const uz = {
     tabLetters: 'Harflar',
     tabNumbers: 'Sonlar',
     numbersHint: 'Sonni bos va sanab ko‘r!',
+    numbersLocked:
+      'Oldingi beshta sonning har birini ketma-ket ikki marta to‘g‘ri bajar – keyingilari ochiladi.',
+    lockedNumber: '{{number}}, yopiq',
   },
   number: {
     countAgain: 'Yana sanash',

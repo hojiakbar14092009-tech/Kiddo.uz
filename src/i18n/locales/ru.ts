@@ -167,6 +167,9 @@ export const ru: Translation = {
     tabLetters: 'Буквы',
     tabNumbers: 'Цифры',
     numbersHint: 'Нажми на число и посчитай!',
+    numbersLocked:
+      'Сделай каждое из пяти прошлых чисел правильно два раза подряд – откроются следующие.',
+    lockedNumber: '{{number}}, закрыто',
   },
   number: {
     countAgain: 'Посчитать ещё',

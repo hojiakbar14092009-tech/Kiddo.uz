@@ -9,9 +9,11 @@ import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/Button'
 import { ListenButton } from '@/components/ui/ListenButton'
 import { NUMBERS } from '@/content/numbers'
+import { openCount } from '@/domain/progress/numberUnlock'
 import { Mascot } from '@/features/mascot/Mascot'
 import { useMascot } from '@/features/mascot/useMascot'
 import { useSpeaker } from '@/services/audio/useSpeaker'
+import { useChildKey, useProgress, useProgressStore } from '@/store/progressStore'
 import { useLanguage } from '@/store/settingsStore'
 import { paletteFor } from './letterPalette'
 import { Picture } from '@/components/ui/Picture'
@@ -22,23 +24,30 @@ const NAV_LINK_CLASSES =
 export function NumberPage() {
   const { itemId = '' } = useParams()
   const index = NUMBERS.findIndex((entry) => entry.id === itemId)
-  // every number is open at any age
-  if (index === -1) return <Navigate to="/alphabet?tab=numbers" replace />
+  const { numberStreaks } = useProgress()
+  const open = openCount(
+    NUMBERS.map((entry) => `count:${entry.id}`),
+    numberStreaks ?? {},
+  )
+  // a locked number (a typed URL, or "next" before it opened) goes back to the list
+  if (index === -1 || index >= open) return <Navigate to="/alphabet?tab=numbers" replace />
   // A fresh counting game for every number.
-  return <NumberScreen key={itemId} index={index} />
+  return <NumberScreen key={itemId} index={index} open={open} />
 }
 
-function NumberScreen({ index }: { index: number }) {
+function NumberScreen({ index, open }: { index: number; open: number }) {
   const { t } = useTranslation()
   const language = useLanguage()
   const reduceMotion = useReducedMotion() ?? false
   const { sayNumber, sayCount, speaking } = useSpeaker()
   const { react, reset } = useMascot()
+  const childKey = useChildKey()
   const entry = NUMBERS[index]!
   const word = entry.words[language]
   const palette = paletteFor(index)
   const previous = NUMBERS[index - 1]
-  const next = NUMBERS[index + 1]
+  // the arrow on shows only an open number
+  const next = index + 1 < open ? NUMBERS[index + 1] : undefined
 
   /** Order in which the pictures were tapped: `counted[i]` is the count shown on picture `i`. */
   const [counted, setCounted] = useState<Record<number, number>>({})
@@ -58,6 +67,8 @@ function NumberScreen({ index }: { index: number }) {
     setCounted((current) => ({ ...current, [picture]: count }))
     const countWord = NUMBERS[count - 1]?.words[language] ?? String(count)
     if (count === entry.value) {
+      // counted to the end: one right answer for this number (it opens the next five)
+      useProgressStore.getState().recordNumberAnswer(childKey, `count:${entry.id}`, true)
       react('correct', { text: `${count} — ${countWord}!`, emoji: '🎉' })
     } else {
       void sayCount(count, countWord)

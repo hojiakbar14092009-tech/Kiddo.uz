@@ -20,6 +20,7 @@ import type { EvidenceKind } from '@/domain/learner/evidence'
 import { atCurrentLevel, clearUniverseChild, emitActivity } from '@/domain/universe/store'
 import { taskActivity } from '@/domain/universe/wiring'
 import { useFamilyStore } from './familyStore'
+import { nextStreak } from '@/domain/progress/numberUnlock'
 import { newId } from '@/lib/id'
 
 /** What kind of progression evidence each game is (domain/learner/evidence). */
@@ -75,6 +76,8 @@ export interface ChildProgress {
    * results list is capped, this count is not), and the last friendship day it has said.
    */
   robotBond?: RobotBond
+  /** Right answers in a row per number (`count:num-3`, `trace:3`): numbers open five at a time (MVP). */
+  numberStreaks?: Record<string, number>
 }
 
 export interface RobotBond extends PetBond {
@@ -148,6 +151,7 @@ interface ProgressState {
    * heart count when that day added a heart, otherwise null.
    */
   recordPetDay: (childKey: string, day: string) => { pet: PetId; level: number } | null
+  recordNumberAnswer: (childKey: string, key: string, correct: boolean) => void
   /**
    * The child played on `day` (once a day). `pastDays`: days played before, from the history,
    * the starting count for a child who played before the robot counted (seeded once).
@@ -373,6 +377,16 @@ export const useProgressStore = create<ProgressState>()(
           const current = state.byChild[childKey] ?? EMPTY_PROGRESS
           if (pet !== null && !(current.pets ?? []).includes(pet)) return state
           return { byChild: { ...state.byChild, [childKey]: { ...current, pet } } }
+        }),
+
+      recordNumberAnswer: (childKey, key, correct) =>
+        set((state) => {
+          const current = state.byChild[childKey] ?? EMPTY_PROGRESS
+          const numberStreaks = {
+            ...current.numberStreaks,
+            [key]: nextStreak(current.numberStreaks?.[key], correct),
+          }
+          return { byChild: { ...state.byChild, [childKey]: { ...current, numberStreaks } } }
         }),
 
       recordPetDay: (childKey, day) => {
