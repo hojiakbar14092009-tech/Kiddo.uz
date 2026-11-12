@@ -1,6 +1,6 @@
 # Kiddo MVP — progress
 
-Holat: 0–8-bosqichlar kodda bajarildi. Turso migratsiyasi QILINMADI (.env.local'da Turso sirlari yo'q). Keyingi: YAKUN oldidan qolgan UX bandlari (pastdagi jadval).
+Holat: 0–8 bajarildi; Turso migratsiyasi 1 o'tkazildi (2026-11-13). Email kirish SMTP_FROM kutadi. Keyingi: deploy + webhook + haqiqiy kirish sinovi (ega).
 sessiya scratchpad'ida edi (repo'da emas).
 
 ## 0-bosqich: AUDIT (2026-11-12)
@@ -270,6 +270,18 @@ webhook secret_token.
 | Har bo'limda bitta orqaga | bajarildi: TitleTopBar orqaga bo'lsa uy tugmasi yo'q (audit: hamma ekranda 1 ta) |
 | Scroll'siz tugmalar | bajarildi o'yin ekranlari uchun (375×667 o'lchandi: Uyda top, Masshtab, Uch tilli so'z); ro'yxat sahifalari scroll qiladi |
 - Orqa fon jarayonlari: o'zim ochgan vite preview'lar (4182–4185) PID bilan to'xtatildi. `.data/load.db` (lokal yuklama bazasi, git-ignored) qoldi.
+
+## Turso, webhook, tarix (2026-11-13, kech)
+- Baza nomi tekshirildi: `kiddo` (teamflow emas). Migratsiyadan oldin baza BO'SH edi. Migratsiya 1 o'tkazildi (faqat CREATE ... IF NOT EXISTS):
+  jadvallar users, sessions, auth_codes, telegram_logins, user_state, rate_limits, subscriptions, payments, schema_migrations;
+  indekslar auth_codes_target, payments_user, sessions_user, telegram_logins_user. Skript sessiya scratchpad'ida edi (repo'da emas).
+- `.env.local`: `SMTP_FROM` YO'Q → email usuli yashirin. `TELEGRAM_WEBHOOK_SECRET` yaratildi (64 belgi, qiymat chiqarilmadi).
+- Webhook: `server/telegram.ts telegramWebhook` — sarlavha yo'q/noto'g'ri → 401, solishtirish sha256 + timingSafeEqual.
+  `scripts/telegram-webhook.mjs` setWebhook'ga `secret_token` = TELEGRAM_WEBHOOK_SECRET. `auth/methods` telegram uchun bu sirni ham talab qiladi.
+- PAYMENT_MODE: o'rnatilmasa kodda `test` (bepul Pro!) — tavsiya: productionda o'rnatilmagan bo'lsa rad etish (hali o'zgartirilmadi, egadan javob kutiladi).
+- Lokal tekshiruv: /parent/login'da Google tugmasi va Telegram oqimi ko'rinadi; email yo'q (SMTP_FROM). "Telegram yo'qmi?" email bo'lmasa Google'ga fokus.
+- Tarix: ad81645a va 63756794 ichidagi faqat-format fayllar alohida `style: prettier …` commit'larga ajratildi; yakuniy daraxt asl bilan
+  bir xil (tekshirildi). Zaxira: branch `backup/before-prettier-split` (ega o'chirishi mumkin).
 
 ## Bosqichlar rejasi (qarorlardan)
 3. O'chirish: `/learn/garden`, `/adventure` (redirect), Soya lab, 9 klassik ertak; takroriy tugmalar; sodda so'zlar → Birinchi so'zim; kvest "o'stir" qadami.
