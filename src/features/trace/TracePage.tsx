@@ -4,13 +4,19 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { Screen } from '@/components/layout/Screen'
 import { TitleTopBar } from '@/components/layout/TitleTopBar'
 import { LockIcon } from '@/components/icons'
-import { Img3D } from '@/components/ui/Img3D'
+import { FitWords } from '@/components/ui/FitWords'
 import { openCount } from '@/domain/progress/numberUnlock'
 import { useProgress } from '@/store/progressStore'
 import { TraceRun } from './TraceRun'
 import { TraceThumb } from './TraceThumb'
 import { traceItemName } from './traceText'
-import { findTraceItem, isTraceSet, TRACE_ITEMS, type TraceSetId } from './traceItems'
+import {
+  findTraceItem,
+  isTraceSet,
+  TRACE_ITEMS,
+  type TraceItem,
+  type TraceSetId,
+} from './traceItems'
 
 const TILE =
   'flex flex-col items-center justify-center gap-2 rounded-card bg-surface p-4 text-center font-display font-extrabold shadow-press transition-transform active:translate-y-1 active:shadow-press-sm'
@@ -46,35 +52,30 @@ export function TracePage() {
 
 function TracePicker() {
   const { t } = useTranslation()
-  const choices = [
-    { to: '/tasks/trace', label: t('trace.sets.letters'), visual: <Glyph text="Aa" /> },
-    { to: '/trace/numbers', label: t('trace.sets.numbers'), visual: <Glyph text="123" /> },
-    {
-      to: '/trace/shapes',
-      label: t('trace.sets.shapes'),
-      visual: <Img3D name="star" className="size-20 sm:size-28 short:size-12" />,
-    },
+  const openNumbers = useOpenTraceCount('numbers')
+  // MVP: every number and shape in one list (letters keep their own lesson)
+  const entries = [
+    ...TRACE_ITEMS.numbers.map((entry, index) => ({ entry, locked: index >= openNumbers })),
+    ...TRACE_ITEMS.shapes.map((entry) => ({ entry, locked: false })),
   ]
   return (
     <Screen header={<TitleTopBar title={t('trace.title')} back="/home" />}>
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 px-4 py-6 short:gap-3 short:py-2">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-6 short:gap-2 short:py-2">
         <p className="text-center text-xl text-ink-soft short:text-base">{t('trace.pickPrompt')}</p>
-        <ul className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-3 short:grid-cols-3 short:gap-3">
-          {choices.map((choice) => (
-            <li key={choice.to}>
-              <Link
-                to={choice.to}
-                className={clsx(
-                  TILE,
-                  'min-h-36 w-full text-2xl sm:min-h-52 sm:text-3xl short:min-h-28 short:text-xl',
-                )}
-              >
-                {choice.visual}
-                {choice.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <Link
+          to="/tasks/trace"
+          className={clsx(
+            TILE,
+            'min-h-20 w-full flex-row gap-3 text-2xl short:min-h-14 short:text-xl',
+          )}
+        >
+          <Glyph text="Aa" />
+          {t('trace.sets.letters')}
+        </Link>
+        {openNumbers < TRACE_ITEMS.numbers.length && (
+          <p className="text-center text-base text-ink-soft">{t('alphabet.numbersLocked')}</p>
+        )}
+        <TraceGrid entries={entries} />
       </div>
     </Screen>
   )
@@ -100,57 +101,57 @@ function TraceItems({ set }: { set: TraceSetId }) {
         {open < TRACE_ITEMS[set].length && (
           <p className="text-center text-base text-ink-soft">{t('alphabet.numbersLocked')}</p>
         )}
-        <ul
-          className={clsx(
-            'grid gap-3 sm:gap-4',
-            set === 'numbers'
-              ? 'grid-cols-3 min-[480px]:grid-cols-4 sm:grid-cols-6 short:grid-cols-6'
-              : 'grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-5 short:grid-cols-5',
-          )}
-        >
-          {TRACE_ITEMS[set].map((entry, index) =>
-            index >= open ? (
-              <li key={entry.id}>
-                <span
-                  role="img"
-                  aria-label={t('alphabet.lockedNumber', { number: entry.id })}
-                  className={clsx(
-                    TILE,
-                    'relative aspect-square w-full text-ink-soft opacity-55 short:aspect-auto short:h-20',
-                  )}
-                >
-                  <TraceThumb
-                    strokes={entry.strokes}
-                    className="size-14 sm:size-20 short:size-12"
-                  />
-                  <LockIcon aria-hidden="true" size={20} className="absolute top-2 right-2" />
-                </span>
-              </li>
-            ) : (
-              <li key={entry.id}>
-                <Link
-                  to={`/trace/${set}/${entry.id}`}
-                  aria-label={traceItemName(t, entry)}
-                  className={clsx(
-                    TILE,
-                    'aspect-square w-full text-primary short:aspect-auto short:h-20',
-                  )}
-                >
-                  <TraceThumb
-                    strokes={entry.strokes}
-                    className="size-14 sm:size-20 short:size-12"
-                  />
-                  {set === 'shapes' && (
-                    <span className="text-base text-ink short:sr-only">
-                      {traceItemName(t, entry)}
-                    </span>
-                  )}
-                </Link>
-              </li>
-            ),
-          )}
-        </ul>
+        <TraceGrid
+          entries={TRACE_ITEMS[set].map((entry, index) => ({ entry, locked: index >= open }))}
+        />
       </div>
     </Screen>
+  )
+}
+
+function TraceGrid({ entries }: { entries: { entry: TraceItem; locked: boolean }[] }) {
+  const { t } = useTranslation()
+  return (
+    <ul className="grid grid-cols-3 gap-3 min-[480px]:grid-cols-4 sm:grid-cols-6 sm:gap-4 short:grid-cols-6">
+      {entries.map(({ entry, locked }) =>
+        locked ? (
+          <li key={`${entry.set}-${entry.id}`}>
+            <span
+              role="img"
+              aria-label={t('alphabet.lockedNumber', { number: entry.id })}
+              className={clsx(
+                TILE,
+                'relative aspect-square w-full text-ink-soft opacity-55 short:aspect-auto short:h-20',
+              )}
+            >
+              <TraceThumb strokes={entry.strokes} className="size-14 sm:size-20 short:size-12" />
+              <LockIcon aria-hidden="true" size={20} className="absolute top-2 right-2" />
+            </span>
+          </li>
+        ) : (
+          <li key={`${entry.set}-${entry.id}`}>
+            <Link
+              to={`/trace/${entry.set}/${entry.id}`}
+              aria-label={traceItemName(t, entry)}
+              className={clsx(
+                TILE,
+                'aspect-square w-full text-primary short:aspect-auto short:h-20',
+              )}
+            >
+              <TraceThumb strokes={entry.strokes} className="size-12 sm:size-20 short:size-12" />
+              {entry.set === 'shapes' && (
+                // a phone's tile is too narrow for "Шестиугольник": the picture says it, the label reads it
+                <span className="hidden w-full sm:block">
+                  <FitWords
+                    text={traceItemName(t, entry)}
+                    className="text-center text-base text-ink short:sr-only"
+                  />
+                </span>
+              )}
+            </Link>
+          </li>
+        ),
+      )}
+    </ul>
   )
 }

@@ -16,6 +16,8 @@ const ROUTES = [
   '/learn/my-story',
   '/math-lab',
   '/alphabet/num-3',
+  '/trace',
+  '/explore/find-home',
 ]
 
 async function child(page: Page, language: 'uz' | 'ru' | 'en', age: number) {

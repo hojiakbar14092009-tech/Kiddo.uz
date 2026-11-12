@@ -1,14 +1,28 @@
 import { arc, curve, join, line, type Stroke } from '@/components/trace/paths'
 
 /*
- * What can be traced on `/trace`: the numbers 0–10 and five basic shapes, each
+ * What can be traced on `/trace`: the numbers 0–10 and fourteen shapes (one list), each
  * as strokes in the 0–100 box (see components/trace/paths). Strokes follow the
  * way the numbers are taught to be written: from the top, in one movement
  * where possible.
  */
 
 export type TraceSetId = 'numbers' | 'shapes'
-export type ShapeId = 'circle' | 'square' | 'triangle' | 'star' | 'heart'
+export type ShapeId =
+  | 'circle'
+  | 'square'
+  | 'triangle'
+  | 'star'
+  | 'heart'
+  | 'rectangle'
+  | 'oval'
+  | 'rhombus'
+  | 'pentagon'
+  | 'hexagon'
+  | 'plus'
+  | 'arrow'
+  | 'zigzag'
+  | 'wave'
 
 export interface TraceItem {
   /** Unique in its set: `7`, `circle`. */
@@ -68,17 +82,41 @@ const NUMBER_STROKES: Record<string, readonly Stroke[]> = {
   '10': [line([18, 26], [32, 10], [32, 90]), arc(66, 50, 18, 38, -90, -450)],
 }
 
+/** A regular polygon around the centre, from the top point clockwise, closed. */
+function polygon(sides: number, radius = 40): Stroke {
+  return Array.from({ length: sides + 1 }, (_, i) => {
+    const angle = (-90 + (i * 360) / sides) * (Math.PI / 180)
+    return p(50 + radius * Math.cos(angle), 50 + radius * Math.sin(angle))
+  })
+}
+
+/** Two waves from left to right. */
+function wave(): Stroke {
+  return Array.from({ length: 49 }, (_, i) =>
+    p(10 + (i * 80) / 48, 50 - 18 * Math.sin((i / 48) * Math.PI * 4)),
+  )
+}
+
 const SHAPE_STROKES: Record<ShapeId, readonly Stroke[]> = {
   circle: [arc(50, 50, 38, 38, -90, -450)],
   square: [line([16, 16], [84, 16], [84, 84], [16, 84], [16, 16])],
   triangle: [line([50, 12], [87, 84], [13, 84], [50, 12])],
   star: [star()],
   heart: [heart()],
+  rectangle: [line([10, 28], [90, 28], [90, 72], [10, 72], [10, 28])],
+  oval: [arc(50, 50, 40, 26, -90, -450)],
+  rhombus: [line([50, 10], [86, 50], [50, 90], [14, 50], [50, 10])],
+  pentagon: [polygon(5)],
+  hexagon: [polygon(6)],
+  plus: [line([50, 14], [50, 86]), line([14, 50], [86, 50])],
+  arrow: [line([12, 50], [86, 50]), line([64, 28], [86, 50], [64, 72])],
+  zigzag: [line([10, 32], [26, 68], [42, 32], [58, 68], [74, 32], [90, 68])],
+  wave: [wave()],
 }
 
-export const SHAPE_IDS: readonly ShapeId[] = ['circle', 'square', 'triangle', 'star', 'heart']
+export const SHAPE_IDS = Object.keys(SHAPE_STROKES) as readonly ShapeId[]
 
-const SHAPE_PICTURES: Record<ShapeId, string> = {
+const SHAPE_PICTURES: Partial<Record<ShapeId, string>> = {
   circle: 'ball',
   square: 'gift',
   triangle: 'tent',

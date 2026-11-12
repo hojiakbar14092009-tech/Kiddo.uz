@@ -6,13 +6,25 @@ import { renderRoute } from '@/test/renderRoute'
 describe('trace page', () => {
   beforeEach(() => useSettingsStore.setState({ language: 'en' }))
 
-  it('offers letters, numbers and shapes', async () => {
+  it('offers letters, and every number and shape in one list', async () => {
     await renderRoute('/trace')
     expect(
       await screen.findByRole('link', { name: /Letters/ }, { timeout: 10_000 }),
     ).toHaveAttribute('href', '/tasks/trace')
-    expect(screen.getByRole('link', { name: /Numbers/ })).toHaveAttribute('href', '/trace/numbers')
-    expect(screen.getByRole('link', { name: /Shapes/ })).toHaveAttribute('href', '/trace/shapes')
+    // MVP: one list, 0–10 and fourteen shapes (25 things to draw), locked numbers shown with a lock
+    const open = screen
+      .getAllByRole('link')
+      .filter((link) => link.getAttribute('href')?.startsWith('/trace/'))
+    const locked = screen.getAllByRole('img', { name: /locked$/ })
+    expect(open.length + locked.length).toBe(25)
+    expect(screen.getByRole('link', { name: 'Hexagon' })).toHaveAttribute(
+      'href',
+      '/trace/shapes/hexagon',
+    )
+    expect(screen.getByRole('link', { name: 'Number 0' })).toHaveAttribute(
+      'href',
+      '/trace/numbers/0',
+    )
   })
 
   it('lists the numbers 0–10, the first five open (numbers open five at a time)', async () => {
