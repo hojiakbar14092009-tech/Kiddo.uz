@@ -24,6 +24,9 @@ npm run dev        # http://localhost:5173 (lokal tarmoqdagi iPad’dan ham ochi
 
 Playwright birinchi marta: `npx playwright install chromium`.
 
+Telegram bot (deploydan keyin, `.env.local` dagi `TELEGRAM_BOT_TOKEN` bilan; token chiqarilmaydi):
+`node scripts/telegram-webhook.mjs https://<domen>` webhookni ulaydi, `node scripts/telegram-setup.mjs` esa buyruqlar menyusi va bot tavsifini (uz/ru/en) sozlaydi. Ikkalasini qayta ishga tushirish xavfsiz.
+
 ## Nimalar bor
 
 **Bola uchun**
