@@ -326,3 +326,10 @@ Qoldi (9-bosqich, Telegram bot ota-onalar uchun): kod hali yozilmagan.
 - Tekshirildi: tsc, lint, server testlari 54/54 (avvalgi 29 ham o'tdi), parent/legal/i18n/alifbo testlari 241/241. Funksiyalar soni: `api/` ichida 1 ta. E2E ishga tushirilmadi, haqiqiy Telegram'ga xabar yuborilmadi.
 - Egaga: Vercel'da `CRON_SECRET` qo'shilsin (TELEGRAM_* va boshqalar avvalgidek).
 - Qisqartirish (shortcut): bir ishga tushirishda ~7 soniya (~140 xabar), qolgani keyingi ishga tushirishga qoladi. Bir xil brauzer va tizimli ikki kompyuter bitta qurilma deb hisoblanadi.
+
+## 9.1-bosqich: botni qulay qilish (2026-11-13, push qilinmagan)
+- `1276345b` server: migratsiya 3 (bot_prefs, feedback, device_alerts; faqat CREATE IF NOT EXISTS) Turso'ga qo'llandi (versiyalar 1,2,3). `server/bot.ts`: /menu va inline menyu (Hisobot, Sozlamalar, Til, Yordam, Saytni ochish), /sozlamalar (haftalik, voqealar, xavfsizlik; editMessageText, tugma holatni o'rnatadi, almashtirmaydi, shuning uchun qayta bosish xavfsiz), /yordam, /fikr (10 daqiqa, 1000 belgi, soatiga 3 ta, logga yozilmaydi, ixtiyoriy admin bildirishnomasi matnsiz), «Bu men emas» (bir martalik, 7 kun, barcha sessiyalarni o'chiradi). Callback'ni faqat ulangan ota-onaning shaxsiy chati (from.id = chat id) ishlata oladi. Noma'lum matnga yordam va menyu chiqadi; bare /start va kirish oqimi o'zgarmagan. Hisobot telefonning bitta ekraniga sig'adi (ism va hafta, Mini salomi, 4 fakt, 1 maslahat). /stop xavfsizlik xabarlarini ham o'chiradi.
+- `4d471325` 8 ta buyruq (uz/ru/en), webhook `allowed_updates` ga callback_query qo'shildi, `.env.example` ga ADMIN_TELEGRAM_CHAT_ID, /privacy bandi.
+- Tekshirildi: tsc, lint, server testlari 72/72, skript va privacy testlari 12/12.
+- Egaga: 1) `node scripts/telegram-webhook.mjs https://<domen>` qayta ishga tushirilsin, aks holda tugmalar ishlamaydi; 2) `node scripts/telegram-setup.mjs` ishga tushirilsin (yangi menyu); 3) ixtiyoriy: Vercel'da ADMIN_TELEGRAM_CHAT_ID.
+- Saytdagi panelda xavfsizlik xabarlari tugmasi yo'q, u faqat botda bor.
