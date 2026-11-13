@@ -3,6 +3,7 @@ import { randomToken, sameText, sha256 } from './crypto.js'
 import { db } from './db.js'
 import { botUsername, requireEnv } from './env.js'
 import { clientIp, HttpError, json, readJson } from './http.js'
+import { botCommand, isLinkStart } from './notify.js'
 import { memoryLimit, rateLimit } from './rateLimit.js'
 
 /*
@@ -70,6 +71,19 @@ export const BOT_TEXT: Record<
   },
 }
 
+/** A refused Bot API call: Telegram's error code, description and retry_after (no token, no text). */
+export class TelegramError extends HttpError {
+  readonly telegramStatus: number
+  readonly description: string
+  readonly retryAfter: number | undefined
+  constructor(telegramStatus: number, description = '', retryAfter?: number) {
+    super(502, 'telegram_failed')
+    this.telegramStatus = telegramStatus
+    this.description = description
+    this.retryAfter = retryAfter
+  }
+}
+
 /** Calls the Bot API; tests replace it. */
 export let botSend = async (
   chatId: string,
@@ -84,7 +98,18 @@ export let botSend = async (
       body: JSON.stringify({ chat_id: chatId, text, ...extra }),
     },
   )
-  if (!response.ok) throw new HttpError(502, 'telegram_failed')
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as {
+      description?: unknown
+      parameters?: { retry_after?: unknown }
+    }
+    const retryAfter = Number(body.parameters?.retry_after)
+    throw new TelegramError(
+      response.status,
+      typeof body.description === 'string' ? body.description.slice(0, 200) : '',
+      Number.isFinite(retryAfter) ? retryAfter : undefined,
+    )
+  }
 }
 export function useBotForTests(send: typeof botSend): void {
   botSend = send
@@ -221,8 +246,11 @@ export async function telegramWebhook(request: Request, now = Date.now()): Promi
   const say = (key: keyof (typeof BOT_TEXT)['uz'], extra?: Record<string, unknown>) =>
     botSend(String(chatId), BOT_TEXT[lang][key], extra)
 
-  const start = message.text?.match(/^\/start(?:\s+(\S+))?$/)
-  if (start) {
+  // two kinds of /start payload: link_<token> links a chat for notifications (notify.ts),
+  // any other is a sign-in token; a bare /start or a command goes to the notifications side first
+  const text = message.text?.trim() ?? ''
+  const start = text.match(/^\/start\s+(\S+)$/)
+  if (start && !isLinkStart(text)) {
     const token = tokenOf(start[1])
     const login = token ? await loginBy(sha256(token)) : undefined
     if (!login || login.status !== 'waiting' || Number(login.expires_at) <= now) {
@@ -269,6 +297,7 @@ export async function telegramWebhook(request: Request, now = Date.now()): Promi
     return json(200, { ok: true })
   }
 
+  if (text && (await botCommand(String(chatId), text, lang, now))) return json(200, { ok: true })
   await say('unknown')
   return json(200, { ok: true })
 }

@@ -87,4 +87,33 @@ export const MIGRATIONS: { version: number; statements: string[] }[] = [
       `CREATE INDEX IF NOT EXISTS payments_user ON payments(user_id, created_at)`,
     ],
   },
+  {
+    // the parents' Telegram notifications (stage 9): off until the parent turns them on
+    version: 2,
+    statements: [
+      `CREATE TABLE IF NOT EXISTS notification_prefs (
+        user_id TEXT PRIMARY KEY,
+        chat_id TEXT,
+        weekly INTEGER NOT NULL DEFAULT 0,
+        events INTEGER NOT NULL DEFAULT 0,
+        language TEXT NOT NULL DEFAULT 'uz',
+        link_hash TEXT,
+        link_expires_at INTEGER,
+        last_report_week TEXT,
+        last_event_day TEXT,
+        last_nudge_week TEXT,
+        milestone INTEGER,
+        updated_at INTEGER NOT NULL
+      )`,
+      `CREATE INDEX IF NOT EXISTS notification_prefs_chat ON notification_prefs(chat_id)`,
+      `CREATE INDEX IF NOT EXISTS notification_prefs_link ON notification_prefs(link_hash)`,
+      // a short hash of (account, "browser, system") only: never an IP or the full user agent
+      `CREATE TABLE IF NOT EXISTS user_devices (
+        user_id TEXT NOT NULL,
+        device_hash TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        PRIMARY KEY (user_id, device_hash)
+      ) WITHOUT ROWID`,
+    ],
+  },
 ]

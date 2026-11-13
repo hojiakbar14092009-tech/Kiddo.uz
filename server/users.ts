@@ -51,6 +51,8 @@ export async function deleteUser(userId: string): Promise<void> {
       { sql: 'DELETE FROM user_state WHERE user_id = ?', args: [userId] },
       { sql: 'DELETE FROM subscriptions WHERE user_id = ?', args: [userId] },
       { sql: 'DELETE FROM payments WHERE user_id = ?', args: [userId] },
+      { sql: 'DELETE FROM notification_prefs WHERE user_id = ?', args: [userId] },
+      { sql: 'DELETE FROM user_devices WHERE user_id = ?', args: [userId] },
       { sql: 'DELETE FROM users WHERE id = ?', args: [userId] },
     ],
     'write',

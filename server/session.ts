@@ -1,6 +1,7 @@
 import { randomToken, sha256 } from './crypto.js'
 import { db } from './db.js'
 import { cookie, HttpError, isSecure, parseCookies } from './http.js'
+import { noticeDevice } from './notify.js'
 
 const DAY = 86_400_000
 const SESSION_DAYS = 30
@@ -63,6 +64,10 @@ export async function startSession(
       },
     ],
     'write',
+  )
+  // a sign-in from a new kind of device tells the parent in Telegram; never blocks the sign-in
+  await noticeDevice(request, userId, now).catch((error: unknown) =>
+    console.error('[notify] device check failed', error instanceof Error ? error.name : 'unknown'),
   )
   return cookie(request, sessionCookieName(request), token, SESSION_DAYS * 86_400)
 }

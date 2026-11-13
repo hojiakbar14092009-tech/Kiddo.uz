@@ -1,6 +1,7 @@
 import { emailStart, emailVerify, googleCallback, googleStart, methods } from './auth.js'
 import { ready } from './db.js'
 import { assertSameOrigin, clientIp, HttpError, json } from './http.js'
+import { dailyCron, notifyLink, notifySettings, saveNotifySettings, weeklyCron } from './notify.js'
 import { memoryLimit } from './rateLimit.js'
 import { endSession, requireSession } from './session.js'
 import { checkout, prices } from './pay.js'
@@ -44,6 +45,12 @@ const routes: Record<string, Handler> = {
   'POST auth/telegram/resend': (request) => telegramResend(request),
   'POST auth/telegram/verify': (request) => telegramVerify(request),
   'POST telegram/webhook': (request) => telegramWebhook(request),
+  // the parents' Telegram notifications (stage 9) and their Vercel cron jobs (vercel.json)
+  'GET notify/settings': (request) => notifySettings(request),
+  'PUT notify/settings': (request) => saveNotifySettings(request),
+  'POST notify/link': (request) => notifyLink(request),
+  'GET cron/weekly': (request) => weeklyCron(request),
+  'GET cron/daily': (request) => dailyCron(request),
   // Pro (MVP: test payments)
   'GET pay/prices': async () => prices(),
   'POST pay/checkout': (request) => checkout(request),
@@ -52,8 +59,8 @@ const routes: Record<string, Handler> = {
 /** Answered without the database (they work, and say what is set up, before Turso is). */
 const NO_DATABASE = new Set(['GET health', 'GET auth/methods', 'GET pay/prices'])
 
-/** Webhooks prove themselves with a secret, not with a browser Origin. */
-const WEBHOOKS = new Set<string>(['POST telegram/webhook'])
+/** Webhooks and cron jobs prove themselves with a secret, not with a browser Origin. */
+const WEBHOOKS = new Set<string>(['POST telegram/webhook', 'GET cron/weekly', 'GET cron/daily'])
 
 /**
  * The route: /api/<path> in the dev server, or /api?path=<path> after the vercel.json rewrite.

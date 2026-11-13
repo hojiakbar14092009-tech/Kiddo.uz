@@ -1,5 +1,6 @@
 import { createClient, type Client } from '@libsql/client'
 import { env, requireEnv } from './env.js'
+import { HttpError } from './http.js'
 import { MIGRATIONS } from './migrations.js'
 
 let client: Client | null = null
@@ -17,8 +18,20 @@ export function db(): Client {
   return client
 }
 
+/**
+ * Only Kiddo's own Turso database is ever migrated: its host starts with "kiddo-" (database
+ * "kiddo" + the organisation) and never names another project's ("teamflow").
+ */
+export function isKiddoDatabase(url: string): boolean {
+  const label = url.replace(/^libsql:\/\//, 'https://').match(/^https?:\/\/([^./:]+)/)?.[1] ?? ''
+  return label.startsWith('kiddo-') && !/teamflow/i.test(url)
+}
+
 /** Applies missing migrations once per cold start (they only add tables, so a race is harmless). */
 export function ready(): Promise<void> {
+  const url = env('TURSO_DATABASE_URL')
+  if (url && !isKiddoDatabase(url))
+    return Promise.reject(new HttpError(503, 'not_configured', { setting: 'TURSO_DATABASE_URL' }))
   migrated ??= migrate(db()).catch((error: unknown) => {
     migrated = null
     throw error
