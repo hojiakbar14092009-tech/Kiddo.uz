@@ -176,11 +176,28 @@ export function useMailerForTests(send: typeof sendMail): void {
   sendMail = send
 }
 
+/** A per-day mail cap: over it the parent is told to use Telegram or Google (code email_limited). */
+async function dailyEmailLimit(key: string, max: number): Promise<void> {
+  try {
+    await rateLimit(key, max, 86_400)
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 429)
+      throw new HttpError(429, 'email_limited')
+    throw error
+  }
+}
+
 export async function emailStart(request: Request): Promise<Response> {
   const body = await readJson<{ email?: unknown; language?: unknown }>(request, 4096)
   const email = cleanEmail(body.email)
-  await rateLimit(`email-ip:${clientIp(request)}`, 20, 3600)
+  const ip = clientIp(request)
+  await rateLimit(`email-ip:${ip}`, 20, 3600)
   await rateLimit(`email-to:${email}`, 3, 600)
+  // daily caps protect the mail quota; Telegram and Google sign-in never touch them.
+  // Narrow ones first: a caller refused there does not use up the whole site's cap.
+  await dailyEmailLimit(`email-to-day:${email}`, 5)
+  await dailyEmailLimit(`email-ip-day:${ip}`, 15)
+  await dailyEmailLimit('email-day', Number(env('EMAIL_DAILY_CAP')) || 200)
   for (const name of ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'SMTP_FROM'])
     requireEnv(name)
   const text = MAIL_TEXT[langOf(body.language)]

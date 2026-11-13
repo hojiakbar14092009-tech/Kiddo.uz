@@ -12,6 +12,8 @@ export async function rateLimit(
   windowSeconds: number,
   now = Date.now(),
 ): Promise<void> {
+  // memory first: a caller already over the limit on this instance never costs a database write
+  memoryLimit(key, max, windowSeconds, now)
   const windowStart = Math.floor(now / 1000 / windowSeconds) * windowSeconds
   const result = await db().execute({
     sql: `INSERT INTO rate_limits (key, window_start, count) VALUES (?, ?, 1)
@@ -37,6 +39,8 @@ export async function rateLimit(
 }
 
 const windows = new Map<string, { start: number; count: number }>()
+/** Tests: forget this instance's counters. */
+export const resetMemoryLimits = () => windows.clear()
 
 /**
  * The same fixed window in this instance's memory: a cheap first line against floods. Each warm

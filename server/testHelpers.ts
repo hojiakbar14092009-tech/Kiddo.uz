@@ -1,12 +1,14 @@
 // Shared by the server's unit tests only: an in-memory libSQL database and request builders.
 import { createClient } from '@libsql/client'
 import { db, migrate, useDbForTests } from './db.js'
+import { resetMemoryLimits } from './rateLimit.js'
 import { handle } from './router.js'
 import { startSession } from './session.js'
 
 export const ORIGIN = 'https://kiddo.test'
 
 export async function freshDb(): Promise<void> {
+  resetMemoryLimits()
   process.env.AUTH_SECRET = 'test-secret-'.padEnd(48, 'x')
   const client = createClient({ url: ':memory:' })
   useDbForTests(client)

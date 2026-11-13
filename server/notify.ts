@@ -483,7 +483,7 @@ async function deliver(
 }
 
 /** Vercel Cron sends `Authorization: Bearer <CRON_SECRET>`; compared in constant time. */
-function assertCron(request: Request): void {
+export function assertCron(request: Request): void {
   const secret = requireEnv('CRON_SECRET')
   const given = request.headers.get('authorization') ?? ''
   if (!given || !sameText(sha256(given), sha256(`Bearer ${secret}`)))

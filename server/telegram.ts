@@ -160,6 +160,7 @@ export async function telegramStatus(
 ): Promise<Response> {
   const token = tokenOf(url.searchParams.get('token'))
   if (!token) throw new HttpError(400, 'bad_token')
+  memoryLimit(`tg-status-ip:${clientIp(_request)}`, 120, 60) // one IP, any token
   memoryLimit(`tg-status:${token}`, 40, 60) // the page asks every few seconds
   const login = await loginBy(sha256(token))
   if (!login) throw new HttpError(404, 'not_found')
@@ -241,12 +242,17 @@ interface Update {
 const langOfTelegram = (code: string | undefined): Lang =>
   code?.startsWith('ru') ? 'ru' : code?.startsWith('en') ? 'en' : 'uz'
 
-/** Telegram → us. Always 200 for a real call (Telegram retries otherwise); the secret header first. */
-export async function telegramWebhook(request: Request, now = Date.now()): Promise<Response> {
+/** The secret header Telegram sends with every update; checked in constant time. */
+export function assertWebhookSecret(request: Request): void {
   const secret = request.headers.get('x-telegram-bot-api-secret-token') ?? ''
-  // constant time: both sides hashed to the same length first (no length or prefix leak)
+  // both sides hashed to the same length first (no length or prefix leak)
   if (!secret || !sameText(sha256(secret), sha256(webhookSecret())))
     throw new HttpError(401, 'bad_secret')
+}
+
+/** Telegram → us. Always 200 for a real call (Telegram retries otherwise); the secret header first. */
+export async function telegramWebhook(request: Request, now = Date.now()): Promise<Response> {
+  assertWebhookSecret(request)
   const update = await readJson<Update>(request, 64 * 1024)
   const origin = new URL(request.url).origin
   const callback = update.callback_query

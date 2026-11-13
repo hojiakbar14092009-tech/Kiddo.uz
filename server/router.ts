@@ -1,7 +1,14 @@
 import { emailStart, emailVerify, googleCallback, googleStart, methods } from './auth.js'
 import { ready } from './db.js'
 import { assertSameOrigin, clientIp, HttpError, json } from './http.js'
-import { dailyCron, notifyLink, notifySettings, saveNotifySettings, weeklyCron } from './notify.js'
+import {
+  assertCron,
+  dailyCron,
+  notifyLink,
+  notifySettings,
+  saveNotifySettings,
+  weeklyCron,
+} from './notify.js'
 import { memoryLimit } from './rateLimit.js'
 import { endSession, requireSession } from './session.js'
 import { checkout, prices } from './pay.js'
@@ -12,6 +19,7 @@ import {
   telegramStatus,
   telegramVerify,
   telegramWebhook,
+  assertWebhookSecret,
 } from './telegram.js'
 import { deleteUser, getUser, proStatus } from './users.js'
 
@@ -80,7 +88,12 @@ export async function handle(request: Request): Promise<Response> {
     if (!WEBHOOKS.has(route)) assertSameOrigin(request)
     // a coarse limit per IP over every route, in memory (no database write per request);
     // the sensitive routes (codes, sign-in, writes, payments) add their own in Turso
-    memoryLimit(`ip:${clientIp(request)}`, 300, 60)
+    // Telegram's servers share a few IPs: the webhook has a higher bucket of its own
+    if (route === 'POST telegram/webhook') memoryLimit(`hook-ip:${clientIp(request)}`, 600, 60)
+    else memoryLimit(`ip:${clientIp(request)}`, 300, 60)
+    // a webhook or cron call without its secret is refused before the database is touched
+    if (route === 'POST telegram/webhook') assertWebhookSecret(request)
+    if (route.startsWith('GET cron/')) assertCron(request)
     if (!NO_DATABASE.has(route)) await ready()
     return await handler(request, url)
   } catch (error) {

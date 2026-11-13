@@ -106,11 +106,20 @@ export function assertSameOrigin(request: Request): void {
   if (!origin || (origin !== own && origin !== extra)) throw new HttpError(403, 'bad_origin')
 }
 
-/** The caller's IP (Vercel sets x-real-ip / x-forwarded-for); only used for rate limits, never stored in clear. */
+let warnedNoIp = false
+/**
+ * The caller's IP, for rate limits only (never stored in clear). Only headers Vercel sets itself
+ * are read (x-real-ip, x-vercel-forwarded-for): a client-sent x-forwarded-for is ignored, so it
+ * cannot dodge a limit by changing it. Without them (local dev) every caller shares "unknown".
+ */
 export function clientIp(request: Request): string {
-  return (
-    request.headers.get('x-real-ip') ??
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    'local'
-  )
+  const ip =
+    request.headers.get('x-real-ip')?.trim() ||
+    request.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim()
+  if (ip) return ip
+  if (!warnedNoIp) {
+    warnedNoIp = true
+    console.warn('[api] no x-real-ip: callers share the "unknown" rate-limit bucket')
+  }
+  return 'unknown'
 }
