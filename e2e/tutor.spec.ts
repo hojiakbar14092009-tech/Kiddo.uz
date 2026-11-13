@@ -18,24 +18,12 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
-async function solveParentGate(page: Page) {
-  const gate = page.getByRole('dialog', { name: 'Faqat kattalar uchun' })
-  await expect(gate).toBeVisible()
-  const text =
-    (await gate.locator('p[aria-live="polite"] span[aria-hidden="true"]').textContent()) ?? ''
-  const match = /(\d+)\s*×\s*(\d+)/.exec(text)
-  const answer = String(Number(match![1]) * Number(match![2]))
-  for (const digit of answer) await gate.getByRole('button', { name: digit, exact: true }).click()
-  await gate.getByRole('button', { name: 'Tekshirish' }).click()
-}
-
 /** A six-year-old "Aziz" (Math Lab level 3) made in the demo parent area, then chosen. */
 async function sixYearOld(page: Page) {
   await page.goto('/')
   await page.getByRole('button', { name: 'O‘zbekcha' }).click()
   await expect(page).toHaveURL(/\/home$/)
   await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
-  await solveParentGate(page)
   await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
   await page.getByRole('textbox', { name: 'Ismi' }).fill('Aziz')
   const born = new Date()
@@ -174,8 +162,6 @@ test('tutor: hint ladder, memory after a reload, spaced review, parent summary',
 
   // the parent sees the skill, never a label for the child
   await page.goto('/parent/dashboard?tab=report')
-  // a new page load asks the grown-ups' question again
-  await solveParentGate(page)
   const memory = page.locator('#memory')
   await expect(memory).toContainText('Kiddo nimani eslab qoldi')
   await expect(memory.getByTestId('memory-needs')).toContainText('Ayirish')

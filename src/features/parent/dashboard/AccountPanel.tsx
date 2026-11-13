@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
+import { useAdultCheck } from '@/features/parent/gate/useAdultCheck'
 import { toast } from '@/components/ui/toast'
 import { useSyncStore } from '@/services/sync/syncQueue'
 import { deleteCloudAccount, signOutCloud } from '@/services/supabase/auth'
@@ -58,6 +59,7 @@ export function AccountPanel({ email, userId }: { email: string; userId: string 
     }
   }
 
+  const [askAdult, adultGate] = useAdultCheck()
   const deleteAccount = async () => {
     if (typed.trim() !== DELETE_WORD) return
     setDeleteError(false)
@@ -89,6 +91,7 @@ export function AccountPanel({ email, userId }: { email: string; userId: string 
   return (
     <Panel title={t('parent.settings.account')} className="lg:col-span-2" id="account">
       <div className="flex flex-col gap-5">
+        {adultGate}
         <p className="break-words text-ink-soft">
           {t('parent.settings.cloud', { email: email || '—' })}
         </p>
@@ -103,7 +106,12 @@ export function AccountPanel({ email, userId }: { email: string; userId: string 
               type="checkbox"
               checked={cloudPhotos}
               disabled={photosBusy}
-              onChange={(event) => void togglePhotos(event.target.checked)}
+              onChange={(event) =>
+                event.target.checked
+                  ? void togglePhotos(true)
+                  : // turning it off deletes the photos in the cloud: a grown-up's call
+                    askAdult(() => void togglePhotos(false))
+              }
               data-testid="account-photos"
               className="size-6 accent-primary"
             />
@@ -156,7 +164,7 @@ export function AccountPanel({ email, userId }: { email: string; userId: string 
             variant="oops"
             size="md"
             disabled={deleting || typed.trim() !== DELETE_WORD}
-            onClick={() => void deleteAccount()}
+            onClick={() => askAdult(() => void deleteAccount())}
             data-testid="account-delete"
           >
             {deleting ? t('parent.account.deleting') : t('parent.account.deleteButton')}

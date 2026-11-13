@@ -16,15 +16,6 @@ const SIGN_LABEL: Record<string, string> = { '<': 'kichik', '>': 'katta', '=': '
 
 async function parentArea(page: Page) {
   await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
-  await solveGate(page)
-}
-
-/** A fresh page load asks the grown-ups question again (12 × 3 with this Math.random). */
-async function solveGate(page: Page) {
-  await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '3', exact: true }).click()
-  await page.getByRole('button', { name: '6', exact: true }).click()
-  await page.getByRole('button', { name: 'Tekshirish' }).click()
 }
 
 test('activity homework: given by the parent, played by the child, counted by itself', async ({
@@ -46,7 +37,6 @@ test('activity homework: given by the parent, played by the child, counted by it
 
   // the homework tab: Math Lab, once, with a word for the child
   await page.goto('/parent/dashboard?tab=homework')
-  await solveGate(page)
   await page.getByTestId('hw-activity-mathLab').click()
   await page.getByRole('radio', { name: '1 marta' }).click()
   await page.getByTestId('hw-note').fill('Barakalla!')
@@ -92,7 +82,6 @@ test('activity homework: given by the parent, played by the child, counted by it
   await page.goto('/home')
   await expect(page.getByTestId('activity-homework')).toHaveCount(0)
   await page.goto('/parent/dashboard?tab=homework')
-  await solveGate(page)
   await expect(page.getByTestId('hw-progress')).toHaveText(/1 \/ 1/)
 })
 
@@ -135,7 +124,6 @@ test('planet homework: Child A learns the lesson, then its check; the parent see
 
   // parent: Aziza → Space → the lesson "Earth, Mars, Saturn" → once
   await page.goto('/parent/dashboard?tab=homework')
-  await solveGate(page)
   // the parent's demo session (no cloud account in this build)
   const demo = page.getByRole('button', { name: 'Demo rejimda kirish' })
   const children = page.getByRole('group', { name: 'Bolani tanlang' })
@@ -143,7 +131,6 @@ test('planet homework: Child A learns the lesson, then its check; the parent see
   if (await demo.isVisible()) {
     await demo.click()
     await page.goto('/parent/dashboard?tab=homework')
-    await solveGate(page)
   }
   await page
     .getByRole('group', { name: 'Bolani tanlang' })
@@ -192,7 +179,6 @@ test('planet homework: Child A learns the lesson, then its check; the parent see
 
   // the parent sees it done
   await page.goto('/parent/dashboard?tab=homework')
-  await solveGate(page)
   await page
     .getByRole('group', { name: 'Bolani tanlang' })
     .getByRole('button', { name: /Aziza/ })

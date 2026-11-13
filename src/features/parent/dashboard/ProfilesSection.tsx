@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/Button'
+import { useAdultCheck } from '@/features/parent/gate/useAdultCheck'
 import { ChildAvatar } from '@/features/profiles/ChildAvatar'
 import { childAge, useFamilyStore, type ChildProfile } from '@/store/familyStore'
 import { useProgressStore } from '@/store/progressStore'
@@ -31,6 +32,7 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
     setEditing(null)
   }
 
+  const [askAdult, adultGate] = useAdultCheck()
   const confirmRemove = () => {
     if (!removing) return
     removeChild(removing.id)
@@ -56,6 +58,7 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
 
   return (
     <Panel title={t('parent.profiles.title', { count: children.length })}>
+      {adultGate}
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {children.map((child) => (
           <li key={child.id} className="flex flex-col gap-3 rounded-3xl bg-cream p-4">
@@ -74,7 +77,7 @@ export function ProfilesSection({ onCreated }: { onCreated?: (child: ChildProfil
                   {t('parent.profiles.removeConfirm', { name: child.name })}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="oops" size="md" onClick={confirmRemove}>
+                  <Button variant="oops" size="md" onClick={() => askAdult(confirmRemove)}>
                     {t('parent.profiles.removeYes')}
                   </Button>
                   <Button variant="soft" size="md" onClick={() => setRemoving(null)}>

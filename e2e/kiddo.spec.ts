@@ -14,13 +14,6 @@ async function chooseUzbek(page: Page) {
   await expect(page).toHaveURL(/\/home$/)
 }
 
-async function solveParentGate(page: Page) {
-  await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '3', exact: true }).click()
-  await page.getByRole('button', { name: '6', exact: true }).click()
-  await page.getByRole('button', { name: 'Tekshirish' }).click()
-}
-
 test('a child picks a language and sees today’s plan', async ({ page }) => {
   await chooseUzbek(page)
   await expect(page.getByRole('heading', { name: 'Bugungi reja' })).toBeVisible()
@@ -64,10 +57,9 @@ test('the demo: the voice is free (no PRO crown on “listen again”)', async (
   await expect(page.getByRole('status', { name: 'Bepul' })).toHaveCount(0)
 })
 
-test('the parent area is behind the grown-ups gate', async ({ page }) => {
+test('the parent area opens without the grown-ups question', async ({ page }) => {
   await chooseUzbek(page)
   await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
-  await solveParentGate(page)
   await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
 
   await page.getByRole('textbox', { name: 'Ismi' }).fill('Lola')
@@ -98,11 +90,8 @@ test('works offline after the first visit', async ({ page, context }) => {
 
 async function openProTab(page: Page) {
   await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
-  await solveParentGate(page)
   await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
   await page.goto('/parent/dashboard?tab=pro')
-  // a fresh page load asks the grown-ups question again
-  await solveParentGate(page)
 }
 
 test('no ad yet: no promo code', async ({ page }) => {

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, CrownIcon } from '@/components/icons'
 import { Button } from '@/components/ui/Button'
+import { useAdultCheck } from '@/features/parent/gate/useAdultCheck'
 import { ChoiceChips } from '@/features/parent/dashboard/ChoiceChips'
 import { Panel } from '@/features/parent/dashboard/Panel'
 import { formatDayMonth } from '@/lib/dates'
@@ -31,7 +32,7 @@ const FEATURES = [
 
 type PayState = 'idle' | 'paying' | 'paid'
 
-/** The PRO tab of the parent dashboard. Only reachable behind the parent gate. */
+/** The PRO tab of the parent dashboard. Paying asks the grown-ups question first (useAdultCheck). */
 export function ProSection() {
   const { t } = useTranslation()
   const subscription = useSubscriptionStore()
@@ -59,6 +60,7 @@ export function ProSection() {
   const canPay = serverPay || paymentsAvailable()
   const [payError, setPayError] = useState(false)
 
+  const [askAdult, adultGate] = useAdultCheck()
   const pay = async () => {
     if (!canPay) return
     setPayState('paying')
@@ -85,6 +87,7 @@ export function ProSection() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
+      {adultGate}
       {celebrating && <ProCelebration gift={gift} onClose={() => setCelebrating(false)} />}
       {publicPro && !active && (
         <ProShowcase
@@ -231,7 +234,7 @@ export function ProSection() {
                 size="md"
                 className="self-start"
                 disabled={!canPay || payState === 'paying'}
-                onClick={() => void pay()}
+                onClick={() => askAdult(() => void pay())}
               >
                 {payState === 'paying'
                   ? t('pro.paying')

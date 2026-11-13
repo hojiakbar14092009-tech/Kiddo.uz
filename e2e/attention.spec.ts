@@ -13,7 +13,6 @@ type Consent = 'unasked' | 'granted' | 'denied'
 async function child(page: Page, consent: Consent, { firstRun = false } = {}) {
   await page.addInitScript(
     ({ consent, firstRun }) => {
-      // the grown-ups' question asks 12 × 3
       Math.random = () => 0
       // seeded once per test, so what the app writes later survives a reload
       if (sessionStorage.getItem('seeded')) return
@@ -58,13 +57,6 @@ async function ready(page: Page, path: string) {
   await expect(page.locator('[data-splash]')).toHaveCount(0, { timeout: 30_000 })
 }
 
-async function solveParentGate(page: Page) {
-  await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '3', exact: true }).click()
-  await page.getByRole('button', { name: '6', exact: true }).click()
-  await page.getByRole('button', { name: 'Tekshirish' }).click()
-}
-
 /** A science game: its rules and the try first (the first time), then it starts. */
 async function startSci(page: Page) {
   await expect(page.getByTestId('lesson-deck').or(page.getByTestId('sci-start'))).toBeVisible()
@@ -81,12 +73,9 @@ test.describe('the attention helper', () => {
     await ready(page, '/home')
     await expect(page.getByTestId('attention-consent')).toHaveCount(0)
     await ready(page, '/parent/dashboard?tab=settings')
-    await solveParentGate(page)
     await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
     await page.goto('/parent/dashboard?tab=settings')
-    const gate = page.getByRole('dialog', { name: 'Faqat kattalar uchun' })
-    await expect(gate.or(page.getByTestId('attention-setting'))).toBeVisible()
-    if (await gate.isVisible()) await solveParentGate(page)
+    await expect(page.getByTestId('attention-setting')).toBeVisible()
     await page.getByTestId('attention-setting').getByRole('radio', { name: 'Yoqilgan' }).click()
     await expect.poll(() => stored(page)).toBe('granted')
   })
@@ -135,12 +124,9 @@ test.describe('the attention helper', () => {
       localStorage.setItem('kiddo.attention', JSON.stringify(raw))
     })
     await ready(page, '/parent/dashboard?tab=settings')
-    await solveParentGate(page)
     await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
     await page.goto('/parent/dashboard?tab=settings')
-    const gate = page.getByRole('dialog', { name: 'Faqat kattalar uchun' })
-    await expect(gate.or(page.getByTestId('attention-setting'))).toBeVisible()
-    if (await gate.isVisible()) await solveParentGate(page)
+    await expect(page.getByTestId('attention-setting')).toBeVisible()
     const report = page.getByTestId('attention-report')
     await expect(report).toContainText('Diqqat hisoboti: Bek')
     await expect(page.getByTestId('attention-total-reminders')).toHaveText('3')

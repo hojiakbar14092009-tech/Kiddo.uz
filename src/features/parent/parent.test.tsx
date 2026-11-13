@@ -17,7 +17,7 @@ async function solveGate(user: User, answer = '36') {
   await user.click(screen.getByRole('button', { name: 'Tekshirish' }))
 }
 
-describe('Parent gate', () => {
+describe('Parent area: the grown-ups question', () => {
   beforeEach(() => {
     vi.spyOn(Math, 'random').mockReturnValue(0)
     useSettingsStore.setState({ language: 'uz' })
@@ -27,41 +27,39 @@ describe('Parent gate', () => {
   })
   afterEach(() => vi.restoreAllMocks())
 
-  it('keeps the parent area closed until the sum is solved', async () => {
-    const { router, user } = await renderRoute('/parent/dashboard')
-    expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
-    expect(screen.getByText('12 ko‘paytirish 3 nechaga teng?')).toBeInTheDocument()
-
-    await solveGate(user, '8')
-    expect(screen.getByText('Noto‘g‘ri. Mana yangi misol.')).toBeInTheDocument()
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-
-    await solveGate(user)
-    await waitFor(() => expect(router.state.location.pathname).toBe('/parent/login'))
-  })
-
-  it('rests the keypad after three wrong answers in a row', async () => {
-    const { user } = await renderRoute('/parent')
-    for (let attempt = 0; attempt < 3; attempt += 1) await solveGate(user, '1')
-    expect(screen.getByText(/30 soniyadan keyin/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '6' })).toBeDisabled()
-  })
-
-  it('goes back to the child area on cancel', async () => {
-    const { router, user } = await renderRoute('/parent')
-    await user.click(screen.getByRole('button', { name: 'Orqaga' }))
-    expect(router.state.location.pathname).toBe('/home')
-  })
-
-  it('is reached from the home screen', async () => {
+  it('is not asked on entering: home leads straight to the sign-in', async () => {
     const { router, user } = await renderRoute('/home')
     await user.click(screen.getByTestId('parent-lock'))
-    expect(router.state.location.pathname).toBe('/parent')
+    await waitFor(() => expect(router.state.location.pathname).toBe('/parent/login'))
+    expect(screen.queryByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeNull()
+  })
+
+  it('is asked before deleting a profile; a wrong answer, three of them rest the keypad', async () => {
+    useParentStore.setState({ session: { mode: 'demo' } })
+    useFamilyStore.setState({ children: [], activeChildId: null })
+    useFamilyStore
+      .getState()
+      .addChild({ name: 'Ali', birthDate: birthDateForAge(5, dayKey()), gender: 'boy' })
+    const { user } = await renderRoute('/parent/dashboard?tab=profiles')
+    await user.click(screen.getByRole('button', { name: 'Ali profilini o‘chirish' }))
+    await user.click(screen.getByRole('button', { name: 'Ha, o‘chirish' }))
     expect(screen.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeInTheDocument()
+    expect(screen.getByText('12 ko‘paytirish 3 nechaga teng?')).toBeInTheDocument()
+    await solveGate(user, '8')
+    expect(screen.getByText('Noto‘g‘ri. Mana yangi misol.')).toBeInTheDocument()
+    expect(useFamilyStore.getState().children).toHaveLength(1)
+    for (let attempt = 0; attempt < 2; attempt += 1) await solveGate(user, '1')
+    expect(screen.getByText(/30 soniyadan keyin/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '6' })).toBeDisabled()
+    // "Back" keeps the profile
+    await user.click(screen.getByRole('button', { name: 'Orqaga' }))
+    expect(screen.queryByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeNull()
+    expect(useFamilyStore.getState().children).toHaveLength(1)
   })
 })
 
 describe('Parent dashboard', () => {
+  afterEach(() => vi.restoreAllMocks())
   beforeEach(() => {
     useSettingsStore.setState({ language: 'uz' })
     useParentGateStore.setState({ openedAt: Date.now() })
@@ -124,6 +122,8 @@ describe('Parent dashboard', () => {
   })
 
   it('asks before deleting a profile', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    useParentGateStore.getState().unlock()
     useParentStore.setState({ session: { mode: 'demo' } })
     useFamilyStore
       .getState()
@@ -132,6 +132,8 @@ describe('Parent dashboard', () => {
     await user.click(screen.getByRole('button', { name: 'Ali profilini o‘chirish' }))
     expect(useFamilyStore.getState().children).toHaveLength(1)
     await user.click(screen.getByRole('button', { name: 'Ha, o‘chirish' }))
+    expect(useFamilyStore.getState().children).toHaveLength(1)
+    await solveGate(user)
     expect(useFamilyStore.getState().children).toHaveLength(0)
   })
 

@@ -8,20 +8,12 @@ test.beforeEach(async ({ page }) => {
   })
 })
 
-async function solveParentGate(page: Page) {
-  await expect(page.getByRole('dialog', { name: 'Faqat kattalar uchun' })).toBeVisible()
-  await page.getByRole('button', { name: '3', exact: true }).click()
-  await page.getByRole('button', { name: '6', exact: true }).click()
-  await page.getByRole('button', { name: 'Tekshirish' }).click()
-}
-
 /** Uzbek, demo parent, one five-year-old "Lola" made in the parent area; ends on the report. */
 async function parentWithChild(page: Page) {
   await page.goto('/')
   await page.getByRole('button', { name: 'O‘zbekcha' }).click()
   await expect(page).toHaveURL(/\/home$/)
   await page.getByRole('link', { name: 'Ota-ona bo‘limi' }).click()
-  await solveParentGate(page)
   await page.getByRole('button', { name: 'Demo rejimda kirish' }).click()
   await page.getByRole('textbox', { name: 'Ismi' }).fill('Lola')
   const born = new Date()
@@ -172,8 +164,6 @@ async function seedPlay(page: Page) {
     localStorage.setItem('kiddo.progress', JSON.stringify(progress))
   })
   await page.reload()
-  // a fresh page load asks the grown-ups question again
-  await solveParentGate(page)
 }
 
 test('the parent dashboard shows calm empty panels for a new child', async ({ page }) => {
