@@ -2566,6 +2566,10 @@ export const en: Translation = {
         title: 'How long it is kept',
         body: 'Family data in the cloud is kept until the account is deleted. Anonymous statistics: about 180 days. A Telegram link: until you unlink it (send /stop to the bot) or the account is deleted.\nData on the device stays until the profile is removed or the browser data is cleared.',
       },
+      telegram: {
+        title: 'Telegram notifications',
+        body: 'Off by default; they work only if you turn them on in Settings. What is sent: your child’s name (if given), the week’s number of activities, time playing, letters practised and worth practising, a note about a new stage and about a sign-in from a new device. What is kept: the chat number, the language, the last week/day sent and a short hash of the device kind (no IP address or full browser details). To turn off: in Settings or send /stop to the bot; deleting the account deletes these records too.',
+      },
       delete: {
         title: 'How to delete data',
         body: '• The whole account: Parent area → Settings → Account → type DELETE. All the family’s data and photos are deleted.\n• One child: remove the profile under Profiles.\n• A copy: in the parent area a child’s data can be downloaded as a file.\n• Telegram: send /stop to the bot or unlink it in Settings.\n• Without an account: remove the profile or clear the browser data.\nIf you need help, write to the address below.',

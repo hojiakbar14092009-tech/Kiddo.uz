@@ -2577,6 +2577,10 @@ export const uz = {
         title: 'Qancha saqlanadi',
         body: 'Bulutdagi oila ma’lumoti hisob o‘chirilguncha saqlanadi. Anonim statistika taxminan 180 kun. Telegram ulanishi uni uzguningizcha (botga /stop) yoki hisob o‘chirilguncha.\nQurilmadagi ma’lumot profil o‘chirilguncha yoki brauzer ma’lumotlari tozalanguncha qoladi.',
       },
+      telegram: {
+        title: 'Telegram xabarnomalari',
+        body: 'Standart holatda o‘chiq; faqat siz Sozlamalarda yoqsangiz ishlaydi. Yuboriladi: farzandingiz ismi (bo‘lsa), haftadagi mashg‘ulotlar soni, o‘yin vaqti, mashq qilingan va takrorlash foydali harflar, yangi bosqich va yangi qurilmadan kirish haqida xabar. Saqlanadi: chat raqami, til, oxirgi yuborilgan hafta/kun va qurilma turining qisqa xeshi (IP manzil yoki to‘liq brauzer ma’lumoti saqlanmaydi). O‘chirish: Sozlamalarda o‘chiring yoki botga /stop yozing; hisob o‘chirilganda bu yozuvlar ham o‘chadi.',
+      },
       delete: {
         title: 'Ma’lumotni qanday o‘chirish mumkin',
         body: '• Butun hisob: Ota-ona bo‘limi → Sozlamalar → Hisob → DELETE deb yozing. Oilaning barcha ma’lumoti va suratlari o‘chadi.\n• Bitta bola: Profillar bo‘limida profilni o‘chiring.\n• Nusxa olish: Ota-ona bo‘limida bola ma’lumotini fayl sifatida yuklab olish mumkin.\n• Telegram: botga /stop yozing yoki Sozlamalarda uzing.\n• Hisobsiz rejim: profilni o‘chiring yoki brauzer ma’lumotlarini tozalang.\nYordam kerak bo‘lsa, quyidagi manzilga yozing.',

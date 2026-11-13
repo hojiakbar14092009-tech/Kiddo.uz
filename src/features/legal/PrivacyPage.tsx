@@ -19,6 +19,7 @@ const SECTIONS = [
   'stats',
   'share',
   'keep',
+  'telegram',
   'delete',
   'kids',
   'changes',

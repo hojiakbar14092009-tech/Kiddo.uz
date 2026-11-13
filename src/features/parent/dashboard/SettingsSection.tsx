@@ -12,6 +12,7 @@ import { AccountPanel } from './AccountPanel'
 import { AiTutorPanel } from './AiTutorPanel'
 import { AttentionPanel } from './AttentionPanel'
 import { ChoiceChips } from './ChoiceChips'
+import { NotifyPanel } from './NotifyPanel'
 import { Panel } from './Panel'
 import { TelegramPanel } from './TelegramPanel'
 
@@ -134,7 +135,12 @@ export function SettingsSection() {
 
       <AiTutorPanel />
 
-      <TelegramPanel cloud={session?.mode === 'cloud'} />
+      {session?.mode === 'cloud' && !isSupabaseConfigured ? (
+        // Kiddo's own server (MVP): the stage 9 notifications; the Supabase bot panel otherwise
+        <NotifyPanel />
+      ) : (
+        <TelegramPanel cloud={session?.mode === 'cloud'} />
+      )}
 
       {session?.mode === 'cloud' ? (
         <AccountPanel email={session.email} userId={session.userId} />
