@@ -1,6 +1,6 @@
 import { emailStart, emailVerify, googleCallback, googleStart, methods } from './auth.js'
 import { ready } from './db.js'
-import { assertSameOrigin, clientIp, HttpError, json } from './http.js'
+import { assertSameOrigin, clientIp, errorSummary, HttpError, json } from './http.js'
 import {
   assertCron,
   dailyCron,
@@ -103,8 +103,8 @@ export async function handle(request: Request): Promise<Response> {
         headers['retry-after'] = String(error.extra.retryAfter)
       return json(error.status, { error: error.code, ...error.extra }, headers)
     }
-    // the route and the error's name only: never the request body, cookies or secrets
-    console.error('[api] failed', route, error instanceof Error ? error.name : 'unknown')
+    // the route and a short safe reason (name, code, message without addresses): never the request, cookies or secrets
+    console.error('[api] failed', route, errorSummary(error))
     return json(500, { error: 'server_error' })
   }
 }

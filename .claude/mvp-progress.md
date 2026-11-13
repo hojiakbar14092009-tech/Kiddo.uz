@@ -333,3 +333,8 @@ Qoldi (9-bosqich, Telegram bot ota-onalar uchun): kod hali yozilmagan.
 - Tekshirildi: tsc, lint, server testlari 72/72, skript va privacy testlari 12/12.
 - Egaga: 1) `node scripts/telegram-webhook.mjs https://<domen>` qayta ishga tushirilsin, aks holda tugmalar ishlamaydi; 2) `node scripts/telegram-setup.mjs` ishga tushirilsin (yangi menyu); 3) ixtiyoriy: Vercel'da ADMIN_TELEGRAM_CHAT_ID.
 - Saytdagi panelda xavfsizlik xabarlari tugmasi yo'q, u faqat botda bor.
+
+## E-mail kirish xatosi tekshiruvi (2026-11-13, push qilinmagan)
+- Muammo: `POST auth/email/start` 500 (umumiy "Kirib bo'lmadi"), logda faqat "Error". Brevo'da 6–13 noyabr oralig'ida 0 ta xat.
+- Tahlil: e4438209 yangi jadval/migratsiya talab qilmaydi (mavjud `rate_limits`); limit xatolari `HttpError` (429) bo'lib, "failed" logiga tushmaydi. Oddiy `Error` tashlay oladigan yagona yangi yo'l qolgan: SMTP (nodemailer). Brevo'ga xat umuman bormagani ham shunga mos. Production logi o'qilmagan, shuning uchun sabab ANIQLANMAGAN (taxmin: SMTP ulanish/autentifikatsiya yoki SMTP_FROM tasdiqlanmagan jo'natuvchi).
+- Tuzatildi: log endi `[api] failed <route> <nom> <kod> <SMTP javob kodi> <buyruq>: <qisqa xabar>` (email manzil `<email>` bilan almashtiriladi, parol/sir yo'q); SMTP: 5/5/8 soniya timeout (Vercel 10 s ichida, aks holda Vercel uzib qo'yadi va log chiqmaydi), 587 da `requireTLS` (STARTTLS majburiy). Foydalanuvchi matni o'zgarmadi.

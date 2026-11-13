@@ -169,6 +169,12 @@ export let sendMail = async (to: string, subject: string, text: string): Promise
     host: requireEnv('SMTP_HOST'),
     port,
     secure: port === 465,
+    // 587 and the like: upgrade to TLS or fail, never log in in clear text
+    requireTLS: port !== 465,
+    // fail inside the function's 10 s, so the reason is logged instead of Vercel cutting the call
+    connectionTimeout: 5_000,
+    greetingTimeout: 5_000,
+    socketTimeout: 8_000,
     auth: { user: requireEnv('SMTP_USER'), pass: requireEnv('SMTP_PASS') },
   }).sendMail({ from: requireEnv('SMTP_FROM'), to, subject, text })
 }

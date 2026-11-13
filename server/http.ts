@@ -106,6 +106,28 @@ export function assertSameOrigin(request: Request): void {
   if (!origin || (origin !== own && origin !== extra)) throw new HttpError(403, 'bad_origin')
 }
 
+/**
+ * A log-safe reason for an unexpected error: its name, library code (nodemailer's EAUTH,
+ * ESOCKET …, an SMTP reply code) and a short message with any e-mail address hidden.
+ * Never the request, a cookie, a token or a password.
+ */
+export function errorSummary(error: unknown): string {
+  if (!(error instanceof Error)) return 'unknown'
+  const { code, responseCode, command } = error as {
+    code?: unknown
+    responseCode?: unknown
+    command?: unknown
+  }
+  const parts = [error.name, code, responseCode, command].filter(
+    (part) => typeof part === 'string' || typeof part === 'number',
+  )
+  const message = error.message
+    .replace(/[^\s@<>"']+@[^\s@<>"']+/g, '<email>')
+    .replace(/\s+/g, ' ')
+    .slice(0, 120)
+  return `${parts.join(' ')}: ${message}`
+}
+
 let warnedNoIp = false
 /**
  * The caller's IP, for rate limits only (never stored in clear). Only headers Vercel sets itself
