@@ -10,11 +10,15 @@ export const SIGN_IN_TEXT = {
     phone: 'Telefon raqamingiz',
     getCode: 'Telegram’da kod olish',
     steps: [
-      '«Telegram’da kod olish» tugmasini bosing',
-      'Botda «Start» tugmasini bosing',
+      'Botda «Start» tugmasini bosing (bot buni o‘zi bosa olmaydi)',
       '«Raqamni ulashish» tugmasi bilan raqamingizni yuboring',
       'Bot yuborgan 6 xonali kodni shu yerga yozing',
     ],
+    openBot: 'Botni ochish',
+    notOpened: 'Bot o‘zi ochilmadimi? «Botni ochish» tugmasini bosing.',
+    inApp: 'Google bilan kirish uchun saytni Safari yoki Chrome’da oching.',
+    inAppHint:
+      'Havolani nusxalang va brauzerga qo‘ying. Telegram yoki email bilan shu yerda kirsa bo‘ladi.',
     qr: 'Kompyuterdamisiz? Telefon kamerasi bilan QR kodni skanerlang',
     copy: 'Havolani nusxalash',
     copied: 'Havola nusxalandi',
@@ -26,7 +30,6 @@ export const SIGN_IN_TEXT = {
     code: '6 xonali kod',
     signIn: 'Kirish',
     resend: 'Qayta yuborish',
-    reopen: 'Botni qayta ochish',
     resendIn: (s: number) => `Qayta yuborish ${s} soniyadan keyin`,
     emailAddress: 'Email manzilingiz',
     sendEmail: 'Kodni emailga yuborish',
@@ -54,11 +57,15 @@ export const SIGN_IN_TEXT = {
     phone: 'Ваш номер телефона',
     getCode: 'Получить код в Telegram',
     steps: [
-      'Нажмите «Получить код в Telegram»',
-      'В боте нажмите «Start»',
+      'В боте нажмите «Start» (бот не может нажать её сам)',
       'Отправьте номер кнопкой «Поделиться номером»',
       'Введите здесь 6-значный код от бота',
     ],
+    openBot: 'Открыть бота',
+    notOpened: 'Бот не открылся сам? Нажмите «Открыть бота».',
+    inApp: 'Чтобы войти через Google, откройте сайт в Safari или Chrome.',
+    inAppHint:
+      'Скопируйте ссылку и вставьте в браузер. Через Telegram или email можно войти и здесь.',
     qr: 'Вы за компьютером? Отсканируйте QR-код камерой телефона',
     copy: 'Скопировать ссылку',
     copied: 'Ссылка скопирована',
@@ -70,7 +77,6 @@ export const SIGN_IN_TEXT = {
     code: '6-значный код',
     signIn: 'Войти',
     resend: 'Отправить ещё раз',
-    reopen: 'Открыть бота снова',
     resendIn: (s: number) => `Повторная отправка через ${s} с`,
     emailAddress: 'Ваш email',
     sendEmail: 'Отправить код на email',
@@ -98,11 +104,15 @@ export const SIGN_IN_TEXT = {
     phone: 'Your phone number',
     getCode: 'Get the code in Telegram',
     steps: [
-      'Tap “Get the code in Telegram”',
-      'In the bot, tap “Start”',
+      'In the bot, tap “Start” (the bot cannot tap it for you)',
       'Send your number with “Share my number”',
       'Type the 6-digit code from the bot here',
     ],
+    openBot: 'Open the bot',
+    notOpened: 'The bot did not open by itself? Tap “Open the bot”.',
+    inApp: 'To sign in with Google, open the site in Safari or Chrome.',
+    inAppHint:
+      'Copy the link and paste it into the browser. Telegram or email sign-in works right here.',
     qr: 'On a computer? Scan the QR code with your phone’s camera',
     copy: 'Copy the link',
     copied: 'Link copied',
@@ -114,7 +124,6 @@ export const SIGN_IN_TEXT = {
     code: '6-digit code',
     signIn: 'Sign in',
     resend: 'Send again',
-    reopen: 'Open the bot again',
     resendIn: (s: number) => `Send again in ${s} s`,
     emailAddress: 'Your email',
     sendEmail: 'Email me a code',
@@ -152,3 +161,17 @@ export async function qrOf(link: string): Promise<string> {
   qr.make()
   return qr.createDataURL(5, 2)
 }
+
+/** A phone (Android, iPhone, iPad): Telegram opens straight from a tg:// link there. */
+export const isPhone = (ua: string = navigator.userAgent) => /Android|iPhone|iPad|iPod/i.test(ua)
+
+/** https://t.me/<bot>?start=<token> as the app's own tg:// link. */
+export function tgLink(link: string): string {
+  const url = new URL(link)
+  const start = url.searchParams.get('start') ?? ''
+  return `tg://resolve?domain=${url.pathname.slice(1)}&start=${encodeURIComponent(start)}`
+}
+
+/** A browser inside an app (Telegram, Instagram, Facebook, LINE): Google refuses to sign in there. */
+export const isInAppBrowser = (ua: string = navigator.userAgent, scope: object = window) =>
+  /Telegram|Instagram|FBAN|FBAV|FB_IAB|\bLine\//i.test(ua) || 'TelegramWebviewProxy' in scope

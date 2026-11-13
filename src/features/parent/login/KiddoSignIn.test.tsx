@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useParentStore } from '@/store/parentStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { KiddoSignIn } from './KiddoSignIn'
-import { qrOf, secondsUntil } from './signInText'
+import { isInAppBrowser, isPhone, qrOf, secondsUntil, tgLink } from './signInText'
 
 type Reply = { status?: number; body: unknown }
 let routes: Record<string, Reply | ((body: unknown) => Reply)>
@@ -51,36 +51,53 @@ describe('helpers', () => {
     expect(secondsUntil(30_000, 0)).toBe(30)
     expect(secondsUntil(1_000, 5_000)).toBe(0)
   })
+  it('a phone gets the tg:// link; in-app browsers are told apart', () => {
+    expect(tgLink('https://t.me/kiddo_bot?start=abc_1')).toBe(
+      'tg://resolve?domain=kiddo_bot&start=abc_1',
+    )
+    expect(isPhone('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)')).toBe(true)
+    expect(isPhone('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130')).toBe(false)
+    expect(isInAppBrowser('Mozilla/5.0 (Linux; Android 14) Telegram-Android/11.2', {})).toBe(true)
+    expect(isInAppBrowser('Mozilla/5.0 (iPhone) Instagram 300.0', {})).toBe(true)
+    expect(isInAppBrowser('Mozilla/5.0 (iPhone) [FBAN/FBIOS;FBAV/450.0]', {})).toBe(true)
+    expect(isInAppBrowser('Mozilla/5.0 (iPhone) Safari/604.1', { TelegramWebviewProxy: {} })).toBe(
+      true,
+    )
+    expect(isInAppBrowser('Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537.36', {})).toBe(false)
+  })
   it('draws the bot link as a QR picture', async () => {
     expect(await qrOf('https://t.me/kiddo_bot?start=abc')).toMatch(/^data:image\/gif;base64,/)
   })
 })
 
 describe('KiddoSignIn', () => {
-  it('Telegram: 4 steps, the deep link opens, QR + copy for a computer, the code signs in', async () => {
+  it('Telegram: 3 steps, the bot tab opens in the tap, QR + copy for a computer, the code signs in', async () => {
     const user = userEvent.setup()
     const signedIn = vi.fn()
+    const tab = { opener: {}, location: { href: '' }, close: vi.fn() }
+    vi.mocked(window.open).mockImplementation(() => tab as unknown as Window)
     render(<KiddoSignIn onSignedIn={signedIn} />)
     expect(await screen.findByTestId('telegram-sign-in')).toBeInTheDocument()
-    expect(screen.getAllByRole('listitem')).toHaveLength(4)
+    expect(screen.getAllByRole('listitem')).toHaveLength(3)
+    expect(screen.getByText(/bot buni o‘zi bosa olmaydi/)).toBeInTheDocument()
     await user.type(screen.getByLabelText(/Telefon raqamingiz/), '90 123 45 67')
     await user.click(screen.getByTestId('telegram-get-code'))
     expect(sent.find((call) => call.path === 'auth/telegram/start')!.body).toMatchObject({
       phone: '+998901234567',
     })
-    expect(window.open).toHaveBeenCalledWith(
-      expect.stringMatching(/^https:\/\/t\.me\/kiddo_bot\?start=t{32}$/),
-      '_blank',
-      'noopener',
-    )
+    // opened before the request (a pop-up blocker allows only that), pointed at the bot after it
+    expect(window.open).toHaveBeenCalledWith('about:blank', '_blank')
+    expect(tab.location.href).toMatch(/^https:\/\/t\.me\/kiddo_bot\?start=t{32}$/)
+    expect(tab.opener).toBeNull()
+    expect(screen.queryByText(/Bot o‘zi ochilmadimi/)).toBeNull()
+    expect(screen.getByTestId('telegram-open')).toHaveAttribute('href', tab.location.href)
     expect(await screen.findByTestId('telegram-qr')).toHaveAttribute(
       'src',
       expect.stringMatching(/^data:image\/gif/),
     )
     expect(screen.getByRole('button', { name: 'Havolani nusxalash' })).toBeInTheDocument()
-    // resend and reopen wait 30 s (no code yet is normal for a moment)
+    // resend waits 30 s (no code yet is normal for a moment)
     expect(screen.getByTestId('telegram-resend')).toBeDisabled()
-    expect(screen.getByTestId('telegram-reopen')).toBeDisabled()
     await user.type(screen.getByLabelText('6 xonali kod'), '123456')
     await user.click(screen.getByRole('button', { name: 'Kirish' }))
     expect(signedIn).toHaveBeenCalled()
@@ -115,6 +132,43 @@ describe('KiddoSignIn', () => {
     await user.click(screen.getByTestId('telegram-resend'))
     expect(await screen.findByText(/Qayta yuborish 2\d soniyadan keyin/)).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('Juda tez-tez')
+  })
+
+  it('Telegram: a blocked pop-up leaves the big “Open the bot” button and the hint', async () => {
+    const user = userEvent.setup()
+    render(<KiddoSignIn onSignedIn={() => undefined} />)
+    await user.type(await screen.findByLabelText(/Telefon raqamingiz/), '901234567')
+    await user.click(screen.getByTestId('telegram-get-code'))
+    expect(await screen.findByText(/Bot o‘zi ochilmadimi/)).toBeInTheDocument()
+    expect(screen.getByTestId('telegram-open')).toHaveTextContent('Botni ochish')
+    expect(screen.getByTestId('telegram-open')).toHaveAttribute('target', '_blank')
+  })
+
+  it('Telegram: a failed start closes the tab opened for it', async () => {
+    const user = userEvent.setup()
+    const tab = { opener: {}, location: { href: '' }, close: vi.fn() }
+    vi.mocked(window.open).mockImplementation(() => tab as unknown as Window)
+    routes['POST auth/telegram/start'] = { status: 429, body: { error: 'rate_limited' } }
+    render(<KiddoSignIn onSignedIn={() => undefined} />)
+    await user.type(await screen.findByLabelText(/Telefon raqamingiz/), '901234567')
+    await user.click(screen.getByTestId('telegram-get-code'))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Juda tez-tez')
+    expect(tab.close).toHaveBeenCalled()
+  })
+
+  it('Google inside an in-app browser: a warning with a copy button, Telegram still there', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
+      'Mozilla/5.0 (Linux; Android 14) Telegram-Android/11.2',
+    )
+    const assign = vi.fn()
+    vi.stubGlobal('location', { ...window.location, assign, origin: 'https://kiddo.uz' })
+    render(<KiddoSignIn onSignedIn={() => undefined} />)
+    await user.click(await screen.findByTestId('login-google'))
+    expect(assign).not.toHaveBeenCalled()
+    expect(screen.getByTestId('in-app-browser')).toHaveTextContent('Safari yoki Chrome')
+    expect(screen.getByRole('button', { name: 'Havolani nusxalash' })).toBeInTheDocument()
+    expect(screen.getByTestId('telegram-sign-in')).toBeInTheDocument()
   })
 
   it('no Telegram: one tap leads to e-mail; a way the server has not set up is hidden', async () => {

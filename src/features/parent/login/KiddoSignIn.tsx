@@ -1,11 +1,21 @@
 import clsx from 'clsx'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/Button'
+import { buttonClasses } from '@/components/ui/buttonStyles'
 import { useSingleFlight } from '@/lib/useSingleFlight'
 import { api, ApiError } from '@/services/cloud/api'
 import { useParentStore } from '@/store/parentStore'
 import { useLanguage } from '@/store/settingsStore'
-import { qrOf, RESEND_AFTER_MS, secondsUntil, SIGN_IN_TEXT, type SignInText } from './signInText'
+import {
+  isInAppBrowser,
+  isPhone,
+  qrOf,
+  RESEND_AFTER_MS,
+  secondsUntil,
+  SIGN_IN_TEXT,
+  tgLink,
+  type SignInText,
+} from './signInText'
 
 /*
  * The MVP parent sign-in (Kiddo's own API, Turso): Google, a code by e-mail, a code by Telegram.
@@ -43,6 +53,7 @@ export function KiddoSignIn({ onSignedIn }: { onSignedIn: () => void }) {
   const setCloudSession = useParentStore((state) => state.setCloudSession)
   const [methods, setMethods] = useState<Methods | null>(null)
   const [tab, setTab] = useState<'telegram' | 'email'>('telegram')
+  const [inApp, setInApp] = useState(false)
 
   useEffect(() => {
     api<Methods>('auth/methods')
@@ -77,11 +88,25 @@ export function KiddoSignIn({ onSignedIn }: { onSignedIn: () => void }) {
         <Button
           variant="soft"
           size="md"
-          onClick={() => window.location.assign('/api/auth/google/start')}
+          onClick={() =>
+            // Google refuses sign-in inside Telegram/Instagram/Facebook: say so instead of a dead end
+            isInAppBrowser() ? setInApp(true) : window.location.assign('/api/auth/google/start')
+          }
           data-testid="login-google"
         >
           {text.google}
         </Button>
+      )}
+      {inApp && (
+        <div
+          role="alert"
+          className="flex flex-col gap-2 rounded-2xl bg-sky-soft p-4"
+          data-testid="in-app-browser"
+        >
+          <p className="font-semibold">{text.inApp}</p>
+          <p className="text-sm text-ink-soft">{text.inAppHint}</p>
+          <CopyButton text={text} link={`${window.location.origin}/parent/login`} />
+        </div>
       )}
       {tabs.length > 1 && (
         <div role="group" aria-label={text.tabs} className="grid grid-cols-2 gap-2">
@@ -164,6 +189,24 @@ function CodeForm({
   )
 }
 
+function CopyButton({ text, link }: { text: SignInText; link: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <Button
+      size="md"
+      variant="soft"
+      onClick={() =>
+        void navigator.clipboard?.writeText(link).then(
+          () => setCopied(true),
+          () => setCopied(false),
+        )
+      }
+    >
+      {copied ? text.copied : text.copy}
+    </Button>
+  )
+}
+
 type Login = { token: string; link: string }
 type Status = 'waiting' | 'code_sent' | 'used' | 'expired'
 
@@ -184,7 +227,7 @@ function TelegramFlow({
   const [resendAt, setResendAt] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [qr, setQr] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [opened, setOpened] = useState(true)
   const active = !!login && status !== 'used' && status !== 'expired'
   const now = useNow(active)
 
@@ -207,6 +250,9 @@ function TelegramFlow({
 
   const [startRun, starting] = useSingleFlight(async () => {
     setError(null)
+    const phoneDevice = isPhone()
+    // a computer: the tab opens in the tap itself (before any await), or the browser blocks it
+    const botTab = phoneDevice ? null : window.open('about:blank', '_blank')
     try {
       const made = await api<Login>('auth/telegram/start', {
         method: 'POST',
@@ -215,9 +261,15 @@ function TelegramFlow({
       setLogin(made)
       setStatus('waiting')
       setResendAt(Date.now() + RESEND_AFTER_MS)
-      window.open(made.link, '_blank', 'noopener')
+      if (phoneDevice) window.location.assign(tgLink(made.link))
+      else if (botTab) {
+        botTab.opener = null
+        botTab.location.href = made.link
+      }
+      setOpened(phoneDevice || !!botTab)
       setQr(await qrOf(made.link).catch(() => null))
     } catch (failure) {
+      botTab?.close()
       setError(text.errors[errorOf(failure)] ?? text.errors.failed!)
     }
   })
@@ -326,6 +378,17 @@ function TelegramFlow({
           >
             {status === 'code_sent' ? text.codeSent : text.waiting}
           </p>
+          {!opened && <p className="text-ink-soft">{text.notOpened}</p>}
+          <a
+            href={login.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClasses('primary', 'lg')}
+            data-testid="telegram-open"
+          >
+            {text.openBot}
+          </a>
+          <CopyButton text={text} link={login.link} />
           <div className="hidden items-center gap-4 rounded-2xl bg-cream p-3 md:flex">
             {qr && (
               <img
@@ -335,43 +398,18 @@ function TelegramFlow({
                 data-testid="telegram-qr"
               />
             )}
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-ink-soft">{text.qr}</p>
-              <Button
-                size="md"
-                variant="soft"
-                onClick={() =>
-                  void navigator.clipboard?.writeText(login.link).then(
-                    () => setCopied(true),
-                    () => setCopied(false),
-                  )
-                }
-              >
-                {copied ? text.copied : text.copy}
-              </Button>
-            </div>
+            <p className="text-sm text-ink-soft">{text.qr}</p>
           </div>
           <CodeForm text={text} onSubmit={verify} error={error} />
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Button
-              size="md"
-              variant="soft"
-              disabled={wait > 0 || resending}
-              onClick={() => void resendRun()}
-              data-testid="telegram-resend"
-            >
-              {wait > 0 ? text.resendIn(wait) : text.resend}
-            </Button>
-            <Button
-              size="md"
-              variant="soft"
-              disabled={wait > 0}
-              onClick={() => window.open(login.link, '_blank', 'noopener')}
-              data-testid="telegram-reopen"
-            >
-              {text.reopen}
-            </Button>
-          </div>
+          <Button
+            size="md"
+            variant="soft"
+            disabled={wait > 0 || resending}
+            onClick={() => void resendRun()}
+            data-testid="telegram-resend"
+          >
+            {wait > 0 ? text.resendIn(wait) : text.resend}
+          </Button>
         </>
       )}
       <button
