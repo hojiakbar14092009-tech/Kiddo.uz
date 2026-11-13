@@ -1,5 +1,5 @@
 import { langOf, type Lang } from './auth.js'
-import { randomToken, sameText, sha256 } from './crypto.js'
+import { randomId, randomToken, sameText, sha256 } from './crypto.js'
 import { db } from './db.js'
 import { botUsername, requireEnv } from './env.js'
 import { HttpError, json, readJson } from './http.js'
@@ -50,131 +50,187 @@ const tashkentTime = (at: number) =>
 
 // ---- texts ----
 
-type Text = Record<
-  | 'title'
-  | 'hello'
-  | 'helloNamed'
-  | 'week'
-  | 'weekNamed'
-  | 'activities'
-  | 'minutes'
-  | 'letters'
-  | 'practice'
-  | 'closing'
-  | 'empty'
-  | 'stage'
-  | 'quiet'
-  | 'yourChild'
-  | 'linked'
-  | 'linkExpired'
-  | 'stopped'
-  | 'started'
-  | 'off'
-  | 'help'
-  | 'tooOften'
-  | 'chooseLanguage'
-  | 'languageSet'
-  | 'device'
-  | 'notLinked',
-  string
->
+// Playful and warm for reports and moments (Kiddo's robots Mini and Piku say hello);
+// plain and serious for security, /stop and errors. Never a grade, a score or a comparison.
+const UZ = {
+  title: '📒 {child} · {from}–{to}',
+  greet: '🤖 Mini: Salom! Mana bu haftamiz:',
+  greetNamed: '🤖 Mini: Salom, {parent}! Mana bu haftamiz:',
+  activities: '🎯 Mashg‘ulotlar: {count}',
+  minutes: '⏱ O‘yin vaqti: {minutes} daqiqa',
+  letters: '🔤 Mashq qilingan harflar: {list}',
+  practice: '🔁 Takrorlash foydali: {list}',
+  tipPractice: '💡 Bugun 5 daqiqa «{letter}» harfini birga takrorlang.',
+  tipLetters: '💡 Bugun 5 daqiqa «{letter}» harfi bilan boshlanadigan so‘zlar topib o‘ynang.',
+  tipAny: '💡 Bugun 5 daqiqa birga bitta yangi harfni o‘ynab ko‘ring.',
+  empty:
+    '🤖 Piku: Bu hafta biz dam oldik 😊 Qulay paytda 5 daqiqa birga o‘ynab ko‘ring, yangi harflar kutib turibdi!',
+  stage:
+    '🎉 Piku xabari: {child} yangi bosqichga chiqdi, {count} ta harf o‘rganildi! Birga quvoning!',
+  quiet:
+    '🌱 Mini sog‘indi: {child} bir necha kundan beri Kiddo’ga kirmadi. Qulay paytda 5 daqiqa birga o‘ynab ko‘ring.',
+  yourChild: 'Farzandingiz',
+  menu: '🤖 Kiddo menyusi. Kerakli bo‘limni tanlang:',
+  btnReport: '📒 Hisobot',
+  btnSettings: '⚙️ Sozlamalar',
+  btnLanguage: '🌐 Til',
+  btnHelp: '❓ Yordam',
+  btnSite: '🔗 Saytni ochish',
+  help: 'Kiddo boti ota-onalar uchun: haftalik hisobot, muhim voqealar va xavfsizlik xabarlari.\n/hisobot — oxirgi hisobot, /sozlamalar — nima kelishini tanlash\n/til — til, /fikr — fikr yozish, /menu — menyu\nBolani baholamaymiz va hech kim bilan taqqoslamaymiz.\n/stop — barcha xabarlarni o‘chirish.\nOta-ona bo‘limi: {site}',
+  settingsTitle: '⚙️ Kiddo xabarnomalari',
+  weeklyName: 'Haftalik hisobot',
+  eventsName: 'Muhim voqealar',
+  securityName: 'Xavfsizlik xabarlari',
+  stateOn: '✅ yoqilgan',
+  stateOff: '⛔ o‘chiq',
+  turnOn: 'Yoqish: {name}',
+  turnOff: 'O‘chirish: {name}',
+  saved: 'Saqlandi',
+  feedbackAsk: '✍️ Fikringizni keyingi xabarda yozing (1000 belgigacha). 10 daqiqa kutaman.',
+  feedbackThanks: 'Rahmat! Fikringiz Kiddo jamoasiga yetkazildi.',
+  feedbackTooLong: 'Xabar juda uzun. Iltimos, 1000 belgigacha yozing.',
+  feedbackTooMany: 'Bir soatda 3 tagacha fikr yuborish mumkin. Iltimos, keyinroq yozing.',
+  adminFeedback: '📝 Kiddo: yangi fikr ({lang}, {length} belgi).',
+  linked:
+    'Tayyor! Kiddo xabarnomalari shu chatga ulandi. Haftalik hisobot yakshanba kuni 20:00 da keladi. Menyu: /menu',
+  linkExpired: 'Bu ulash havolasi eskirgan yoki ishlatilgan. Kiddo sozlamalaridan yangisini oling.',
+  stopped: 'Barcha Kiddo xabarnomalari o‘chirildi. Qayta yoqish uchun /start bosing.',
+  started: 'Kiddo xabarnomalari qayta yoqildi. Haftalik hisobot yakshanba kuni 20:00 da keladi.',
+  off: 'Xabarnomalar o‘chiq. Yoqish uchun /start bosing.',
+  tooOften: 'Hisobotni soatiga 2 martagacha so‘rash mumkin. Birozdan keyin urinib ko‘ring.',
+  chooseLanguage: 'Xabarlar tilini tanlang:',
+  languageSet: 'Endi xabarlar o‘zbek tilida keladi.',
+  notLinked:
+    'Bu chat Kiddo xabarnomalariga hali ulanmagan. Avval saytda Ota-ona bo‘limi → Sozlamalar → «Telegram xabarnomalari»ni yoqing, keyin /hisobot, /til va /stop ishlaydi.',
+  device:
+    '🔐 Kiddo hisobingizga yangi qurilmadan kirildi: {device}, {time} (Toshkent vaqti). Bu siz bo‘lmasangiz, «Bu men emas» tugmasini bosing va Google akkauntingiz yoki pochtangizni tekshiring.',
+  btnNotMe: '🚫 Bu men emas',
+  notMeDone:
+    '🔐 Kiddo hisobingizdan barcha qurilmalar chiqarildi. Qayta kirish kerak bo‘ladi. Google akkauntingiz yoki pochtangiz parolini tekshiring.',
+  notMeStale: 'Bu tugma endi ishlamaydi: amal allaqachon bajarilgan yoki muddati o‘tgan.',
+  notAllowed: 'Bu amal faqat hisob egasining shaxsiy chatida ishlaydi.',
+}
+
+export type Text = Record<keyof typeof UZ, string>
 
 export const NOTIFY_TEXT: Record<Lang, Text> = {
-  uz: {
-    title: '📒 Kiddo: haftalik hisobot',
-    hello: 'Assalomu alaykum!',
-    helloNamed: 'Assalomu alaykum, {parent}!',
-    week: 'Bu hafta Kiddo’da:',
-    weekNamed: '{child} bu hafta Kiddo’da:',
-    activities: '• Bajarilgan mashg‘ulotlar: {count}',
-    minutes: '• O‘yin vaqti: {minutes} daqiqa',
-    letters: '• Mashq qilingan harflar: {list}',
-    practice: '• Yana takrorlash foydali: {list}',
-    closing: 'Birga o‘rganishda davom eting! 🌱',
-    empty: 'Bu hafta Kiddo’da mashg‘ulot bo‘lmadi. Qulay paytda birga 10 daqiqa o‘ynab ko‘ring 🌱',
-    stage: '🎉 {child} yangi bosqichga chiqdi: {count} ta harf o‘rganildi!',
-    quiet:
-      '🌱 {child} bir necha kundan beri Kiddo’ga kirmadi. Qulay paytda birga 10 daqiqa o‘ynab ko‘ring.',
-    yourChild: 'Farzandingiz',
-    linked:
-      'Tayyor! Kiddo xabarnomalari shu chatga ulandi. Haftalik hisobot yakshanba kuni 20:00 da keladi.\n/hisobot — oxirgi hisobot, /til — til, /stop — o‘chirish',
-    linkExpired:
-      'Bu ulash havolasi eskirgan yoki ishlatilgan. Kiddo sozlamalaridan yangisini oling.',
-    stopped: 'Barcha Kiddo xabarnomalari o‘chirildi. Qayta yoqish uchun /start bosing.',
-    started: 'Kiddo xabarnomalari qayta yoqildi. Haftalik hisobot yakshanba kuni 20:00 da keladi.',
-    off: 'Xabarnomalar o‘chiq. Yoqish uchun /start bosing.',
-    help: 'Kiddo buyruqlari:\n/hisobot — oxirgi haftalik hisobot\n/til — xabarlar tili\n/stop — xabarlarni o‘chirish\n/start — qayta yoqish',
-    tooOften: 'Hisobotni soatiga 2 martagacha so‘rash mumkin. Birozdan keyin urinib ko‘ring.',
-    chooseLanguage: 'Xabarlar tilini tanlang:',
-    languageSet: 'Endi xabarlar o‘zbek tilida keladi.',
-    notLinked:
-      'Bu chat Kiddo xabarnomalariga hali ulanmagan. Avval saytda Ota-ona bo‘limi → Sozlamalar → «Telegram xabarnomalari»ni yoqing, keyin /hisobot, /til va /stop ishlaydi.',
-    device:
-      '🔐 Kiddo hisobingizga yangi qurilmadan kirildi: {device}, {time} (Toshkent vaqti). Bu siz bo‘lmasangiz, Google akkauntingiz yoki pochtangizni tekshiring va Kiddo’da hisobdan chiqing.',
-  },
+  uz: UZ,
   ru: {
-    title: '📒 Kiddo: недельный отчёт',
-    hello: 'Здравствуйте!',
-    helloNamed: 'Здравствуйте, {parent}!',
-    week: 'На этой неделе в Kiddo:',
-    weekNamed: '{child} на этой неделе в Kiddo:',
-    activities: '• Выполнено занятий: {count}',
-    minutes: '• Время в игре: {minutes} мин',
-    letters: '• Буквы, которые повторяли: {list}',
-    practice: '• Полезно повторить ещё: {list}',
-    closing: 'Учитесь вместе и дальше! 🌱',
+    title: '📒 {child} · {from}–{to}',
+    greet: '🤖 Мини: Привет! Вот наша неделя:',
+    greetNamed: '🤖 Мини: Привет, {parent}! Вот наша неделя:',
+    activities: '🎯 Занятия: {count}',
+    minutes: '⏱ Время в игре: {minutes} мин',
+    letters: '🔤 Повторяли буквы: {list}',
+    practice: '🔁 Полезно повторить: {list}',
+    tipPractice: '💡 Сегодня 5 минут повторите вместе букву «{letter}».',
+    tipLetters: '💡 Сегодня 5 минут поиграйте: найдите слова на букву «{letter}».',
+    tipAny: '💡 Сегодня 5 минут поиграйте вместе с одной новой буквой.',
     empty:
-      'На этой неделе занятий в Kiddo не было. Найдите удобную минуту поиграть вместе 10 минут 🌱',
-    stage: '🎉 {child} перешёл(ла) на новый этап: выучено букв — {count}!',
+      '🤖 Пику: На этой неделе мы отдыхали 😊 В удобный момент поиграйте вместе 5 минут, новые буквы уже ждут!',
+    stage:
+      '🎉 Новость от Пику: {child} перешёл(ла) на новый этап, выучено букв: {count}! Порадуйтесь вместе!',
     quiet:
-      '🌱 {child} несколько дней не заходил(а) в Kiddo. В удобный момент поиграйте вместе 10 минут.',
+      '🌱 Мини скучает: {child} несколько дней не заходил(а) в Kiddo. В удобный момент поиграйте вместе 5 минут.',
     yourChild: 'Ваш ребёнок',
+    menu: '🤖 Меню Kiddo. Выберите раздел:',
+    btnReport: '📒 Отчёт',
+    btnSettings: '⚙️ Настройки',
+    btnLanguage: '🌐 Язык',
+    btnHelp: '❓ Помощь',
+    btnSite: '🔗 Открыть сайт',
+    help: 'Бот Kiddo для родителей: недельный отчёт, важные события и сообщения безопасности.\n/hisobot — последний отчёт, /sozlamalar — что присылать\n/til — язык, /fikr — написать отзыв, /menu — меню\nМы не оцениваем ребёнка и ни с кем не сравниваем.\n/stop — отключить все сообщения.\nРодительский раздел: {site}',
+    settingsTitle: '⚙️ Уведомления Kiddo',
+    weeklyName: 'Недельный отчёт',
+    eventsName: 'Важные события',
+    securityName: 'Сообщения безопасности',
+    stateOn: '✅ включено',
+    stateOff: '⛔ выключено',
+    turnOn: 'Включить: {name}',
+    turnOff: 'Выключить: {name}',
+    saved: 'Сохранено',
+    feedbackAsk: '✍️ Напишите отзыв следующим сообщением (до 1000 символов). Жду 10 минут.',
+    feedbackThanks: 'Спасибо! Ваш отзыв передан команде Kiddo.',
+    feedbackTooLong: 'Сообщение слишком длинное. Пожалуйста, до 1000 символов.',
+    feedbackTooMany: 'Можно отправить до 3 отзывов в час. Пожалуйста, напишите позже.',
+    adminFeedback: '📝 Kiddo: новый отзыв ({lang}, {length} симв.).',
     linked:
-      'Готово! Уведомления Kiddo подключены к этому чату. Недельный отчёт приходит в воскресенье в 20:00.\n/hisobot — последний отчёт, /til — язык, /stop — отключить',
+      'Готово! Уведомления Kiddo подключены к этому чату. Недельный отчёт приходит в воскресенье в 20:00. Меню: /menu',
     linkExpired: 'Ссылка устарела или уже использована. Получите новую в настройках Kiddo.',
     stopped: 'Все уведомления Kiddo отключены. Чтобы включить снова, нажмите /start.',
     started: 'Уведомления Kiddo снова включены. Недельный отчёт приходит в воскресенье в 20:00.',
     off: 'Уведомления отключены. Чтобы включить, нажмите /start.',
-    help: 'Команды Kiddo:\n/hisobot — последний недельный отчёт\n/til — язык сообщений\n/stop — отключить сообщения\n/start — включить снова',
     tooOften: 'Отчёт можно запросить не чаще 2 раз в час. Попробуйте немного позже.',
     chooseLanguage: 'Выберите язык сообщений:',
     languageSet: 'Теперь сообщения будут на русском.',
     notLinked:
       'Этот чат ещё не подключён к уведомлениям Kiddo. Сначала включите на сайте «Уведомления в Telegram» (Родительский раздел → Настройки), после этого заработают /hisobot, /til и /stop.',
     device:
-      '🔐 Вход в ваш аккаунт Kiddo с нового устройства: {device}, {time} (время Ташкента). Если это были не вы, проверьте свой Google-аккаунт или почту и выйдите из Kiddo.',
+      '🔐 Вход в ваш аккаунт Kiddo с нового устройства: {device}, {time} (время Ташкента). Если это были не вы, нажмите «Это не я» и проверьте свой Google-аккаунт или почту.',
+    btnNotMe: '🚫 Это не я',
+    notMeDone:
+      '🔐 Все устройства вышли из вашего аккаунта Kiddo. Нужно будет войти заново. Проверьте пароль своего Google-аккаунта или почты.',
+    notMeStale: 'Эта кнопка больше не работает: действие уже выполнено или срок истёк.',
+    notAllowed: 'Это действие работает только в личном чате владельца аккаунта.',
   },
   en: {
-    title: '📒 Kiddo: weekly report',
-    hello: 'Hello!',
-    helloNamed: 'Hello, {parent}!',
-    week: 'This week in Kiddo:',
-    weekNamed: '{child} this week in Kiddo:',
-    activities: '• Activities finished: {count}',
-    minutes: '• Time playing: {minutes} min',
-    letters: '• Letters practised: {list}',
-    practice: '• Worth practising again: {list}',
-    closing: 'Keep learning together! 🌱',
+    title: '📒 {child} · {from}–{to}',
+    greet: '🤖 Mini: Hi! Here is our week:',
+    greetNamed: '🤖 Mini: Hi, {parent}! Here is our week:',
+    activities: '🎯 Activities: {count}',
+    minutes: '⏱ Time playing: {minutes} min',
+    letters: '🔤 Letters practised: {list}',
+    practice: '🔁 Worth practising: {list}',
+    tipPractice: '💡 Today, practise the letter «{letter}» together for 5 minutes.',
+    tipLetters: '💡 Today, spend 5 minutes finding words that start with «{letter}».',
+    tipAny: '💡 Today, play with one new letter together for 5 minutes.',
     empty:
-      'There were no Kiddo activities this week. Try 10 minutes of play together when it suits you 🌱',
-    stage: '🎉 {child} reached a new stage: {count} letters learned!',
+      '🤖 Piku: We had a restful week 😊 When it suits you, play together for 5 minutes, new letters are waiting!',
+    stage:
+      '🎉 News from Piku: {child} reached a new stage, {count} letters learned! Celebrate together!',
     quiet:
-      '🌱 {child} has not opened Kiddo for a few days. Try 10 minutes of play together when it suits you.',
+      '🌱 Mini misses {child}: no Kiddo for a few days. When it suits you, play together for 5 minutes.',
     yourChild: 'Your child',
+    menu: '🤖 Kiddo menu. Choose a section:',
+    btnReport: '📒 Report',
+    btnSettings: '⚙️ Settings',
+    btnLanguage: '🌐 Language',
+    btnHelp: '❓ Help',
+    btnSite: '🔗 Open the website',
+    help: 'The Kiddo bot for parents: a weekly report, important moments and security messages.\n/hisobot — the latest report, /sozlamalar — what to receive\n/til — language, /fikr — send feedback, /menu — menu\nWe never grade your child or compare them with anyone.\n/stop — turn all messages off.\nParent area: {site}',
+    settingsTitle: '⚙️ Kiddo notifications',
+    weeklyName: 'Weekly report',
+    eventsName: 'Important moments',
+    securityName: 'Security messages',
+    stateOn: '✅ on',
+    stateOff: '⛔ off',
+    turnOn: 'Turn on: {name}',
+    turnOff: 'Turn off: {name}',
+    saved: 'Saved',
+    feedbackAsk:
+      '✍️ Write your feedback in your next message (up to 1000 characters). I will wait 10 minutes.',
+    feedbackThanks: 'Thank you! Your feedback has reached the Kiddo team.',
+    feedbackTooLong: 'The message is too long. Please keep it within 1000 characters.',
+    feedbackTooMany: 'Up to 3 feedback messages an hour. Please write again later.',
+    adminFeedback: '📝 Kiddo: new feedback ({lang}, {length} characters).',
     linked:
-      'Done! Kiddo notifications are linked to this chat. The weekly report comes on Sunday at 20:00.\n/hisobot — the latest report, /til — language, /stop — turn off',
+      'Done! Kiddo notifications are linked to this chat. The weekly report comes on Sunday at 20:00. Menu: /menu',
     linkExpired: 'This link has expired or was already used. Get a new one in Kiddo’s settings.',
     stopped: 'All Kiddo notifications are off. Tap /start to turn them on again.',
     started: 'Kiddo notifications are on again. The weekly report comes on Sunday at 20:00.',
     off: 'Notifications are off. Tap /start to turn them on.',
-    help: 'Kiddo commands:\n/hisobot — the latest weekly report\n/til — message language\n/stop — turn messages off\n/start — turn them on again',
     tooOften: 'The report can be asked for up to 2 times an hour. Please try a little later.',
     chooseLanguage: 'Choose the language of the messages:',
     languageSet: 'Messages will now come in English.',
     notLinked:
       'This chat is not linked to Kiddo notifications yet. First turn on “Telegram notifications” on the website (Parent area → Settings); then /hisobot, /til and /stop will work.',
     device:
-      '🔐 Someone signed in to your Kiddo account from a new device: {device}, {time} (Tashkent time). If it was not you, check your Google account or e-mail and sign out of Kiddo.',
+      '🔐 Someone signed in to your Kiddo account from a new device: {device}, {time} (Tashkent time). If it was not you, tap “This was not me” and check your Google account or e-mail.',
+    btnNotMe: '🚫 This was not me',
+    notMeDone:
+      '🔐 Every device has been signed out of your Kiddo account. You will need to sign in again. Check the password of your Google account or e-mail.',
+    notMeStale: 'This button no longer works: it was already used or has expired.',
+    notAllowed: 'This only works in the account owner’s private chat.',
   },
 }
 
@@ -185,7 +241,7 @@ export const LANGUAGE_BUTTONS: Record<Lang, string> = {
   en: 'English',
 }
 
-const fill = (text: string, values: Record<string, string | number>) =>
+export const fill = (text: string, values: Record<string, string | number>) =>
   text.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ''))
 
 // ---- what the account holds (user_state, synced by the app) ----
@@ -277,24 +333,90 @@ export function weekFacts(progress: Progress, start: number): WeekFacts {
   }
 }
 
-/** The weekly message: names when known, facts, nothing that grades or compares. */
+const dayMonth = (at: number) => {
+  const day = tashkentDay(at)
+  return `${day.slice(8, 10)}.${day.slice(5, 7)}`
+}
+
+/**
+ * The weekly message, one phone screen: the child and the week, a hello from Mini, up to four
+ * short facts and one simple idea for today. Names when known; nothing grades or compares.
+ */
 export function reportText(
   lang: Lang,
   names: { parent: string | null; child: string | null },
   facts: WeekFacts,
+  start: number,
 ): string {
   const t = NOTIFY_TEXT[lang]
-  const lines = [t.title, names.parent ? fill(t.helloNamed, { parent: names.parent }) : t.hello]
-  if (facts.activities === 0 && facts.minutes === 0) return [...lines, t.empty].join('\n')
-  lines.push(names.child ? fill(t.weekNamed, { child: names.child }) : t.week)
+  const lines = [
+    fill(t.title, {
+      child: names.child ?? t.yourChild,
+      from: dayMonth(start),
+      to: dayMonth(start + 6 * DAY),
+    }),
+    names.parent ? fill(t.greetNamed, { parent: names.parent }) : t.greet,
+  ]
+  if (facts.activities === 0 && facts.minutes === 0) return [lines[0], t.empty].join('\n')
   if (facts.activities > 0) lines.push(fill(t.activities, { count: facts.activities }))
   if (facts.minutes > 0) lines.push(fill(t.minutes, { minutes: facts.minutes }))
   if (facts.letters.length > 0) lines.push(fill(t.letters, { list: facts.letters.join(', ') }))
   if (facts.practice.length > 0) lines.push(fill(t.practice, { list: facts.practice.join(', ') }))
-  return [...lines, t.closing].join('\n')
+  const letter = facts.practice[0] ?? facts.letters[0]
+  lines.push(
+    facts.practice[0]
+      ? fill(t.tipPractice, { letter: facts.practice[0] })
+      : letter
+        ? fill(t.tipLetters, { letter })
+        : t.tipAny,
+  )
+  return lines.join('\n')
 }
 
-async function reportFor(userId: string, lang: Lang, start: number): Promise<string> {
+/** The menu under reports and help: four actions and the parent area on the website. */
+export function menuKeyboard(lang: Lang, origin: string) {
+  const t = NOTIFY_TEXT[lang]
+  return {
+    inline_keyboard: [
+      [
+        { text: t.btnReport, callback_data: 'm:report' },
+        { text: t.btnSettings, callback_data: 'm:settings' },
+      ],
+      [
+        { text: t.btnLanguage, callback_data: 'm:lang' },
+        { text: t.btnHelp, callback_data: 'm:help' },
+      ],
+      [{ text: t.btnSite, url: `${origin}/parent/dashboard` }],
+    ],
+  }
+}
+
+export const helpText = (lang: Lang, origin: string) =>
+  fill(NOTIFY_TEXT[lang].help, { site: `${origin}/parent` })
+
+/** Security messages are on unless the parent turned them off (bot_prefs, default 1). */
+export async function securityOn(userId: string): Promise<boolean> {
+  const found = await db().execute({
+    sql: 'SELECT security FROM bot_prefs WHERE user_id = ?',
+    args: [userId],
+  })
+  return found.rows[0] ? Number(found.rows[0].security) === 1 : true
+}
+
+export async function setBotPref(
+  userId: string,
+  column: 'security' | 'feedback_until',
+  value: number | null,
+  now: number,
+): Promise<void> {
+  await db().execute({
+    sql: `INSERT INTO bot_prefs (user_id, ${column}, updated_at) VALUES (?, ?, ?)
+          ON CONFLICT(user_id) DO UPDATE SET ${column} = excluded.${column}, updated_at = excluded.updated_at`,
+    args: [userId, value, now],
+  })
+}
+
+export async function reportFor(userId: string, lang: Lang, start: number): Promise<string> {
   const [child, user] = await Promise.all([
     childOf(userId),
     db().execute({ sql: 'SELECT name FROM users WHERE id = ?', args: [userId] }),
@@ -302,7 +424,7 @@ async function reportFor(userId: string, lang: Lang, start: number): Promise<str
   const parent = user.rows[0]?.name
     ? String(user.rows[0].name).trim().split(/\s+/)[0] || null
     : null
-  return reportText(lang, { parent, child: child.name }, weekFacts(child.progress, start))
+  return reportText(lang, { parent, child: child.name }, weekFacts(child.progress, start), start)
 }
 
 // ---- sending ----
@@ -325,10 +447,11 @@ async function deliver(
   chatId: string,
   text: string,
   now: number,
+  extra: Record<string, unknown> = {},
 ): Promise<Outcome> {
   for (let attempt = 0; ; attempt += 1) {
     try {
-      await botSend(chatId, text)
+      await botSend(chatId, text, extra)
       return 'sent'
     } catch (error) {
       if (!(error instanceof TelegramError)) {
@@ -340,6 +463,7 @@ async function deliver(
           sql: 'UPDATE notification_prefs SET weekly = 0, events = 0, updated_at = ? WHERE user_id = ?',
           args: [now, userId],
         })
+        await setBotPref(userId, 'security', 0, now)
         console.error('[notify] chat closed, notifications off', error.telegramStatus)
         return 'blocked'
       }
@@ -383,6 +507,7 @@ async function sendAll(
   release: (row: Row) => Promise<void>,
   text: (row: Row) => Promise<string | null>,
   now: number,
+  extra: (row: Row) => Record<string, unknown> = () => ({}),
 ) {
   const started = performance.now()
   const count = { sent: 0, blocked: 0, failed: 0, left: 0 }
@@ -396,7 +521,7 @@ async function sendAll(
       if (!(await claim(row))) continue
       const message = await text(row)
       if (message === null) continue
-      const outcome = await deliver(row.user_id, row.chat_id, message, now)
+      const outcome = await deliver(row.user_id, row.chat_id, message, now, extra(row))
       if (outcome === 'sent') count.sent += 1
       else if (outcome === 'blocked') count.blocked += 1
       else {
@@ -450,6 +575,7 @@ export async function weeklyCron(request: Request, now = Date.now()): Promise<Re
     },
     (row) => reportFor(row.user_id, langOf(row.language), start),
     now,
+    (row) => ({ reply_markup: menuKeyboard(langOf(row.language), new URL(request.url).origin) }),
   )
   return json(200, { ok: true, week, ...count })
 }
@@ -618,125 +744,6 @@ export async function notifyLink(request: Request, now = Date.now()): Promise<Re
   return json(200, { link: `https://t.me/${bot}?start=link_${token}`, expiresAt: now + LINK_MS })
 }
 
-// ---- the bot: linking and commands ----
-
-const NOTIFY_COMMANDS = new Set(['/hisobot', '/report', '/til', '/lang', '/stop'])
-const LINK_START = /^\/start\s+link_([A-Za-z0-9_-]{16,64})$/
-
-/** Is this /start payload an account-linking one (not a sign-in token)? */
-export const isLinkStart = (text: string) => LINK_START.test(text.trim())
-
-/**
- * The bot's notification side. Returns false when the chat is not a linked parent's and the
- * message is not a linking link: the sign-in flow answers it then.
- */
-export async function botCommand(
-  chatId: string,
-  raw: string,
-  fallback: Lang,
-  now = Date.now(),
-  fromId: string = chatId,
-): Promise<boolean> {
-  const text = raw.trim()
-  const say = (lang: Lang, key: keyof Text, extra?: Record<string, unknown>) =>
-    botSend(chatId, NOTIFY_TEXT[lang][key], extra)
-
-  const link = text.match(LINK_START)
-  if (link) {
-    // one use: the hash is cleared in the same statement that links the chat
-    const linked = await db().execute({
-      sql: `UPDATE notification_prefs SET chat_id = ?, link_hash = NULL, link_expires_at = NULL, updated_at = ?
-            WHERE link_hash = ? AND link_expires_at > ? RETURNING language`,
-      args: [chatId, now, sha256(link[1]!), now],
-    })
-    const row = linked.rows[0]
-    await say(row ? langOf(row.language) : fallback, row ? 'linked' : 'linkExpired')
-    return true
-  }
-
-  const found = await db().execute({
-    sql: 'SELECT user_id, weekly, events, language FROM notification_prefs WHERE chat_id = ? LIMIT 1',
-    args: [chatId],
-  })
-  const command = text.split(/[\s@]/)[0]!.toLowerCase()
-  // a Telegram sign-in that turned notifications on while the account had no Telegram id yet:
-  // its private chat (chat id = the sender's id, proven by the webhook secret) is linked now
-  const prefs =
-    found.rows[0] ??
-    (chatId === fromId
-      ? (
-          await db().execute({
-            sql: `UPDATE notification_prefs SET chat_id = ?, updated_at = ?
-                  WHERE chat_id IS NULL AND (weekly = 1 OR events = 1)
-                    AND user_id = (SELECT id FROM users WHERE telegram_id = ?)
-                  RETURNING user_id, weekly, events, language`,
-            args: [chatId, now, fromId],
-          })
-        ).rows[0]
-      : undefined)
-  if (!prefs) {
-    // a notification command from a chat that is not linked: say how to turn them on,
-    // not the sign-in help (a bare /start and other text still get that)
-    if (!NOTIFY_COMMANDS.has(command)) return false
-    await say(fallback, 'notLinked')
-    return true
-  }
-  const userId = String(prefs.user_id)
-  const lang = langOf(prefs.language)
-  const on = Number(prefs.weekly) === 1 || Number(prefs.events) === 1
-
-  if (command === '/stop') {
-    await db().execute({
-      sql: 'UPDATE notification_prefs SET weekly = 0, events = 0, link_hash = NULL, link_expires_at = NULL, updated_at = ? WHERE chat_id = ?',
-      args: [now, chatId],
-    })
-    await say(lang, 'stopped')
-  } else if (command === '/start') {
-    await db().execute({
-      sql: 'UPDATE notification_prefs SET weekly = 1, updated_at = ? WHERE chat_id = ?',
-      args: [now, chatId],
-    })
-    await say(lang, 'started')
-  } else if (command === '/hisobot' || command === '/report') {
-    if (!on) {
-      await say(lang, 'off')
-      return true
-    }
-    try {
-      await rateLimit(`notify-report:${chatId}`, 2, 3600, now)
-    } catch (error) {
-      if (error instanceof HttpError && error.status === 429) {
-        await say(lang, 'tooOften')
-        return true
-      }
-      throw error
-    }
-    await botSend(chatId, await reportFor(userId, lang, reportWeek(now)))
-  } else if (command === '/til' || command === '/lang') {
-    await say(lang, 'chooseLanguage', {
-      reply_markup: {
-        keyboard: [Object.values(LANGUAGE_BUTTONS).map((label) => ({ text: label }))],
-        resize_keyboard: true,
-        one_time_keyboard: true,
-      },
-    })
-  } else {
-    const chosen = (Object.keys(LANGUAGE_BUTTONS) as Lang[]).find(
-      (key) => LANGUAGE_BUTTONS[key] === text,
-    )
-    if (chosen) {
-      await db().execute({
-        sql: 'UPDATE notification_prefs SET language = ?, updated_at = ? WHERE chat_id = ?',
-        args: [chosen, now, chatId],
-      })
-      await say(chosen, 'languageSet', { reply_markup: { remove_keyboard: true } })
-    } else {
-      await say(lang, 'help')
-    }
-  }
-  return true
-}
-
 // ---- a sign-in from a new device ----
 
 /** "Chrome, Windows": the kind of browser and system only, never the full user agent. */
@@ -795,7 +802,22 @@ export async function noticeDevice(
   })
   if (known.rows.length === 0) return
   const prefs = await prefsOf(userId)
-  if (!prefs?.chat_id || (Number(prefs.weekly) !== 1 && Number(prefs.events) !== 1)) return
-  const text = fill(NOTIFY_TEXT[langOf(prefs.language)].device, { device, time: tashkentTime(now) })
-  await deliver(userId, String(prefs.chat_id), text, now)
+  // a linked chat, security messages on (the default; /stop and the switch turn them off)
+  if (!prefs?.chat_id || !(await securityOn(userId))) return
+  const t = NOTIFY_TEXT[langOf(prefs.language)]
+  // the "this was not me" button: a one-time id of its own, never the session or account id
+  const alert = randomId()
+  await db().execute({
+    sql: 'INSERT INTO device_alerts (id, user_id, chat_id, created_at) VALUES (?, ?, ?, ?)',
+    args: [alert, userId, String(prefs.chat_id), now],
+  })
+  await deliver(
+    userId,
+    String(prefs.chat_id),
+    fill(t.device, { device, time: tashkentTime(now) }),
+    now,
+    {
+      reply_markup: { inline_keyboard: [[{ text: t.btnNotMe, callback_data: `nm:${alert}` }]] },
+    },
+  )
 }

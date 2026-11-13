@@ -3,7 +3,7 @@ import { randomToken, sameText, sha256 } from './crypto.js'
 import { db } from './db.js'
 import { botUsername, requireEnv } from './env.js'
 import { clientIp, HttpError, json, readJson } from './http.js'
-import { botCommand, isLinkStart } from './notify.js'
+import { botCallback, botCommand, isLinkStart } from './bot.js'
 import { memoryLimit, rateLimit } from './rateLimit.js'
 
 /*
@@ -84,18 +84,14 @@ export class TelegramError extends HttpError {
   }
 }
 
-/** Calls the Bot API; tests replace it. */
-export let botSend = async (
-  chatId: string,
-  text: string,
-  extra: Record<string, unknown> = {},
-): Promise<void> => {
+/** Any Bot API method (answerCallbackQuery, editMessageText …); tests replace it. */
+export let botApi = async (method: string, body: Record<string, unknown>): Promise<void> => {
   const response = await fetch(
-    `https://api.telegram.org/bot${requireEnv('TELEGRAM_BOT_TOKEN')}/sendMessage`,
+    `https://api.telegram.org/bot${requireEnv('TELEGRAM_BOT_TOKEN')}/${method}`,
     {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, ...extra }),
+      body: JSON.stringify(body),
     },
   )
   if (!response.ok) {
@@ -111,6 +107,16 @@ export let botSend = async (
     )
   }
 }
+export function useBotApiForTests(call: typeof botApi): void {
+  botApi = call
+}
+
+/** Sends a message; tests replace it. */
+export let botSend = (
+  chatId: string,
+  text: string,
+  extra: Record<string, unknown> = {},
+): Promise<void> => botApi('sendMessage', { chat_id: chatId, text, ...extra })
 export function useBotForTests(send: typeof botSend): void {
   botSend = send
 }
@@ -224,6 +230,12 @@ interface Update {
     text?: string
     contact?: { phone_number?: string; user_id?: number }
   }
+  callback_query?: {
+    id?: string
+    from?: { id?: number; language_code?: string; is_bot?: boolean }
+    message?: { chat?: { id?: number }; message_id?: number }
+    data?: string
+  }
 }
 
 const langOfTelegram = (code: string | undefined): Lang =>
@@ -236,6 +248,25 @@ export async function telegramWebhook(request: Request, now = Date.now()): Promi
   if (!secret || !sameText(sha256(secret), sha256(webhookSecret())))
     throw new HttpError(401, 'bad_secret')
   const update = await readJson<Update>(request, 64 * 1024)
+  const origin = new URL(request.url).origin
+  const callback = update.callback_query
+  if (callback?.id && callback.from?.id !== undefined && !callback.from.is_bot) {
+    memoryLimit(`tg-from:${callback.from.id}`, 20, 60)
+    const chat = callback.message?.chat?.id
+    await botCallback(
+      {
+        id: String(callback.id),
+        fromId: String(callback.from.id),
+        chatId: chat === undefined ? null : String(chat),
+        messageId: callback.message?.message_id ?? null,
+        data: String(callback.data ?? '').slice(0, 64),
+        lang: langOfTelegram(callback.from.language_code),
+        origin,
+      },
+      now,
+    )
+    return json(200, { ok: true })
+  }
   const message = update.message
   const chatId = message?.chat?.id
   const fromId = message?.from?.id
@@ -297,7 +328,10 @@ export async function telegramWebhook(request: Request, now = Date.now()): Promi
     return json(200, { ok: true })
   }
 
-  if (text && (await botCommand(String(chatId), text, lang, now, String(fromId))))
+  if (
+    text &&
+    (await botCommand({ chatId: String(chatId), fromId: String(fromId), text, lang, origin }, now))
+  )
     return json(200, { ok: true })
   await say('unknown')
   return json(200, { ok: true })

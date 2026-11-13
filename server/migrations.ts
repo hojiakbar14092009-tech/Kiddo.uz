@@ -116,4 +116,33 @@ export const MIGRATIONS: { version: number; statements: string[] }[] = [
       ) WITHOUT ROWID`,
     ],
   },
+  {
+    // the bot's menu (stage 9.1): security alerts switch, /fikr (feedback), "this was not me"
+    version: 3,
+    statements: [
+      `CREATE TABLE IF NOT EXISTS bot_prefs (
+        user_id TEXT PRIMARY KEY,
+        security INTEGER NOT NULL DEFAULT 1,
+        feedback_until INTEGER,
+        updated_at INTEGER NOT NULL
+      )`,
+      `CREATE TABLE IF NOT EXISTS feedback (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        text TEXT NOT NULL,
+        language TEXT NOT NULL,
+        created_at INTEGER NOT NULL
+      )`,
+      `CREATE INDEX IF NOT EXISTS feedback_user ON feedback(user_id, created_at)`,
+      // one row per new-device message: its "this was not me" button works once, for a week
+      `CREATE TABLE IF NOT EXISTS device_alerts (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        chat_id TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        used_at INTEGER
+      )`,
+      `CREATE INDEX IF NOT EXISTS device_alerts_user ON device_alerts(user_id)`,
+    ],
+  },
 ]

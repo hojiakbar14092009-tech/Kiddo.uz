@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from './db.js'
 import {
   deviceType,
+  helpText,
+  menuKeyboard,
   NOTIFY_TEXT,
   reportText,
   reportWeek,
@@ -10,10 +12,11 @@ import {
   weekFacts,
   weekStart,
 } from './notify.js'
-import { TelegramError, useBotForTests, webhookSecret } from './telegram.js'
-import { call, freshDb, makeUser } from './testHelpers.js'
+import { TelegramError, useBotApiForTests, useBotForTests, webhookSecret } from './telegram.js'
+import { call, freshDb, makeUser, ORIGIN } from './testHelpers.js'
 
 const bot: { chat: string; text: string; extra: Record<string, unknown> }[] = []
+const api: { method: string; body: Record<string, unknown> }[] = []
 let failNext: TelegramError[] = []
 const pauses: number[] = []
 const CRON = 'cron-secret-for-tests'
@@ -36,6 +39,8 @@ beforeEach(async () => {
     if (failure) throw failure
     bot.push({ chat, text, extra })
   })
+  api.length = 0
+  useBotApiForTests(async (method, body) => void api.push({ method, body }))
   usePauseForTests(async (ms) => void pauses.push(ms))
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(SUNDAY_EVENING)
@@ -162,7 +167,7 @@ describe('the weekly report', () => {
     await hook('/start')
     expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.started)
     await cron('weekly')
-    expect(bot.at(-1)!.text).toContain(NOTIFY_TEXT.uz.title)
+    expect(bot.at(-1)!.text).toContain('📒')
   })
 
   it('a blocked bot (403) or a lost chat turns notifications off, without a retry', async () => {
@@ -220,19 +225,20 @@ describe('the weekly report', () => {
     await hook('Русский')
     expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.ru.languageSet)
     await cron('weekly')
-    expect(bot.at(-1)!.text).toContain(NOTIFY_TEXT.ru.title)
+    expect(bot.at(-1)!.text).toContain(NOTIFY_TEXT.ru.greet)
   })
 
   it('/hisobot sends the latest report now, at most twice an hour', async () => {
     await parent('p1')
     await hook('/hisobot')
     await hook('/hisobot')
-    expect(bot.filter((m) => m.text.startsWith(NOTIFY_TEXT.uz.title))).toHaveLength(2)
+    expect(bot.filter((m) => m.text.startsWith('📒'))).toHaveLength(2)
     await hook('/hisobot')
     expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.tooOften)
     // anything else from a linked parent: a short help
     await hook('salom')
-    expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.help)
+    expect(bot.at(-1)!.text).toBe(helpText('uz', ORIGIN))
+    expect(bot.at(-1)!.extra.reply_markup).toEqual(menuKeyboard('uz', ORIGIN))
   })
 })
 
@@ -275,24 +281,52 @@ describe('the report text', () => {
           { parent: 'Dilnoza', child: 'Ali' },
           { parent: null, child: null },
         ]) {
-          const text = reportText(lang, names, week).toLowerCase()
+          const text = reportText(
+            lang,
+            names,
+            week,
+            Date.parse('2026-11-08T19:00:00Z'),
+          ).toLowerCase()
           for (const word of FORBIDDEN) expect(text, `${lang}: ${word}`).not.toContain(word)
         }
       }
-      const events = [NOTIFY_TEXT[lang].stage, NOTIFY_TEXT[lang].quiet].join(' ').toLowerCase()
-      for (const word of FORBIDDEN) expect(events, `${lang}: ${word}`).not.toContain(word)
+      // every other message too: moments, menu, settings, help, feedback, security
+      const all = [...Object.values(NOTIFY_TEXT[lang]), helpText(lang, ORIGIN)]
+        .join(' ')
+        .toLowerCase()
+      for (const word of FORBIDDEN) expect(all, `${lang}: ${word}`).not.toContain(word)
     }
   })
 
   it('names the parent and the child when known; a quiet week is short and kind', () => {
-    const text = reportText('uz', { parent: 'Dilnoza', child: 'Ali' }, facts)
+    const text = reportText(
+      'uz',
+      { parent: 'Dilnoza', child: 'Ali' },
+      facts,
+      Date.parse('2026-11-08T19:00:00Z'),
+    )
     expect(text).toContain('Dilnoza')
     expect(text).toContain('Ali')
     expect(text).toContain('23')
     expect(text).toContain('A, B')
     expect(text).toContain('Sh')
-    const quiet = reportText('uz', { parent: null, child: 'Ali' }, empty)
-    expect(quiet.split('\n')).toHaveLength(3)
+    // one phone screen: the child and the week, Mini's hello, four facts, one idea for today
+    expect(text.split('\n')).toEqual([
+      '📒 Ali · 09.11–15.11',
+      '🤖 Mini: Salom, Dilnoza! Mana bu haftamiz:',
+      '🎯 Mashg‘ulotlar: 4',
+      '⏱ O‘yin vaqti: 23 daqiqa',
+      '🔤 Mashq qilingan harflar: A, B',
+      '🔁 Takrorlash foydali: Sh',
+      '💡 Bugun 5 daqiqa «Sh» harfini birga takrorlang.',
+    ])
+    const quiet = reportText(
+      'uz',
+      { parent: null, child: 'Ali' },
+      empty,
+      Date.parse('2026-11-08T19:00:00Z'),
+    )
+    expect(quiet.split('\n')).toHaveLength(2)
     expect(quiet).toContain(NOTIFY_TEXT.uz.empty)
   })
 })
@@ -463,7 +497,7 @@ describe('turning it on and linking a chat', () => {
     await parent('p1', { chat: null })
     await db().execute("UPDATE users SET telegram_id = '500' WHERE id = 'p1'")
     await hook('/hisobot')
-    expect(bot.at(-1)!.text.startsWith(NOTIFY_TEXT.uz.title)).toBe(true)
+    expect(bot.at(-1)!.text.startsWith('📒')).toBe(true)
     const row = (await db().execute("SELECT chat_id FROM notification_prefs WHERE user_id = 'p1'"))
       .rows[0]!
     expect(row.chat_id).toBe('500')
@@ -481,7 +515,7 @@ describe('turning it on and linking a chat', () => {
       expect(bot.at(-1)!.chat).toBe('501')
       expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.notLinked)
     }
-    expect(bot.some((m) => m.text.startsWith(NOTIFY_TEXT.uz.title))).toBe(false)
+    expect(bot.some((m) => m.text.startsWith('📒'))).toBe(false)
     const rows = await db().execute('SELECT user_id, chat_id, weekly FROM notification_prefs')
     expect(rows.rows.map((r) => [r.user_id, r.chat_id, Number(r.weekly)])).toEqual([
       ['p1', null, 1],
@@ -501,7 +535,13 @@ describe('turning it on and linking a chat', () => {
   it('deleting the account deletes its notification settings and devices', async () => {
     const cookie = await parent('p1')
     expect((await call('POST', 'account/delete', { cookie })).status).toBe(200)
-    for (const table of ['notification_prefs', 'user_devices']) {
+    for (const table of [
+      'notification_prefs',
+      'user_devices',
+      'bot_prefs',
+      'feedback',
+      'device_alerts',
+    ]) {
       const left = await db().execute(`SELECT COUNT(*) AS n FROM ${table} WHERE user_id = 'p1'`)
       expect(Number(left.rows[0]!.n)).toBe(0)
     }
