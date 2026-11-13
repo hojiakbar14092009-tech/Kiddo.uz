@@ -305,3 +305,15 @@ uz/ru/en tillarida, sodda. Hammasi uchun test yoz (QR/havola yaratish, token mud
 ## Keyingi aniq qadam
 8-bosqich (kirish: Google, email kod, Telegram kod + Telegram UX talabi) — egadan sirlar kerak; so'ng 7-bosqich (Pro serverda, narxlar, sinov to'lovi).
 Turso: migratsiya 1 (faqat yangi jadvallar) birinchi production so'rovida `ready()` orqali qo'llanadi → env qo'yishdan oldin egaga aytish SHART.
+
+## Login tuzatishlari va 9-bosqich holati (2026-11-13)
+Bajarildi (har biri alohida commit, push qilinmagan):
+- `62d016c8` Google xatosi: har tarmoqqa sirsiz sabab kodi (denied, no_state, state_mismatch, no_code, token_failed, bad_token, email_unverified, server_error); server log faqat kod, URL `?reason=`; foydalanuvchi matni o'zgarmadi.
+- `1b6bb855` Telegram tugmasi: kompyuterda tab bosilgan zahoti (await'dan oldin) ochiladi, telefonda tg:// havola; katta «Botni ochish» va nusxalash; ko'rsatma 3 qadam («bot Start'ni o'zi bosa olmaydi»). Ichki brauzer (Telegram/Instagram/Facebook) aniqlansa Google o'rniga ogohlantirish va nusxalash (uz/ru/en). Shu commit ikkala vazifani o'z ichiga oladi (fayllar umumiy).
+- `7c62d3db` Kattalar misoli: /parent'ga kirishda so'ralmaydi. Endi faqat Pro to'lovi, hisobni o'chirish, profilni o'chirish va bulutdagi rasmlarni o'chirish oldidan so'raladi (`gate/useAdultCheck.tsx`). Bola profilini almashtirishda (ChildSelectPage) so'rov saqlangan. E2E fayllardagi kirish misollari olib tashlandi.
+- Tekshirildi: tsc OK, `oxlint src` OK, server testlari 29/29, parent/pro/login/onboarding/home testlari 233/233. E2E ishga tushirilmadi.
+
+Qoldi (9-bosqich, Telegram bot ota-onalar uchun): kod hali yozilmagan.
+- 0-bosqich rejasi: sxema o'qildi. Hisobotga mos ma'lumotlar `user_state` ichida (progress.results: o'yinlar, sana, xatolar; minutesByDay: vaqt; learned; family: bola ismi). Oxirgi kirish uchun `sessions.last_seen_at` bor.
+- Keyingi qadamlar: 1) notification_prefs/notification_log migratsiyasi (faqat CREATE IF NOT EXISTS, baza nomi tekshiruvi bilan); 2) `link_<token>` start payload; 3) dispatcher ichida CRON_SECRET bilan himoyalangan cron va vercel.json'da `0 15 * * 0`; 4) haftalik hisobot, voqealar, /hisobot, /til, /stop; 5) yangi qurilma xabari; 6) 403/429 qayta ishlash; 7) /privacy bandi; 8) testlar.
+- Egaga: SMTP_FROM hali yo'q; Vercel env'lari va webhook (`node scripts/telegram-webhook.mjs https://<domen>`) sozlanishi kerak.
