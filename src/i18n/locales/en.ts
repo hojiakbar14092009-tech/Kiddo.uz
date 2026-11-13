@@ -2568,7 +2568,7 @@ export const en: Translation = {
       },
       telegram: {
         title: 'Telegram notifications',
-        body: 'Off by default; they work only if you turn them on in Settings. What is sent: your child’s name (if given), the week’s number of activities, time playing, letters practised and worth practising, a note about a new stage and about a sign-in from a new device. What is kept: the chat number, the language, the last week/day sent and a short hash of the device kind (no IP address or full browser details). To turn off: in Settings or send /stop to the bot; deleting the account deletes these records too.',
+        body: 'Off by default; they work only if you turn them on in Settings. What is sent: your child’s name (if given), the week’s number of activities, time playing, letters practised and worth practising, a note about a new stage and about a sign-in from a new device. What is kept: the chat number, the language, the last week/day sent and a short hash of the device kind (no IP address or full browser details). To turn off: in Settings or send /stop to the bot; deleting the account deletes these records too. Text you send with /fikr (up to 1000 characters) is kept to improve the service and is deleted with the account. The “This was not me” button in a new-device message signs every device out of your account.',
       },
       delete: {
         title: 'How to delete data',

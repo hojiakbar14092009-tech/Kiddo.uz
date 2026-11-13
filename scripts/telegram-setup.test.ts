@@ -35,6 +35,10 @@ describe('scripts/telegram-setup.mjs', () => {
     expect(calls[0]!.body.commands).toEqual([
       { command: 'start', description: COMMANDS.uz.start },
       { command: 'hisobot', description: COMMANDS.uz.hisobot },
+      { command: 'menu', description: COMMANDS.uz.menu },
+      { command: 'sozlamalar', description: COMMANDS.uz.sozlamalar },
+      { command: 'yordam', description: COMMANDS.uz.yordam },
+      { command: 'fikr', description: COMMANDS.uz.fikr },
       { command: 'til', description: COMMANDS.uz.til },
       { command: 'stop', description: COMMANDS.uz.stop },
     ])
@@ -53,7 +57,16 @@ describe('scripts/telegram-setup.mjs', () => {
     const forbidden =
       /yomon|zaif|orqada|ball|reyting|плох|слаб|отста|балл|рейтинг|\bbad\b|weak|behind|score|rank/i
     for (const lang of ['uz', 'ru', 'en'] as const) {
-      expect(Object.keys(COMMANDS[lang])).toEqual(['start', 'hisobot', 'til', 'stop'])
+      expect(Object.keys(COMMANDS[lang])).toEqual([
+        'start',
+        'hisobot',
+        'menu',
+        'sozlamalar',
+        'yordam',
+        'fikr',
+        'til',
+        'stop',
+      ])
       for (const text of Object.values(COMMANDS[lang]) as string[]) {
         expect(text.length).toBeGreaterThanOrEqual(1)
         expect(text.length).toBeLessThanOrEqual(256)

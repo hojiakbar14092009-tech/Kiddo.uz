@@ -31,7 +31,8 @@ const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOK
   body: JSON.stringify({
     url: `${base.replace(/\/$/, '')}/api/telegram/webhook`,
     secret_token: secret,
-    allowed_updates: ['message'],
+    // callback_query: the bot's menu, settings and "this was not me" buttons
+    allowed_updates: ['message', 'callback_query'],
   }),
 })
 const body = await response.json()

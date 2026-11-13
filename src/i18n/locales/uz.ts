@@ -2579,7 +2579,7 @@ export const uz = {
       },
       telegram: {
         title: 'Telegram xabarnomalari',
-        body: 'Standart holatda o‘chiq; faqat siz Sozlamalarda yoqsangiz ishlaydi. Yuboriladi: farzandingiz ismi (bo‘lsa), haftadagi mashg‘ulotlar soni, o‘yin vaqti, mashq qilingan va takrorlash foydali harflar, yangi bosqich va yangi qurilmadan kirish haqida xabar. Saqlanadi: chat raqami, til, oxirgi yuborilgan hafta/kun va qurilma turining qisqa xeshi (IP manzil yoki to‘liq brauzer ma’lumoti saqlanmaydi). O‘chirish: Sozlamalarda o‘chiring yoki botga /stop yozing; hisob o‘chirilganda bu yozuvlar ham o‘chadi.',
+        body: 'Standart holatda o‘chiq; faqat siz Sozlamalarda yoqsangiz ishlaydi. Yuboriladi: farzandingiz ismi (bo‘lsa), haftadagi mashg‘ulotlar soni, o‘yin vaqti, mashq qilingan va takrorlash foydali harflar, yangi bosqich va yangi qurilmadan kirish haqida xabar. Saqlanadi: chat raqami, til, oxirgi yuborilgan hafta/kun va qurilma turining qisqa xeshi (IP manzil yoki to‘liq brauzer ma’lumoti saqlanmaydi). O‘chirish: Sozlamalarda o‘chiring yoki botga /stop yozing; hisob o‘chirilganda bu yozuvlar ham o‘chadi. /fikr orqali yozgan matningiz (1000 belgigacha) xizmatni yaxshilash uchun saqlanadi va hisob o‘chirilganda o‘chadi. Yangi qurilma xabaridagi «Bu men emas» tugmasi hisobingizdagi barcha kirishlarni yakunlaydi.',
       },
       delete: {
         title: 'Ma’lumotni qanday o‘chirish mumkin',

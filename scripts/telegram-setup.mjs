@@ -4,7 +4,7 @@
  *   node scripts/telegram-setup.mjs
  * Reads TELEGRAM_BOT_TOKEN from .env.local (or the environment) and prints only "ok" or an error
  * code per call, never the token or Telegram's reply. Safe to run again: each call replaces the
- * same setting. The commands are the ones server/notify.ts answers (/start, /hisobot, /til, /stop).
+ * same setting. The commands are the ones server/bot.ts answers.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
@@ -13,18 +13,30 @@ export const COMMANDS = {
   uz: {
     start: 'Boshlash va xabarnomalarni qayta yoqish',
     hisobot: 'Oxirgi haftalik hisobot',
+    menu: 'Asosiy menyu',
+    sozlamalar: 'Nima kelishini tanlash',
+    yordam: 'Bot haqida qisqa yordam',
+    fikr: 'Kiddo jamoasiga fikr yozish',
     til: 'Xabarlar tili',
     stop: 'Xabarlarni o‘chirish',
   },
   ru: {
     start: 'Начать и снова включить уведомления',
     hisobot: 'Последний недельный отчёт',
+    menu: 'Главное меню',
+    sozlamalar: 'Выбрать, что присылать',
+    yordam: 'Короткая помощь по боту',
+    fikr: 'Написать отзыв команде Kiddo',
     til: 'Язык сообщений',
     stop: 'Отключить сообщения',
   },
   en: {
     start: 'Start and turn notifications on again',
     hisobot: 'The latest weekly report',
+    menu: 'Main menu',
+    sozlamalar: 'Choose what to receive',
+    yordam: 'Short help about the bot',
+    fikr: 'Send feedback to the Kiddo team',
     til: 'Message language',
     stop: 'Turn messages off',
   },
