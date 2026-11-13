@@ -74,7 +74,8 @@ type Text = Record<
   | 'tooOften'
   | 'chooseLanguage'
   | 'languageSet'
-  | 'device',
+  | 'device'
+  | 'notLinked',
   string
 >
 
@@ -106,6 +107,8 @@ export const NOTIFY_TEXT: Record<Lang, Text> = {
     tooOften: 'Hisobotni soatiga 2 martagacha so‘rash mumkin. Birozdan keyin urinib ko‘ring.',
     chooseLanguage: 'Xabarlar tilini tanlang:',
     languageSet: 'Endi xabarlar o‘zbek tilida keladi.',
+    notLinked:
+      'Bu chat Kiddo xabarnomalariga hali ulanmagan. Avval saytda Ota-ona bo‘limi → Sozlamalar → «Telegram xabarnomalari»ni yoqing, keyin /hisobot, /til va /stop ishlaydi.',
     device:
       '🔐 Kiddo hisobingizga yangi qurilmadan kirildi: {device}, {time} (Toshkent vaqti). Bu siz bo‘lmasangiz, Google akkauntingiz yoki pochtangizni tekshiring va Kiddo’da hisobdan chiqing.',
   },
@@ -136,6 +139,8 @@ export const NOTIFY_TEXT: Record<Lang, Text> = {
     tooOften: 'Отчёт можно запросить не чаще 2 раз в час. Попробуйте немного позже.',
     chooseLanguage: 'Выберите язык сообщений:',
     languageSet: 'Теперь сообщения будут на русском.',
+    notLinked:
+      'Этот чат ещё не подключён к уведомлениям Kiddo. Сначала включите на сайте «Уведомления в Telegram» (Родительский раздел → Настройки), после этого заработают /hisobot, /til и /stop.',
     device:
       '🔐 Вход в ваш аккаунт Kiddo с нового устройства: {device}, {time} (время Ташкента). Если это были не вы, проверьте свой Google-аккаунт или почту и выйдите из Kiddo.',
   },
@@ -166,6 +171,8 @@ export const NOTIFY_TEXT: Record<Lang, Text> = {
     tooOften: 'The report can be asked for up to 2 times an hour. Please try a little later.',
     chooseLanguage: 'Choose the language of the messages:',
     languageSet: 'Messages will now come in English.',
+    notLinked:
+      'This chat is not linked to Kiddo notifications yet. First turn on “Telegram notifications” on the website (Parent area → Settings); then /hisobot, /til and /stop will work.',
     device:
       '🔐 Someone signed in to your Kiddo account from a new device: {device}, {time} (Tashkent time). If it was not you, check your Google account or e-mail and sign out of Kiddo.',
   },
@@ -613,6 +620,7 @@ export async function notifyLink(request: Request, now = Date.now()): Promise<Re
 
 // ---- the bot: linking and commands ----
 
+const NOTIFY_COMMANDS = new Set(['/hisobot', '/report', '/til', '/lang', '/stop'])
 const LINK_START = /^\/start\s+link_([A-Za-z0-9_-]{16,64})$/
 
 /** Is this /start payload an account-linking one (not a sign-in token)? */
@@ -627,6 +635,7 @@ export async function botCommand(
   raw: string,
   fallback: Lang,
   now = Date.now(),
+  fromId: string = chatId,
 ): Promise<boolean> {
   const text = raw.trim()
   const say = (lang: Lang, key: keyof Text, extra?: Record<string, unknown>) =>
@@ -649,12 +658,32 @@ export async function botCommand(
     sql: 'SELECT user_id, weekly, events, language FROM notification_prefs WHERE chat_id = ? LIMIT 1',
     args: [chatId],
   })
-  const prefs = found.rows[0]
-  if (!prefs) return false
+  const command = text.split(/[\s@]/)[0]!.toLowerCase()
+  // a Telegram sign-in that turned notifications on while the account had no Telegram id yet:
+  // its private chat (chat id = the sender's id, proven by the webhook secret) is linked now
+  const prefs =
+    found.rows[0] ??
+    (chatId === fromId
+      ? (
+          await db().execute({
+            sql: `UPDATE notification_prefs SET chat_id = ?, updated_at = ?
+                  WHERE chat_id IS NULL AND (weekly = 1 OR events = 1)
+                    AND user_id = (SELECT id FROM users WHERE telegram_id = ?)
+                  RETURNING user_id, weekly, events, language`,
+            args: [chatId, now, fromId],
+          })
+        ).rows[0]
+      : undefined)
+  if (!prefs) {
+    // a notification command from a chat that is not linked: say how to turn them on,
+    // not the sign-in help (a bare /start and other text still get that)
+    if (!NOTIFY_COMMANDS.has(command)) return false
+    await say(fallback, 'notLinked')
+    return true
+  }
   const userId = String(prefs.user_id)
   const lang = langOf(prefs.language)
   const on = Number(prefs.weekly) === 1 || Number(prefs.events) === 1
-  const command = text.split(/[\s@]/)[0]!.toLowerCase()
 
   if (command === '/stop') {
     await db().execute({

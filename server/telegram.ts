@@ -297,7 +297,8 @@ export async function telegramWebhook(request: Request, now = Date.now()): Promi
     return json(200, { ok: true })
   }
 
-  if (text && (await botCommand(String(chatId), text, lang, now))) return json(200, { ok: true })
+  if (text && (await botCommand(String(chatId), text, lang, now, String(fromId))))
+    return json(200, { ok: true })
   await say('unknown')
   return json(200, { ok: true })
 }

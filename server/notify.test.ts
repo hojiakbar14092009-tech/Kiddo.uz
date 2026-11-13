@@ -437,7 +437,50 @@ describe('turning it on and linking a chat', () => {
     await hook('/start')
     expect(bot.at(-1)!.text).toContain('Telegram')
     await hook('/stop')
-    expect(bot.at(-1)!.text).not.toBe(NOTIFY_TEXT.uz.stopped)
+    expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.notLinked)
+  })
+
+  it('a notification command from a chat that is not linked says how to turn them on (not the sign-in help)', async () => {
+    const ru = (text: string) =>
+      call('POST', 'telegram/webhook', {
+        body: { message: { chat: { id: 900 }, from: { id: 900, language_code: 'ru' }, text } },
+        origin: null,
+        headers: { 'x-telegram-bot-api-secret-token': webhookSecret() },
+      })
+    for (const command of ['/hisobot', '/til', '/stop', '/hisobot@kiddo_test_bot']) {
+      await ru(command)
+      expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.ru.notLinked)
+    }
+    expect(bot).toHaveLength(4)
+    // a parent whose notifications are off but who never linked gets the same, not a report
+    await parent('p1', { weekly: false, chat: null })
+    await db().execute("UPDATE users SET telegram_id = '900' WHERE id = 'p1'")
+    await ru('/hisobot')
+    expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.ru.notLinked)
+  })
+
+  it('a Telegram sign-in with notifications on but no chat yet is linked by its own private chat', async () => {
+    await parent('p1', { chat: null })
+    await db().execute("UPDATE users SET telegram_id = '500' WHERE id = 'p1'")
+    await hook('/hisobot')
+    expect(bot.at(-1)!.text.startsWith(NOTIFY_TEXT.uz.title)).toBe(true)
+    const row = (await db().execute("SELECT chat_id FROM notification_prefs WHERE user_id = 'p1'"))
+      .rows[0]!
+    expect(row.chat_id).toBe('500')
+    await hook('/til')
+    expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.chooseLanguage)
+    await hook('/stop')
+    expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.stopped)
+  })
+
+  it('a group chat never links someone’s account by the sender', async () => {
+    await parent('p1', { chat: null })
+    await db().execute("UPDATE users SET telegram_id = '500' WHERE id = 'p1'")
+    await hook('/hisobot', -100500, 500)
+    expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.notLinked)
+    const row = (await db().execute("SELECT chat_id FROM notification_prefs WHERE user_id = 'p1'"))
+      .rows[0]!
+    expect(row.chat_id).toBeNull()
   })
 
   it('deleting the account deletes its notification settings and devices', async () => {
