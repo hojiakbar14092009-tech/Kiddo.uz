@@ -473,6 +473,21 @@ describe('turning it on and linking a chat', () => {
     expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.stopped)
   })
 
+  it('a command from another Telegram user’s private chat links nothing and gets no report', async () => {
+    await parent('p1', { chat: null })
+    await db().execute("UPDATE users SET telegram_id = '500' WHERE id = 'p1'")
+    for (const command of ['/hisobot', '/til', '/stop']) {
+      await hook(command, 501, 501)
+      expect(bot.at(-1)!.chat).toBe('501')
+      expect(bot.at(-1)!.text).toBe(NOTIFY_TEXT.uz.notLinked)
+    }
+    expect(bot.some((m) => m.text.startsWith(NOTIFY_TEXT.uz.title))).toBe(false)
+    const rows = await db().execute('SELECT user_id, chat_id, weekly FROM notification_prefs')
+    expect(rows.rows.map((r) => [r.user_id, r.chat_id, Number(r.weekly)])).toEqual([
+      ['p1', null, 1],
+    ])
+  })
+
   it('a group chat never links someone’s account by the sender', async () => {
     await parent('p1', { chat: null })
     await db().execute("UPDATE users SET telegram_id = '500' WHERE id = 'p1'")
