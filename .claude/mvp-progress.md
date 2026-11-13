@@ -317,3 +317,12 @@ Qoldi (9-bosqich, Telegram bot ota-onalar uchun): kod hali yozilmagan.
 - 0-bosqich rejasi: sxema o'qildi. Hisobotga mos ma'lumotlar `user_state` ichida (progress.results: o'yinlar, sana, xatolar; minutesByDay: vaqt; learned; family: bola ismi). Oxirgi kirish uchun `sessions.last_seen_at` bor.
 - Keyingi qadamlar: 1) notification_prefs/notification_log migratsiyasi (faqat CREATE IF NOT EXISTS, baza nomi tekshiruvi bilan); 2) `link_<token>` start payload; 3) dispatcher ichida CRON_SECRET bilan himoyalangan cron va vercel.json'da `0 15 * * 0`; 4) haftalik hisobot, voqealar, /hisobot, /til, /stop; 5) yangi qurilma xabari; 6) 403/429 qayta ishlash; 7) /privacy bandi; 8) testlar.
 - Egaga: SMTP_FROM hali yo'q; Vercel env'lari va webhook (`node scripts/telegram-webhook.mjs https://<domen>`) sozlanishi kerak.
+
+## 9-bosqich bajarildi (2026-11-13, push qilinmagan)
+- `db3c51de` server: migratsiya 2 (notification_prefs, user_devices; faqat CREATE IF NOT EXISTS; `ready()` faqat host `kiddo-` bilan boshlansa va "teamflow" bo'lmasa migratsiya qiladi). Cron: `GET cron/weekly` (`0 15 * * 0`), `GET cron/daily` (`0 14 * * *`), CRON_SECRET Bearer, doimiy vaqtda solishtirish, hafta/kun bo'yicha idempotent. Bot: `link_<token>` va kirish tokeni ajratilgan; /hisobot (soatiga 2), /til, /stop, /start, yordam. Yangi qurilma xabari (brauzer + tizim, 16 belgili xesh). 403/chat not found holatida o'chiradi, 429 holatida retry_after kutadi, ~20 xabar/s. Hisob o'chirilsa yozuvlar ham o'chadi.
+- `a5df5a46` UI: Sozlamalar → «Telegram xabarnomalari» (standart holatda o'chiq, Kiddo server rejimida), /privacy bandi uz/ru/en.
+- Hisobotga kiradi: ota-ona va bola ismi (faqat birinchi ism), hafta (Toshkent, dushanba 00:00 dan boshlanadi) davomidagi mashg'ulotlar soni, daqiqalar, mashq qilingan harflar, `struggles` bo'yicha takrorlashga muhtoj 4 ta harf. Baho, ball va taqqoslash yo'q. Bosqich = har 5 ta o'rganilgan harf.
+- Turso: migratsiya 2 qo'llandi (versiyalar 1,2).
+- Tekshirildi: tsc, lint, server testlari 54/54 (avvalgi 29 ham o'tdi), parent/legal/i18n/alifbo testlari 241/241. Funksiyalar soni: `api/` ichida 1 ta. E2E ishga tushirilmadi, haqiqiy Telegram'ga xabar yuborilmadi.
+- Egaga: Vercel'da `CRON_SECRET` qo'shilsin (TELEGRAM_* va boshqalar avvalgidek).
+- Qisqartirish (shortcut): bir ishga tushirishda ~7 soniya (~140 xabar), qolgani keyingi ishga tushirishga qoladi. Bir xil brauzer va tizimli ikki kompyuter bitta qurilma deb hisoblanadi.
