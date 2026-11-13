@@ -261,30 +261,59 @@ export function useGoogleForTests(
   verifyGoogleToken = verify
 }
 
+/** Why a Google sign-in failed: fixed codes only (no token, e-mail or Google text in a log or an address). */
+export type GoogleFailure =
+  | 'denied'
+  | 'no_state'
+  | 'state_mismatch'
+  | 'no_code'
+  | 'token_failed'
+  | 'bad_token'
+  | 'email_unverified'
+  | 'server_error'
+
 export async function googleCallback(request: Request, url: URL): Promise<Response> {
-  const back = (result: string, cookies: string[] = []) =>
-    redirect(`/parent/auth?signin=${result}`, [cookie(request, GOOGLE_COOKIE, '', 0), ...cookies])
+  const clear = cookie(request, GOOGLE_COOKIE, '', 0)
+  const failed = (reason: GoogleFailure) => {
+    console.error('google_signin_failed', reason)
+    return redirect(`/parent/auth?signin=failed&reason=${reason}`, [clear])
+  }
+  // the parent pressed "Cancel" on Google's screen (or Google refused): Google says so in `error`
+  if (url.searchParams.has('error')) return failed('denied')
   const [state, verifier] = (parseCookies(request)[GOOGLE_COOKIE] ?? '').split('.')
   const given = url.searchParams.get('state') ?? ''
   const code = url.searchParams.get('code')
   // a callback this browser did not start (CSRF / a stolen link) is refused
-  if (!state || !verifier || !code || !sameText(state, given)) return back('failed')
+  if (!state || !verifier) return failed('no_state')
+  if (!sameText(state, given)) return failed('state_mismatch')
+  if (!code) return failed('no_code')
+  let idToken: string
   try {
-    const claims = await verifyGoogleToken(await googleToken(code, verifier, callbackUrl(request)))
-    if (
-      typeof claims.sub !== 'string' ||
-      claims.email_verified !== true ||
-      typeof claims.email !== 'string'
-    )
-      return back('failed')
+    idToken = await googleToken(code, verifier, callbackUrl(request))
+  } catch {
+    return failed('token_failed')
+  }
+  let claims: Awaited<ReturnType<typeof verifyGoogleToken>>
+  try {
+    claims = await verifyGoogleToken(idToken)
+  } catch {
+    return failed('bad_token')
+  }
+  if (
+    typeof claims.sub !== 'string' ||
+    claims.email_verified !== true ||
+    typeof claims.email !== 'string'
+  )
+    return failed('email_unverified')
+  try {
     const userId = await userFor({
       googleSub: claims.sub,
       email: claims.email.toLowerCase(),
       name: typeof claims.name === 'string' ? claims.name.slice(0, 80) : undefined,
     })
-    return back('google', [await startSession(request, userId)])
+    return redirect('/parent/auth?signin=google', [clear, await startSession(request, userId)])
   } catch {
-    return back('failed')
+    return failed('server_error')
   }
 }
 

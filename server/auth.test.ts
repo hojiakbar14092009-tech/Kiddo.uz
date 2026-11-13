@@ -206,7 +206,45 @@ describe('Google', () => {
     expect(location.searchParams.get('code_challenge_method')).toBe('S256')
     expect(location.searchParams.get('redirect_uri')).toBe(`${ORIGIN}/api/auth/google/callback`)
     const forged = await call('GET', 'auth/google/callback?code=c&state=someone-elses')
-    expect(forged.headers.get('location')).toBe('/parent/auth?signin=failed')
+    expect(forged.headers.get('location')).toBe('/parent/auth?signin=failed&reason=no_state')
+  })
+
+  it('every failure carries a fixed reason code, logged without secrets', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const start = await call('GET', 'auth/google/start')
+    const flow = start.headers.getSetCookie()[0]!.split(';')[0]!
+    const state = new URL(start.headers.get('location')!).searchParams.get('state')
+    const reason = async (query: string) =>
+      new URL(
+        (await call('GET', `auth/google/callback?${query}`, { cookie: flow })).headers.get(
+          'location',
+        )!,
+        ORIGIN,
+      ).searchParams.get('reason')
+    expect(await reason(`error=access_denied&state=${state}`)).toBe('denied')
+    expect(await reason('code=c&state=other')).toBe('state_mismatch')
+    expect(await reason(`state=${state}`)).toBe('no_code')
+    useGoogleForTests(
+      async () => {
+        throw new Error('google said: secret-ish text')
+      },
+      async () => ({}),
+    )
+    expect(await reason(`code=c&state=${state}`)).toBe('token_failed')
+    useGoogleForTests(
+      async () => 'id-token',
+      async () => {
+        throw new Error('bad signature')
+      },
+    )
+    expect(await reason(`code=c&state=${state}`)).toBe('bad_token')
+    // the log holds the code only: never the token, the state or Google's own words
+    for (const args of errors.mock.calls) {
+      expect(args).toHaveLength(2)
+      expect(args[0]).toBe('google_signin_failed')
+      expect(args[1]).toMatch(/^[a-z_]+$/)
+    }
+    errors.mockRestore()
   })
 
   it('signs in with a verified Google e-mail only', async () => {
@@ -227,7 +265,9 @@ describe('Google', () => {
     const unverified = await call('GET', `auth/google/callback?code=c&state=${state}`, {
       cookie: flow,
     })
-    expect(unverified.headers.get('location')).toBe('/parent/auth?signin=failed')
+    expect(unverified.headers.get('location')).toBe(
+      '/parent/auth?signin=failed&reason=email_unverified',
+    )
   })
 })
 

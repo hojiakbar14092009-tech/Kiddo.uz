@@ -26,8 +26,15 @@ export function AuthReturnPage() {
   useEffect(() => {
     if (started.current) return
     started.current = true
-    // the code is used once: it does not stay in the address or the history
-    window.history.replaceState(window.history.state, '', window.location.pathname)
+    // the code is used once: it does not stay in the address or the history; a failure's
+    // fixed reason code (never a secret) stays, so a parent's screenshot tells what went wrong
+    const reason = new URLSearchParams(search).get('reason')
+    window.history.replaceState(
+      window.history.state,
+      '',
+      window.location.pathname +
+        (reason && /^[a-z_]{1,32}$/.test(reason) ? `?reason=${reason}` : ''),
+    )
     // MVP: back from Google through Kiddo's own API (the session cookie is already set)
     const own = new URLSearchParams(search).get('signin')
     if (own) {
