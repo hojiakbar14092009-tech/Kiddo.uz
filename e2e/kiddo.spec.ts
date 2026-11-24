@@ -21,6 +21,8 @@ test('a child picks a language and sees today’s plan', async ({ page }) => {
 })
 
 test('a right answer earns praise, a finished game earns coins', async ({ page }) => {
+  // five rounds paced by the praise voice (each waits until it is said): 27–37 s measured on a phone (B1)
+  test.setTimeout(60_000)
   await chooseUzbek(page)
   await page.getByRole('link', { name: '1. Harfni top — Navbatdagi' }).click()
 

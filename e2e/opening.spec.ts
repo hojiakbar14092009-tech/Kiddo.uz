@@ -64,9 +64,12 @@ test('a key skips the opening, and the screen behind waits (not reachable) until
   )
   expect(behind).toBe(true)
   await page.keyboard.press('Escape')
-  await expect(splash).toHaveCount(0, { timeout: 1_500 })
-  const reachable = await page.evaluate(() => !document.querySelector('[inert]'))
-  expect(reachable).toBe(true)
+  // the skip is immediate (the screen behind is reachable); its 0.35 s fade can stretch past
+  // 1.5 s while Home's 3D loads behind on headless software WebGL (B1 probe: 1 in 10 on tablet)
+  await expect
+    .poll(() => page.evaluate(() => !document.querySelector('[inert]')), { timeout: 1_500 })
+    .toBe(true)
+  await expect(splash).toHaveCount(0)
 })
 
 test('a tap skips the opening', async ({ page }) => {
@@ -74,5 +77,9 @@ test('a tap skips the opening', async ({ page }) => {
   const splash = page.locator('[data-splash]')
   await expect(splash).toBeVisible()
   await splash.click()
-  await expect(splash).toHaveCount(0, { timeout: 1_500 })
+  // as for the key: the skip at once, the fade in its own time
+  await expect
+    .poll(() => page.evaluate(() => !document.querySelector('[inert]')), { timeout: 1_500 })
+    .toBe(true)
+  await expect(splash).toHaveCount(0)
 })

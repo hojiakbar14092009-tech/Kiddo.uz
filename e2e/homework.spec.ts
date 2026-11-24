@@ -160,7 +160,9 @@ test('planet homework: Child A learns the lesson, then its check; the parent see
     if (await practice.isVisible()) {
       const answer = (await practice.getAttribute('data-answer'))!
       await practice.getByRole('button', { name: answer, exact: true }).click()
-      await page.waitForTimeout(1400)
+      // the next question comes only after the praise is said (up to the app's 15 s cap):
+      // reading data-answer earlier read the solved question again
+      await expect(practice.locator('[data-status="correct"]')).toHaveCount(0, { timeout: 15_000 })
     } else await next.click()
   }
   await startTest.click()
@@ -173,7 +175,7 @@ test('planet homework: Child A learns the lesson, then its check; the parent see
     const answer = (await question.getAttribute('data-answer'))!
     expect(['Yer', 'Mars', 'Saturn']).toContain(answer)
     await question.getByRole('button', { name: answer, exact: true }).click()
-    await page.waitForTimeout(1400)
+    await expect(question.locator('[data-status="correct"]')).toHaveCount(0, { timeout: 15_000 })
   }
   await expect(score).toBeVisible({ timeout: 10_000 })
 
