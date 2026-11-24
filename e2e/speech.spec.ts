@@ -92,6 +92,8 @@ function recordClips(page: Page): string[] {
 const clipOf = (language: Lang, text: string) =>
   `/audio/voice/${language}/${phraseKey(language, text)}.mp3`
 const speaker = (page: Page) => page.getByTestId('learn-speak')
+/** The child's bar folds the three languages into one button (LanguageSwitcher, CompactSwitcher). */
+const languageButton = (page: Page) => page.locator('[data-language-compact] > button')
 const prompt = (page: Page) => page.locator('.space-prompt')
 /** The voice clips playing right now (Howler is on window in the browser). */
 const playingClips = (page: Page) =>
@@ -211,6 +213,8 @@ test.describe('speaker button (PRO)', () => {
     await speaker(page).click()
     await expect.poll(() => playingCount(page)).toBe(1)
 
+    // one language button on a child's bar (6a9f0634): open it, then choose
+    await languageButton(page).click()
     await page.getByRole('button', { name: LANG_BUTTON.uz, exact: true }).click()
     await expect.poll(() => playingCount(page)).toBe(0)
     await expect(speaker(page)).toHaveAttribute('data-status', 'idle')
@@ -284,11 +288,7 @@ test('the speaker is easy to tap and overlaps nothing, from 320px phones to desk
     expect(box.height).toBeGreaterThanOrEqual(44)
     expect(box.x).toBeGreaterThanOrEqual(0)
     expect(box.x + box.width, `${width}px: inside the screen`).toBeLessThanOrEqual(width)
-    const others = [
-      page.getByRole('button', { name: LANG_BUTTON.uz, exact: true }),
-      page.getByRole('button', { name: LANG_BUTTON.en, exact: true }),
-      page.getByRole('button', { name: /help/i }).first(),
-    ]
+    const others = [languageButton(page), page.getByRole('button', { name: /help/i }).first()]
     for (const other of others) {
       if ((await other.count()) === 0) continue
       const b = await other.first().boundingBox()
@@ -298,7 +298,12 @@ test('the speaker is easy to tap and overlaps nothing, from 320px phones to desk
         b.x < box.x + box.width &&
         box.y < b.y + b.height &&
         b.y < box.y + box.height
-      expect(overlap, `${width}px: speaker overlaps another control`).toBe(false)
+      const name =
+        (await other.first().getAttribute('aria-label')) ?? (await other.first().textContent())
+      expect(
+        overlap,
+        `${width}px: speaker overlaps "${name}" ${JSON.stringify(box)} ${JSON.stringify(b)}`,
+      ).toBe(false)
     }
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth)
     expect(scrollWidth, `${width}px: no sideways scroll`).toBeLessThanOrEqual(width)

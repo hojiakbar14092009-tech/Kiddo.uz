@@ -222,7 +222,8 @@ describe('the find-at-home page', () => {
     useSettingsStore.setState({ language: 'ru' })
     useFamilyStore.setState({ activeChildId: 'sis' })
     await renderRoute('/explore/find-home')
-    expect(screen.getByRole('button', { name: 'Нашла!' })).toBeInTheDocument()
+    // the Russian texts are their own chunk: under a loaded CPU they arrive after the first paint
+    expect(await screen.findByRole('button', { name: 'Нашла!' })).toBeInTheDocument()
   })
 
   it('has its tile in Kashf et', async () => {
