@@ -1,0 +1,67 @@
+# Codemagic: Android AAB -> Play internal (draft), iOS IPA -> TestFlight. Both on the free macOS M2 minutes
+# (personal account only; a Team account has none). Names in <> are created by the owner in the Codemagic UI
+# and must match: see docs/handoff/NEXT_PROMPT.md.
+workflows:
+  android:
+    name: Android -> Play internal
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      node: 22
+      java: 21
+      android_signing:
+        - kiddo_upload # <keystore reference>
+      groups:
+        - google_play # GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      vars:
+        PACKAGE_NAME: uz.kiddo.app
+    scripts:
+      - name: Web build
+        script: npm ci && npm run build
+      - name: Sync native project
+        script: npx cap sync android
+      - name: AAB
+        script: |
+          LATEST=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks internal || echo 0)
+          cd android && ./gradlew bundleRelease -PversionCode=$((LATEST + 1))
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+
+  ios:
+    name: iOS -> TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: kiddo_asc # <App Store Connect API key name>
+    environment:
+      node: 22
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: uz.kiddo.app
+      vars:
+        APP_STORE_APPLE_ID: 0 # <numeric Apple ID from App Store Connect -> App Information>
+    scripts:
+      - name: Web build
+        script: npm ci && npm run build
+      - name: Sync native project (SPM, no pod install)
+        script: npx cap sync ios
+      - name: Signing profiles
+        script: xcode-project use-profiles
+      - name: Build number
+        script: |
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          cd ios/App && agvtool new-version -all $((LATEST + 1))
+      - name: IPA
+        script: xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

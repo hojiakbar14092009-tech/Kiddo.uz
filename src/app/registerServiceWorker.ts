@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import { registerSW } from 'virtual:pwa-register'
 
 const CHECK_EVERY_MS = 60_000
@@ -14,7 +15,8 @@ const CHECK_EVERY_MS = 60_000
  * child's first screen is in, instead of competing with it.
  */
 export function registerServiceWorker() {
-  if (import.meta.env.DEV || !('serviceWorker' in navigator)) return
+  // the store app already carries every file; a worker there would only fetch them a second time
+  if (import.meta.env.DEV || Capacitor.isNativePlatform() || !('serviceWorker' in navigator)) return
   registerSW({
     immediate: false,
     onRegisteredSW(_url, registration) {
