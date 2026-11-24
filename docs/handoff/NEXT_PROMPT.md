@@ -1,23 +1,22 @@
-# Handoff: Capacitor 8 + Codemagic (MASTER_PROMPT_V3)
+Tavsiya etilgan model: **Opus 5.5**, chunki B1 flaky/timeout testlarning ildiz sababini topishni talab qiladi (murakkab debug). Mexanik qismlarni subagentlarga Sonnet 5.5 bilan bering.
 
-## Bajarildi
-- `@capacitor/core|android|ios` 8.6.2, `@capacitor/cli` (dev). `capacitor.config.ts`: appId `uz.kiddo.app`, webDir `dist`.
-- Native ilovada service worker yoqilmaydi (`src/app/registerServiceWorker.ts`).
-- `codemagic.yaml`: `android` (AAB -> Play internal, draft) va `ios` (IPA -> TestFlight), ikkalasi `mac_mini_m2`, iOS SPM (pod install yo'q).
+# Kiddo: keyingi sessiya, bosqich B1 (xavfsizlik to'ri: testlarni yashil qilish)
 
-- `android/` (SDK 24/36/36) va `ios/` (iOS 15, SPM) yaratildi; web fayllari ularda gitignore'da, CI `cap sync` bilan qo'yadi.
-- `android/app/build.gradle`: `-PversionCode` va `CM_KEYSTORE_*` bilan release imzolash.
-- Tekshirildi: `npm run build`, `tsc -b`, oxlint, YAML parse. **Tekshirilmadi**: gradle/xcode build (lokal SDK/Java yo'q) — birinchi Codemagic run sinaydi.
+Bu sessiya oldingi suhbatni bilmaydi. Hamma narsa fayllarda.
 
-## Qolgan (kod)
-1. Native'da kirish (Google/email) ishlamaydi: `/api` nisbiy, cookie same-origin, Google OAuth WebView'da bloklanadi.
-   Store build'ning birinchi versiyasida "Ota-onalar" bo'limidagi kirishni yashirish yoki `@capgo/capacitor-social-login` + Sign in with Apple qo'shish kerak (egasi tanlaydi).
+1. `docs/MASTER_PROMPT_V3.md` ni to'liq o'qi: u yagona manba, 3-bo'lim qoidalari buzilmaydi. Istisno: branch `app-v3` emas, **`feat/capacitor-codemagic`** da qol (`docs/handoff/DECISIONS.md`).
+2. `docs/handoff/STATE.md` va `docs/handoff/PLAN.md` ni o'qi. `git status`, `git log -5 --oneline`, branch'ni tekshir. `docs/MASTER_PROMPT_V3.md` va `docs/reference/TADQIQOT.md` Hojiakbarning commit qilinmagan fayllari: ularga tegma, commit'ga qo'shma.
+3. Skill inventari: `docs/handoff/SKILLS.md`. Har vazifa oldidan `ponytail:ponytail`; B1 uchun `superpowers:systematic-debugging`, `mattpocock-skills:diagnosing-bugs`, `superpowers:verification-before-completion`.
 
-## Faqat ega (Codemagic UI nomlari `codemagic.yaml` dagilar bilan bir xil bo'lsin)
-- Shaxsiy (Team emas) Codemagic akkaunti, repo ulash.
-- Android: `keytool` bilan upload keystore -> Codemagic "Code signing" -> reference `kiddo_upload` (zaxira nusxa saqlang).
-  Google Cloud service account JSON -> env group `google_play`, o'zgaruvchi `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`.
-  Birinchi AAB'ni Play Console'ga qo'lda yuklash kerak bo'lishi mumkin.
-- iOS: Apple Developer Program, App Store Connect'da `uz.kiddo.app` ilova yozuvi, API kaliti (App Manager) -> Codemagic integration `kiddo_asc`.
-  `codemagic.yaml` dagi `APP_STORE_APPLE_ID: 0` ni ilovaning raqamli Apple ID'si bilan almashtiring.
-- appId `uz.kiddo.app` birinchi yuklashdan keyin o'zgarmaydi: boshqasi kerak bo'lsa hozir ayting.
+## B1 vazifalari
+- Vitest 7 yiqilgan test (`STATE.md`): admin (4 ta), `MathPage`, `parent` (`/parent` ≠ `/parent/login`: haqiqiy xato bo'lishi mumkin), `DinoPage`. Sabablar: timeout, "router is still loading", `store.createIndex is not a function`. Timeout'ni oshirish bilan "tuzatma": ildiz sababi.
+- React "duplicate key" ogohlantirishlari (birthday, award, CoinBadge).
+- Playwright e2e bazasini o'lcha, ma'lum flake'lar: "coins", opening "key/tap skips", homework "planet" (`.claude/mvp-progress.md:206,240`).
+- Bazaviy ekran yuklanish vaqtlarini o'lcha (B0 da qilinmadi), `STATE.md` ga yoz.
+- Parallel: 4 tagacha subagent (admin / parent / Math+Dino / e2e), fayllar kesishmasin.
+
+## Ochiq ishlar va xavflar
+- Native paketga ~215 MB ovoz kiradi: B2 da hal qilinadi (`PLAN.md` 2-bo'lim). `public/audio/voice` dagi mp3 larni O'CHIRMA.
+- Native'da kirish ishlamaydi (nisbiy `/api`, Google OAuth WebView): B7.
+- Kompyuterda GPU yo'q, RAM cheklangan: vitest (~194 s) va e2e ni bir vaqtda ishga tushirma.
+- Oxirida 7-bo'lim handoff: `STATE.md`, `REPORT_B1.md`, shu faylni B2 uchun qayta yoz. Push yo'q.
