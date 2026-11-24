@@ -1,0 +1,13 @@
+{
+  "id": "P018",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Good that it's Payme or Click and the trial needs no card, so I'd install it and let my kid try it. But every app goes the same way at our house: a week of excitement, then it gets deleted, so by day 14 there's nothing left to pay for.",
+  "objection": "My child won't stick with it past the first week. Paying monthly for an app nobody opens is just money gone, and a report doesn't help if there's nothing in it.",
+  "would_change_my_mind": "If after two weeks my kid still asks for it on their own and the report shows they actually learned new letters, I'd pay, probably monthly first.",
+  "price_too_cheap": 5000,
+  "price_cheap": 12000,
+  "price_expensive": 30000,
+  "price_too_expensive": 50000
+}

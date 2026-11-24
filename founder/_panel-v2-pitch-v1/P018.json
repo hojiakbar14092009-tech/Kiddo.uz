@@ -1,0 +1,13 @@
+{
+  "id": "P018",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "convenience",
+  "reason": "I'd install the free version and let my kid try it, but paying means going through Google Play or App Store billing and my card doesn't work there, so PRO is out. Besides, our kids' apps usually get deleted after a week anyway.",
+  "objection": "I can't pay with store billing or a foreign card, and I'm not paying for something before I know my child will still use it next week.",
+  "would_change_my_mind": "Being able to pay for PRO with Payme or Click, after my child is still using the free version a few weeks later.",
+  "price_too_cheap": 5000,
+  "price_cheap": 12000,
+  "price_expensive": 30000,
+  "price_too_expensive": 50000
+}

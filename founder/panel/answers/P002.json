@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I've never paid for an app and I'm not starting now. The kindergarten already does letters and numbers, so I'd download the free version and let my child use one language, plus YouTube, and that's enough.",
+  "objection": "The kindergarten already teaches this. Why pay 25 thousand a month for something the teacher and free YouTube videos already give my child?",
+  "would_change_my_mind": "If the kindergarten teacher or several mothers in our parents' Telegram group said their child really learned to read with it and that it's worth paying for.",
+  "price_too_cheap": 5000,
+  "price_cheap": 10000,
+  "price_expensive": 20000,
+  "price_too_expensive": 30000
+}

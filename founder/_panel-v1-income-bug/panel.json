@@ -1,0 +1,102 @@
+{
+ "n": 20,
+ "seed": 87423,
+ "customer": {
+  "business": "Kiddo: a voiced learning app (letters, numbers) for children aged 4-6, Uzbek/Russian/English",
+  "target": "Parents in Uzbekistan with a child aged 4-6 who has a smartphone or tablet and wants the child ready for school (all money is Uzbek so'm: the yearly income shown with a '$' sign is really so'm, not dollars)",
+  "where": "Uzbekistan: Tashkent and regional cities, online (Google Play, App Store, web)",
+  "age": [
+   24,
+   42
+  ],
+  "income_note": "GUESS: yearly household income in so'm (monthly x12); no real survey data",
+  "segments": [
+   {
+    "name": "Uzbek-medium family, regional city",
+    "share": 0.4,
+    "income": [
+     48000000,
+     108000000
+    ]
+   },
+   {
+    "name": "Uzbek-medium family, Tashkent",
+    "share": 0.25,
+    "income": [
+     84000000,
+     216000000
+    ]
+   },
+   {
+    "name": "Russian-medium family, Tashkent",
+    "share": 0.2,
+    "income": [
+     108000000,
+     300000000
+    ]
+   },
+   {
+    "name": "Family preparing the child for English or a private school",
+    "share": 0.15,
+    "income": [
+     180000000,
+     480000000
+    ]
+   }
+  ],
+  "behaviours": [
+   {
+    "name": "Free only",
+    "share": 0.25,
+    "how": "Downloads free apps and YouTube; has never paid for an app."
+   },
+   {
+    "name": "Asks other mothers",
+    "share": 0.18,
+    "how": "Buys what moms in a Telegram group or the kindergarten recommend."
+   },
+   {
+    "name": "Screen-time worrier",
+    "share": 0.15,
+    "how": "Limits the phone, and allows only what feels educational and safe."
+   },
+   {
+    "name": "School-readiness planner",
+    "share": 0.15,
+    "how": "Already pays for a tutor or courses before first grade."
+   },
+   {
+    "name": "Tries then drops",
+    "share": 0.12,
+    "how": "Installs many apps; the child plays a week, then they are deleted."
+   },
+   {
+    "name": "Payme/Click subscriber",
+    "share": 0.1,
+    "how": "Already pays for subscriptions (Kinopoisk, Yandex Plus) by card."
+   },
+   {
+    "name": "Grandparent buyer",
+    "share": 0.05,
+    "how": "A grandparent or relative pays for the child's learning as a gift."
+   }
+  ],
+  "objections": [
+   "YouTube and free apps already teach letters for free",
+   "24,990 so'm every month is a lot for an app",
+   "I don't want my child glued to the phone",
+   "Will my child actually learn, or just play?",
+   "The kindergarten already teaches this",
+   "I can't pay with a foreign card / store billing",
+   "The app is big and our internet is slow or limited"
+  ],
+  "habits": [
+   "your child watches cartoons on your phone in the evening",
+   "you are in a parents' Telegram group for the kindergarten",
+   "first grade starts in about a year",
+   "you pay bills through Payme or Click",
+   "the grandparents look after the child during the day"
+  ]
+ },
+ "pitch": "Kiddo — an app where a child aged 4-6 learns letters and numbers in Uzbek, Russian or English with a real recorded voice and a friendly mascot.\nShort lessons and games; no ads; it works offline; the camera is used only if a parent turns it on.\nThe parent sets homework and sees the progress in a parent area.\nThe core app is free. Kiddo PRO costs 24,990 so'm a month or 238,990 so'm a year.\nGet it on Google Play, the App Store, or the web."
+}

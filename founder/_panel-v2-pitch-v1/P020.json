@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "need",
+  "reason": "First grade is a year away and I want my child doing letters and numbers in English and Uzbek every day, and 25 thousand a month is nothing next to Kinopoisk. I'd start on the free version, and if the child actually uses it for a week or two I'd pay for one month of PRO with Payme to see what's in it, not the year.",
+  "objection": "If the download is huge it will eat our mobile data and take forever, and I don't know what PRO adds over the free part. If the free version already covers the basics, why pay?",
+  "would_change_my_mind": "If the download is large and the offline mode doesn't really work on our connection, I'd delete it and not pay anything.",
+  "price_too_cheap": 5000,
+  "price_cheap": 15000,
+  "price_expensive": 50000,
+  "price_too_expensive": 100000
+}

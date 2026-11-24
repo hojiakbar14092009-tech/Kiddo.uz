@@ -1,0 +1,13 @@
+{
+  "id": "P005",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "convenience",
+  "reason": "The free part is enough for me to test it on my child for a few weeks, and the English letters are the only thing I really care about. I won't pay for PRO until I see it actually teaches something and until I know I can pay without fighting with a foreign card or store billing.",
+  "objection": "I can't easily pay through Google Play or the App Store with my local card, and I don't want to give my child another screen app that is a cartoon dressed up as a lesson.",
+  "would_change_my_mind": "Being able to pay with Click, Payme or Uzcard/Humo, after my child clearly learns English letters with the free version in a couple of weeks.",
+  "price_too_cheap": 5000,
+  "price_cheap": 15000,
+  "price_expensive": 40000,
+  "price_too_expensive": 80000
+}

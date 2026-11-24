@@ -1,0 +1,13 @@
+{
+  "id": "P013",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Nobody in my Telegram mom group or at the kindergarten has mentioned Kiddo yet, and I don't pay for an app nobody I know has tried. At most I would download the free version on Wi-Fi and see if my child even opens it while the grandparents watch him.",
+  "objection": "Our internet is slow and limited, so I worry the download is big, and I don't know if the Uzbek voice and lessons are good or just another cartoon game.",
+  "would_change_my_mind": "A few mothers in my Telegram group or the kindergarten teacher saying their child really learned letters with it.",
+  "price_too_cheap": 5000,
+  "price_cheap": 15000,
+  "price_expensive": 45000,
+  "price_too_expensive": 80000
+}

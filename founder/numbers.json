@@ -1,0 +1,14 @@
+{
+  "business": "Kiddo PRO (subscription; one unit = one paid subscriber-month)",
+  "unit": "subscriber-month",
+  "price": 24990,
+  "variable": [
+    {"label": "Payme/Click acquiring fee, ESTIMATE ~2%", "cost": 500},
+    {"label": "Hosting/voice delivery per subscriber, ESTIMATE (free tiers today)", "cost": 0}
+  ],
+  "fixed_monthly": [],
+  "startup": [],
+  "days_per_month": 30,
+  "plan_per_day": 10,
+  "ramp_per_day": [0, 0.17, 0.33, 0.67, 1, 1.5, 2, 2.67, 3.67, 5, 6.67, 10]
+}

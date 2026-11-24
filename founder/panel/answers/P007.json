@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I've never paid for an app and I'm not starting now. The kindergarten already teaches letters and numbers, so I'd download the free version, maybe let the 14-day trial run since it needs no card, and then just keep the free part.",
+  "objection": "The kindergarten already does this, and YouTube has free alphabet cartoons in Uzbek and Russian. Why pay every month for something my child gets for free?",
+  "would_change_my_mind": "If the kindergarten teacher told me my child is behind and recommended this app specifically, I might pay for a month or two before first grade.",
+  "price_too_cheap": 3000,
+  "price_cheap": 7000,
+  "price_expensive": 15000,
+  "price_too_expensive": 25000
+}

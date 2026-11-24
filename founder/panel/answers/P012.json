@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I have never paid for an app and I'm not starting now. The free letters and numbers in Uzbek are enough for my child, and the rest we get from YouTube and the kindergarten.",
+  "objection": "The app is big and our internet is slow and limited. Even the free download costs me data, and once the 14 days are up I'll just go back to free things anyway.",
+  "would_change_my_mind": "If the kindergarten teacher or several mothers in our Telegram group said their kids really learned to read with it before first grade, I might pay for one month before school starts.",
+  "price_too_cheap": 3000,
+  "price_cheap": 7000,
+  "price_expensive": 15000,
+  "price_too_expensive": 25000
+}

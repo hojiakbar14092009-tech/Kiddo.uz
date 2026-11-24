@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I've never paid for an app and I'm not starting now. If the free part works on our phone and doesn't eat all our internet, my child can use that, and YouTube already has letters and numbers for free.",
+  "objection": "The app will be big and our internet is slow and limited. I don't want to spend my traffic downloading it only to find the good lessons are locked behind PRO.",
+  "would_change_my_mind": "If the kindergarten teacher or other mothers in our Telegram group said it really got their child ready for school, and I could pay a small amount through Click or Payme without a card.",
+  "price_too_cheap": 3000,
+  "price_cheap": 7000,
+  "price_expensive": 15000,
+  "price_too_expensive": 25000
+}

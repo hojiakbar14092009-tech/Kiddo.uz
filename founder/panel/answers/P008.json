@@ -1,0 +1,13 @@
+{
+  "id": "P008",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I'd install it and use the free 14 days, since no card is needed, but my son plays any app for about a week and then it gets deleted. By the time it asks me to pay, he'll be back on YouTube, which teaches letters for free.",
+  "objection": "Why pay 25 thousand every month when YouTube and free apps already teach letters? And he'll lose interest anyway.",
+  "would_change_my_mind": "If after the two free weeks he still asks for it by himself and I can see in the report that he really learned new letters, then I'd pay for one month.",
+  "price_too_cheap": 3000,
+  "price_cheap": 10000,
+  "price_expensive": 20000,
+  "price_too_expensive": 35000
+}

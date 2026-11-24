@@ -1,0 +1,13 @@
+{
+  "id": "P003",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I already pay a tutor to get my child ready for first grade, and that's where our money goes. I might install the free version to see if it helps with letters at home, but I won't pay for PRO before I see that it does something the tutor doesn't.",
+  "objection": "I don't want my child glued to the phone, and paying monthly feels like I'm paying for more screen time, not more learning.",
+  "would_change_my_mind": "If the tutor or the kindergarten teacher said it actually helps and the parent area showed my child really learned letters in a few weeks without sitting on the phone for hours.",
+  "price_too_cheap": 5000,
+  "price_cheap": 10000,
+  "price_expensive": 20000,
+  "price_too_expensive": 35000
+}

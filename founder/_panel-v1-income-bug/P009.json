@@ -1,0 +1,13 @@
+{
+  "id": "P009",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "The core app is free, so in the first month I would just install it and watch whether my child actually learns letters or just taps the mascot. I'm not paying 25 thousand a month before I see real progress in the parent area.",
+  "objection": "Will my child actually learn, or just play? Every kids app says 'learning' and most turn into cartoons on a phone.",
+  "would_change_my_mind": "After a few weeks of the free version, seeing in the parent area that my child really knows new letters and numbers, plus other parents in our kindergarten Telegram group saying it helped before school.",
+  "price_too_cheap": 5000,
+  "price_cheap": 12000,
+  "price_expensive": 30000,
+  "price_too_expensive": 45000
+}

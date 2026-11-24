@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I have never paid for an app and I'm not starting now; the kindergarten already teaches letters and numbers, and YouTube has plenty of free cartoons for that. I might download the free version, but I would not pay for PRO.",
+  "objection": "Why pay every month for something the kindergarten and free YouTube videos already give my child?",
+  "would_change_my_mind": "If the kindergarten teacher told me my child is behind and recommended this app specifically, I might try a month.",
+  "price_too_cheap": 3000,
+  "price_cheap": 7000,
+  "price_expensive": 15000,
+  "price_too_expensive": 25000
+}

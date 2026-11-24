@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "values",
+  "reason": "We already pay a tutor to get him ready for first grade, and during the day he's with his grandparents, who would just hand him the phone. At most I'd install the free version and look at it myself; I wouldn't pay for PRO in the first month.",
+  "objection": "I don't want my child glued to the phone. An app that grandma can switch on so he sits quietly works against what the tutor is doing, and I can't see that it teaches better than a real person.",
+  "would_change_my_mind": "A hard daily time limit I set myself, plus a progress report showing he really learned letters and numbers in Russian, so it supports the tutor instead of just being screen time.",
+  "price_too_cheap": 5000,
+  "price_cheap": 15000,
+  "price_expensive": 50000,
+  "price_too_expensive": 100000
+}

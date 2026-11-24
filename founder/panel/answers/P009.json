@@ -1,0 +1,13 @@
+{
+  "id": "P009",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "convenience",
+  "reason": "I would download the free version on Wi-Fi and see if my child even sticks with it, but I would not pay this month. In our family it is my mother who pays for the child's learning, and she would rather pay for a real teacher or a course she can see than a subscription on my phone.",
+  "objection": "Our internet is slow and limited and the phone memory is already full, so I am not sure how big the download is, and with a monthly payment I don't know if my child will still use it after the first two weeks.",
+  "would_change_my_mind": "If the download size was stated and small, and I could give a one-year access as a gift card or code that grandma pays for once, maybe after other parents in our kindergarten Telegram group say their child really learned letters with it.",
+  "price_too_cheap": 7000,
+  "price_cheap": 12000,
+  "price_expensive": 25000,
+  "price_too_expensive": 45000
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "need",
+  "reason": "First grade is a year away and I already pay a tutor, so a free 14-day trial with no card costs me nothing to test, and the weekly report shows me if the tutor's work is sticking. If the Russian content is decent and my child actually uses it, I'll pay the monthly 24,990 once and watch it before committing to a year.",
+  "objection": "24,990 every month is a lot for an app when I already pay a tutor; I worry it just repeats what the tutor does and the child gets bored after two weeks.",
+  "would_change_my_mind": "If during the trial the Russian voice and lessons feel weak or my child stops opening it after the first week, I cancel and don't pay.",
+  "price_too_cheap": 5000,
+  "price_cheap": 12000,
+  "price_expensive": 30000,
+  "price_too_expensive": 50000
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P013",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "I have never heard of Kiddo, and nobody in our kindergarten chat has mentioned it yet. At most I would try the free part on the tablet first, and I would only pay for PRO once other moms say it really helps.",
+  "objection": "Our internet is slow and limited, and I'm afraid the app is big and will eat our data. Also the grandparents watch my child during the day and they won't figure out homework or a parent area.",
+  "would_change_my_mind": "Two or three moms in my Telegram group or the kindergarten saying their child learned letters with it and that it really works offline after one small download.",
+  "price_too_cheap": 5000,
+  "price_cheap": 12000,
+  "price_expensive": 30000,
+  "price_too_expensive": 50000
+}

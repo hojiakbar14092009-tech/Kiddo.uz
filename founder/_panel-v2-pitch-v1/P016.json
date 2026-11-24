@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "The core app is free, so I'd install that and see whether my child actually sits with it. I already pay a tutor for school prep, and nothing here tells me what PRO adds that the free version and the tutor don't already cover.",
+  "objection": "24,990 every month for an app, on top of a tutor I already pay. I don't know what PRO even unlocks, and kids drop these apps after two weeks.",
+  "would_change_my_mind": "If after a few weeks on the free version my child is still using it every day and the tutor or other parents in the kindergarten group say it really helped with letters, I'd pay for the yearly plan.",
+  "price_too_cheap": 5000,
+  "price_cheap": 12000,
+  "price_expensive": 30000,
+  "price_too_expensive": 50000
+}

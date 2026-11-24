@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "need",
+  "reason": "We are preparing our son for a private school with English, and 25 thousand a month is nothing next to what a tutor costs. If after the free 14 days he actually sits with it and I see in the report that he knows more letters, I pay by Payme like I do for Kinopoisk.",
+  "objection": "The app is probably heavy and our internet is slow or limited. If the first download fails or eats my mobile traffic, or the child gets bored in a week, I will just delete it and not think about it again.",
+  "would_change_my_mind": "If the download is huge or fails on our home Wi-Fi, or the English voice sounds poor, I would not pay.",
+  "price_too_cheap": 5000,
+  "price_cheap": 15000,
+  "price_expensive": 50000,
+  "price_too_expensive": 100000
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "values",
+  "reason": "I don't want my kid glued to a phone, so I'm not paying to keep him on it longer. If anything, his grandmother buys learning things as gifts, and she'd rather buy real books or a tutor than an app subscription; the free version is enough for us to try.",
+  "objection": "It's still screen time. I don't believe a phone teaches letters better than a person sitting with the child, and money's tight, so a monthly charge for an app feels like a waste.",
+  "would_change_my_mind": "Seeing that it hard-limits play to something like 15 minutes a day and that my child actually learned letters for school, maybe through a free month of PRO that grandma could pay once a year by Payme.",
+  "price_too_cheap": 5000,
+  "price_cheap": 10000,
+  "price_expensive": 20000,
+  "price_too_expensive": 35000
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I have never paid for an app and I'm not starting now. I'd download it, use the free letters and numbers in Uzbek, and maybe press the free PRO trial because it needs no card, but when the 14 days end I'd just keep the free part and YouTube.",
+  "objection": "I can't tell if my child will really learn or just tap the mascot and play. YouTube has free alphabet songs, so why pay 25 thousand every month for something I'm not sure works?",
+  "would_change_my_mind": "If after the free trial I saw with my own eyes that my child could read and say letters she didn't know before, and her kindergarten teacher or other mothers said it helped, I might pay for one month before school starts.",
+  "price_too_cheap": 3000,
+  "price_cheap": 8000,
+  "price_expensive": 15000,
+  "price_too_expensive": 25000
+}

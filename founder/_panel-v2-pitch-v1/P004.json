@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I have never paid for an app; YouTube is free and my child is happy with cartoons. I might download the free part and see, but paying 25 thousand every month for something on my phone is not what I do.",
+  "objection": "Will my child actually learn letters, or just tap the mascot and play like with any other game? I can't tell that from an advert.",
+  "would_change_my_mind": "If after a few weeks of the free version my child really started reading letters and counting, and the kindergarten teacher or another mum I trust said PRO is worth it.",
+  "price_too_cheap": 3000,
+  "price_cheap": 7000,
+  "price_expensive": 15000,
+  "price_too_expensive": 25000
+}

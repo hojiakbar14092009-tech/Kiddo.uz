@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Jasper",
+  "age": 32,
+  "segment": "Russian-medium family, Tashkent",
+  "income": 170008000,
+  "behaviour": "School-readiness planner",
+  "behaviour_how": "Already pays for a tutor or courses before first grade.",
+  "objection": "I don't want my child glued to the phone",
+  "habit": "the grandparents look after the child during the day"
+ },
+ {
+  "id": "P002",
+  "name": "Ruby",
+  "age": 24,
+  "segment": "Uzbek-medium family, Tashkent",
+  "income": 158721000,
+  "behaviour": "Free only",
+  "behaviour_how": "Downloads free apps and YouTube; has never paid for an app.",
+  "objection": "The kindergarten already teaches this",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P003",
+  "name": "Celine",
+  "age": 30,
+  "segment": "Family preparing the child for English or a private school",
+  "income": 426978000,
+  "behaviour": "Screen-time worrier",
+  "behaviour_how": "Limits the phone, and allows only what feels educational and safe.",
+  "objection": "I don't want my child glued to the phone",
+  "habit": "you pay bills through Payme or Click"
+ },
+ {
+  "id": "P004",
+  "name": "Kira",
+  "age": 29,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 100974000,
+  "behaviour": "Free only",
+  "behaviour_how": "Downloads free apps and YouTube; has never paid for an app.",
+  "objection": "Will my child actually learn, or just play?",
+  "habit": "your child watches cartoons on your phone in the evening"
+ },
+ {
+  "id": "P005",
+  "name": "Raj",
+  "age": 32,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 68765000,
+  "behaviour": "Free only",
+  "behaviour_how": "Downloads free apps and YouTube; has never paid for an app.",
+  "objection": "The app is big and our internet is slow or limited",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P006",
+  "name": "Amara",
+  "age": 40,
+  "segment": "Russian-medium family, Tashkent",
+  "income": 139512000,
+  "behaviour": "Screen-time worrier",
+  "behaviour_how": "Limits the phone, and allows only what feels educational and safe.",
+  "objection": "24,990 so'm every month is a lot for an app",
+  "habit": "your child watches cartoons on your phone in the evening"
+ },
+ {
+  "id": "P007",
+  "name": "Owen",
+  "age": 29,
+  "segment": "Uzbek-medium family, Tashkent",
+  "income": 104179000,
+  "behaviour": "Free only",
+  "behaviour_how": "Downloads free apps and YouTube; has never paid for an app.",
+  "objection": "The kindergarten already teaches this",
+  "habit": "your child watches cartoons on your phone in the evening"
+ },
+ {
+  "id": "P008",
+  "name": "Mason",
+  "age": 32,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 54665000,
+  "behaviour": "Tries then drops",
+  "behaviour_how": "Installs many apps; the child plays a week, then they are deleted.",
+  "objection": "YouTube and free apps already teach letters for free",
+  "habit": "you pay bills through Payme or Click"
+ },
+ {
+  "id": "P009",
+  "name": "Nia",
+  "age": 34,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 83725000,
+  "behaviour": "Grandparent buyer",
+  "behaviour_how": "A grandparent or relative pays for the child's learning as a gift.",
+  "objection": "The app is big and our internet is slow or limited",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P010",
+  "name": "Tariq",
+  "age": 31,
+  "segment": "Russian-medium family, Tashkent",
+  "income": 119333000,
+  "behaviour": "School-readiness planner",
+  "behaviour_how": "Already pays for a tutor or courses before first grade.",
+  "objection": "24,990 so'm every month is a lot for an app",
+  "habit": "first grade starts in about a year"
+ },
+ {
+  "id": "P011",
+  "name": "Sara",
+  "age": 36,
+  "segment": "Uzbek-medium family, Tashkent",
+  "income": 106488000,
+  "behaviour": "Asks other mothers",
+  "behaviour_how": "Buys what moms in a Telegram group or the kindergarten recommend.",
+  "objection": "I don't want my child glued to the phone",
+  "habit": "your child watches cartoons on your phone in the evening"
+ },
+ {
+  "id": "P012",
+  "name": "Talia",
+  "age": 27,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 91220000,
+  "behaviour": "Free only",
+  "behaviour_how": "Downloads free apps and YouTube; has never paid for an app.",
+  "objection": "The app is big and our internet is slow or limited",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P013",
+  "name": "Andre",
+  "age": 26,
+  "segment": "Uzbek-medium family, Tashkent",
+  "income": 175572000,
+  "behaviour": "Asks other mothers",
+  "behaviour_how": "Buys what moms in a Telegram group or the kindergarten recommend.",
+  "objection": "The app is big and our internet is slow or limited",
+  "habit": "the grandparents look after the child during the day"
+ },
+ {
+  "id": "P014",
+  "name": "Rohan",
+  "age": 39,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 96040000,
+  "behaviour": "Payme/Click subscriber",
+  "behaviour_how": "Already pays for subscriptions (Kinopoisk, Yandex Plus) by card.",
+  "objection": "Will my child actually learn, or just play?",
+  "habit": "you pay bills through Payme or Click"
+ },
+ {
+  "id": "P015",
+  "name": "Aisha",
+  "age": 37,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 102033000,
+  "behaviour": "Asks other mothers",
+  "behaviour_how": "Buys what moms in a Telegram group or the kindergarten recommend.",
+  "objection": "Will my child actually learn, or just play?",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P016",
+  "name": "Diego",
+  "age": 37,
+  "segment": "Uzbek-medium family, Tashkent",
+  "income": 160477000,
+  "behaviour": "School-readiness planner",
+  "behaviour_how": "Already pays for a tutor or courses before first grade.",
+  "objection": "24,990 so'm every month is a lot for an app",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P017",
+  "name": "Selin",
+  "age": 27,
+  "segment": "Uzbek-medium family, regional city",
+  "income": 66234000,
+  "behaviour": "Asks other mothers",
+  "behaviour_how": "Buys what moms in a Telegram group or the kindergarten recommend.",
+  "objection": "Will my child actually learn, or just play?",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P018",
+  "name": "Wes",
+  "age": 24,
+  "segment": "Russian-medium family, Tashkent",
+  "income": 287201000,
+  "behaviour": "Tries then drops",
+  "behaviour_how": "Installs many apps; the child plays a week, then they are deleted.",
+  "objection": "I can't pay with a foreign card / store billing",
+  "habit": "you pay bills through Payme or Click"
+ },
+ {
+  "id": "P019",
+  "name": "Aria",
+  "age": 29,
+  "segment": "Family preparing the child for English or a private school",
+  "income": 266943000,
+  "behaviour": "Screen-time worrier",
+  "behaviour_how": "Limits the phone, and allows only what feels educational and safe.",
+  "objection": "24,990 so'm every month is a lot for an app",
+  "habit": "you are in a parents' Telegram group for the kindergarten"
+ },
+ {
+  "id": "P020",
+  "name": "Pablo",
+  "age": 39,
+  "segment": "Family preparing the child for English or a private school",
+  "income": 408089000,
+  "behaviour": "Payme/Click subscriber",
+  "behaviour_how": "Already pays for subscriptions (Kinopoisk, Yandex Plus) by card.",
+  "objection": "The app is big and our internet is slow or limited",
+  "habit": "first grade starts in about a year"
+ }
+]
