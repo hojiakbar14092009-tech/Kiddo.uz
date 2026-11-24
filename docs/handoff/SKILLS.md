@@ -15,7 +15,7 @@ Manba: sessiyadagi skill ro'yxati (faqat nom va tavsif o'qildi). Ko'pligi sababl
 - Hamma bosqich: `ponytail:ponytail`: kamroq kod, sifat tushmasin (majburiy, subagentlarga ham).
 - Hamma bosqich: `superpowers:writing-plans`: bosqich rejasi; `superpowers:verification-before-completion`: "tayyor" deyishdan oldin dalil.
 - B0: `superpowers:dispatching-parallel-agents`: ZEHN, xarita, rasmiy talablar parallel.
-- B1: `superpowers:systematic-debugging`, `mattpocock-skills:diagnosing-bugs`: flaky/timeout testlarning ildiz sababi; `ecc:e2e-testing`: Playwright.
+- B1: `superpowers:systematic-debugging`, `mattpocock-skills:diagnosing-bugs`: flaky/timeout testlarning ildiz sababi; `ecc:e2e-testing`: Playwright. (B1 haqiqatda: ponytail, brainstorming, ecc:code-reviewer subagent; systematic-debugging uslubi qo'llandi, skill chaqirilmadi: REPORT_B1.md)
 - B2: `superpowers:test-driven-development`: kesh kaliti, normalizatsiya, zaxira zanjiri; `zizi-skills:security-and-hardening`: TTS endpoint suiiste'mol himoyasi; `zizi-skills:i18n`.
 - B3: `zizi-skills:i18n`, `vectorlab-ux-skills:loaders`/`errors`: ovoz yuklanishi va xato holati; `superpowers:subagent-driven-development`.
 - B4: `remotion:remotion-best-practices` va `remotion:*`, `anthropic-skills:ffmpeg-media`, `design-skills:accessibility-audit` (kontrast).
