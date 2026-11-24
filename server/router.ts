@@ -21,6 +21,7 @@ import {
   telegramWebhook,
   assertWebhookSecret,
 } from './telegram.js'
+import { tts } from './tts.js'
 import { deleteUser, getUser, proStatus } from './users.js'
 
 type Handler = (request: Request, url: URL) => Promise<Response>
@@ -62,10 +63,12 @@ const routes: Record<string, Handler> = {
   // Pro (MVP: test payments)
   'GET pay/prices': async () => prices(),
   'POST pay/checkout': (request) => checkout(request),
+  // the live voice for an app sentence without a recorded clip (server/tts.ts)
+  'GET tts': (request, url) => tts(request, url),
 }
 
 /** Answered without the database (they work, and say what is set up, before Turso is). */
-const NO_DATABASE = new Set(['GET health', 'GET auth/methods', 'GET pay/prices'])
+const NO_DATABASE = new Set(['GET health', 'GET auth/methods', 'GET pay/prices', 'GET tts'])
 
 /** Webhooks and cron jobs prove themselves with a secret, not with a browser Origin. */
 const WEBHOOKS = new Set<string>(['POST telegram/webhook', 'GET cron/weekly', 'GET cron/daily'])

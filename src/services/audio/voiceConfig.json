@@ -1,0 +1,31 @@
+{
+  "narrator": {
+    "engine": "azure",
+    "voices": {
+      "uz": "uz-UZ-MadinaNeural",
+      "ru": "ru-RU-SvetlanaNeural",
+      "en": "en-US-JennyNeural"
+    },
+    "rate": "-15%",
+    "pitch": "+0Hz",
+    "version": 0
+  },
+  "girl": {
+    "engine": "azure",
+    "voices": { "uz": "uz-UZ-MadinaNeural", "ru": "ru-RU-SvetlanaNeural", "en": "en-US-AnaNeural" },
+    "rate": "-20%",
+    "pitch": "+12Hz",
+    "version": 0
+  },
+  "boy": {
+    "engine": "azure",
+    "voices": {
+      "uz": "uz-UZ-SardorNeural",
+      "ru": "ru-RU-DmitryNeural",
+      "en": "en-US-ChristopherNeural"
+    },
+    "rate": "-20%",
+    "pitch": "+25Hz",
+    "version": 0
+  }
+}

@@ -9,6 +9,7 @@
     /* Vercel runs api/ as Node ESM: relative imports need their .js extension */
     "module": "nodenext",
     "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
     "moduleDetection": "force",
     "noEmit": true,
 

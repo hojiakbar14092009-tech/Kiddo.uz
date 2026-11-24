@@ -146,7 +146,9 @@ def write_from_mp3(mp3: bytes, target: Path) -> None:
     )
 
 
-EDGE_VOICES = {'uz': 'uz-UZ-MadinaNeural', 'ru': 'ru-RU-SvetlanaNeural', 'en': 'en-US-JennyNeural'}
+# the narrator's voice and settings: one place for the app's live voice and these recordings
+NARRATOR = json.loads((ROOT / 'src' / 'services' / 'audio' / 'voiceConfig.json').read_text('utf-8'))['narrator']
+EDGE_VOICES = NARRATOR['voices']
 
 
 def edge_mp3(language: str, text: str) -> bytes | None:
@@ -160,7 +162,7 @@ def edge_mp3(language: str, text: str) -> bytes | None:
         text = normalize_uz(text)[0]  # uz-UZ voices read only Latin, never Cyrillic
 
     async def run() -> bytes:
-        com = edge_tts.Communicate(text, EDGE_VOICES[language], rate='-15%')
+        com = edge_tts.Communicate(text, EDGE_VOICES[language], rate=NARRATOR['rate'], pitch=NARRATOR['pitch'])
         return b''.join([c['data'] async for c in com.stream() if c['type'] == 'audio'])
 
     for _ in range(2):
