@@ -40,4 +40,4 @@ B5 uchun kuzatuv: planshetda Home 3D (2 canvas) ochilish pardasi paytida yuklani
 - Native paketga ~215 MB ovoz kiradi (B2).
 - Native'da kirish ishlamaydi (B7).
 - RAM: to'liq e2e 4 worker bilan xotira yetmay o'ldirildi; faqat `--workers=1`. Vitest va e2e ni bir vaqtda ishga tushirma.
-- `founder/` (biznes-reja paketi, foydalanuvchi so'rovi bilan B1 sessiyasida yaratildi) commit qilinmagan.
+- `founder/` biznes-reja paketi (foydalanuvchi so'rovi bilan B1 sessiyasida) commit qilingan: e870ce76. Panel simulyatsiya, raqamlar taxmin.

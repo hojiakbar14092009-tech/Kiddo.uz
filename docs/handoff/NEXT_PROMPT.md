@@ -24,5 +24,5 @@ Bu sessiya oldingi suhbatni bilmaydi. Hamma narsa fayllarda.
 - **37 e2e yiqilish** (`STATE.md` ro'yxati), sabablari tekshirilmagan. B2 ga tegishlilari: `speech.spec.ts` (til almashganda ovoz to'xtashi; speaker tugmasi 320/390 px da ustma-ust) — B2 `say()` ni o'zgartirganda shularni qayta yugur va sababini top. Qolganlari (math-lab, performance budget, release-matrix overflow, garden, scale-portal, PRO promo, production admin, tutor, pet-shop, living-mascots, attention) B2 dan oldin yoki alohida "B1b" sifatida Hojiakbar bilan kelish.
 - RAM: vitest va e2e ni bir vaqtda ishga tushirma. Vitest `maxWorkers: 6` (~190–225 s). E2E faqat `--workers=1` (to'liq ~1.9 soat); kerakli spec'larni alohida yugur.
 - Native'da kirish ishlamaydi (B7). edge-tts endpoint Vercel'dan bloklanishi mumkin (tasdiqlanmagan) → zaxira statik + ovozsiz.
-- `founder/` papkasi (biznes-reja, B1 sessiyasida foydalanuvchi so'rovi bilan) commit qilinmagan: unga tegma, Hojiakbar qaror qiladi.
+- `founder/` biznes-reja paketi commit qilingan (e870ce76): B2 ga aloqasi yo'q, unga tegma. Undagi Free/PRO bo'linishi va 14 kunlik sinov taklifi B3 (Pro) uchun kirish ma'lumoti.
 - Oxirida 7-bo'lim handoff: `STATE.md`, `REPORT_B2.md`, shu faylni B3 uchun qayta yoz. Push yo'q.
