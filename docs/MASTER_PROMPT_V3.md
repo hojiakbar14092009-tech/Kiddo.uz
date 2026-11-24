@@ -1,112 +1,270 @@
-# Kiddo bepul ovoz bilan do'konlarga chiqadi
+# KIDDO MASTER PROMPT v3 (ilova: iOS + Android, jonli ovoz, Pro yashirin)
 
-Kiddo uchun tarif sotib olmasdan uch tilda tabiiy ovoz olishning eng ishonchli yo'li Microsoft neyron ovozlaridir: o'zbekcha Madina va Sardor, ruscha Svetlana va Dmitry, inglizcha Ana va boshqalar. Ularni kalitsiz, norasmiy Edge Read Aloud kanali orqali ham, rasmiy Azure Speech F0 bepul darajasi (oyiga 0,5 million belgi) orqali ham olish mumkin; Gemini TTS eng "aktyorlik" bilan o'qiydi, lekin bepul kunlik limiti amalda 10 dan 100 so'rovgacha, shuning uchun u faqat oldindan paket qilib yaratishga yaraydi. Hech bir manbada o'zbekcha yoki ruscha bola ovozi topilmadi, demak qiz va o'g'il maskotlar kattalar ovozini pitch va rate bilan sozlash orqali olinadi, Q/G'/K talaffuzi esa hech qayerda baholanmagan va faqat quloq bilan test qilinadi. Do'konlar tomonida asosiy qoida bitta: bola o'yini akkauntsiz ishlaydi, tashqi havolalar, xarid, Google bilan kirish va akkauntni o'chirish "Ota-onalar" bo'limida parental gate ortida turadi, yashirin Pro esa yo store build'dan butunlay olib tashlanadi, yo birinchi kundan StoreKit/Play Billing bilan ochiq e'lon qilinadi. Mac'siz chiqarish real: Codemagic shaxsiy akkauntga oyiga 500 bepul macOS M2 daqiqa beradi va iOS imzolashni App Store Connect API kaliti bilan o'zi bajaradi, lekin Apple va Google akkauntlari, kalitlar, keystore va 12 testerli 14 kunlik yopiq testni faqat inson qiladi. Hajm va qotish masalasida hal qiluvchi omillar ovoz fayllari formati (iOS 18.4 dan past qurilmalarda Opus xavfli), GLB modellarni Meshopt/KTX2 bilan siqish va iOS WebView xotira chegarasidir. Hisobotdagi **[TASDIQLANMAGAN]** belgisi manbadan tekshirilmagan ma'lumotni, **[TAXMIN]** belgisi esa manbalar asosidagi muhandislik xulosasini bildiradi.
+Sen Kiddo loyihasining bosh muhandisisan. Bu fayl butun ishning yagona manbasi. Uni to'liq o'qi, keyin "Hozirgi bosqich"ni aniqlab, o'sha bosqichni oxirigacha bajar.
 
-## Uchta bepul ovoz yo'li bor, lekin har biri keshlashni talab qiladi
+Bu prompt master prompt v2 (ovoz, Tarbiya, tezlik, Clean Code, CI/CD) ustiga qo'shiladi. v2 bilan zid joyda shu v3 ustun. v2'dagi ovoz qismi (VoiceStudio, design_voice, 22 100 klip) BEKOR: VoiceStudio ham, ElevenLabs ham ishlatilmaydi.
 
-Hujjatlashtirilgan o'zbekcha qo'llovga ega bepul manbalar uchta. Birinchisi Microsoft Edge brauzerining onlayn "Read Aloud" xizmati: `edge-tts` (Python) va `msedge-tts` (Node) kutubxonalari unga API kalitsiz ulanadi ([rany2/edge-tts](https://github.com/rany2/edge-tts)), ovozlar ro'yxatida **uz-UZ Madina (ayol) va Sardor (erkak), ru-RU Svetlana va Dmitry, en-US Ana, Aria, Jenny, Guy va boshqalar** bor, lekin ro'yxat bola ovozlarini alohida belgilamaydi ([FoloToy wiki](https://github.com/FoloToy/folotoy-server-self-hosting/wiki/Edge%E2%80%90TTS%E2%80%90Voices)). Ikkinchisi xuddi shu ovozlarning rasmiy varianti: Azure Speech F0 darajasi neyron ovozlar uchun **oyiga 0,5 million belgini bepul** beradi, HD ovozlar uchun alohida bepul hajm ko'rsatilmagan ([Azure Speech pricing](https://azure.microsoft.com/en-us/pricing/details/speech/)). Uchinchisi Gemini TTS: `gemini-3.8-flash-tts` va `gemini-3.8-flash-lite-tts` modellari ingliz, rus va "Northern Uzbek" tillarini qo'llaydi, tilni matndan o'zi aniqlaydi ([Gemini speech docs](https://ai.google.dev/gemini-api/docs/speech-generation)), narxlar sahifasida esa bu modellar bepul daraja ustunida "Free of charge" deb turadi ([Gemini pricing](https://aistudio.google.com/docs/pricing)).
+---
 
-| Manba | O'zbekcha | Bepul hajm | Sozlash imkoni | Asosiy xavf |
-|---|---|---|---|---|
-| Edge Read Aloud (`msedge-tts`) | Madina, Sardor | Rasmiy limit e'lon qilinmagan, kalit kerak emas | Faqat rate, pitch, volume | Norasmiy kanal, 403 uzilishlari |
-| Azure Speech F0 | Xuddi shu ovozlar | 0,5 mln belgi/oy | To'liq SSML (prosody, break, sub, lexicon) | Azure akkaunti kerak; oylik limit |
-| Gemini 3.8 TTS | "Northern Uzbek" | Foydalanuvchi xabarlariga ko'ra 10 dan 100 so'rov/kun | Uslub ko'rsatmasi, `<giggle>`, pauza teglari | Juda past kunlik limit; bepul darajadagi ma'lumot Google mahsulotlarini yaxshilashga ishlatiladi |
-| Aisha (mahalliy) | "Gulnoza" ovozi | 10 000 belgi/oy | mood, speed | Hajm jonli ishlatishga yetmaydi |
+## 1. LOYIHA
 
-Xavflar bir xil emas. Edge kanalida SSML deyarli yopiq: Microsoft Edge o'zi yarata olmaydigan SSML'ni bloklaydi, shu sabab faqat bitta `voice` ichida bitta `prosody` qabul qilinadi ([rany2/edge-tts](https://github.com/rany2/edge-tts)). 2025-yil dekabridan beri xizmat Edge brauzeriga mos user agent talab qiladi, ya'ni boshqa brauzerdan to'g'ridan-to'g'ri ishlamaydi, server tomonda esa README'ga ko'ra ishlayveradi ([MsEdgeTTS](https://github.com/Migushthe2nd/MsEdgeTTS)). 2026-yil yanvarida `edge-tts` 7.2.1 foydalanuvchilari 403 handshake xatosiga uchradi va muammo faqat kutubxonani yangilash bilan yechildi ([edge-tts issue #458](https://github.com/rany2/edge-tts/issues/458)). Bundan chiqadigan xulosa **[TAXMIN]**: bu kanal istalgan kuni sinishi mumkin, shuning uchun u asosiy emas, zaxira manba bo'lishi kerak. Microsoft Vercel/AWS data-markaz IP manzillarini bloklaydimi, bu kanal foydalanish shartlari bo'yicha nima deyilgan va do'konda chiqarilgan bolalar ilovasida norasmiy endpoint ishlatish siyosatga zidmi, bularning hech biri manbadan tasdiqlanmadi **[TASDIQLANMAGAN]**; Vercel'dan jonli test bilan tekshirish kerak.
+- Kiddo: 4-7 yoshli bolalar uchun o'rganish ilovasi, uz/ru/en. Repo: `%USERPROFILE%\Kiddo.uz` (main, Vercel Hobby avto-deploy push'da).
+- Stek: React 19, Vite, TS, Tailwind, Zustand, i18next, three.js, PWA, Vitest, Playwright, Remotion, Vercel serverless (bitta dispatcher `api/index.ts`, Hobby 12 funksiya limiti, cron kuniga 1 marta), Turso/libSQL "kiddo" (Frankfurt). O'z autentifikatsiyasi: Google OAuth, email kod (Brevo SMTP), Telegram bot.
+- Valyuta "yong'oq". Maskotlar: qiz robot Mini, o'g'il robot Piku (2D).
+- Muhit: Windows, cmd. Mac YO'Q. Kompyuterda GPU yo'q, RAM cheklangan: og'ir jarayonlarni (emulyator, render, build) bir vaqtda bittadan ishga tushir.
 
-Gemini limiti alohida ogohlantirishga loyiq. Google TTS uchun RPM/TPM/RPD qiymatlarini hujjatda e'lon qilmaydi ([Google AI forum](https://discuss.ai.google.dev/t/what-are-the-rpd-rpm-and-tpm-limits-for-gemini-3-1-flash-tts-preview-per-tier/141793)). 2026-yil avgustidagi foydalanuvchi xabarida bepul daraja kuniga 10 so'rovda to'xtagan ([forum](https://discuss.ai.google.dev/t/gemini-lies-about-free-tier-quota-limits-sudden-resource-exhausted-blockers-on-tts-models/177531)), oktabrda esa AI Studio 10 000 RPD ko'rsatib turganiga qaramay API kuniga 100 ta so'rovdan keyin 429 qaytargan; Google xodimi "hal qilingan bo'lishi kerak" deb javob bergan, lekin tuzatilgani o'sha muhokamada tasdiqlanmagan ([forum](https://discuss.ai.google.dev/t/gemini-3-8-flash-tts-api-enforces-100-rpd-despite-ai-studio-showing-10k-rpd/187223)). Aniq limitni faqat o'z AI Studio panelingizdan ko'rish mumkin. Qolgan variantlar yaroqsiz yoki noaniq: Google Cloud Chirp 3 HD ro'yxatida rus va ingliz bor, o'zbek yo'q ([Chirp 3 HD docs](https://docs.cloud.google.com/text-to-speech/docs/chirp3-hd)); Meta MMS o'zbek modeli CC-BY-NC litsenziyali (notijorat) va faqat kirill matn qabul qiladi ([Hugging Face](https://huggingface.co/facebook/mms-tts-uzb-script_cyrillic)); Aisha oyiga 10 000 belgi bepul beradi ([Aisha blog](https://aisha.group/en/blog/aisha-tts-ozbek-nutq-sintezi)); Muxlisa AI va UzbekVoice uchun API hujjati, narx va bepul kvota topilmadi **[TASDIQLANMAGAN]**.
+## 2. YAKUNIY MAQSAD
 
-### "Jonli" ovoz aslida "bir marta yaratib, saqlab berish" degani
+1. Kiddo sayt emas, ILOVA: Capacitor bilan o'ralgan iOS va Android versiyalari, App Store va Google Play'ga topshirishga tayyor.
+2. Ovoz: ZEHN loyihasidagidek tabiiy, haqiqiydek, tekin, internet orqali jonli yaratiladigan uz/ru/en ovoz, lekin bolalarga mos, yoqimli, tushunarli. Maskotlar bolaga do'stidek gapiradi.
+3. Pro hammadan yashirin, lekin kodi saqlanadi; Pro imkoniyatlarining hammasi hamma uchun ochiq va ishlaydi.
+4. Ilovadagi barcha klip va shorts professional darajada qayta yaratiladi (2D Mini va Piku, ranglar jonliroq).
+5. Ilova qotmaydi, tez javob beradi, hajmi kichik, sifat tushmagan.
+6. Har bosqich o'zi test qilingan, topilgan xato tuzatilgan, kamchilik to'ldirilgan.
 
-Bu bo'limdagi arxitektura manbalardagi limitlarga tayangan muhandislik xulosasi **[TAXMIN]**, alohida manbadan olinmagan. Kalitlar baribir serverda turishi shart (Aisha buni ochiq talab qiladi, Edge kanali esa brauzerdan ishlamaydi) ([Aisha API](https://aisha.group/llms-api.txt), [MsEdgeTTS](https://github.com/Migushthe2nd/MsEdgeTTS)), shuning uchun Vercel Node runtime'da bitta `/api/tts` endpoint kerak. Kalit sifatida normallashtirilgan matn, til, personaj va preset versiyasidan olingan hash ishlatiladi; fayl omborda bo'lsa o'sha qaytariladi, bo'lmasa sintez qilinib saqlanadi va bir yillik `immutable` kesh sarlavhasi bilan beriladi. Hisob-kitob shuni ko'rsatadi: 5 000 ta noyob ibora 60 belgidan 300 000 belgi bo'ladi, ya'ni Azure F0 ning bir oylik hajmiga bir martada sig'adi. Endpoint faqat ilova kontent jadvalida mavjud matnni sintez qilishi kerak, aks holda ochiq manzil orqali oylik kvotani kuydirish mumkin. Tavsiya etilgan zaxira zanjiri: ilovaga qo'shib berilgan klip, keyin CDN keshi, keyin Azure F0, keyin Edge Read Aloud, keyin qurilmaning tizim TTS'i, oxirida faqat matn. `msedge-tts` standart holatda ulanishga 10 soniya, sintezga 60 soniya kutadi ([MsEdgeTTS](https://github.com/Migushthe2nd/MsEdgeTTS)), serverless funksiya vaqtini shunga qarab belgilash kerak. Vercel funksiya davomiyligi, Vercel Blob yoki R2 bepul kvotalari manbadan tekshirilmadi **[TASDIQLANMAGAN]**.
+## 3. BUZILMAS QOIDALAR
 
-Format bo'yicha ehtiyot bo'lish kerak: Gemini faqat WAV/PCM 24 kHz mono qaytaradi va serverda transkodlash talab qiladi ([Gemini speech docs](https://ai.google.dev/gemini-api/docs/speech-generation)), `msedge-tts` misolida esa WebM Opus chiqishi ko'rsatilgan ([MsEdgeTTS](https://github.com/Migushthe2nd/MsEdgeTTS)). iOS'da Opus muammoli (to'rtinchi bo'limga qarang), shuning uchun keshga mono MP3 yoki AAC yozish xavfsizroq; `msedge-tts` qaysi MP3 formatlarini berishini uning `src/Output.ts` faylidan tekshirish kerak. Maxfiylik tomoni ham bor: Gemini bepul darajasiga yuborilgan ma'lumot Google mahsulotlarini yaxshilashga ishlatiladi ([Gemini pricing](https://aistudio.google.com/docs/pricing)), demak u yerga faqat ssenariy matni boradi, bola ismi yoki ovozi hech qachon bormaydi.
+1. PUSH QILMA, DEPLOY QILMA. Faqat lokal commit. Push faqat Hojiakbar "push qil" deb yozganda. Force push hech qachon.
+2. `rm -rf`, glob bilan o'chirish, `pkill`/`taskkill /F` ommaviy, `git reset --hard`, `git clean` YO'Q. Fayl o'chirish kerak bo'lsa aniq nomi bilan bittalab, sababini hisobotga yoz.
+3. Hojiakbarning commit qilinmagan o'zgarishlarini o'chirma va ustidan yozma. Ish boshida `git status` qara; begona o'zgarish bo'lsa unga tegma.
+4. Sirlar (token, kalit, parol) hech qayerga chiqmasin: chatga, logga, commit'ga, hisobotga. Sirlar faqat `.env.local` va Vercel Environment Variables'da. Yangi kalit kerak bo'lsa o'zing yaratma, `HUMAN_TODO.md`ga yoz.
+5. Teamflow bazasiga tegilmaydi. Supabase kodi repoda qoladi, ishlatilmaydi, o'chirilmaydi.
+6. Pulli xizmat yoqilmaydi, tarif sotib olinmaydi, karta talab qiladigan narsa o'zingcha ulanmaydi.
+7. `%USERPROFILE%\voice-test\` va `voice-out\` papkalaridagi eski fayllarga tegma. `Desktop\AI suhbat` (ZEHN) faqat O'QILADI, unda hech narsa o'zgartirilmaydi.
+8. Barcha ish `app-v3` branch'ida (yo'q bo'lsa main'dan och). main'ga merge qilma.
+9. Huquqiy/litsenziya masalalarini muhokama qilma, lekin do'konlarning 9-bo'limdagi TEXNIK talablari majburiy: ularsiz ilova qabul qilinmaydi.
+10. Hech narsani to'qib chiqarma: test o'tmagan bo'lsa "o'tdi" dema, bajarilmagan ishni "tayyor" dema. Tasdiqlanmagan narsani "tasdiqlanmagan" deb yoz.
 
-### Maskot va oila ovozlari pitch bilan emas, quloq bilan tanlanadi
+## 4. TO'XTAMASDAN ISHLASH
 
-Hech bir manbada uz-UZ yoki ru-RU bola ovozi yo'q; Edge ro'yxatida o'zbek uchun faqat Madina va Sardor, rus uchun Svetlana va Dmitry bor. en-US Ana bola ovozi ekani keng aytiladi, lekin bu tadqiqotda birlamchi manbadan tasdiqlanmadi **[TASDIQLANMAGAN]**. Hujjatlashtirilgan dastaklar ikkita. Microsoft ovozlarida `prosody`: Azure pitch o'zgarishini asl ovozning 0,5 dan 1,5 baravarigacha ushlashni tavsiya qiladi, rate esa 0,5 dan 2 baravargacha, `-20%` kabi qiymatlar qabul qilinadi ([Azure SSML prosody](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-voice)); Edge kanalida ham rate va pitch (masalan `pitch: "+200Hz"`) ishlaydi ([MsEdgeTTS](https://github.com/Migushthe2nd/MsEdgeTTS)). Gemini'da esa ijro uslubi `speech_metadata.style` orqali tabiiy tilda beriladi, `<giggle>`, `<laugh>`, `<short pause>` kabi teglar va bosh harfli so'zlar urg'u qo'shadi; ovozlar orasida Leda (Youthful), Puck (Upbeat), Zephyr (Bright) bolalarga, Sulafat (Warm), Vindemiatrix (Gentle), Gacrux (Mature) oila a'zolariga yaqin tavsifga ega ([Gemini speech docs](https://ai.google.dev/gemini-api/docs/speech-generation)). Azure'da `role="Girl"` va `role="Boy"` mavjud, biroq faqat ayrim ovozlarda ishlaydi va qo'llanmagan joyda e'tiborsiz qoldiriladi ([Azure SSML prosody](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-voice)); uz-UZ uchun bunday rol ma'lum emas **[TASDIQLANMAGAN]**.
+- Hojiakbar barcha manbalarga ruxsat bergan. Tasdiq so'rama, savol berib kutib o'tirma, bosqichni oxirigacha o'zing olib bor.
+- Noaniq joyda eng oqilona variantni tanla, qaroringni va sababini `docs/handoff/DECISIONS.md`ga bir qator qilib yoz, davom et.
+- Faqat inson bajara oladigan ish chiqsa (akkaunt ochish, kalit kiritish, ovozni quloq bilan eshitish, haqiqiy iPhone'da sinash) TO'XTAMA: uni `docs/handoff/HUMAN_TODO.md`ga aniq qadamlari bilan yoz va unga bog'liq bo'lmagan ishlarni davom ettir.
+- Istisno: 3-bo'lim qoidalarini buzishni talab qiladigan yoki qaytarib bo'lmaydigan amal (ma'lumot o'chirish, baza sxemasini buzuvchi migratsiya, tashqariga biror narsa yuborish). Bunda tayyorgarlikni qil, amalni bajarma, `HUMAN_TODO.md`ga yoz.
+- Bir xil xato 3 marta takrorlansa o'sha yo'lni to'xtat: ildiz sababini izla (systematic-debugging), boshqa yondashuv tanla. Ko'r-ko'rona qayta urinma.
 
-Quyidagi boshlang'ich presetlar manbasiz evristika **[TAXMIN]**, ya'ni "kattalar ovozini bolaga o'xshatish" bo'yicha e'lon qilingan qo'llanma topilmadi va qiymatlarni quloq bilan tasdiqlash shart.
+## 5. LIMITNI TEJASH (sifatni tushirmasdan)
 
-| Personaj | Asos ovoz (uz / ru / en) | Pitch | Rate |
-|---|---|---|---|
-| Qiz bola maskot | Madina / Svetlana / Ana | +8% dan +15% gacha | -10% dan -15% gacha |
-| O'g'il bola maskot | Sardor / Dmitry / en-US erkak ovoz | +12% dan +20% gacha | -10% dan -15% gacha |
-| Ona | Madina, o'zgarishsiz | 0 | -5% |
-| Ota | Sardor, o'zgarishsiz | 0 | 0 |
-| Buvi | Madina | -8% dan -12% gacha | -15% dan -20% gacha |
-| Bobo | Sardor | -10% dan -15% gacha | -15% dan -20% gacha |
+Limitni maksimal teja, sifatni tushirmasdan:
+- Butun repo'ni o'qima. Avval fayl nomi/simvol/import bo'yicha qidir, faqat kerakli fayl va bo'limni och. `node_modules`, `dist`, build chiqishlari, katta loglar, lock fayllarni o'qima.
+- O'zgarmagan faylni qayta o'qima. Buyruq chiqishini qisqa ol (faqat xato qismi).
+- Eng kichik ishonchli o'zgarishni qil. Mavjud komponent, util, kutubxonani qayta ishlat. Aloqasi yo'q refaktoring qilma.
+- Subagentlarga faqat kerakli kontekstni ber (fayl yo'llari + aniq vazifa), ulardan QISQA hisobot so'ra (nima qildi, qaysi fayllar, qanday tekshirdi, nima qoldi).
+- Mexanik ishlar (qidiruv, nom almashtirish, fayl siqish, tarjima kalitlarini tekshirish) uchun subagentga arzonroq model ber; arxitektura va murakkab debug uchun kuchlisini.
+- Sessiya konteksti to'lib borayotganini sezsang, bosqichni mantiqiy nuqtada yop va handoff yoz (7-bo'lim). Yarim ishni "tugadi" dema.
+- Token yoqadigan "cheksiz" rejimli skill/orkestratorlarni (masalan nomi "godmode", "idontcaretoken" kabi) ISHLATMA.
 
-Taxminan +20% dan +25% gacha ko'tarilganda neyron ovozlar "metall" yoki "chipmunk" tusini oladi, shuning uchun artefakt boshlangan joyda to'xtash kerak. 4 dan 7 yoshgacha bolalar uchun rate -10% dan -25% gacha va harf bilan so'z orasida 250 dan 400 ms gacha pauza mos keladi; Azure'da bu `<break time="300ms"/>` bilan qilinadi (standart kuchlar 250 ms dan 1250 ms gacha) ([Azure SSML structure](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-structure)), Edge'da esa `break` yo'q, pauza tinish belgisi yoki ikki klip orasiga kodda sukunat qo'yish orqali olinadi. Halol baho: bitta ayol va bitta erkak ovozdan olingan maskotlar baribir kattalarga o'xshab qoladi. Ovozning o'zini emas, ijrosini o'zgartiradigan yagona topilgan bepul yo'l Gemini (Leda ovozi va "quvnoq 7 yoshli do'st, sekin va aniq" kabi uslub), lekin uning o'zbekcha sifati va bolaga o'xshashligi sinovdan o'tmagan **[TASDIQLANMAGAN]**. Amaliy yechim: maskotlarning barcha qat'iy iboralarini Gemini'da bir necha kun davomida paket qilib yaratish, keyin saqlab qo'yish, jonli zaxira sifatida Azure/Edge presetlarini qoldirish.
+## 6. SKILLAR (majburiy)
 
-### Q, G' va K ni faqat so'zlar ro'yxati va to'rt xil yozuv bilan tekshirish mumkin
+Skillar ixtiyoriy emas. Har sessiya boshida:
+1. O'zingda mavjud BARCHA skill, plugin, MCP connector va subagent turlarini ro'yxatdan o'tkaz (faqat nomi va tavsifi, ichini hammasini o'qima).
+2. Shu bosqichga foyda beradiganlarini tanla va `docs/handoff/SKILLS.md`ga "bosqich: skill: nima uchun" ko'rinishida yoz.
+3. Har vazifa oldidan tegishli skillni Skill tool orqali CHAQIR va uning ko'rsatmasiga amal qil. "Eslayman" deb chaqirmasdan o'tma.
+4. Bosqich hisobotida haqiqatan chaqirilgan skillar ro'yxatini ber.
 
-Madina va Sardor "q" ni chuqur til orqa tovushi sifatida, "g'" ni to'g'ri talaffuz qiladimi, degan savolga javob beradigan nashr qilingan baho, GitHub muammosi yoki forum muhokamasi topilmadi; Gemini 3.8 uchun ham shunday **[TASDIQLANMAGAN]**. Hujjatdagi dastaklar faqat rasmiy Azure API'da: `phoneme` (ipa, sapi, ups, x-sampa; tanilmagan fonema HTTP 400 qaytaradi), `sub alias` va 100 KB gacha bo'lgan maxsus lexicon, biroq talaffuz sahifasida uz-UZ tilga olinmagan, `say-as` esa o'zbek tilini qo'llamaydi, ya'ni sonlar va sanalar so'z bilan yozilishi kerak ([Azure SSML pronunciation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-pronunciation)). Edge kanali bu teglarning hech birini qabul qilmaydi ([rany2/edge-tts](https://github.com/rany2/edge-tts)). Gemini matnni so'zma-so'z transkript deb oladi ([Gemini speech docs](https://ai.google.dev/gemini-api/docs/speech-generation)).
+`ponytail:ponytail` HAR BOSQICHDA, kod yozadigan har vazifa oldidan majburiy: kamroq kod, sifat tushmasin. Subagentlarga ham shuni buyur.
 
-Tavsiya etilgan test protokoli **[TAXMIN]**: qo'l, qush, qizil, g'oz, g'isht, tog', o'rdak, ko'k, kitob, quyosh, bog' so'zlarini har bir dvigatelda to'rt xil yozuvda sintez qiling: U+02BB (oʻ, gʻ), U+2019 (o’, g’), oddiy apostrof U+0027 (o', g') va kirill (қ, ғ, ў). Har bir dvigatel uchun to'g'ri eshitilgan variantni tanlang va ilovadagi barcha matnni hash va sintezdan oldin aynan shu variantga normallashtiring. K va Q farqini tekshirish uchun "kitob" va "qizil", "ko'k" va "qo'l" juftlarini yonma-yon eshiting, tinglovchi sifatida o'zbek tilida so'zlashuvchi odam, iloji bo'lsa boshlang'ich sinf o'qituvchisi qatnashsin. Provayder bo'yicha alohida normallashtiruvchi funksiya va kichik "so'z, qayta yozilgan shakl" lug'ati eng chidamli dizayn; Azure'da bu lug'at lexicon yoki `sub alias` bo'ladi. Yakka harflar ("Q", "G'") eng xavfli elementlar, shuning uchun uchta alifbo uchun 100 tadan kam klipni jonli TTS'ga ishonmasdan, qo'lda tanlab yoki yozib olish xavfsizroq. Aisha'ning bepul 10 000 belgisi mahalliy dvigatel Q/G' ni yaxshiroq aytishini solishtirib ko'rishga yetadi.
+Quyidagilar tavsiya, mavjud bo'lsa ishlat, yo'q bo'lsa to'qima va o'rnini bosadiganini top:
+- Jarayon: `superpowers:writing-plans`, `superpowers:executing-plans`, `superpowers:dispatching-parallel-agents`, `superpowers:subagent-driven-development`, `superpowers:systematic-debugging`, `superpowers:test-driven-development`, `superpowers:verification-before-completion`, `superpowers:requesting-code-review`.
+- Kod sifati: `mattpocock-skills:diagnosing-bugs`, `mattpocock-skills:code-review`, `mattpocock-skills:tdd`, `zizi-skills:code-quality`, `zizi-skills:security-and-hardening`, `zizi-skills:database-optimization`, `zizi-skills:i18n`, `one-shot-prompting:perf-audit`, `one-shot-prompting:ship-check`.
+- UI/UX: `vectorlab-ux-skills:ux-audit` va uning qolganlari (motion, loaders, errors, empty-states, viewports, reduced-motion), `design-skills:accessibility-audit`, `anthropic-skills:frontend-design`.
+- Klip va media: `remotion:remotion-best-practices` va boshqa `remotion:*`, `anthropic-skills:ffmpeg-media`.
+- Do'kon: `zizi-skills:app-store`.
+- Handoff: `mattpocock-skills:handoff` yoki `zizi-skills:handoff`.
+- Connectorlar: Playwright MCP (brauzer testi), Vercel MCP (faqat o'qish: log, env nomlari; deploy YO'Q), Figma (kerak bo'lsa).
 
-## Bola o'yini akkauntsiz, qolgan hammasi parental gate ortida
+## 7. BOSQICH TARTIBI VA HANDOFF
 
-Apple'ning 4.2 bandi ilovadan qayta o'ralgan veb-saytdan yuqori turadigan funksiya, kontent va interfeys kutadi, 2.5.2 bandi esa ilova funksiyasini o'zgartiradigan kodni yuklab olishni taqiqlaydi; Capacitor uchun alohida qoida e'lon qilinmagan ([App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)). Google'da ham parallel talab bor: Families Policy bo'yicha ilova shunchaki sayt webview'i bo'la olmaydi ([Families Policy](https://support.google.com/googleplay/android-developer/answer/9893335)). Amaliy himoya **[TAXMIN]**: `dist/` ni ilova ichiga joylash va `server.url` ni jonli saytga yo'naltirmaslik, birinchi ishga tushirishda internetsiz ishlash, PWA o'rnatish bannerlari, cookie oynalari va Safari'ga chiqarib yuboradigan havolalarni olib tashlash. Agar ovoz paketlari birinchi ishga tushirishda yuklanadigan bo'lsa, 4.2.3(ii) hajmni ko'rsatib, foydalanuvchidan ruxsat so'rashni talab qiladi ([App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)).
+Har bosqich = alohida yangi sessiya. Bir sessiyada bitta bosqich.
 
-Kids Category qoidalari arxitekturani belgilaydi. 1.3 bandga ko'ra tashqi havolalar, xarid imkoniyatlari va boshqa chalg'ituvchi narsalar faqat parental gate ortidagi ajratilgan hududda bo'lishi mumkin; shaxsni aniqlaydigan yoki qurilma ma'lumotini uchinchi tomonga yuborish taqiqlangan, uchinchi tomon analitikasi va reklamasi bo'lmasligi kerak; kategoriyadan keyin chiqib ketilsa ham keyingi yangilanishlar shu talablarga rioya qilishi shart ([App Review Guidelines 1.3](https://developer.apple.com/app-store/review/guidelines/)). Apple parental gate'ni davom etish uchun kattalar darajasidagi vazifa deb ta'riflaydi (masalan matematik savol), o'qiy olmaydigan bolalar uchun esa ota-onani chaqirishni aytadigan ovozli ko'rsatma tavsiya qiladi; yosh oralig'i sifatida "5 va undan kichik", "6-8" yoki "9-11" dan biri tanlanadi ([Apple: Building apps for kids](https://developer.apple.com/app-store/kids-apps/)). Kiddo 4 dan 7 yoshgacha mo'ljallangani uchun ikki oraliqqa tushadi va jamoa bittasini tanlashi kerak; Apple qaysi biri afzalligini aytmagan. Gate'ning aniq dizayn qoidalari (tasodifiy savollar, bola aylanib o'ta olmasligi) normativ matn sifatida topilmadi **[TASDIQLANMAGAN]**.
+Sessiya boshida:
+1. Shu faylni va `docs/handoff/STATE.md`ni o'qi (yo'q bo'lsa B0'dan boshla).
+2. `git status`, `git log -5 --oneline`, branch'ni tekshir.
+3. Skillar ro'yxati (6-bo'lim).
+4. Bosqich rejasini `superpowers:writing-plans` bilan qisqa yoz, keyin bajar.
 
-Google bilan kirish to'rtta alohida talabni keltirib chiqaradi. Birinchidan, Apple 4.8 bandi: asosiy akkaunt uchinchi tomon yoki ijtimoiy login orqali yaratilsa, ma'lumot yig'ishni ism va email bilan cheklaydigan, emailni yashirishga imkon beradigan teng qiymatli boshqa login ham taklif qilinishi shart ([Guidelines 4.8](https://developer.apple.com/app-store/review/guidelines/)); amalda buni Sign in with Apple qondiradi, Telegram login ham shu ta'rifga tushadi **[TAXMIN]**. Ikkinchidan, Google OAuth siyosati avtorizatsiya so'rovini dasturchi nazoratidagi ichki user-agent'ga yo'naltirishni taqiqlaydi ([Google OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)), demak PWA'dagi popup oqimi Capacitor WebView ichida bloklanadi va native plagin kerak. `@capgo/capacitor-social-login` (Capacitor 8 uchun v8) Android'da Credential Manager, iOS'da AuthenticationServices ishlatadi, Google, Apple va Telegram'ni qo'llaydi; har bir imzolash sertifikati (debug, release, Play App Signing) uchun paket nomi va SHA-1 bilan alohida Android OAuth client kerak ([capacitor-social-login](https://github.com/Cap-go/capacitor-social-login)). Play App Signing SHA-1 ro'yxatdan o'tmasa, login debug'da ishlab, do'kon build'ida sinadi **[TAXMIN]**. Uchinchidan, Kids Category'da identifikatorni uchinchi tomonga uzatish faqat ota-ona roziligi bilan, kattalar bo'limida himoyalanadi ([Apple kids page](https://developer.apple.com/app-store/kids-apps/)); login'ni gate ortiga qo'yish Apple matnida aynan nomlanmagan, bu "links out" va ma'lumot qoidalaridan chiqarilgan xulosa **[TAXMIN]**. To'rtinchidan, Google Play bolalar ilovalarida autentifikatsiya ma'lumoti Data safety'da e'lon qilinishi kerak ([Families Policy](https://support.google.com/googleplay/android-developer/answer/9893335)).
+Bosqich oxirida (hammasi majburiy):
+1. 8-bo'limdagi testlarni o'tkaz, xatolarni tuzat, qayta o'tkaz.
+2. Mantiqiy bo'laklarda commit qil (push YO'Q).
+3. `docs/handoff/STATE.md`ni yangila: bajarilgan, qolgan, ma'lum muammolar, o'lchovlar (hajm, tezlik, test soni).
+4. `docs/handoff/REPORT_B<N>.md` yoz: nima qilindi, muhim fayllar, HAQIQATAN nima test qilindi va natijasi, chaqirilgan skillar, qolgan bloker.
+5. `docs/handoff/NEXT_PROMPT.md`ni QAYTA YOZ: keyingi sessiya uchun to'liq, mustaqil prompt. Birinchi qatorida tavsiya etilgan model (Opus 5.5 yoki Sonnet 5.5) va sababi. Ichida: shu master faylga havola, keyingi bosqich raqami va aniq vazifalari, shu sessiyadan qolgan ochiq ishlar, e'tibor berilishi kerak bo'lgan xavflar. Yangi sessiya oldingi suhbatni bilmaydi deb yoz.
+6. Chatga qisqa yakun: bosqich natijasi, `HUMAN_TODO`dagi yangi bandlar, keyingi model.
 
-Akkauntni o'chirish ikkala do'konda majburiy. Apple 5.1.1(v): akkaunt yaratish bo'lsa, ilova ichida o'chirish ham bo'lishi shart, muhim akkauntli funksiya bo'lmasa loginsiz foydalanishga ruxsat berilishi kerak, ijtimoiy tarmoq ruxsatini ilova ichidan bekor qilish mexanizmi ham talab qilinadi ([Guidelines 5.1.1(v)](https://developer.apple.com/app-store/review/guidelines/)). Vaqtincha o'chirib qo'yish yetarli emas, tugma odatda akkaunt sozlamalarida turadi, Sign in with Apple tokenlari REST API orqali bekor qilinadi ([Apple: account deletion](https://developer.apple.com/support/offering-account-deletion-in-your-app/)). Google ilova ichidagi yo'ldan tashqari, o'chirishni so'rash mumkin bo'lgan veb-havolani ham talab qiladi ([Google Play account deletion](https://support.google.com/googleplay/android-developer/answer/13327111?hl=en)). Demak Kiddo'ga "Ota-onalar" bo'limida o'chirish ekrani, serverda Turso ma'lumotlarini o'chiradigan va Google/Apple tokenlarini bekor qiladigan endpoint hamda ommaviy veb-sahifa kerak.
+Hojiakbar keyingi sessiyani shunday ochadi: `claude`, keyin "docs/handoff/NEXT_PROMPT.md ni o'qi va bajar".
 
-Yashirin Pro eng xavfli nuqta. Apple 3.1.1 funksiya ochish uchun faqat in-app purchase'ni tan oladi va litsenziya kalitlari, QR kodlar kabi o'z mexanizmlarini taqiqlaydi; 2.3.1 yangi funksiyalar ko'rib chiqish eslatmalarida aniq yozilishi va tekshiruvchiga ochiq bo'lishini talab qiladi, qo'pol yoki takroriy buzilish dasturdan chiqarishga olib keladi ([Guidelines 3.1.1, 2.3.1](https://developer.apple.com/app-store/review/guidelines/)). Google ham ilova ichidagi kontent uchun Play Billing'ni majbur qiladi va boshqa to'lov usuliga yo'naltirishni man etadi ([Google Play Payments](https://support.google.com/googleplay/android-developer/answer/9858738?hl=en)). Bundan kelib chiqadigan ikki xavfsiz yo'l **[TAXMIN]**: (a) Pro interfeysi va to'lov kodini store build'dan kompilyatsiya vaqtidagi flag bilan butunlay kesib tashlash; (b) Pro'ni birinchi kundan StoreKit va Play Billing bilan amalga oshirish, review notes'da tasvirlash, paywall'ni gate ortiga qo'yish va "xaridlarni tiklash" tugmasini berish. Tasdiqdan keyin serverdagi flag bilan e'lon qilinmagan funksiyani yoqish, shuningdek iOS build'da promo-kod yoki "Telegram orqali Pro" mexanizmi bo'lmasligi kerak.
+Agar bosqich bitta sessiyaga sig'masa: uni B3a, B3b kabi bo'l, har biri uchun shu handoff tartibini bajar.
 
-Qolgan majburiy texnik talablar sanali. Apple: 2026-yil 28-apreldan yuklamalar Xcode 26 va iOS 26 SDK bilan yig'ilishi, 2024-yil 1-maydan `PrivacyInfo.xcprivacy` ichida required-reason API sabablari ko'rsatilishi shart ([Apple upcoming requirements](https://developer.apple.com/news/upcoming-requirements/)); Capacitor `@capacitor/preferences` uchun `CA92.1` sababini namuna qilib beradi ([Capacitor privacy manifest](https://capacitorjs.com/docs/ios/privacy-manifest)). Mikrofon yoki kamera ishlatilsa, 2.5.14 aniq rozilik va yozib olish ko'rsatkichini talab qiladi ([Guidelines 2.5.14](https://developer.apple.com/app-store/review/guidelines/)); `NSMicrophoneUsageDescription` va `NSCameraUsageDescription` satrlari majburligi bu tadqiqotda Apple hujjatidan o'qilmadi **[TASDIQLANMAGAN]**. Google: yangi ilovalar 2026-yil 31-avgustdan Android 16 (API 36) ni nishonga olishi kerak ([target API](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en)); API 35 va undan yuqorini nishonga olgan ilovalar 16 KB xotira sahifalarini qo'llashi shart, bu faqat `.so` native kutubxonali ilovalarga tegadi va Android Studio'ning Analyze APK oynasida tekshiriladi ([16 KB page sizes](https://developer.android.com/guide/practices/page-sizes)). Bolalar ilovasi AAID va boshqa qurilma identifikatorlarini uzatmasligi, `AD_ID` ruxsatini va joylashuvni so'ramasligi, faqat bolalar xizmatlari uchun tasdiqlangan SDK'lardan foydalanishi kerak ([Families Policy](https://support.google.com/googleplay/android-developer/answer/9893335)). Firebase Analytics yoki Crashlytics bolalar ilovasida qabul qilinadimi, tekshirilmadi **[TASDIQLANMAGAN]**; xavfsiz yo'l uchinchi tomon analitikasini umuman qo'shmaslik. Capacitor 8 standart sozlamalari (minSdk 24, target va compile SDK 36, iOS 15, Node 22+, Xcode 26+, standart holda SPM) bu talablarga mos keladi ([Capacitor 8 update guide](https://capacitorjs.com/docs/updating/8-0)). Capacitor 9 noyabr oxiriga mo'ljallangan edi ([Ionic blog](https://ionic.io/blog/?p=6904)), barqaror chiqqani tasdiqlanmadi **[TASDIQLANMAGAN]**; plaginlar tayyor bo'lgani uchun 8-versiyada boshlash to'g'ri.
+## 8. SUBAGENTLAR VA TEST
 
-Agar bola ovozi yoki matni bulutli TTS, nutqni tanish yoki AI xizmatiga yuborilsa, bu bola ma'lumotini uchinchi tomonga uzatish bo'ladi va ota-ona roziligi hamda maxfiylik siyosatida e'lon talab qilinadi **[TAXMIN]**. iOS'da service worker'ning `capacitor://` sxemasida ishlamasligi, audio uchun foydalanuvchi teginishi talabi, OTA yangilanishlar (Capgo va shunga o'xshash) qoidalari birlamchi manbadan olinmadi **[TASDIQLANMAGAN]**; ehtiyot chorasi sifatida native build'da PWA service worker'ni o'chirish va OTA'ni faqat xatolarni tuzatish uchun ishlatish tavsiya etiladi.
+### Subagentlar
+- Mustaqil vazifalar bo'lganda bir vaqtda 4-5 tagacha subagent ishga tushir. Mustaqil bo'lmasa parallel qilma.
+- Har subagentga: bitta aniq vazifa, o'ziga tegishli fayllar ro'yxati (ikki subagent bir faylga tegmasin), qabul mezoni, chaqirishi shart bo'lgan skillar (`ponytail:ponytail` doim), 3-bo'lim qoidalari, qisqa hisobot formati.
+- Bog'liqlik bo'lsa navbat bilan: B natijasi A'ga kerak bo'lsa A kutadi. Umumiy fayllarni (router, store, i18n lug'atlari, `api/index.ts`, `package.json`) faqat asosiy sessiya yoki bitta belgilangan subagent o'zgartiradi.
+- Har to'lqin oxirida asosiy sessiya natijalarni birlashtiradi, build + testni o'zi o'tkazadi.
+- Bosqich oxirida ALOHIDA tekshiruvchi subagent (ishni yozmagan, toza kontekst) diff'ni va ishlayotgan ilovani mustaqil tekshiradi. U topgan narsa tuzatilmaguncha bosqich yopilmaydi.
 
-## Codemagic 500 bepul daqiqada iOS'ni Mac'siz imzolaydi
+### Har bosqich oxiridagi test (dalil bilan)
+1. `tsc` xatosiz, lint xatosiz, `vite build` muvaffaqiyatli.
+2. Vitest: hammasi yashil. Flaky test o'chirib qo'yilmaydi, sababi tuzatiladi.
+3. Playwright e2e, mobil viewport'larda (kichik Android ~360x640, iPhone ~390x844, planshet): shu bosqich tegib o'tgan har ekranda HAR BIR tugma, havola, kiritish maydoni, modal, orqaga qaytish bosib ko'riladi; 3 tilda (uz/ru/en); konsolda xato 0, muvaffaqiyatsiz tarmoq so'rovi 0 (kutilganidan tashqari).
+4. Chekka holatlar: internet yo'q, sekin internet, ovoz xizmati javob bermadi, bo'sh ma'lumot, juda uzun ism, tez-tez ketma-ket bosish, ilovani fonga olib qaytish, ekranni burish.
+5. Ovozga tegilgan bo'lsa: 10-bo'limdagi ovoz tekshiruvi.
+6. Topilgan har xato: ildiz sababi tuzatiladi, regressiya testi qo'shiladi, test qayta o'tkaziladi.
+7. Mavjud ishlaydigan funksiyani testni o'tkazish uchun o'chirma, haqiqiy funksiyani mock bilan almashtirma.
 
-Xcode 26 faqat macOS'da ishlaydi, shuning uchun Windows noutbukdan iOS build faqat bulutli macOS orqali olinadi **[TAXMIN]**. Codemagic shaxsiy akkauntlarga **oyiga 500 bepul daqiqa** beradi va ular faqat macOS M2 mashinalariga tegishli; Team akkauntida bepul daqiqa yo'q, Linux va Windows instansiyalari ham bepul emas ([Codemagic pricing](https://docs.codemagic.io/billing/pricing/)). Jamoa bo'lib ishlaganda bu muhim: bepul qolish uchun build'lar bitta shaxsiy akkauntdan yuritiladi. Xarajatni nolda ushlash uchun Android workflow'ni ham M2 da ishga tushirish kerak; `instance_type: mac_mini_m2` kaliti model bilimidan olingan, Codemagic interfeysida tekshiring **[TASDIQLANMAGAN]**. Bitta Capacitor iOS build'i necha daqiqa olishi manbadan topilmadi, demak 500 daqiqa nechta build'ga yetishi noma'lum.
+"Bug umuman yo'q" deb yozma. "Nima tekshirildi va nima topilmadi" deb yoz.
 
-Hujjatlashtirilgan iOS zanjiri quyidagicha: `npm install`, `npm run build`, `npx cap sync`, `xcode-project use-profiles`, App Store Connect'dan oxirgi build raqamini olib bittaga oshirish, `xcode-project build-ipa`, so'ng `app_store_connect` nashr bloki `submit_to_testflight: true` bilan ([Codemagic Capacitor quick start](https://docs.codemagic.io/yaml-quick-start/building-an-ionic-app/)). Muhit blokida `integrations: app_store_connect` va `ios_signing` (`distribution_type: app_store`, `bundle_identifier`) birga yoziladi. Imzolash uchun Mac kerak emas: Codemagic interfeysi API kaliti yordamida Apple Distribution sertifikatini o'zi yaratadi va provisioning profillarni Developer Portal'dan oladi; boshqa joyda yaratilgan sertifikatni ololmaydi, Apple esa Distribution sertifikatlarini uchta bilan cheklaydi ([Codemagic iOS signing](https://docs.codemagic.io/yaml-code-signing/signing-ios/)). Muqobil skriptli yo'lda kalit `ssh-keygen` bilan yaratiladi ([Codemagic alternative signing](https://docs.codemagic.io/yaml-code-signing/alternative-code-signing-methods/)), u Windows 10/11 da mavjud. Ikki tuzatish kerak: namunada `pod install` bor, lekin Capacitor 8 loyihalari standart holda SPM bo'lgani uchun bu qadam tushirib qoldiriladi; namunadagi artefakt qolipi `.apk` ni ko'rsatadi, build esa AAB chiqaradi, shuning uchun `**/*.aab` yozing **[TAXMIN]**. CocoaPods trunk 2026-yil 2-dekabrda faqat o'qish rejimiga o'tadi ([Ionic blog](https://ionic.io/blog/?p=6904)), bu ham SPM foydasiga.
+## 9. DO'KON TEXNIK TALABLARI (majburiy)
 
-Android zanjiri: `sdk.dir` ni `local.properties` ga yozish, build, `npx cap sync`, Play'dagi oxirgi build raqamini olish, `./gradlew bundleRelease`, so'ng `google_play` bloki `track: internal` va `submit_as_draft: true` bilan; keystore Codemagic'ga yuklanadi (qaytarib bermaydi, zaxira nusxa saqlang), service account JSON maxfiy o'zgaruvchiga qo'yiladi ([Codemagic Capacitor quick start](https://docs.codemagic.io/yaml-quick-start/building-an-ionic-app/)). Yangi ilovaning birinchi AAB'si Play Console'ga qo'lda yuklanishi kerakligi tarixan ma'lum, lekin tekshirilmadi **[TASDIQLANMAGAN]**.
+Apple va Google bolalar ilovasiga qattiq qaraydi. Kodda bo'lishi shart:
+1. Ilova "saytning o'rami" bo'lib qolmasin: native qobiq, splash, ikonka, oflayn holat ekrani, Android "orqaga" tugmasi, safe-area, status bar, native ulashish/haptika kabi mos joyda native imkoniyatlar. Veb-kod ilova paketida bo'ladi (masofadagi saytni WebView'da ochish EMAS).
+2. Ota-ona darvozasi (parental gate): tashqi havola, akkaunt/kirish, sozlamalar, kelajakdagi xarid, o'chirish faqat darvoza ortida. Bola oqimida tashqariga chiqadigan havola yo'q. Darvoza o'qiy olmaydigan bola o'ta olmaydigan, kattalar uchun oson bo'lsin.
+3. Kirish: Google web OAuth WebView ichida ishlamaydi (Google taqiqlaydi). Native Google kirish plagini qo'y. iOS'da Google/Telegram kirish bor ekan, unga teng maxfiylikni saqlovchi variant (Sign in with Apple) ham bo'lishi kerak. Email kod va Telegram deep link ilovada ishlashi kerak.
+4. Akkauntni o'chirish: ilova ichida to'liq o'chirish yo'li + ochiq veb-sahifa havolasi. Faqat "o'chirib qo'yish" yetmaydi.
+5. Uchinchi tomon analitika va reklama SDK'lari bolalar oqimida yo'q. Reklama identifikatori ruxsati so'ralmaydi, joylashuv ishlatilmaydi.
+6. Kamera/mikrofon ishlatiladigan joyda (diqqat yordamchisi): aniq rozilik, ko'rinadigan indikator, tushunarli ruxsat matni, ota-ona o'chira oladigan sozlama. Tasvir qurilmadan chiqmasligini kodda tekshir va hisobotga yoz.
+7. Maxfiylik siyosati sahifasi (/privacy) ilova ichidan ochiladi (darvoza ortida).
+8. Pro (12-bo'lim): do'kon build'ida to'lov yoki "sotib ol" UI umuman yo'q, masofadan yoqiladigan yashirin paywall ham yo'q. Bayroq build paytida belgilanadi.
+9. Versiyalar: Capacitor'ning joriy barqaror versiyasi (rasmiy hujjatdan tekshir), Android target API va iOS SDK talabining bugungi holatini rasmiy sahifadan tekshir, 16 KB page-size mosligini native kutubxonalar bo'lsa tekshir. Xotiradagi raqamga tayanma.
+10. Bundle ID / applicationId: vaqtincha `uz.kiddo.app`, bitta konfiguratsiya joyida. Do'konga yuklangandan keyin o'zgartirib bo'lmaydi, shuning uchun `HUMAN_TODO`ga "tasdiqlash kerak" deb yoz.
 
-GitHub Actions xususiy repozitoriy uchun iOS'da qimmatroq chiqadi. Free rejaga oyiga 12 dollarlik hisoblash kiradi, Linux 2-core daqiqasi 0,006 dollar, macOS daqiqasi 0,062 dollar; ommaviy repozitoriylarda standart runner'lar bepul ([GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)). Hisoblab chiqilsa, bu taxminan 2 000 Linux daqiqa, lekin atigi 193 ga yaqin macOS daqiqa **[TAXMIN, o'z hisobim]**. Eng arzon bo'linish: Android AAB'ni GitHub Actions `ubuntu-latest` da, iOS'ni Codemagic'da yig'ish yoki hammasini Codemagic'da qoldirish. `xcodebuild -allowProvisioningUpdates` va `-authenticationKey*` bayroqlari bilan GitHub'da imzolash yoki fastlane `match` yo'li manbadan o'qilmadi **[TASDIQLANMAGAN]**; `macos-latest` tasviridagi Xcode versiyasi Apple talab qilgan Xcode 26 ga mosligi ham tekshirilmadi.
+## 10. OVOZ (ilovaning asosi)
 
-Faqat inson bajaradigan ishlar quyidagi jadvalda; ularni Claude Code yoki CI avtomatlashtira olmaydi.
+### Manba
+1. `%USERPROFILE%\Desktop\AI suhbat` (ZEHN) papkasini FAQAT O'QIB, ovoz qanday yaratilayotganini aniqla: qaysi xizmat/kutubxona, qaysi ovoz nomlari, qaysi parametrlar, kalit kerakmi. Topganingni `docs/voice/ZEHN_METHOD.md`ga yoz. Kalitlarning qiymatini ko'chirma, faqat nomini yoz.
+2. Kiddo'da aynan shu usulni asos qilib ol. Qo'shimcha tekin manbalarni zaxira sifatida bahola. Tadqiqot xulosasi (o'zing rasmiy hujjatdan qayta tekshir, raqamlar o'zgaruvchan):
+   - Microsoft Edge neural ovozlari (kalitsiz, norasmiy endpoint): uz-UZ Madina/Sardor, ru-RU Svetlana/Dmitry, en-US bir nechta. Faqat rate/pitch/volume ishlaydi, pauza tegi ishlamaydi. Faqat server tomonda ishlaydi. Norasmiy bo'lgani uchun uzilib qolishi mumkin.
+   - Azure Speech bepul darajasi: rasmiy, to'liq SSML (pauza, prosody), oylik belgi kvotasi bor. Akkaunt kerak.
+   - Gemini TTS: uslubni matn bilan boshqarish mumkin (do'stona, bolalarga mos), o'zbekcha bor, lekin bepul kunlik limit juda kichik bo'lishi mumkin: jonli emas, oldindan yaratishga mos.
+   - O'zbek va rus tillari uchun tayyor BOLA ovozi hech qayerda topilmadi.
+3. Faqat tekin. Kalit kerak bo'lsa `HUMAN_TODO`ga yoz va kalitsiz variant bilan davom et.
 
-| Ish | Tafsilot va manba |
-|---|---|
-| Apple Developer Program'ga a'zo bo'lish | Yiliga 99 USD, ikki bosqichli autentifikatsiyali Apple Account, sotuvchi sifatida qonuniy ism ko'rinadi; tashkilot uchun D-U-N-S, domen email va sayt ([Apple enrollment](https://developer.apple.com/support/enrollment/)) |
-| Google Play Console akkaunti | Bir martalik 25 USD, oldindan to'langan kartalar qabul qilinmaydi, 18 yosh, Android qurilma tasdig'i ([Play Console get started](https://support.google.com/googleplay/android-developer/answer/6112435?hl=en)) |
-| App Store Connect'da ilova yozuvi va API kaliti | Issuer ID, Key ID, `.p8` faqat bir marta yuklab olinadi; App Manager roli tavsiya etiladi ([Codemagic iOS signing](https://docs.codemagic.io/yaml-code-signing/signing-ios/)) |
-| Android upload keystore yaratish va zaxiralash | `keytool` bilan; yo'qotilmasin ([Codemagic quick start](https://docs.codemagic.io/yaml-quick-start/building-an-ionic-app/)) |
-| Google Cloud service account va Play'da ruxsat | JSON faylini maxfiy o'zgaruvchiga qo'yish ([Codemagic quick start](https://docs.codemagic.io/yaml-quick-start/building-an-ionic-app/)) |
-| Yopiq test | 2023-yil 13-noyabrdan keyin ochilgan shaxsiy akkauntlar uchun kamida 12 tester, ketma-ket 14 kun, keyin production so'rovi ([Play testing requirements](https://support.google.com/googleplay/android-developer/answer/14151465?hl=en)) |
-| Do'kon anketalari | Yosh reytingi, maqsadli auditoriya, Data safety, App Privacy javoblari halol va dolzarb bo'lishi kerak ([Families Policy](https://support.google.com/googleplay/android-developer/answer/9893335), [Guidelines 2.3.6](https://developer.apple.com/app-store/review/guidelines/)) |
-| Haqiqiy iPhone'da TestFlight orqali sinash | Windows'da Simulator va Safari Web Inspector yo'q **[TAXMIN]** |
+### Arxitektura (jonli, lekin tejamkor)
+- Ovoz internet orqali so'rov bo'yicha yaratiladi, ilova paketiga minglab audio fayl solinmaydi.
+- Server: `api/index.ts` dispatcher ichida bitta TTS yo'li (yangi serverless funksiya ochma, 12 limit). Kalitlar faqat serverda.
+- HAR IBORA BIR MARTA sintez qilinadi: kalit = (matn + til + ovoz + parametrlar versiyasi) xeshi. Natija server tomonda hamma foydalanuvchilar uchun umumiy keshlanadi (tekin saqlash joyini o'zing tanla va limitini tekshir), keyin CDN kesh sarlavhalari bilan beriladi. Shunda tekin kvota foydalanuvchilar soniga emas, noyob iboralar soniga sarflanadi.
+- Qurilmada ham kesh: eshitilgan ibora qayta yuklanmaydi, internet yo'qda keshdagisi o'ynaydi.
+- Suiiste'moldan himoya: endpoint ixtiyoriy matnni sintez qilmasin. Ilova matnlari ruxsat etilgan ro'yxat/imzo orqali, dinamik qism (bola ismi) uzunlik va belgi cheklovi bilan, rate limit bilan.
+- Zaxira zanjiri: asosiy manba ishlamasa ikkinchisi, u ham ishlamasa qurilma keshi, oxirida ovozsiz lekin ilova ishlayveradi (matn va animatsiya bilan). Ovoz xatosi hech qachon ekranni qotirmasin.
+- Format: iOS WebView va Android'da bir xil ishlaydigan bitta format (mono MP3 yoki AAC, nutq uchun yetarli past bitrate; Opus'ni eski iOS o'ynamaydi). Sifat eshitilarli tushmasin.
+- Kechikish: tugma bosilgandan ovoz boshlanguncha vaqtni o'lcha. Ekran ochilganda keyingi kerakli iboralarni oldindan yuklab qo'y (prefetch). Yuklanayotganda maskot "o'ylayotgan" holatda bo'lsin, ekran bo'sh qolmasin.
+- iOS'da avtomatik ovoz foydalanuvchi bosishisiz o'ynamasligi mumkin: birinchi bosishda audio kontekstni ochib ol.
+- Barcha ovoz sozlamalari BITTA konfiguratsiya faylida: rol -> manba, ovoz nomi, tezlik, balandlik, uslub. Hojiakbar eshitib boshqasini tanlasa faqat shu fayl o'zgaradi va parametr versiyasi oshadi (kesh avtomatik yangilanadi).
 
-Eng katta ochiq savol O'zbekiston bilan bog'liq: Apple ro'yxatdan o'tish ayrim hududlarda qo'llanmasligi mumkinligini aytadi, lekin mamlakatlar ro'yxatini bermaydi va O'zbekistonni tilga olmaydi ([Apple enrollment](https://developer.apple.com/support/enrollment/)); Google'ning qo'llab-quvvatlanadigan hududlar jadvali yuklanmadi. O'zbekistondan Apple va Google dasturchi akkaunti ochish, pullik ilova shartnomasi va bank to'lovlari mumkinligi **[TASDIQLANMAGAN]**, Pro monetizatsiyasini loyihalashdan oldin to'g'ridan-to'g'ri tekshirilishi shart. Tashkilot akkaunti 12 tester talabidan ozodligi ham keng aytiladi, lekin tasdiqlanmadi **[TASDIQLANMAGAN]**.
+### Ovozlar
+- 2 ta ASOSIY: Mini (qiz bola) va Piku (o'g'il bola). Bolaga do'stidek: iliq, quvnoq, rag'batlantiruvchi, sabrli. Hech qachon buyruq ohangida emas.
+- Yordamchilar saqlanadi: narrator (yosh ayol), ona, ota, buvi, bobo, Laylo (qiz bola), Ali (o'g'il bola). Laylo/Ali Mini/Piku'dan farq qilsin.
+- Bola ovozi tayyor yo'q, shuning uchun tabiiy kattalar ovozidan balandlik va tezlikni EHTIYOTKORLIK bilan sozlab ol. Haddan oshirsang ovoz sun'iy/xunuk bo'ladi: tabiiylik birinchi o'rinda.
+- Tezlik kattalar tezligidan sekinroq (bolalar uchun). 3 variant tayyorla (taxminan 90/80/70%).
+- Alifbo: avval harf, keyin so'z, orasida 250-400 ms pauza. Pauza tegi ishlamaydigan manbada ikki bo'lakni ketma-ket o'ynat.
+- Mashq ovozlari faqat gapirayotgan maskotda. Bola maskotni o'zi tanlaydigan joyni kodda tekshir va hisobotga yoz.
+- Har bo'lim savolni avtomatik ovozda o'qiydi va keyingisiga o'zi o'tadi (bola ovozni o'zi yoqa olmaydi). Maskot har ishga tushishda bir marta salomlashadi.
+- Matnlar: bolalar uchun qisqa, sodda, iliq jumlalar. Mavjud matnlar quruq bo'lsa 3 tilda qayta yoz (i18n kalitlarini saqlagan holda).
 
-Kundalik ish sikli Windows'da Android atrofida quriladi. Capacitor live reload WebView'ni LAN dagi dev serverga yo'naltiradi (`server.url`, `cleartext: true` yoki `npx cap run --live-reload`), bu yozuv commit qilinmasligi kerak ([Capacitor live reload](https://capacitorjs.com/docs/guides/live-reload)). Android WebView desktop Chrome'ning `chrome://inspect` sahifasidan tekshiriladi ([Chrome DevTools](https://developer.chrome.com/docs/devtools/remote-debugging/webviews)), Maestro esa Windows'ga WSL'siz o'rnatiladi va Java 17+ talab qiladi ([Maestro Windows](https://docs.maestro.dev/getting-started/installing-maestro/windows)). Codemagic'ning bepul M2 mashinalarida Android emulyatori ishlamaydi ([Codemagic pricing](https://docs.codemagic.io/billing/pricing/)). iOS simulyatorini brauzerda ko'rsatadigan Appetize bepul rejada oyiga 30 daqiqa va 3 daqiqalik sessiya beradi ([Appetize pricing](https://appetize.io/pricing)), bu faqat tezkor ko'zdan kechirishga yetadi.
+### O'zbekcha Q, G', K (muhim)
+- Q bo'g'iz q bo'lib chiqishi kerak (K emas), G' to'g'ri, K alohida aniq.
+- Sinov ro'yxati tuz: Q, G', K, O', SH, CH, NG qatnashgan so'z va minimal juftliklar (masalan qo'l/ko'l, qir/kir, g'oz/goz) + ilovadagi eng ko'p ishlatiladigan 30 ibora.
+- Har manba va ovozda shu ro'yxatni 4 xil yozuvda sinab ko'r: ʻ (U+02BB), ’ (U+2019), ' (U+0027) va kirill (қ, ғ, ў). Qaysi yozuv to'g'ri talaffuz bersa, sintezdan oldin matnni shunga keltiruvchi normalizatsiya qatlamini yoz (ekrandagi matn o'zgarmaydi).
+- Sen audio'ni eshita olmaysan. ru/en uchun namunaviy tekshiruv: sintez qilingan audio'ni qayta matnga o'girib (tekin vosita bo'lsa) solishtir. O'zbekcha uchun avtomatik tekshiruvga ISHONMA: namunalarni `%USERPROFILE%\voice-test\v3\` ga tartibli nom bilan (manba_ovoz_yozuv_tezlik) saqla, `docs/voice/LISTEN.md`ga "nimani eshitish va nimani tanlash kerak" ro'yxatini yoz, `HUMAN_TODO`ga qo'sh.
+- Hojiakbar tanlaguncha eng ehtimoliy variantni vaqtinchalik standart qilib qo'y va davom et.
 
-## Hajmni ovoz formati va GLB siqish, qotishni xotira byudjeti hal qiladi
+## 11. KLIP VA SHORTS
 
-Do'kon limitlari Kiddo uchun to'siq emas: Play'da asosiy modul 500 MB gacha siqilgan yuklab olish hajmiga ruxsat etiladi, 200 MB dan oshganda mobil internetda ogohlantirish chiqadi ([Play app size limits](https://support.google.com/googleplay/android-developer/answer/9859372?hl=en)), iOS'da siqilmagan hajm 4 GB gacha ([App Store Connect file sizes](https://developer.apple.com/help/app-store-connect/reference/maximum-build-file-sizes/)). Haqiqiy cheklov foydalanuvchi sabri. `dist/` ichidagi hamma narsa asosiy modulga tushgani uchun hajmni uch tildagi ovoz va 3D modellar belgilaydi **[TAXMIN]**.
+- Ilovadagi BARCHA klip va shorts (Tarbiya bo'limidagi 90 klip ham, boshqa bo'limlardagilar ham) qayta, professional darajada yaratiladi.
+- Uslub: 2D Mini va Piku, Remotion. Ilova ichida Remotion Player bilan jonli (oldindan render qilingan og'ir video fayllar paketga solinmaydi).
+- Ranglar: hozirgi maskot ranglari xira. Jonliroq, tabiiyroq, bolalarga yoqimli palitra; kontrast va o'qiluvchanlik saqlansin. Ranglar bitta token faylida, ilova va kliplar bir xil tokenlardan foydalansin.
+- Har klip maksimal tushunarli: bitta g'oya, aniq boshlanish-o'rta-yakun, sekin temp, katta aniq obrazlar, ekranda kam matn, ovoz va harakat sinxron, lab/og'iz harakati ovozga mos.
+- Ovoz: 10-bo'limdagi yangi ovoz tizimi orqali, 3 tilda. Klip davomiyligi ovoz uzunligiga moslashadi.
+- Mazmun `docs/tarbiya/CURRICULUM.md`dan. Matnni o'zgartirsang ro'yxatini ber (uz/ru matnini Hojiakbar o'qib tekshiradi).
+- Umumiy sahna qismlari (fon, maskot rig, mimika, o'tishlar) qayta ishlatiladigan komponentlar: 90 ta klip 90 ta alohida kod bo'lmasin, ma'lumotga asoslangan bo'lsin.
+- Kuchsiz qurilmada klip qotmasin: kadr tezligini o'lcha, og'ir effektlarni soddalashtir.
 
-Rasmlar uchun `sharp` bilan build skripti yetarli. Uning standart qiymatlari yaxshi boshlang'ich nuqta: WebP sifat 80, AVIF sifat 50, `jpeg({ mozjpeg: true })` qo'shimcha optimallashtirishni yoqadi ([sharp output API](https://sharp.pixelplumbing.com/api-output)). Vite 8 ning standart brauzer chegarasi Safari 16.4+ va Chrome 111+ ([Vite build guide](https://vite.dev/guide/build)), bu darajada ikkala format ham xavfsiz. Bolalar ilovasiga xos tekis rangli illyustratsiyalarda palitrali PNG yoki lossless WebP ko'pincha yaxshiroq ko'rinadi, rasmni kodlashdan oldin ekranda ko'rsatiladigan eng katta o'lchamga kichraytirish kerak **[TAXMIN]**. "WebP JPEG'dan 25 dan 35 foizgacha, AVIF taxminan 50 foiz kichik" degan qoida manbadan tasdiqlanmadi **[TASDIQLANMAGAN]**; sifatni har doim qurilma ekranida ko'z bilan solishtiring.
+## 12. PRO
 
-3D modellar uchun bitta buyruq ishning katta qismini bajaradi: `gltf-transform optimize input.glb output.glb --compress draco --texture-compress webp`; alohida buyruqlar orasida `meshopt` (geometriya va animatsiya), `dedup`, `prune`, `weld`, `join` (kamroq draw call), `resize`, `etc1s` va `uastc` (KTX2) bor, `inspect` esa sahnaning og'ir joyini ko'rsatadi ([glTF Transform CLI](https://gltf-transform.dev/cli)). three.js tomonida `MeshoptDecoder` `GLTFLoader.setMeshoptDecoder` orqali yuklashdan oldin ulanadi ([meshoptimizer gltfpack](https://meshoptimizer.org/gltf/)), `KTX2Loader` uchun `setTranscoderPath` va `detectSupport(renderer)` birinchi tekstura yuklanishidan oldin chaqiriladi ([three.js KTX2Loader](https://threejs.org/docs/pages/KTX2Loader.html)). Dekoder fayllari CDN'dan emas, ilova ichidan nisbiy yo'l bilan berilishi kerak, aks holda oflayn rejim sinadi **[TAXMIN]**. Format tanlashda muhim nuqta: GPU xotirasi fayl formatiga emas, piksel o'lchamiga bog'liq, teng o'lchamli JPG va PNG bir xil joy egallaydi ([Discover three.js](https://discoverthreejs.com/tips-and-tricks/)). Shundan kelib chiqib, WebP/AVIF teksturalar diskda kichik, lekin GPU'da to'liq RGBA ga yoyiladi, KTX2 esa GPU'da siqilgan holda qoladi va iOS xotira chegarasiga bevosita yordam beradi **[TAXMIN]**. Draco va Meshopt o'rtasidagi hajm farqi bo'yicha raqamlar manbalarda yo'q **[TASDIQLANMAGAN]**; bittasini tanlang, shunda bitta dekoder yuklanadi.
+- Bitta build-vaqti bayrog'i (masalan `VITE_PRO_VISIBLE=false`). False bo'lganda: Pro haqidagi barcha UI (narxlar, "Pro'ga o'ting", qulf belgilari, tariflar sahifasi, sinov rejimi yozuvlari, bildirishnomalar, bot xabarlaridagi Pro eslatmalari) hech qayerda ko'rinmaydi.
+- False bo'lganda Pro uchun ochiq bo'lgan BARCHA imkoniyat hamma foydalanuvchiga ochiq va ishlaydi (Tarbiya 4-30 kunlar ham). Server tomondagi tekshiruvlar ham shunga mos: frontend ochiq-u, API rad etadigan holat qolmasin.
+- Pro kodi, jadvallari, admin paneldagi qismi O'CHIRILMAYDI. Bayroq true bo'lsa hammasi avvalgidek qaytadi. Ikki holat uchun ham test yoz.
+- Tekshiruv: butun kod bo'yicha "pro", "premium", "tarif", "obuna", "subscription" va tarjima kalitlarini qidirib, bayroqsiz qolgan joy yo'qligini isbotla.
 
-Ovozda iOS asosiy cheklov. Ogg Opus va Ogg Vorbis ijrosi WebKit'ga faqat Safari 18.4 bilan, ya'ni iOS 18.4 da (2025-yil 31-mart) qo'shilgan ([Safari 18.4 release notes](https://developer.apple.com/documentation/safari-release-notes/safari-18_4-release-notes.md)), caniuse iOS Safari'ning 18.3 gacha bo'lgan versiyalarini "qisman" deb belgilaydi ([caniuse Opus](https://www.caniuse.com/opus)). Capacitor 8 iOS 15 ni qo'llagani uchun faqat Opus'da berilgan klip eski iPhone'larda jim qoladi; ikki formatni birga berish esa hajmni ikki baravar qiladi. Shuning uchun har bir klip uchun bitta universal fayl to'g'ri savdo **[TAXMIN]**: hikoya va maskot nutqi mono AAC-LC 48 dan 64 kbit/s gacha yoki mono MP3 64 kbit/s, qisqa effektlar 64 dan 96 kbit/s gacha, fon musiqasi stereo 96 dan 128 kbit/s gacha; qiymatlarni quloq bilan sozlang. Taqqoslash uchun, Xiph Opus'da to'liq diapazonli mono nutq uchun taxminan 16 kbit/s yetarli deydi ([Xiph Opus settings](https://wiki.xiph.org/Opus_Recommended_Settings)), ya'ni minimal iOS 18.4 ga ko'tarilsa, hajm sezilarli kamayadi. AAC va MP3 barcha WKWebView va Android WebView versiyalarida ijro etilishi uzoq yillik amaliyot, lekin bu yerda manbadan o'qilmadi **[TASDIQLANMAGAN]**. Hajmni kamaytirishning eng kuchli tashkiliy usuli: ilovaga faqat eng ko'p ishlatiladigan kliplar va bitta til paketini joylash, qolgan tillarni birinchi ishga tushirishda Capacitor Filesystem'ga yuklab olish, bunda Apple 4.2.3(ii) bo'yicha hajmni ko'rsatib ruxsat so'rash.
+## 13. TEZLIK VA HAJM
 
-Bundle tomonida Vite 8 Rolldown bilan ishlaydi va chunk strategiyasi `build.rolldownOptions.output.codeSplitting` orqali beriladi, `base: './'` esa WebView uchun nisbiy manzillar hosil qiladi ([Vite build guide](https://vite.dev/guide/build)). Tavsiya etilgan bo'linish **[TAXMIN]**: kirish chunk'ida React, router va birinchi ekran; three.js va 3D sahnalar `React.lazy` bilan alohida chunk; har bir til paketi alohida dinamik import. Standart `build.target` Safari 16.4 dan past iOS yoki eskirgan Android System WebView'da oq ekran berishi mumkin, shuning uchun minimal OS'ni ongli tanlang: yo `build.target` ni pasaytiring, yo iOS deployment target'ni ko'taring. Fayllar lokal diskdan o'qilgani uchun gzip/brotli plaginlari foyda bermaydi.
+- Avval o'lcha (B0'da bazaviy raqamlar), keyin optimallashtir, keyin qayta o'lcha. Raqamsiz "tezlashdi" dema.
+- Rasm: zamonaviy format (AVIF/WebP), to'g'ri o'lcham, SVG optimallashtirish. Har rasmni asl bilan yonma-yon solishtir: ko'zga ko'rinadigan farq bo'lsa sozlamani yumshat.
+- 3D: glTF siqish (geometriya + tekstura), dekoderlar ilova ichida lokal (CDN emas), three.js faqat kerak bo'lgan ekranda yuklanadi (lazy), sahnadan chiqqanda resurslar bo'shatiladi, pixel ratio cheklanadi, kerak bo'lmaganda render to'xtaydi.
+- Ovoz/SFX: 10-bo'limdagi format; paketdagi audio minimal.
+- Bundle: code splitting, ishlatilmagan kod va kutubxonalarni chiqarish, shrift subset, tillarni alohida yuklash. Bundle tahlilini hisobotga qo'sh.
+- Ish vaqti: keraksiz qayta render yo'q (Zustand selektorlari), uzun vazifalar asosiy oqimni band qilmasin, ro'yxatlar virtual, animatsiyalar transform/opacity bilan, xotira sizib chiqmasin (uzoq ishlatganda WebView qayta yuklanib ketmasin).
+- Backend: N+1 so'rov yo'q, so'rovlar batch, kerakli indekslar, keraksiz ketma-ket so'rovlar parallel, javoblar keshlanadi. Har asosiy endpoint uchun so'rovlar sonini va vaqtini o'lcha.
+- Maqsad: kuchsiz Android telefonda ham bosishga darhol javob, ekranlar orasida qotishsiz o'tish.
 
-Qotmaslik uchun birinchi dushman iOS'dagi xotira. Bir dasturchi hisobotida WKWebView'ning WebContent jarayoni xotira taxminan 1,25 GB dan oshganda to'xtatilgan; chegara hujjatlashtirilmagan va Apple javob bermagan ([Apple Developer Forums](https://developer.apple.com/forums/thread/771787)). Bu bitta ilovaning kuzatuvi, kafolatlangan limit emas; eski iPhone'lar ancha oldin o'ldiriladi, shuning uchun bir necha yuz MB byudjetni mo'ljallang va iOS'dagi har qanday "oq ekranga qaytish" ni xotira o'limi deb hisoblang **[TAXMIN]**. Manbali qoidalar: piksel nisbatini 2 bilan cheklash, alpha, stencil va `preserveDrawingBuffer` ni keraksiz yoqmaslik, statik sahnani faqat o'zgarishda chizish, yorug'liklarni kam ushlash va ish vaqtida qo'shib-olib tashlamaslik, soyalarni kichik saqlash, geometriya, material va teksturalarni qayta ishlatish, butunlay olib tashlanganda `dispose()` chaqirish, render siklida yangi obyekt yaratmaslik ([Discover three.js](https://discoverthreejs.com/tips-and-tricks/)). Qo'shimcha amaliy qoidalar **[TAXMIN]**: butun ilova davomida bitta `WebGLRenderer`, ilova fonga o'tganda renderni to'xtatish, har kadrda o'zgaradigan holatni React'dan tashqarida ref orqali yuritish, progressni tez-tez saqlash, chunki WebView qayta yuklanganda bola birinchi ekranga tushadi. O'lchash uchun eng qimmatli usul haqiqiy arzon Android telefonda `chrome://inspect` orqali Performance va Memory panellarini ishlatish ([Chrome DevTools](https://developer.chrome.com/docs/devtools/remote-debugging/webviews)).
+## 14. BOSQICHLAR
 
-Server tezligi ham "qotish" sifatida seziladi. Vercel'da Turso'ning klassik embedded replica'lari fayl tizimi bo'lmagani uchun qo'llanmaydi ([Turso embedded replicas](https://docs.turso.tech/features/embedded-replicas/introduction)), demak har bir so'rov tarmoq orqali o'tadi; Turso serverless uchun `@libsql/client/web` importini tavsiya qiladi va `/tmp` ga sahifalarni ko'chiradigan beta paket ham taklif etadi ([Turso Vercel docs](https://docs.turso.tech/integrations/vercel.md)). `client.batch([...], 'read')` bir necha so'rovni bitta tranzaksiyada yuboradi, interaktiv tranzaksiyalar esa yozish qulfini ushlab turadi va 5 soniyada tugaydi ([Turso TS SDK](https://docs.turso.tech/sdk/ts/reference)). Xulosa **[TAXMIN]**: N ta ketma-ket so'rov o'rniga bitta JOIN yoki batch, klientni modul darajasida bir marta yaratish, Vercel funksiya hududini Turso asosiy bazasi hududi yoniga qo'yish, alifbo va darslar kabi statik kontentni ilovaga joylab, API'ga faqat progress va akkaunt uchun murojaat qilish. Hudud sozlamalari va sovuq start raqamlari manbadan tekshirilmadi **[TASDIQLANMAGAN]**.
+Har bosqich oxirida 7 va 8-bo'limlar majburiy.
 
-## Conclusion
+**B0. Inventar va reja** (kod deyarli yozilmaydi)
+- Repo holati, ma'lum muammolar (e2e "coins", opening "key/tap skips", homework "planet", 4 admin unit test, vitest timeout'lar, 2 flaky test), push qilinmagan docs commit.
+- ZEHN ovoz usulini aniqlash (10-bo'lim).
+- Skill/connector/subagent inventari.
+- Bazaviy o'lchovlar: bundle hajmi, asosiy ekranlar yuklanish vaqti, test holati, aktivlar hajmi (rasm/3D/audio/video ro'yxati hajmi bilan).
+- Pro, ovoz, klip tegib o'tadigan joylar xaritasi.
+- Capacitor va do'kon talablarining bugungi rasmiy holatini tekshirish.
+- Natija: `docs/handoff/PLAN.md` (bosqichlar bo'yicha aniq vazifalar, bog'liqliklar, qaysi vazifalar parallel).
 
-To'rt savolning javobi bitta dizayn qaroriga yig'iladi: Kiddo'ning bola ko'radigan qismi oflayn, akkauntsiz va oldindan yaratilgan kliplar bilan ishlasa, ovoz limitlari, Kids Category qoidalari, 4.2 "veb o'rami" xavfi va server kechikishi bir vaqtda yo'qoladi. "Jonli TTS" bu holda foydalanuvchi oldidagi xizmat emas, balki kontent quvuriga aylanadi: matn o'zgarganda bir marta sintez qilinadi, hash bilan saqlanadi va hamma qurilmaga fayl sifatida boradi. Shu sababli ovoz sifati bo'yicha asosiy ish kod emas, tinglash: Q/G'/K so'zlar ro'yxati va maskot presetlari o'zbek tilida so'zlashuvchi odam tomonidan tasdiqlanmaguncha hech bir dvigatelga ishonib bo'lmaydi.
+**B1. Xavfsizlik to'ri: testlarni yashil qilish**
+- Ma'lum barcha test muammolari va flaky testlarni ildiz sababi bilan tuzatish. Keyingi bosqichlar shu yashil bazaga tayanadi.
 
-Loyihani to'xtatib qo'yishi mumkin bo'lgan xavflar texnik emas, tashkiliy: O'zbekistondan Apple va Google dasturchi akkaunti hamda to'lovlar mavjudligi tasdiqlanmagan, 12 testerli 14 kunlik yopiq test taqvimga kamida ikki hafta qo'shadi, norasmiy Edge kanalining bolalar ilovasidagi huquqiy holati aniq emas. Bularni birinchi haftada tekshirish, Pro bo'yicha esa "kesib tashlash yoki ochiq e'lon qilish" dan birini hozir tanlash keyingi barcha ishni arzonlashtiradi.
+**B2. Ovoz dvigateli**
+- TTS yo'li, kesh, zaxira zanjiri, konfiguratsiya, normalizatsiya, qurilma keshi, prefetch.
+- Q/G'/K pilot namunalari va tezlik variantlari, `LISTEN.md`.
+- Eski statik ovoz fayllarini ishlatadigan joylar ro'yxati (hali o'chirilmaydi).
+
+**B3. Ovozni butun ilovaga ulash + Pro'ni yashirish**
+- Barcha bo'limlar yangi ovoz tizimiga o'tadi (maskot, alifbo, mashqlar, Masshtab portali, diqqat yordamchisi, salomlashish).
+- Matnlarni bolalarga mos qilish (3 til).
+- Pro bayrog'i (12-bo'lim).
+- Ishlatilmay qolgan eski audio fayllar ro'yxati `HUMAN_TODO`ga (o'chirishni Hojiakbar tasdiqlaydi).
+
+**B4. Tarbiya bo'limi va barcha klip/shorts** (kerak bo'lsa B4a, B4b, B4c)
+- Rang tokenlari, maskot rig, qayta ishlatiladigan sahna komponentlari.
+- 30 kun: har kun 3 mashq + 3 klip, ketma-ket ochilish, alohida menyu tugmasi (Pro yashirin: hammasi ochiq).
+- Boshqa bo'limlardagi klip/shorts ham.
+
+**B5. Tezlik va hajm** (13-bo'lim)
+
+**B6. Clean Code**
+- Takrorlangan kodni birlashtirish, o'lik kodni chiqarish (Supabase kodi qoladi), tiplarni mustahkamlash, xatolarni bir xil boshqarish. Xatti-harakat o'zgarmaydi, testlar yashil qoladi.
+
+**B7. Capacitor ilova**
+- Android va iOS loyihalari, splash/ikonka, safe-area, orqaga tugmasi, oflayn ekran, deep link, native Google kirish, Apple kirish, Telegram va email kod oqimi, ota-ona darvozasi, akkauntni o'chirish, ruxsat matnlari, PWA service worker'ning WebView ichidagi xatti-harakati.
+- Android: lokal build va (RAM yetsa) emulyatorda sinov; yetmasa haqiqiy telefon uchun APK va `HUMAN_TODO`.
+- iOS: lokal build imkonsiz (Mac yo'q). Loyihani to'g'ri tayyorla, tekshiruv B8'dagi bulutli build orqali.
+
+**B8. CI/CD**
+- GitHub Actions: lint, tiplar, unit, e2e, build; yashil bo'lmasa deploy yo'q; Dependabot.
+- Android build (AAB) Linux runner'da.
+- iOS build: Codemagic (bepul macOS daqiqalari faqat SHAXSIY akkauntda, Team akkauntida yo'q; App Store Connect API kaliti bilan avtomatik imzolash) asosiy, GitHub Actions macOS zaxira. Bepul daqiqalarni tejash: iOS build faqat qo'lda yoki teg bo'yicha ishga tushsin.
+- Workflow fayllari tayyorlanadi va lokal tekshiriladi, lekin push YO'Q: Hojiakbar push qilgandan keyin ishlaydi. Kerakli barcha secret NOMLARI va ularni qayerdan olish `HUMAN_TODO`da.
+
+**B9. Do'konga tayyorgarlik va yakuniy to'liq sinov**
+- 9-bo'lim bo'yicha band-ma-band tekshiruv jadvali (bajarildi / dalil / bajarilmadi).
+- Do'kon materiallari: nom, qisqa va to'liq tavsif (uz/ru/en), skrinshotlar ro'yxati va ularni olish skripti, yosh toifasi va ma'lumot xavfsizligi anketalari uchun javoblar loyihasi, ko'rib chiquvchi uchun eslatma.
+- To'liq regressiya: butun ilova, har ekran, har tugma, 3 til, 3 viewport, oflayn, sekin tarmoq.
+- Yakuniy hisobot: nima tayyor, nima insonni kutyapti, ma'lum cheklovlar.
+
+## 15. HUMAN_TODO (faqat Hojiakbar bajaradi)
+
+`docs/handoff/HUMAN_TODO.md`ni doim yangilab tur. Oldindan ma'lum bandlar:
+- Apple Developer akkaunti (yillik to'lov) va Google Play Console akkaunti (bir martalik to'lov).
+- App Store Connect'da ilova yozuvi va API kaliti; Android keystore (zaxira nusxasi bilan); Play service account.
+- Google Play: shaxsiy akkaunt uchun yopiq sinov talabi (testerlar soni va muddatini rasmiy sahifadan tekshir).
+- Bundle ID'ni tasdiqlash.
+- Ovoz namunalarini eshitib tanlash (tezlik, Q/G', har rol uchun ovoz).
+- uz va ru matnlarini o'qib tekshirish.
+- Haqiqiy iPhone'da TestFlight orqali sinash.
+- Kerak bo'lsa TTS xizmati uchun tekin kalit.
+- "push qil" buyrug'i.
+
+## 16. HOZIRGI BOSQICH
+
+`docs/handoff/STATE.md` mavjud bo'lsa undagi keyingi bosqichni bajar. Mavjud bo'lmasa B0'dan boshla.
