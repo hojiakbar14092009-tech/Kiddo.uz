@@ -29,7 +29,7 @@ export function CoinBadge({ amount }: CoinBadgeProps) {
       <span className="font-display text-lg font-bold tabular-nums sm:text-2xl">{amount}</span>
       {gain && (
         <span
-          key={gain.at}
+          key={`gain-${gain.at}`}
           aria-hidden="true"
           data-testid="coin-gain"
           className="pointer-events-none absolute -top-5 left-1 font-display text-base font-extrabold text-coin-shadow opacity-0 motion-safe:animate-nut-rise"

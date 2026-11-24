@@ -205,6 +205,8 @@ export default defineConfig(({ mode }) => {
       css: false,
       // the first lazy route import can be slow on a busy machine
       testTimeout: 15_000,
+      // 11 default workers on 12 threads starve the cold admin route import past 10 s (B1: 2/2 red; 6: 2/2 green)
+      maxWorkers: 6,
       projects: [
         {
           extends: true,

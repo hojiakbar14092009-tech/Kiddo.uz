@@ -25,6 +25,9 @@ function fakeIndexedDB() {
     put: (value: unknown, key: IDBValidKey) => request(() => data.set(key, value) && key),
     get: (key: IDBValidKey) => request(() => data.get(key)),
     delete: (key: IDBValidKey) => request(() => data.delete(key) && undefined),
+    // removing a profile also clears the studio gallery, which opens this same stub
+    createIndex: () => undefined,
+    index: () => ({ getAll: () => request(() => []) }),
   }
   const db = {
     createObjectStore: () => store,
