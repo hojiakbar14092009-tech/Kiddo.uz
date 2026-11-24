@@ -21,27 +21,24 @@ test('a child picks a language and sees today’s plan', async ({ page }) => {
 })
 
 test('a right answer earns praise, a finished game earns coins', async ({ page }) => {
-  // five rounds paced by the praise voice (each waits until it is said): 27–37 s measured on a phone (B1)
-  test.setTimeout(60_000)
+  // five rounds paced by the praise voice (each waits until it is said, up to the app's 15 s cap):
+  // 27–37 s measured on a phone, slower on the tablet's 3D Home (B1)
+  test.setTimeout(120_000)
   await chooseUzbek(page)
   await page.getByRole('link', { name: '1. Harfni top — Navbatdagi' }).click()
 
-  let previous: string | null = null
   for (let round = 0; round < 5; round += 1) {
     const options = page.getByTestId('task-options')
-    const intro = page.getByTestId('letter-intro')
-    // the next round: a new letter's introduction, or new answers on the board
-    await expect
-      .poll(
-        async () =>
-          (await intro.isVisible()) ||
-          ((await options.isVisible()) && (await options.getAttribute('data-answer')) !== previous),
-      )
-      .toBe(true)
+    // the next round by its number: a letter asked twice in a row leaves the answers unchanged
+    await expect(
+      page.getByRole('progressbar', { name: new RegExp(`^${round + 1}-savol`) }),
+    ).toBeVisible({
+      timeout: 30_000,
+    })
     // Learn Before Play: a new letter is shown before it is asked
     await meetNewLetter(page)
-    previous = await options.getAttribute('data-answer')
-    await page.locator(`[data-option="${previous}"]`).click()
+    const answer = await options.getAttribute('data-answer')
+    await page.locator(`[data-option="${answer}"]`).click()
     await expect(page.getByText(/^(Yahoooo|Wow|Hooray|Yay|Woohoo)! /)).toBeVisible()
   }
 
