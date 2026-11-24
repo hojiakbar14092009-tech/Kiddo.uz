@@ -1,43 +1,26 @@
-# STATE (yangilangan: 2026-11-24, B1 oxiri)
+# STATE (yangilangan: 2026-11-24, B2 oxiri)
 
-Branch: `feat/capacitor-codemagic` (push yo'q). Keyingi bosqich: **B2** (ovoz dvigateli).
+Branch: `feat/capacitor-codemagic` (push yo'q). Keyingi bosqich: **B3** (ovozni butun ilovaga ulash + Pro'ni yashirish).
 
 ## Bajarilgan
 - B0: inventar va reja (`PLAN.md`, `MAP_B0.md`, `STORE_STATUS.md`, `SKILLS.md`, `DECISIONS.md`, `HUMAN_TODO.md`, `docs/voice/ZEHN_METHOD.md`).
-- B1 (`REPORT_B1.md`): vitest yashil; uch ma'lum e2e flake ildiz sababi bilan tuzatildi; e2e to'liq bazasi va ekran yuklanish vaqtlari o'lchandi. Commitlar: 443fc4d9 (Hojiakbar so'rovi: MASTER_PROMPT_V3 + TADQIQOT), a68d9471 (vitest), fda143b4 (e2e flake'lar), e3acb637 (coins/homework, `scripts/measure-load.mjs`).
+- B1 (`REPORT_B1.md`): vitest yashil, 3 ma'lum e2e flake, e2e bazasi va yuklanish vaqtlari.
+- B2 (`REPORT_B2.md`): `voiceConfig.json`, `GET /api/tts` (Azure, ruxsat ro'yxati, CDN kesh), `say()` zaxira zanjiri, prefetch API, iOS unlock, `build:native` (ovozsiz paket), Q/G'/K pilot + `LISTEN.md`, `STATIC_VOICE_USERS.md`. Commitlar: 50a28491, 7f4fa76b, ab268941, bf62e0f5.
 
 ## Qolgan
-B2–B9 (`PLAN.md` 3-bo'lim).
+B3–B9 (`PLAN.md` 3-bo'lim). B2 dan B3 ga o'tganlar: prefetch va maskot "o'ylayapti" holatini ekranlarga ulash; har ekran uchun rol (Mini/Piku/narrator); yordamchi rollar konfiguratsiyasi; 320 px speaker/Help ustma-ustligi.
 
-## Testlar holati
-- **Vitest:** 1 892 / 1 892 yashil, ketma-ket 2 marta (190.4 s, 223.5 s), `maxWorkers: 6` bilan. Standart 11 worker bilan 2/2 qizil edi (179 s, 171 s).
-- **E2E to'liq baza** (`npx playwright test --workers=1`, 1.9 soat): **266 o'tdi, 38 yiqildi, 22 o'tkazildi.** Keyin coins tuzatildi (6/6), demak hozir ma'lum 37 yiqilish (~16 alohida test, ko'pi tablet+phone ikkalasida):
-  - `math-lab` (savatcha 320×568, to'rt yoshli, mehmon level-2) — ikkala proyekt, deterministik ko'rinadi
-  - `performance` "first screen download budget" — `scripts KB` byudjetdan oshgan (B5 bilan bog'liq)
-  - `release-matrix` (faqat tablet proyekti): `/explore/find-home` 320/360/393 px da sig'maydi; `/parent` 150%/200% matnda yon scroll
-  - `speech`: til almashganda ovoz to'xtashi (click timeout); speaker 320/390 px da boshqa tugmani yopadi
-  - `scale-portal` (hech narsa ishlab qolmaydi; rail klaviatura), `garden`, `garden-domains`, `attention` helper, `kiddo` demo promo kod PRO, `production` PIN admin narxlari, `living-mascots` robot, `pet-shop` do'stlik yuragi, `tutor` hint ladder
-  - **Sabablari tekshirilmagan** (B1 da faqat 3 ma'lum flake ildizigacha o'rganildi). Log: sessiya scratchpad, takrorlash: yuqoridagi buyruq.
-- Lint: `tsc -b` va `oxlint` B0 dan beri o'zgarmagan kodda tekshirilmagan; B1 da o'zgargan fayllar oxlint 0, prettier toza.
-
-## Ekran yuklanish bazasi (B1, `scripts/measure-load.mjs`)
-Pixel 7 emulyatsiya, CPU ×4 sekin, sovuq yuklash, 3 ta yangi kontekst medianasi, "DOM tayyor" (loading screen yo'q va ekran tugma/sarlavha ko'rsatdi). FCP o'lchanmaydi: ochilish pardasi ustida turadi.
-
-| ekran | ms | ekran | ms |
-|---|---:|---|---:|
-| /home | 970 | /shop | 971 |
-| /learn | 837 | /studio | 897 |
-| /explore | 762 | /shorts | 1080 |
-| /alphabet | 685 | /collection | 1160 |
-| /learn/math | 951 | /parent → /parent/login (kutilgan) | 992 |
-| /learn/space | 1079 | /games | 1080 |
-
-B5 uchun kuzatuv: planshetda Home 3D (2 canvas) ochilish pardasi paytida yuklanib, 55–707 ms long task beradi; uni parda tugagandan keyin yuklash nomzodi.
+## O'lchovlar
+- Native `dist/`: 355 MB → **104 MB** (`video/` 57 MB, B4; qolgani ~47 MB).
+- Statik klip, production CDN, O'zbekistondan: MISS 1.82 s, HIT 0.57–0.84 s. Jonli `/api/tts` o'lchanmagan.
+- Vitest: **1 916 / 1 916** yashil (177 s, `maxWorkers: 6`). Yuklama ostida admin/parent timeout'lari hali ham ba'zan chiqadi (alohida 22/22 o'tadi).
+- E2E `speech.spec.ts`: 15 o'tdi, 4 yiqildi (B1 bilan bir xil). Til testi tuzatildi (phone'da o'tdi). Overlap — haqiqiy UI xatosi, ochiq.
 
 ## Ma'lum muammolar
-- Yuqoridagi 37 e2e yiqilish (sabablari ochiq).
-- Vitest `maxWorkers: 6`: 10–45 s sekinroq, lekin barqaror.
-- Native paketga ~215 MB ovoz kiradi (B2).
-- Native'da kirish ishlamaydi (B7).
-- RAM: to'liq e2e 4 worker bilan xotira yetmay o'ldirildi; faqat `--workers=1`. Vitest va e2e ni bir vaqtda ishga tushirma.
-- `founder/` biznes-reja paketi (foydalanuvchi so'rovi bilan B1 sessiyasida) commit qilingan: e870ce76. Panel simulyatsiya, raqamlar taxmin.
+- Jonli ovoz Azure kalitisiz 503 beradi → ilova yozuv + qurilma ovozi bilan ishlaydi (HUMAN_TODO).
+- Edge TTS endpointi Node'dan v1 token bilan 403; edge-tts faqat lokal Python skriptlarda (pilot, generate.py) ishlaydi.
+- 320 px da `learn-speak` va Help tugmalari ~9 px ustma-ust (`LearnShell.tsx:137`).
+- E2E qolgan yiqilishlar (B1 ro'yxati: math-lab, performance budget, release-matrix, garden, scale-portal, PRO promo, production admin, tutor, pet-shop, living-mascots, attention) — sabablari tekshirilmagan.
+- Native'da kirish ishlamaydi (B7); native'da oflayn ovoz keshi (WebView HTTP kesh) tasdiqlanmagan.
+- RAM: vitest va e2e ni bir vaqtda ishga tushirma; e2e faqat `--workers=1`.
+- `server/auth.ts:219`, `server/telegram.ts:215` oxlint `rules-of-hooks` (`useCode`) — B2 dan oldin bor.

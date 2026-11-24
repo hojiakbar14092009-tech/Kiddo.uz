@@ -27,3 +27,7 @@ Manba: sessiyadagi skill ro'yxati (faqat nom va tavsif o'qildi). Ko'pligi sababl
 
 ## B0 da haqiqatan chaqirilganlar
 `ponytail:ponytail` (foydalanuvchi buyrug'i bilan), `superpowers:dispatching-parallel-agents`, `superpowers:writing-plans`, `superpowers:verification-before-completion`. Subagentlarga `ponytail:ponytail` buyurildi.
+- B2: ponytail:ponytail (ultra): talabni so'roq qilish, keraksiz kod (voiceKey xeshi, Blob saqlash, ism endpointi) yozilmadi.
+- B2: zizi-skills:security-and-hardening: /api/tts ishonch chegaralari, negativ+pozitiv testlar, begona DRM paket qo'shilmadi.
+- B2: superpowers:test-driven-development: tts route, ovoz zanjiri, iOS unlock, SW kesh — har biri RED → GREEN.
+- B2: superpowers:verification-before-completion: yakuniy tsc/vitest/build dalillari.

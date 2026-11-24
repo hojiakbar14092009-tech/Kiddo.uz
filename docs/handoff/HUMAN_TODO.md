@@ -11,6 +11,7 @@ Holat belgilari: [ ] qilinmagan, [x] qilingan. Codemagic UI nomlari `codemagic.y
 - [ ] App Store Connect: `uz.kiddo.app` ilova yozuvi; API kaliti (App Manager) > Codemagic integration `kiddo_asc`. `.p8` faqat bir marta yuklanadi.
 - [ ] `codemagic.yaml` dagi `APP_STORE_APPLE_ID: 0` ni ilovaning raqamli Apple ID'si bilan almashtirish.
 - [ ] Birinchi AAB'ni Play Console'ga qo'lda yuklash (tasdiqlanmagan, lekin odatda talab qilinadi).
+- [ ] **B2: jonli ovoz kaliti (Azure Speech, bepul F0).** portal.azure.com > Create resource > "Speech" > Pricing tier **Free F0** (karta so'ralsa to'xtang, F0 pul yechmaydi, limitdan oshsa so'rov rad etiladi). Region: `westeurope` yoki eng yaqini. Keys and Endpoint > KEY 1 va Location. Vercel > Project > Settings > Environment Variables: `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION` (Production + Preview), lokal uchun `.env.local`. Kalitsiz `/api/tts` 503 beradi, ilova yozilgan mp3 + qurilma ovozi bilan ishlayveradi.
 - [ ] Ixtiyoriy: Gemini API kaliti (ZEHN usuli, `GEMINI_API_KEY`) faqat `.env.local` va Vercel'ga. Kalitsiz ham B2 ishlaydi (edge-tts).
 
 ## Tasdiqlash
@@ -19,7 +20,7 @@ Holat belgilari: [ ] qilinmagan, [x] qilingan. Codemagic UI nomlari `codemagic.y
 - [ ] Native kirish: B7 da `@capgo/capacitor-social-login` + Sign in with Apple qo'shiladi (9-bo'lim 3-band). Google Cloud'da har imzo sertifikati (debug, upload, Play App Signing) SHA-1 bilan Android OAuth client yaratish kerak bo'ladi.
 
 ## Ovoz va matn
-- [ ] Ovoz namunalarini eshitib tanlash (B2 dan keyin `docs/voice/LISTEN.md` bo'yicha): Q/G'/K, tezlik 90/80/70%, har rol uchun ovoz.
+- [ ] **B2 pilot tayyor:** `%USERPROFILE%\voice-test\v3\edge_*.mp3` (21 fayl) ni `docs/voice/LISTEN.md` bo'yicha eshitib jadvalni to'ldirish: imlo (ʻ / ’ / '), tezlik 90/80/70%, Mini/Piku/narrator ovozi. Kirill varianti Edge'da umuman ishlamadi (audio yo'q). Tanlov keyin `voiceConfig.json` (rol `version` +1), `normalize_uz.py` `DEFAULT`, `server/tts.ts` `UZ_APOSTROPHE` ga yoziladi.
 - [ ] uz va ru matnlarni o'qib tekshirish (B3/B4).
 - [ ] B3 dan keyin: ishlatilmay qolgan eski mp3 ro'yxatini ko'rib, o'chirishga ruxsat berish (hozir 15 979 ta, 214.8 MB, `public/audio/voice`).
 
