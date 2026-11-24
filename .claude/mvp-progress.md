@@ -343,3 +343,16 @@ Qoldi (9-bosqich, Telegram bot ota-onalar uchun): kod hali yozilmagan.
 - Sabab (kod o'qib tasdiqlandi, production ko'rilmadi): Pro sahifasining "demo/sinov" holatini serverdagi `PAYMENT_MODE` EMAS, build vaqtidagi `src/config/demo.ts` belgilaydi. `demoMode = !cloudBackend && (VITE_DEMO_MODE ?? true)`, `publicProUIEnabled = VITE_PUBLIC_PRO_UI ?? !demoMode`. `cloudBackend` bu yerda faqat Supabase; Kiddo'ning o'z serveri (Turso) uni true qilmaydi. VITE_ o'zgaruvchilarsiz production build demo bo'ladi: narxlar yashirilgan, `?tab=pro` promokod bo'limiga yo'naltiriladi. Klient `GET pay/prices` ni umuman so'ramaydi.
 - Kod o'zgarmadi; `PAYMENT_MODE` qat'iyligi (faqat aynan "test" bo'lsa to'lov, aks holda 503 payments_not_live) tegilmadi.
 - Qilish kerak (Vercel): `VITE_DEMO_MODE=false` qo'shish va REDEPLOY (build vaqtida o'qiladi, deploy qayta qurilishi shart). Alternativ, faqat narxlar uchun: `VITE_PUBLIC_PRO_UI=true`. Ta'siri: demo promokodlar va demo admin o'chadi, `/admin` uchun `VITE_ADMIN_PIN` kerak bo'ladi. `PAYMENT_MODE=test` esa server uchun alohida va kerak.
+
+## Master prompt v2: 0–1-bosqich (2026-11-14, commit qilinmagan, 1-bosqich TUGAMAGAN)
+- 0: `docs/voice/INVENTORY.md` + `inventory.tsv` (`scripts/voices/inventory.ts`): ilova 9 458 klip (narrator 7 494, Mini 983, Piku 981, faqat uz), 1 797 narrator gapining fayli yo'q, shorts 114 qator.
+- 1B: `docs/tarbiya/CURRICULUM.md` 30 kun tayyor (≤8 so'z skript bilan tekshirildi), egasi o'qishi kerak.
+- 1A: `scripts/voices/voicestudio.py` (MCP klient, audio kontekstga kirmaydi), `normalize_uz.py` (DEFAULT hali tanlanmagan). Pilot `%USERPROFILE%\voice-test\pilot.py`: A faza tugadi (d1 va clone yaxshi, d2 so'z tashlaydi), B/C xotira kamligi sabab to'xtatildi. Qayta: `python -u pilot.py b:mini:clone` → C.
+- Bloker: VoiceStudio CPU'da 1 klip 50–200 s + Whisper ~60–90 s → 2-bosqich (~15 000 klip) ≈ 3–4 hafta uzluksiz.
+
+## Master prompt v3 (2026-11-24, commit qilinmagan)
+- `scripts/voices/edge_listen.py`: Q/Gʻ/K tinglash testi (14 so'z/harf × 4 yozuv × Madina/Sardor) + 9 personaj preseti → `%USERPROFILE%\voice-test\v3\index.html`. Ilovaga tegmaydi.
+- Topilma (tekshirildi): edge-tts uz-UZ Madina/Sardor kirill matnga ovoz QAYTARMAYDI (NoAudioReceived) → Edge yo'lida faqat lotin (ʻ / ’ / ').
+- Kliplar allaqachon MP3 (14 191) → iOS Opus xavfi yo'q.
+- Egasi qaror qiladi: (1) tinglovdan keyin yozuv → `normalize_uz.DEFAULT`, presetlar; (2) VoiceStudio (≈220 soat) o'rniga edge-tts/Azure F0 bilan yaratish; (3) Pro: store build'dan kesish yoki StoreKit/Play Billing; (4) Capacitor/Codemagic faqat Apple/Google akkauntlari O'zbekistondan ochilishi tasdiqlangach.
+- 2026-11-24: edge-tts bilan 1 791 ta yetishmagan narrator klipi yaratildi (uz Madina, ru Svetlana, en Jenny, rate -15%, uz `normalize_uz` ʻ yozuvi; `generate.py --engine edge`). `phrases.json` = eski ∪ collect.ts (yangi ro'yxat yolg'iz 6 271 klipni o'chirardi!). pendingRecordings: faqat `/ < > ?` qoldi. Testlar 1892/1892 (4 ta admin/parent testi to'liq yugurishda router timeout, alohida o'tadi). Commit qilinmagan. Eski Piper narrator kliplari bilan ovoz farq qiladi.

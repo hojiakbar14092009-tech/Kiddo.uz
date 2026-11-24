@@ -39,3 +39,6 @@ dist-production
 
 # local Turso (libSQL) file for development and load tests
 .data
+
+# Python bytecode
+*.pyc

@@ -14,6 +14,11 @@ Voices (MIT/CC-BY Piper models, from the sherpa-onnx "tts-models" release):
 All three are female voices, read slowly (length scale 1.25–1.3) for small children.
 Models are looked up in $KIDDO_VOICE_MODELS (default /tmp/tts).
 
+With edge-tts (pip install edge-tts, no key) only the missing clips are recorded with Microsoft neural
+voices (uz Madina, ru Svetlana, en Jenny); Uzbek goes through normalize_uz (Latin, ʻ):
+
+    python3 scripts/voices/generate.py --engine edge
+
 With an ElevenLabs API key the same clips can be recorded with ElevenLabs'
 Eleven v3 voices instead (see elevenlabs.py):
 
@@ -141,11 +146,38 @@ def write_from_mp3(mp3: bytes, target: Path) -> None:
     )
 
 
+EDGE_VOICES = {'uz': 'uz-UZ-MadinaNeural', 'ru': 'ru-RU-SvetlanaNeural', 'en': 'en-US-JennyNeural'}
+
+
+def edge_mp3(language: str, text: str) -> bytes | None:
+    """One clip from the free Edge Read Aloud channel, or None when it gives no audio (one retry)."""
+    import asyncio
+
+    import edge_tts
+    from normalize_uz import normalize_uz
+
+    if language == 'uz':
+        text = normalize_uz(text)[0]  # uz-UZ voices read only Latin, never Cyrillic
+
+    async def run() -> bytes:
+        com = edge_tts.Communicate(text, EDGE_VOICES[language], rate='-15%')
+        return b''.join([c['data'] async for c in com.stream() if c['type'] == 'audio'])
+
+    for _ in range(2):
+        try:
+            data = asyncio.run(asyncio.wait_for(run(), 60))
+            if data:
+                return data
+        except (edge_tts.exceptions.NoAudioReceived, TimeoutError):
+            pass
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--force', action='store_true')
     parser.add_argument('--only', choices=sorted(VOICES))
-    parser.add_argument('--engine', choices=['piper', 'elevenlabs'], default='piper')
+    parser.add_argument('--engine', choices=['piper', 'elevenlabs', 'edge'], default='piper')
     args = parser.parse_args()
     if args.engine == 'elevenlabs':
         import elevenlabs
@@ -153,7 +185,7 @@ def main() -> None:
         if not elevenlabs.available():
             sys.exit('Set ELEVENLABS_API_KEY first (see scripts/voices/elevenlabs.py).')
 
-    phrases: dict[str, list[str]] = json.loads((Path(__file__).parent / 'phrases.json').read_text())
+    phrases: dict[str, list[str]] = json.loads((Path(__file__).parent / 'phrases.json').read_text(encoding='utf-8'))
     manifest: dict[str, list[str]] = {}
     for language, sentences in phrases.items():
         folder = OUT / language
@@ -169,6 +201,17 @@ def main() -> None:
                 continue
             if args.engine == 'elevenlabs':
                 write_from_mp3(elevenlabs.synthesize_mp3(language, sentence), target)
+            elif args.engine == 'edge':
+                mp3 = edge_mp3(language, sentence)
+                if mp3 is None:
+                    print(language, 'skipped (no audio):', repr(sentence), flush=True)
+                    continue
+                try:
+                    write_from_mp3(mp3, target)
+                except subprocess.CalledProcessError:  # ffmpeg crashes on rare clips: skip it, a rerun tries again
+                    target.unlink(missing_ok=True)
+                    print(language, 'skipped (ffmpeg):', repr(sentence), flush=True)
+                    continue
             else:
                 voice = voice or load_voice(language)
                 audio, rate = synthesize(voice, language, sentence)
