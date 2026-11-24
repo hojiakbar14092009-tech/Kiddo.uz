@@ -17,7 +17,7 @@ workflows:
         PACKAGE_NAME: uz.kiddo.app
     scripts:
       - name: Web build
-        script: npm ci && npm run build
+        script: npm ci && npm run build:native
       - name: Sync native project
         script: npx cap sync android
       - name: AAB
@@ -48,7 +48,7 @@ workflows:
         APP_STORE_APPLE_ID: 0 # <numeric Apple ID from App Store Connect -> App Information>
     scripts:
       - name: Web build
-        script: npm ci && npm run build
+        script: npm ci && npm run build:native
       - name: Sync native project (SPM, no pod install)
         script: npx cap sync ios
       - name: Signing profiles

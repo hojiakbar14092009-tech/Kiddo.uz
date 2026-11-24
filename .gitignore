@@ -31,6 +31,7 @@ playwright-report
 .env
 .env.*
 !.env.example
+!.env.native
 
 # Mascot build output (rebuilt by npm run mascots:build)
 tools/mascots/out

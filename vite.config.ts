@@ -89,7 +89,8 @@ export default defineConfig(({ mode }) => {
       rememberOutDir,
       devApi(),
       preloadStoredLanguage(),
-      ...(voicePrivate ? [dropPublicVoice()] : []),
+      // the native app package carries no clips (~215 MB): it plays them from VITE_VOICE_BASE
+      ...(voicePrivate || mode === 'native' ? [dropPublicVoice()] : []),
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: false,

@@ -70,6 +70,10 @@
       ]
     },
     {
+      "source": "/audio/(.*)",
+      "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }]
+    },
+    {
       "source": "/assets/(.*)",
       "headers": [
         {
