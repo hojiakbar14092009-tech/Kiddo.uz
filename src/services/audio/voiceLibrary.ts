@@ -1,7 +1,7 @@
 import type { Language } from '@/content/languages'
 import { phraseKey, remoteSafeText, splitSentences, withoutName } from './phrases'
 import { kidClipUrl, loadKidManifest, type KidVoice } from './kidVoices'
-import { publicClipUrl } from './voicePaths'
+import { publicClipUrl, recordedVoiceIsCurrent } from './voicePaths'
 import { PIECE_PAUSE_MS, piecesOf } from './pieces'
 
 export type VoiceKind = 'letters' | 'words' | 'numbers' | 'phrases'
@@ -45,6 +45,9 @@ export type SpeechPart =
       key: string
       /** A short quiet after it: the pieces of one sentence (pieces.ts). */
       pauseAfterMs?: number
+      /** What the clip says, for the live and device voices when the clip cannot be played. */
+      text: string
+      remoteText: string | null
     }
   | { kind: 'tts'; text: string; remoteText: string | null }
 
@@ -61,17 +64,25 @@ export async function planSpeech(
   kidVoice?: KidVoice | null,
 ): Promise<SpeechPart[]> {
   const recorded = (await loadManifest())[language]
-  const kid = kidVoice ? (await loadKidManifest())[kidVoice][language] : null
+  // a role whose voice changed since the recordings (voiceConfig version > 0) is spoken live
+  const kid =
+    kidVoice && recordedVoiceIsCurrent(kidVoice)
+      ? (await loadKidManifest())[kidVoice][language]
+      : null
+  const narratorRecorded = recordedVoiceIsCurrent('narrator')
   return splitSentences(text).flatMap((sentence): SpeechPart[] => {
     const candidates = [sentence, withoutName(sentence, childName)].filter(
       (candidate): candidate is string => Boolean(candidate),
     )
     // the child's voice first: the whole sentence, or its pieces (numbers, lists)
+    const said = { text: sentence, remoteText: remoteSafeText(sentence, childName) }
     if (kidVoice && kid) {
       for (const candidate of candidates) {
         const key = phraseKey(language, candidate)
         if (kid.has(key)) {
-          return [{ kind: 'clip', url: kidClipUrl(kidVoice, language, key), language, key }]
+          return [
+            { kind: 'clip', url: kidClipUrl(kidVoice, language, key), language, key, ...said },
+          ]
         }
       }
       for (const candidate of candidates) {
@@ -84,17 +95,19 @@ export async function planSpeech(
             url: kidClipUrl(kidVoice, language, key),
             language,
             key,
+            text: piece,
+            remoteText: remoteSafeText(piece, childName),
             ...(index < pieces.length - 1 ? { pauseAfterMs: PIECE_PAUSE_MS } : {}),
           }
         })
       }
     }
-    for (const candidate of candidates) {
+    for (const candidate of narratorRecorded ? candidates : []) {
       const key = phraseKey(language, candidate)
       if (recorded.has(key)) {
-        return [{ kind: 'clip', url: publicClipUrl(language, key), language, key }]
+        return [{ kind: 'clip', url: publicClipUrl(language, key), language, key, ...said }]
       }
     }
-    return [{ kind: 'tts', text: sentence, remoteText: remoteSafeText(sentence, childName) }]
+    return [{ kind: 'tts', ...said }]
   })
 }

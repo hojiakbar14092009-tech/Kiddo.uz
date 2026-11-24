@@ -17,6 +17,9 @@ describe('voice build settings', () => {
       true,
     )
     expect(rule?.urlPattern({ url: new URL('https://kiddo.uz/audio/ui/ui_click.mp3') })).toBe(false)
+    // the live voice too: a sentence heard once is heard again offline
+    expect(rule?.urlPattern({ url: new URL('https://kiddo.uz/api/tts?lang=uz&text=a') })).toBe(true)
+    expect(rule?.urlPattern({ url: new URL('https://kiddo.uz/api/me') })).toBe(false)
     expect(VOICE_GLOB_IGNORES).toContain('audio/voice/**')
   })
 

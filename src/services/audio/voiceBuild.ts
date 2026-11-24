@@ -23,7 +23,8 @@ export function voiceRuntimeCaching(voicePrivate: boolean) {
   if (voicePrivate) return []
   return [
     {
-      urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/audio/voice/'),
+      urlPattern: ({ url }: { url: URL }) =>
+        url.pathname.startsWith('/audio/voice/') || url.pathname === '/api/tts',
       handler: 'CacheFirst' as const,
       options: {
         cacheName: 'kiddo-voice', // = PUBLIC_VOICE_CACHE in voicePaths.ts

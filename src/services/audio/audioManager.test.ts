@@ -19,6 +19,18 @@ describe('audioManager', () => {
     useSettingsStore.setState({ volume: 0.8 })
     useSubscriptionStore.getState().cancel()
     vi.spyOn(speech, 'say').mockResolvedValue(true)
+    // no live voice here (voiceChain.test.ts covers it): recordings and the device voice only
+    audioManager.resetLiveVoiceForTests()
+    const proto = (Howl as unknown as { prototype: { play: () => number } }).prototype
+    const play = proto.play
+    vi.spyOn(proto, 'play').mockImplementation(function (
+      this: FakeHowl & { options: Record<string, unknown> },
+    ) {
+      if (!this.options.src[0]?.startsWith('/api/tts')) return play.call(this)
+      const onloaderror = this.options.onloaderror
+      if (typeof onloaderror === 'function') queueMicrotask(() => onloaderror(1, 'offline'))
+      return 1
+    })
   })
 
   afterEach(() => vi.restoreAllMocks())

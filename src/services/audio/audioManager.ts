@@ -7,6 +7,7 @@ import { useFamilyStore } from '@/store/familyStore'
 import { planSpeech, type SpeechPart, type VoiceClip } from './voiceLibrary'
 import { kidVoiceOf } from './kidVoices'
 import { resolveClips, voiceMode } from './voiceSource'
+import { liveVoiceUrl } from './voicePaths'
 import { requestTts } from './remoteTts'
 import { noteSuccessSound, setNarrating } from './soundLanguage'
 
@@ -68,6 +69,8 @@ export type SpeakOutcome = 'done' | 'locked' | 'muted' | 'missing' | 'error' | '
 const ERROR_MS = 2500
 /** A clip that has not started after this long counts as failed. */
 const LOAD_TIMEOUT_MS = 10_000
+/** After the live voice fails (offline, not set up, quota), it is not tried again for this long. */
+const LIVE_PAUSE_MS = 60_000
 
 /** A URL without its query string or fragment (signed URLs carry a token there). */
 export function withoutQuery(url: string): string {
@@ -146,6 +149,7 @@ class AudioManager {
     const child = family.children.find((entry) => entry.id === family.activeChildId)
     const name = child?.name
     const generation = this.cancelCurrent()
+    this.speechStartedAt = performance.now()
     this.setStatus('loading')
     // In private voice mode clips come as signed URLs, checked for PRO on the server.
     const isPrivate = voiceMode() === 'private'
@@ -227,10 +231,24 @@ class AudioManager {
             continue
           }
           const result = await this.playClip(url, volume, generation, isPrivate ? 'mp3' : undefined)
-          if (result === 'error') failed += 1
-          else if (result === 'stopped') return 'cancelled'
-          else played += 1
-        } else if (clipsOnly) {
+          if (result === 'stopped') return 'cancelled'
+          if (result === 'ended') played += 1
+          else if (isPrivate) failed += 1
+          else {
+            // the recording did not load: the live voice, then the device voice say it instead
+            const spoken = await this.sayWithoutClip(
+              part,
+              clipLanguage,
+              options,
+              volume,
+              generation,
+              clipsOnly,
+            )
+            if (spoken === 'cancelled') return 'cancelled'
+            if (spoken === 'played') played += 1
+            else failed += 1
+          }
+        } else if (clipsOnly && isPrivate) {
           missing += 1
         } else {
           // Only `remoteText` may leave the device: never the child's name
@@ -252,11 +270,16 @@ class AudioManager {
             }
             // 'missing': no server voice for it, the device voice as before
           }
-          this.setStatus('speaking')
-          // No device voice for the language: silence, counted as missing (never 'done').
-          // a cloud device voice gets the sentence without the child's name (or nothing)
-          const remoteText = part.kind === 'tts' ? part.remoteText : undefined
-          if (await speech.say(part.text, { ...options, volume, remoteText })) played += 1
+          const spoken = await this.sayWithoutClip(
+            part,
+            clipLanguage,
+            options,
+            volume,
+            generation,
+            clipsOnly,
+          )
+          if (spoken === 'cancelled') return 'cancelled'
+          if (spoken === 'played') played += 1
           else missing += 1
         }
       }
@@ -273,6 +296,75 @@ class AudioManager {
     if (outcome === 'done' || quiet) this.setStatus('idle')
     else this.showError(generation, outcome, items)
     return outcome
+  }
+
+  /**
+   * A sentence without a playable recording: the live voice (public mode, a sentence without
+   * the child's name), then the device voice (not with clipsOnly: it may not speak the language).
+   * 'missing' = neither could say it; the text stays on screen.
+   */
+  private async sayWithoutClip(
+    part: { text: string; remoteText: string | null },
+    language: Language,
+    options: VoiceOptions,
+    volume: number,
+    generation: number,
+    clipsOnly: boolean,
+  ): Promise<'played' | 'missing' | 'cancelled'> {
+    if (voiceMode() !== 'private' && part.remoteText !== null && Date.now() >= this.liveDownUntil) {
+      const result = await this.playClip(
+        liveVoiceUrl(language, part.remoteText),
+        volume,
+        generation,
+        'mp3',
+      )
+      if (result === 'ended') return 'played'
+      if (result === 'stopped') return 'cancelled'
+      this.liveDownUntil = Date.now() + LIVE_PAUSE_MS
+    }
+    if (generation !== this.generation) return 'cancelled'
+    if (clipsOnly) return 'missing'
+    this.setStatus('speaking')
+    // No device voice for the language: silence, counted as missing (never 'done').
+    // a cloud device voice gets the sentence without the child's name (or nothing)
+    return (await speech.say(part.text, { ...options, volume, remoteText: part.remoteText }))
+      ? 'played'
+      : 'missing'
+  }
+
+  /**
+   * Loads what these texts will need (recordings and live voice) into the browser's caches
+   * while the child looks at the screen, so the speech starts at once later. Silent, never throws.
+   */
+  async prefetch(texts: readonly string[], language: Language): Promise<void> {
+    if (!this.canSpeak() || voiceMode() === 'private') return
+    try {
+      const parts = (await Promise.all(texts.map((text) => planSpeech(language, text)))).flat()
+      const urls = parts.map((part) =>
+        part.kind === 'clip'
+          ? part.url
+          : part.remoteText !== null
+            ? liveVoiceUrl(language, part.remoteText)
+            : null,
+      )
+      await Promise.allSettled(
+        [...new Set(urls)].flatMap((url) =>
+          url ? [fetch(url, { priority: 'low' } as RequestInit)] : [],
+        ),
+      )
+    } catch {
+      // a prefetch is only a head start: the speech itself still loads what it needs
+    }
+  }
+
+  /** How long the last speech took from the request to its first sound, in ms (null before any). */
+  startDelayMs(): number | null {
+    return this.lastStartDelayMs
+  }
+
+  /** Tests: the live voice counts as working again. */
+  resetLiveVoiceForTests(): void {
+    this.liveDownUntil = 0
   }
 
   /** A quiet wait inside a speech; `stopSpeech` or a new speech ends it at once. */
@@ -304,6 +396,9 @@ class AudioManager {
   private current: Howl | null = null
   private finishCurrent: (() => void) | null = null
   private status: SpeechStatus = 'idle'
+  private liveDownUntil = 0
+  private speechStartedAt = 0
+  private lastStartDelayMs: number | null = null
   private readonly listeners = new Set<(status: SpeechStatus) => void>()
   private errorTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -330,6 +425,10 @@ class AudioManager {
 
   private setStatus(status: SpeechStatus) {
     if (status === this.status) return
+    if (status === 'speaking' && this.speechStartedAt > 0) {
+      this.lastStartDelayMs = Math.round(performance.now() - this.speechStartedAt)
+      this.speechStartedAt = 0
+    }
     this.status = status
     setNarrating(status === 'speaking')
     this.listeners.forEach((listener) => listener(status))

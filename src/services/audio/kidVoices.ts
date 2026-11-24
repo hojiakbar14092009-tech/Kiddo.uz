@@ -1,4 +1,5 @@
 import type { Language } from '@/content/languages'
+import { VOICE_BASE } from './voicePaths'
 
 /*
  * Children's voices (ElevenLabs, a girl and a boy): the sentences recorded in a
@@ -33,7 +34,7 @@ export function loadKidManifest() {
 }
 
 export function kidClipUrl(voice: KidVoice, language: Language, key: string): string {
-  return `/audio/voice/kid/${voice}/${language}/${key}.mp3`
+  return `${VOICE_BASE}/audio/voice/kid/${voice}/${language}/${key}.mp3`
 }
 
 /** The child's voice for a child's gender (none when it is not known). */

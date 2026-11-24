@@ -47,7 +47,13 @@ describe('speech control', () => {
 
   beforeEach(() => {
     HowlClass.instances.length = 0
+    audioManager.resetLiveVoiceForTests()
     vi.spyOn(HowlClass.prototype, 'play').mockImplementation(function (this: FakeHowl) {
+      // no live voice here (voiceChain.test.ts covers it): recordings and the device voice only
+      if (this.options.src[0]?.startsWith('/api/tts')) {
+        queueMicrotask(() => this.options.onloaderror?.(1, 'offline'))
+        return 1
+      }
       this.playing = true
       this.options.onplay?.()
       return 1
